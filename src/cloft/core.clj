@@ -84,7 +84,7 @@
   (lingr
     (str (entity2name entity) " was killed by " (.getName (.getKiller entity)))))
 
-(defn get-entitylistener []
+(defn get-entity-death-listener []
   (c/auto-proxy
     [org.bukkit.event.entity.EntityListener] []
     (onEntityDeath [evt]
@@ -95,6 +95,13 @@
           (instance? org.bukkit.entity.Player entity) (lingr (.getDeathMessage evt))
           (and (instance? org.bukkit.entity.LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
+
+(defn get-entity-projectilehit-listener []
+  (c/auto-proxy
+    [org.bukkit.event.entity.EntityListener] []
+    (onProjectileHit [evt]
+      (let [entity] (.getEntity evt)
+        (prn entity)))))
 
 (defn enable-plugin [plugin]
     (def plugin* plugin)
@@ -129,10 +136,17 @@
         listener
         (:Normal c/event-priorities)
         plugin*))
-    (let [listener (get-entitylistener)]
+    (let [listener (get-entity-death-listener)]
       (.registerEvent
         plugin-manager*
         (:ENTITY_DEATH c/event-types)
+        listener
+        (:Normal c/event-priorities)
+        plugin*))
+    (let [listener (get-entity-projectilehit-listener)]
+      (.registerEvent
+        plugin-manager*
+        (:PROJECTILE_HIT c/event-types)
         listener
         (:Normal c/event-priorities)
         plugin*))
