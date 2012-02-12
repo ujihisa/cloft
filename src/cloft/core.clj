@@ -69,8 +69,9 @@
         :else (class entity)))
 
 (defn pig-death-event [entity]
-  (let [world (.getWorld entity)]
+  (comment (let [world (.getWorld entity)]
     (.setStorm world true)))
+  (.setFireTicks (.getKiller entity) 100))
 
 (defn entity-death-event [entity]
   (lingr
