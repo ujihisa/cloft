@@ -100,7 +100,7 @@
   (c/auto-proxy
     [org.bukkit.event.entity.EntityListener] []
     (onProjectileHit [evt]
-      (let [entity] (.getEntity evt)
+      (let [entity (.getEntity evt)]
         (prn entity)))))
 
 (defn enable-plugin [plugin]
