@@ -48,7 +48,7 @@
         ;(instance? org.bukkit.entity.ComplexLivingEntity entity) "ComplexLivingEntity"
         (instance? org.bukkit.entity.Cow entity) "Cow"
         ;(instance? org.bukkit.entity.Creature entity) "Creature"
-        (instance? org.bukkit.entity.Creeper entity) "Creeper"
+        (instance? org.bukkit.entity.Creeper entity) "Takumi"
         (instance? org.bukkit.entity.EnderDragon entity) "EnderDragon"
         (instance? org.bukkit.entity.Enderman entity) "Enderman"
         ;(instance? org.bukkit.entity.Flying entity) "Flying"
@@ -122,13 +122,16 @@
     ;    listener
     ;    (:Normal c/event-priorities)
     ;    plugin*))
-    (let [listener (get-playerloginlistener)]
-      (.registerEvent
-        plugin-manager*
-        (:PLAYER_LOGIN c/event-types)
-        listener
-        (:Normal c/event-priorities)
-        plugin*))
+    (letfn [(hehehe [f label]
+              (let [listener (f)]
+                (.registerEvent
+                  plugin-manager*
+                  (label c/event-types)
+                  listener
+                  (:Normal c/event-priorities)
+                  plugin*)))]
+      (get-playerloginlistener :PLAYER_LOGIN))
+
     (let [listener (get-playerquitlistener)]
       (.registerEvent
         plugin-manager*
