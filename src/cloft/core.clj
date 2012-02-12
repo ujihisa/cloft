@@ -82,7 +82,7 @@
 
 (defn entity-death-event [entity]
   (lingr
-    (str (entity2name entity) " was killed by " (.getName (.getKiller entity)))))
+    (str (.getName (.getKiller entity)) " killed " (entity2name entity))))
 
 (defn get-entity-death-listener []
   (c/auto-proxy
