@@ -72,15 +72,20 @@
   (let [world (.getWorld entity)]
     (.setStorm world true)))
 
+(defn entity-death-event [entity]
+  (lingr
+    (str (entity2name entity) " was killed by " (.getName (.getKiller entity)))))
+
 (defn get-entitylistener []
   (c/auto-proxy
     [org.bukkit.event.entity.EntityListener] []
     (onEntityDeath [evt]
       (let [entity (.getEntity evt)]
+        (when (instance? org.bukkit.entity.Pig entity)
+          (pig-death-event entity))
         (cond
-          (instance? org.bukkit.entity.Pig entity) (pig-death-event entity)
           (instance? org.bukkit.entity.Player entity) (lingr (.getDeathMessage evt))
-          (and (instance? org.bukkit.entity.LivingEntity entity) (.getKiller entity)) (lingr (str (entity2name entity) " was killed by " (.getName (.getKiller entity))))
+          (and (instance? org.bukkit.entity.LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
 (defn enable-plugin [plugin]
