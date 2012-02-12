@@ -101,7 +101,7 @@
     [org.bukkit.event.entity.EntityListener] []
     (onProjectileHit [evt]
       (let [entity (.getEntity evt)]
-        (prn entity)))))
+        (.setYield entity 0.0)))))
 
 (defn enable-plugin [plugin]
     (def plugin* plugin)
