@@ -27,12 +27,19 @@
 ;   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
 ;  )
 
-(defn get-playerlistener []
+(defn get-playerloginlistener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerLogin
       [evt]
       (lingr (str (.getName (.getPlayer evt)) " logged in now.")))))
+
+(defn get-playerquitlistener []
+  (c/auto-proxy
+    [org.bukkit.event.player.PlayerListener] []
+    (onPlayerQuit
+      [evt]
+      (lingr (str (.getName (.getPlayer evt)) " quitted.")))))
 
 (defn entity2name [entity]
   (cond (instance? org.bukkit.entity.Blaze entity) "Blaze"
@@ -108,10 +115,17 @@
     ;    listener
     ;    (:Normal c/event-priorities)
     ;    plugin*))
-    (let [listener (get-playerlistener)]
+    (let [listener (get-playerloginlistener)]
       (.registerEvent
         plugin-manager*
         (:PLAYER_LOGIN c/event-types)
+        listener
+        (:Normal c/event-priorities)
+        plugin*))
+    (let [listener (get-playerquitlistener)]
+      (.registerEvent
+        plugin-manager*
+        (:PLAYER_QUIT c/event-types)
         listener
         (:Normal c/event-priorities)
         plugin*))
