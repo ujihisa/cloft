@@ -8,26 +8,24 @@
                {:form-params
                 {:room "computer_science"
                  :bot 'cloft
-                 :text (str "[production] " msg)
+                 :text (str msg)
                  :bot_verifier "[FIXME]"}}))
 
-
-(defn block-break [evt]
-  (.sendMessage (.getPlayer evt) "You know. Breaking stuff should be illegal."))
-
-(defn sign-change [evt]
-  (.sendMessage (.getPlayer evt) "Now I've placed a sign and changed the text"))
-
-
-(defn player-move [evt]
-  (.sendMessage (.getPlayer evt) "Ok, no, really.. stop moving."))
-
-(defn get-blocklistener []
-  (c/auto-proxy
-   [org.bukkit.event.block.BlockListener] []
-   (onBlockBreak [evt] (if (.isCancelled evt) nil (block-break evt)))
-   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
-  )
+;(defn block-break [evt]
+;  (.sendMessage (.getPlayer evt) "You know. Breaking stuff should be illegal."))
+;
+;(defn sign-change [evt]
+;  (.sendMessage (.getPlayer evt) "Now I've placed a sign and changed the text"))
+;
+;(defn player-move [evt]
+;  (.sendMessage (.getPlayer evt) "Ok, no, really.. stop moving."))
+;
+;(defn get-blocklistener []
+;  (c/auto-proxy
+;   [org.bukkit.event.block.BlockListener] []
+;   (onBlockBreak [evt] (if (.isCancelled evt) nil (block-break evt)))
+;   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
+;  )
 
 (defn get-playerlistener []
   (c/auto-proxy
