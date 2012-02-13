@@ -67,7 +67,10 @@
           (cond
             (instance? org.bukkit.entity.Zombie target) (d 322)
             (instance? org.bukkit.entity.Villager target) (d 92)
-            (instance? org.bukkit.entity.Squid target)  (.chat (.getPlayer evt) "ikakawaiidesu")
+            (instance? org.bukkit.entity.Squid target) (let [player (.getPlayer evt)]
+                                                         (.chat player "ikakawaiidesu")
+                                                         (.setFoodLevel player 0))
+            (instance? org.bukkit.entity.Player target) (.setFoodLevel target (dec (.getFoodLevel target)))
             ))))))
 
 (defn entity2name [entity]
@@ -102,6 +105,7 @@
         ;(instance? org.bukkit.entity.WaterMob entity) "WaterMob"
         (instance? org.bukkit.entity.Wolf entity) "Wolf"
         (instance? org.bukkit.entity.Zombie entity) "Zombie"
+        (instance? org.bukkit.entity.TNTPrimed entity) "TNT"
         :else (class entity)))
 
 (defn pig-death-event [entity]
