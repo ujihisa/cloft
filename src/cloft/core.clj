@@ -29,7 +29,8 @@
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
    "sbwhitecap" "http://www.gravatar.com/avatar/198149c17c72f7db3a15e432b454067e.jpg?s=28\n"
-   "Sandkat" "https://twimg0-a.akamaihd.net/profile_images/1584518036/claire2_mini.jpg\n"})
+   "Sandkat" "https://twimg0-a.akamaihd.net/profile_images/1584518036/claire2_mini.jpg\n"
+   "kldsas" "http://a3.twimg.com/profile_images/1803424346/_____normal.png\n"})
 
 (defn name2icon [name]
   (get NAME-ICON name (str name " ")))
@@ -187,7 +188,7 @@
     [EntityListener] []
     (onEntityExplode [evt]
       (let [entity (.getEntity evt)]
-        (lingr (str (name2icon (entity2name entity)) "is exploding"))))))
+        (lingr (str (entity2name entity) "is exploding"))))))
 
 (defn get-entity-damage-listener []
   (c/auto-proxy
@@ -207,8 +208,7 @@
       (let [entity (.getEntity evt)]
         (cond
           (instance? Fireball entity) (.setYield entity 0.0)
-          ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
-          )))))
+          ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity)))))))
 
 (defn enable-plugin [plugin]
     (def plugin* plugin)
