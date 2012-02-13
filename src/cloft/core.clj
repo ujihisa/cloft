@@ -138,10 +138,11 @@
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerMove
       [evt]
-      (let [location (.getLocation (.getPlayer evt))
-            block (.getBlockY location)]
-        (prn block)
-        (prn (.getLightFromSky block))))))
+      (let [player (.getPlayer evt)]
+        (when (and
+                (get @zombieplayers (.getName player))
+                (= 15 (.getLightFromSky (.getBlockY (.getLocation player)))))
+          (.setFireTicks player 50))))))
 
 (defn entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
@@ -220,7 +221,7 @@
           (let [attacker (.getDamager evt)]
             (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
               (comment (lingr (str (name2icon (.getName attacker)) "is attacking a Villager")))
-              (swap! zombieplayers conj entity)
+              (swap! zombieplayers conj (.getName entity))
               (.sendMessage entity "You turned into a zombie.")
               (.setTarget attacker nil)
               (comment (.damage attacker (.getDamage evt))))))))))
