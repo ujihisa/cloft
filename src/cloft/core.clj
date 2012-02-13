@@ -12,12 +12,14 @@
   (get NAME-ICON name name))
 
 (defn lingr [msg]
-  (clj-http.client/post "http://lingr.com/api/room/say"
-               {:form-params
-                {:room "computer_science"
-                 :bot 'cloft
-                 :text (str msg)
-                 :bot_verifier "[FIXME]"}}))
+  (future-call
+    #(clj-http.client/post
+       "http://lingr.com/api/room/say"
+       {:form-params
+        {:room "computer_science"
+         :bot 'cloft
+         :text (str msg)
+         :bot_verifier "[FIXME]"}})))
 
 ;(defn block-break [evt]
 ;  (.sendMessage (.getPlayer evt) "You know. Breaking stuff should be illegal."))
@@ -68,7 +70,9 @@
                              (.getLocation target)
                              (org.bukkit.inventory.ItemStack. n 1)))]
           (cond
-            (instance? org.bukkit.entity.Zombie target) (d 322)
+            (and
+              (instance? org.bukkit.entity.Zombie target)
+              (not (instance? org.bukkit.entity.PigZombie target))) (d 322)
             (instance? org.bukkit.entity.Villager target) (d 92)
             (instance? org.bukkit.entity.Squid target) (let [player (.getPlayer evt)]
                                                          (.chat player "ikakawaiidesu")
@@ -83,7 +87,7 @@
         ;(instance? org.bukkit.entity.ComplexLivingEntity entity) "ComplexLivingEntity"
         (instance? org.bukkit.entity.Cow entity) "Cow"
         ;(instance? org.bukkit.entity.Creature entity) "Creature"
-        (instance? org.bukkit.entity.Creeper entity) "Takumi"
+        (instance? org.bukkit.entity.Creeper entity) "Creeper"
         (instance? org.bukkit.entity.EnderDragon entity) "EnderDragon"
         (instance? org.bukkit.entity.Enderman entity) "Enderman"
         ;(instance? org.bukkit.entity.Flying entity) "Flying"
@@ -149,9 +153,9 @@
 
 (defn enable-plugin [plugin]
     (def plugin* plugin)
-    (def server* (.getServer plugin*))
-    (def plugin-manager* (.getPluginManager server* ))
-    (def plugin-desc* (.getDescription plugin*))
+    ;(def server* (.getServer plugin*))
+    ;(def plugin-manager* (.getPluginManager server* ))
+    ;(def plugin-desc* (.getDescription plugin*))
 
     ;(let [listener (get-blocklistener)]
     ;  (.registerEvent
