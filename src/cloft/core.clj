@@ -32,6 +32,8 @@
    "Sandkat" "https://twimg0-a.akamaihd.net/profile_images/1584518036/claire2_mini.jpg\n"
    "kldsas" "http://a3.twimg.com/profile_images/1803424346/_____normal.png\n"})
 
+(def zombieplayers (atom #{}))
+
 (defn name2icon [name]
   (get NAME-ICON name (str name " ")))
 
@@ -203,7 +205,15 @@
           (let [attacker (.getDamager evt)]
             (when (instance? Player attacker)
               (lingr (str (name2icon (.getName attacker)) "is attacking a Villager"))
-              (.damage attacker (.getDamage evt)))))))))
+              (.damage attacker (.getDamage evt)))))
+        (when (and (instance? Player entity) (instance? EntityDamageByEntityEvent evt))
+          (let [attacker (.getDamager evt)]
+            (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
+              (comment (lingr (str (name2icon (.getName attacker)) "is attacking a Villager")))
+              (prn ["zombie attack" attacker entity])
+              (swap! zombieplayers conj entity)
+              (prn @zombieplayers)
+              (comment (.damage attacker (.getDamage evt))))))))))
 
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
