@@ -19,7 +19,8 @@
             EntityDamageEvent EntityDeathEvent EntityEvent EntityExplodeEvent
             EntityInteractEvent EntityListener EntityPortalEnterEvent
             EntityRegainHealthEvent EntityShootBowEvent EntityTameEvent
-            EntityTargetEvent EntityTeleportEvent ExplosionPrimeEvent
+            ;EntityTargetEvent EntityTeleportEvent ExplosionPrimeEvent
+            EntityTargetEvent ExplosionPrimeEvent
             FoodLevelChangeEvent ItemDespawnEvent ItemSpawnEvent PigZapEvent
             PlayerDeathEvent PotionSplashEvent ProjectileHitEvent
             SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
@@ -59,6 +60,16 @@
 ;   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
 ;  )
 
+(defn swap-entity [target klass]
+  (let [location (.getLocation target)
+        world (.getWorld target)]
+    (.remove target)
+    (.spawn world location klass)))
+
+(defn consume-item [player]
+  (let [itemstack (.getItemInHand player)]
+    (.setAmount itemstack (dec (.getAmount itemstack)))))
+
 (defn get-player-login-listener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
@@ -94,11 +105,12 @@
           (cond
             ; right-click zombie -> golden apple
             (and (instance? Zombie target) (not (instance? PigZombie target))) (d 322)
-            ; right-click zombie pigman -> pig
-            (instance? PigZombie target) (let [location (.getLocation target)
-                                               world (.getWorld target)]
-                                           (.remove target)
-                                           (.spawn world location Pig))
+            ; give wheat to zombie pigman -> pig
+            (and
+              (instance? PigZombie target)
+              (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296)) (do
+                                                                        (swap-entity target Pig)
+                                                                        (consume-item (.getPlayer evt)))
             ; right-click villager -> cake
             (instance? Villager target) (d 92)
             ; right-click squid -> chat and hungry
