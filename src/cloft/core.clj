@@ -1,6 +1,16 @@
 (ns cloft.core
   (:require [cljminecraft.core :as c])
   (:import [org.bukkit.event Event Event$Type])
+  (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
+            ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
+            EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
+            EnderSignal ExperienceOrb Explosive FallingSand Fireball Fish
+            Flying Ghast Giant HumanEntity Item LightningStrike LivingEntity
+            MagmaCube Minecart Monster MushroomCow NPC Painting Pig PigZombie
+            Player PoweredMinecart Projectile Sheep Silverfish Skeleton Slime
+            SmallFireball Snowball Snowman Spider Squid StorageMinecart
+            ThrownPotion TNTPrimed Vehicle Villager WaterMob Weather Wolf
+            Zombie])
   (:require clj-http.client))
 
 (def NAME-ICON
@@ -71,48 +81,48 @@
                              (org.bukkit.inventory.ItemStack. n 1)))]
           (cond
             (and
-              (instance? org.bukkit.entity.Zombie target)
-              (not (instance? org.bukkit.entity.PigZombie target))) (d 322)
-            (instance? org.bukkit.entity.Villager target) (d 92)
-            (instance? org.bukkit.entity.Squid target) (let [player (.getPlayer evt)]
+              (instance? Zombie target)
+              (not (instance? PigZombie target))) (d 322)
+            (instance? Villager target) (d 92)
+            (instance? Squid target) (let [player (.getPlayer evt)]
                                                          (.chat player "ikakawaiidesu")
                                                          (.setFoodLevel player 0))
-            (instance? org.bukkit.entity.Player target) (.setFoodLevel target (dec (.getFoodLevel target)))
+            (instance? Player target) (.setFoodLevel target (dec (.getFoodLevel target)))
             ))))))
 
 (defn entity2name [entity]
-  (cond (instance? org.bukkit.entity.Blaze entity) "Blaze"
-        (instance? org.bukkit.entity.CaveSpider entity) "CaveSpider"
-        (instance? org.bukkit.entity.Chicken entity) "Chicken"
-        ;(instance? org.bukkit.entity.ComplexLivingEntity entity) "ComplexLivingEntity"
-        (instance? org.bukkit.entity.Cow entity) "Cow"
-        ;(instance? org.bukkit.entity.Creature entity) "Creature"
-        (instance? org.bukkit.entity.Creeper entity) "Creeper"
-        (instance? org.bukkit.entity.EnderDragon entity) "EnderDragon"
-        (instance? org.bukkit.entity.Enderman entity) "Enderman"
-        ;(instance? org.bukkit.entity.Flying entity) "Flying"
-        (instance? org.bukkit.entity.Ghast entity) "Ghast"
-        (instance? org.bukkit.entity.Giant entity) "Giant"
-        ;(instance? org.bukkit.entity.HumanEntity entity) "HumanEntity"
-        (instance? org.bukkit.entity.MagmaCube entity) "MagmaCube"
-        ;(instance? org.bukkit.entity.Monster entity) "Monster"
-        (instance? org.bukkit.entity.MushroomCow entity) "MushroomCow"
-        ;(instance? org.bukkit.entity.NPC entity) "NPC"
-        (instance? org.bukkit.entity.Pig entity) "Pig"
-        (instance? org.bukkit.entity.PigZombie entity) "PigZombie"
-        ;(instance? org.bukkit.entity.Player entity) "Player"
-        (instance? org.bukkit.entity.Sheep entity) "Sheep"
-        (instance? org.bukkit.entity.Silverfish entity) "Silverfish"
-        (instance? org.bukkit.entity.Skeleton entity) "Skeleton"
-        (instance? org.bukkit.entity.Slime entity) "Slime"
-        (instance? org.bukkit.entity.Snowman entity) "Snowman"
-        (instance? org.bukkit.entity.Spider entity) "Spider"
-        (instance? org.bukkit.entity.Squid entity) "Squid"
-        (instance? org.bukkit.entity.Villager entity) "Villager"
-        ;(instance? org.bukkit.entity.WaterMob entity) "WaterMob"
-        (instance? org.bukkit.entity.Wolf entity) "Wolf"
-        (instance? org.bukkit.entity.Zombie entity) "Zombie"
-        (instance? org.bukkit.entity.TNTPrimed entity) "TNT"
+  (cond (instance? Blaze entity) "Blaze"
+        (instance? CaveSpider entity) "CaveSpider"
+        (instance? Chicken entity) "Chicken"
+        ;(instance? ComplexLivingEntity entity) "ComplexLivingEntity"
+        (instance? Cow entity) "Cow"
+        ;(instance? Creature entity) "Creature"
+        (instance? Creeper entity) "Creeper"
+        (instance? EnderDragon entity) "EnderDragon"
+        (instance? Enderman entity) "Enderman"
+        ;(instance? Flying entity) "Flying"
+        (instance? Ghast entity) "Ghast"
+        (instance? Giant entity) "Giant"
+        ;(instance? HumanEntity entity) "HumanEntity"
+        (instance? MagmaCube entity) "MagmaCube"
+        ;(instance? Monster entity) "Monster"
+        (instance? MushroomCow entity) "MushroomCow"
+        ;(instance? NPC entity) "NPC"
+        (instance? Pig entity) "Pig"
+        (instance? PigZombie entity) "PigZombie"
+        ;(instance? Player entity) "Player"
+        (instance? Sheep entity) "Sheep"
+        (instance? Silverfish entity) "Silverfish"
+        (instance? Skeleton entity) "Skeleton"
+        (instance? Slime entity) "Slime"
+        (instance? Snowman entity) "Snowman"
+        (instance? Spider entity) "Spider"
+        (instance? Squid entity) "Squid"
+        (instance? Villager entity) "Villager"
+        ;(instance? WaterMob entity) "WaterMob"
+        (instance? Wolf entity) "Wolf"
+        (instance? Zombie entity) "Zombie"
+        (instance? TNTPrimed entity) "TNT"
         :else (class entity)))
 
 (defn pig-death-event [entity]
@@ -129,11 +139,11 @@
     [org.bukkit.event.entity.EntityListener] []
     (onEntityDeath [evt]
       (let [entity (.getEntity evt)]
-        (when (instance? org.bukkit.entity.Pig entity)
+        (when (instance? Pig entity)
           (pig-death-event entity))
         (cond
-          (instance? org.bukkit.entity.Player entity) (lingr (str (name2icon (.getName entity)) " " (.getDeathMessage evt)))
-          (and (instance? org.bukkit.entity.LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
+          (instance? Player entity) (lingr (str (name2icon (.getName entity)) " " (.getDeathMessage evt)))
+          (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
 (defn get-entity-explode-listener []
@@ -149,10 +159,10 @@
     (onEntityDamage [evt]
       (let [entity (.getEntity evt)]
         (when (and
-                (instance? org.bukkit.entity.Villager entity)
+                (instance? Villager entity)
                 (instance? org.bukkit.event.entity.EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
-            (when (instance? org.bukkit.entity.Player attacker)
+            (when (instance? Player attacker)
               (lingr (str (name2icon (.getName attacker)) " is attacking a Villager"))
               (.damage attacker (.getDamage evt)))))))))
 
@@ -161,7 +171,7 @@
     [org.bukkit.event.entity.EntityListener] []
     (onProjectileHit [evt]
       (let [entity (.getEntity evt)]
-        (when (instance? org.bukkit.entity.Fireball entity)
+        (when (instance? Fireball entity)
           (.setYield entity 0.0))))))
 
 (defn enable-plugin [plugin]
