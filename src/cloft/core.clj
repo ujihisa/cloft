@@ -152,8 +152,9 @@
                 (instance? org.bukkit.entity.Villager entity)
                 (instance? org.bukkit.event.entity.EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
-            (lingr (str (name2icon (.getName attacker)) " is attacking a Villager"))
-            (.damage attacker (.getDamage evt))))))))
+            (when (instance? org.bukkit.entity.Player attacker)
+              (lingr (str (name2icon (.getName attacker)) " is attacking a Villager"))
+              (.damage attacker (.getDamage evt)))))))))
 
 (defn get-entity-projectilehit-listener []
   (c/auto-proxy
