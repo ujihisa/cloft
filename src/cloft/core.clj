@@ -125,6 +125,13 @@
           (and (instance? org.bukkit.entity.LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
+(defn get-entity-explode-listener []
+  (c/auto-proxy
+    [org.bukkit.event.entity.EntityListener] []
+    (onEntityExplode [evt]
+      (let [entity (.getEntity evt)]
+        (lingr (str (entity2name entity) " is exploding"))))))
+
 (defn get-entity-projectilehit-listener []
   (c/auto-proxy
     [org.bukkit.event.entity.EntityListener] []
@@ -165,6 +172,7 @@
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
+      (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-projectilehit-listener :PROJECTILE_HIT))
   (c/log-info "cloft started"))
 
