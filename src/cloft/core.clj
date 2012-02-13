@@ -101,7 +101,8 @@
     [org.bukkit.event.entity.EntityListener] []
     (onProjectileHit [evt]
       (let [entity (.getEntity evt)]
-        (.setYield entity 0.0)))))
+        (when (instance? org.bukkit.entity.Fireball entity)
+          (.setYield entity 0.0))))))
 
 (defn enable-plugin [plugin]
     (def plugin* plugin)
@@ -130,7 +131,7 @@
                   listener
                   (:Normal c/event-priorities)
                   plugin*)))]
-      (get-playerloginlistener :PLAYER_LOGIN))
+      (hehehe get-playerloginlistener :PLAYER_LOGIN))
 
     (let [listener (get-playerquitlistener)]
       (.registerEvent
