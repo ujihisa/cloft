@@ -187,7 +187,7 @@
     [EntityListener] []
     (onEntityExplode [evt]
       (let [entity (.getEntity evt)]
-        (lingr (str (entity2name entity) "is exploding"))))))
+        (lingr (str (name2icon (entity2name entity)) "is exploding"))))))
 
 (defn get-entity-damage-listener []
   (c/auto-proxy
