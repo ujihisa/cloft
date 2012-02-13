@@ -3,6 +3,11 @@
   (:import [org.bukkit.event Event Event$Type])
   (:require clj-http.client))
 
+(def NAME-ICON
+  {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28"
+   "sbwhitecap" "http://www.gravatar.com/avatar/198149c17c72f7db3a15e432b454067e.jpg?s=28"
+   "Sandkat" "https://twimg0-a.akamaihd.net/profile_images/1584518036/claire2_mini.jpg"})
+
 (defn lingr [msg]
   (clj-http.client/post "http://lingr.com/api/room/say"
                {:form-params
@@ -46,7 +51,15 @@
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerChat
       [evt]
-      (lingr (str (.getName (.getPlayer evt)) ": " (.getMessage evt))))))
+      (lingr (str (get (.getName (.getPlayer evt)) NAME-ICON) "\n" (.getMessage evt))))))
+
+(defn get-player-interact-entity []
+  (c/auto-proxy
+    [org.bukkit.event.player.PlayerListener] []
+    (onPlayerInteractEntity
+      [evt]
+      (let [target (.getRightClicked evt)]
+        (prn ["clicked" (.getName (.getPlayer evt)) target])))))
 
 (defn entity2name [entity]
   (cond (instance? org.bukkit.entity.Blaze entity) "Blaze"
@@ -141,6 +154,7 @@
       (hehehe get-playerloginlistener :PLAYER_LOGIN)
       (hehehe get-playerquitlistener :PLAYER_QUIT)
       (hehehe get-player-chat :PLAYER_CHAT)
+      (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-projectilehit-listener :PROJECTILE_HIT))
   (c/log-info "cloft started"))
