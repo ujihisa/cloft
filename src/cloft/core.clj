@@ -207,9 +207,7 @@
               (lingr (str (name2icon (.getName attacker)) "is attacking a Villager"))
               (.damage attacker (.getDamage evt)))))
         (when (and (instance? Player entity) (instance? EntityDamageByEntityEvent evt))
-          (prn "player got damage")
           (let [attacker (.getDamager evt)]
-            (prn (str "attacker is " attacker))
             (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
               (comment (lingr (str (name2icon (.getName attacker)) "is attacking a Villager")))
               (prn ["zombie attack" attacker entity])
