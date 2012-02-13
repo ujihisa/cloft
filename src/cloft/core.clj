@@ -223,7 +223,7 @@
         (when (and (instance? Player entity) (instance? EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
             (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
-              (if (zombie-player? player)
+              (if (zombie-player? entity)
                 (.setCancelled evt)
                 (do
                   (comment (lingr (str (name2icon (.getName attacker)) "is attacking a Villager")))
