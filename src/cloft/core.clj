@@ -205,8 +205,9 @@
     [EntityListener] []
     (onProjectileHit [evt]
       (let [entity (.getEntity evt)]
-        (when (instance? Fireball entity)
-          (.setYield entity 0.0))))))
+        (cond
+          (instance? Fireball entity) (.setYield entity 0.0)
+          (instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity)))))))
 
 (defn enable-plugin [plugin]
     (def plugin* plugin)
