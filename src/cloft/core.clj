@@ -208,7 +208,8 @@
       (let [entity (.getEntity evt)]
         (cond
           (instance? Fireball entity) (.setYield entity 0.0)
-          ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity)))))))
+          ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
+          )))))
 
 (defn enable-plugin [plugin]
     (def plugin* plugin)
