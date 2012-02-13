@@ -51,7 +51,8 @@
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerChat
       [evt]
-      (lingr (str (get (.getName (.getPlayer evt)) NAME-ICON) "\n" (.getMessage evt))))))
+      (let [name (.getName (.getPlayer evt))]
+        (lingr (str (get NAME-ICON name name) "\n" (.getMessage evt)))))))
 
 (defn get-player-interact-entity []
   (c/auto-proxy
