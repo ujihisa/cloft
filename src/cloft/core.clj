@@ -111,6 +111,12 @@
               (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296)) (do
                                                                         (swap-entity target Pig)
                                                                         (consume-item (.getPlayer evt)))
+            ; give zombeef to pig -> zombie pigman
+            (and
+              (instance? Pig target)
+              (= (.getTypeId (.getItemInHand (.getPlayer evt))) 367)) (do
+                                                                        (swap-entity target PigZombie)
+                                                                        (consume-item (.getPlayer evt)))
             ; right-click villager -> cake
             (instance? Villager target) (d 92)
             ; right-click squid -> chat and hungry
