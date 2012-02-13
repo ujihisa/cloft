@@ -104,8 +104,6 @@
                              (.getLocation target)
                              (org.bukkit.inventory.ItemStack. n 1)))]
           (cond
-            ; right-click zombie -> golden apple
-            (and (instance? Zombie target) (not (instance? PigZombie target))) (d 322)
             ; give wheat to zombie pigman -> pig
             (and
               (instance? PigZombie target)
@@ -120,6 +118,12 @@
                                                                         (consume-item (.getPlayer evt)))
             ; right-click villager -> cake
             (instance? Villager target) (d 92)
+            ; right-click zombie -> zombeef
+            (and (instance? Zombie target) (not (instance? PigZombie target))) (d 367)
+            ; right-click skelton -> arrow
+            (instance? Skeleton target) (d 262)
+            ; right-click spider -> cat record
+            (instance? Spider target) (d 2257)
             ; right-click squid -> chat and hungry
             (instance? Squid target) (let [player (.getPlayer evt)]
                                        (.chat player "ikakawaiidesu")
