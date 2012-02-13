@@ -8,6 +8,9 @@
    "sbwhitecap" "http://www.gravatar.com/avatar/198149c17c72f7db3a15e432b454067e.jpg?s=28"
    "Sandkat" "https://twimg0-a.akamaihd.net/profile_images/1584518036/claire2_mini.jpg"})
 
+(defn name2icon [name]
+  (get NAME-ICON name name))
+
 (defn lingr [msg]
   (clj-http.client/post "http://lingr.com/api/room/say"
                {:form-params
@@ -37,14 +40,14 @@
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerLogin
       [evt]
-      (lingr (str (.getName (.getPlayer evt)) " logged in now.")))))
+      (lingr (str (name2icon (.getName (.getPlayer evt))) " logged in now.")))))
 
 (defn get-playerquitlistener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerQuit
       [evt]
-      (lingr (str (.getName (.getPlayer evt)) " quitted.")))))
+      (lingr (str (name2icon (.getName (.getPlayer evt))) " quitted.")))))
 
 (defn get-player-chat []
   (c/auto-proxy
@@ -52,7 +55,7 @@
     (onPlayerChat
       [evt]
       (let [name (.getName (.getPlayer evt))]
-        (lingr (str (get NAME-ICON name name) "\n" (.getMessage evt)))))))
+        (lingr (str (name2icon name) " " (.getMessage evt)))))))
 
 (defn get-player-interact-entity []
   (c/auto-proxy
@@ -115,7 +118,7 @@
 
 (defn entity-death-event [entity]
   (lingr
-    (str (.getName (.getKiller entity)) " killed " (entity2name entity))))
+    (str (name2icon (.getName (.getKiller entity))) " killed " (entity2name entity))))
 
 (defn get-entity-death-listener []
   (c/auto-proxy
@@ -178,7 +181,9 @@
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-projectilehit-listener :PROJECTILE_HIT))
+  (lingr "server running...")
   (c/log-info "cloft started"))
 
 (defn disable-plugin [plugin]
+  (lingr "server stopping...")
   (c/log-info "cloft stopped"))
