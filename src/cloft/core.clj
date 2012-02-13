@@ -138,8 +138,10 @@
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerMove
       [evt]
-      (let [location (.getLocation (.getPlayer evt))]
-        (prn location)))))
+      (let [location (.getLocation (.getPlayer evt))
+            block (.getBlockAt (.getWorld evt) location)]
+        (prn block)
+        (prn (.getLightFromSky block))))))
 
 (defn entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
