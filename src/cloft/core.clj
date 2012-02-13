@@ -32,7 +32,10 @@
    "Sandkat" "https://twimg0-a.akamaihd.net/profile_images/1584518036/claire2_mini.jpg\n"
    "kldsas" "http://a3.twimg.com/profile_images/1803424346/_____normal.png\n"})
 
-(def zombieplayers (atom #{}))
+(def zombie-players (atom #{}))
+
+(defn zombie-player? [p]
+  (boolean (get @zombie-players p)))
 
 (defn name2icon [name]
   (get NAME-ICON name (str name " ")))
@@ -140,9 +143,9 @@
       [evt]
       (let [player (.getPlayer evt)]
         (when (and
-                (get @zombieplayers (.getName player))
+                (get @zombie-players (.getName player))
                 (= 15 (.getLightFromSky (.getBlock (.getLocation player)))))
-          (.setFireTicks player 50))))))
+          (.setFireTicks player 30))))))
 
 (defn entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
@@ -220,11 +223,18 @@
         (when (and (instance? Player entity) (instance? EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
             (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
-              (comment (lingr (str (name2icon (.getName attacker)) "is attacking a Villager")))
-              (swap! zombieplayers conj (.getName entity))
-              (.sendMessage entity "You turned into a zombie.")
-              (.setTarget attacker nil)
-              (comment (.damage attacker (.getDamage evt))))))))))
+              (if (zombie-player? player)
+                (.setCancelled evt)
+                (do
+                  (comment (lingr (str (name2icon (.getName attacker)) "is attacking a Villager")))
+                  (swap! zombie-players conj (.getName entity))
+                  (.sendMessage entity "You turned into a zombie.")
+                  (comment (.damage attacker (.getDamage evt))))))
+            (when (and (instance? Player attacker) (zombie-player? attacker))
+              (do
+                (swap! zombie-players conj (.getName entity))
+                (.sendMessage attacker "You made a friend")
+                (.sendMessage entity "You also turned into a zombie.")))))))))
 
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
