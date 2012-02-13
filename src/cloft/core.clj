@@ -80,15 +80,12 @@
                              (.getLocation target)
                              (org.bukkit.inventory.ItemStack. n 1)))]
           (cond
-            (and
-              (instance? Zombie target)
-              (not (instance? PigZombie target))) (d 322)
+            (and (instance? Zombie target) (not (instance? PigZombie target))) (d 322)
             (instance? Villager target) (d 92)
             (instance? Squid target) (let [player (.getPlayer evt)]
-                                                         (.chat player "ikakawaiidesu")
-                                                         (.setFoodLevel player 0))
-            (instance? Player target) (.setFoodLevel target (dec (.getFoodLevel target)))
-            ))))))
+                                       (.chat player "ikakawaiidesu")
+                                       (.setFoodLevel player 0))
+            (instance? Player target) (.setFoodLevel target (dec (.getFoodLevel target)))))))))
 
 (defn entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
@@ -158,9 +155,7 @@
     [org.bukkit.event.entity.EntityListener] []
     (onEntityDamage [evt]
       (let [entity (.getEntity evt)]
-        (when (and
-                (instance? Villager entity)
-                (instance? org.bukkit.event.entity.EntityDamageByEntityEvent evt))
+        (when (and (instance? Villager entity) (instance? org.bukkit.event.entity.EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
             (when (instance? Player attacker)
               (lingr (str (name2icon (.getName attacker)) " is attacking a Villager"))
