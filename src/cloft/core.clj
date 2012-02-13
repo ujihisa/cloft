@@ -11,15 +11,27 @@
             SmallFireball Snowball Snowman Spider Squid StorageMinecart
             ThrownPotion TNTPrimed Vehicle Villager WaterMob Weather Wolf
             Zombie])
+  (:import [org.bukkit.event.entity CreatureSpawnEvent CreeperPowerEvent
+            EndermanPickupEvent EndermanPlaceEvent EntityChangeBlockEvent
+            EntityCombustByBlockEvent EntityCombustByEntityEvent
+            EntityCombustEvent EntityCreatePortalEvent EntityDamageByBlockEvent
+            EntityDamageByEntityEvent EntityDamageByProjectileEvent
+            EntityDamageEvent EntityDeathEvent EntityEvent EntityExplodeEvent
+            EntityInteractEvent EntityListener EntityPortalEnterEvent
+            EntityRegainHealthEvent EntityShootBowEvent EntityTameEvent
+            EntityTargetEvent EntityTeleportEvent ExplosionPrimeEvent
+            FoodLevelChangeEvent ItemDespawnEvent ItemSpawnEvent PigZapEvent
+            PlayerDeathEvent PotionSplashEvent ProjectileHitEvent
+            SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
   (:require clj-http.client))
 
 (def NAME-ICON
-  {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28"
-   "sbwhitecap" "http://www.gravatar.com/avatar/198149c17c72f7db3a15e432b454067e.jpg?s=28"
-   "Sandkat" "https://twimg0-a.akamaihd.net/profile_images/1584518036/claire2_mini.jpg"})
+  {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
+   "sbwhitecap" "http://www.gravatar.com/avatar/198149c17c72f7db3a15e432b454067e.jpg?s=28\n"
+   "Sandkat" "https://twimg0-a.akamaihd.net/profile_images/1584518036/claire2_mini.jpg\n"})
 
 (defn name2icon [name]
-  (get NAME-ICON name name))
+  (get NAME-ICON name (str name " ")))
 
 (defn lingr [msg]
   (future-call
@@ -52,14 +64,14 @@
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerLogin
       [evt]
-      (lingr (str (name2icon (.getName (.getPlayer evt))) "\nlogged in now.")))))
+      (lingr (str (name2icon (.getName (.getPlayer evt))) "logged in now.")))))
 
 (defn get-player-quit-listener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerQuit
       [evt]
-      (lingr (str (name2icon (.getName (.getPlayer evt))) "\nquitted.")))))
+      (lingr (str (name2icon (.getName (.getPlayer evt))) "quitted.")))))
 
 (defn get-player-chat []
   (c/auto-proxy
@@ -67,7 +79,7 @@
     (onPlayerChat
       [evt]
       (let [name (.getName (.getPlayer evt))]
-        (lingr (str (name2icon name) "\n" (.getMessage evt)))))))
+        (lingr (str (name2icon name) (.getMessage evt)))))))
 
 (defn get-player-interact-entity []
   (c/auto-proxy
@@ -129,41 +141,41 @@
 
 (defn entity-death-event [entity]
   (lingr
-    (str (name2icon (.getName (.getKiller entity))) "\nkilled " (entity2name entity))))
+    (str (name2icon (.getName (.getKiller entity))) "killed " (entity2name entity))))
 
 (defn get-entity-death-listener []
   (c/auto-proxy
-    [org.bukkit.event.entity.EntityListener] []
+    [EntityListener] []
     (onEntityDeath [evt]
       (let [entity (.getEntity evt)]
         (when (instance? Pig entity)
           (pig-death-event entity))
         (cond
-          (instance? Player entity) (lingr (str (name2icon (.getName entity)) "\n" (.getDeathMessage evt)))
+          (instance? Player entity) (lingr (str (name2icon (.getName entity)) (.getDeathMessage evt)))
           (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
 (defn get-entity-explode-listener []
   (c/auto-proxy
-    [org.bukkit.event.entity.EntityListener] []
+    [EntityListener] []
     (onEntityExplode [evt]
       (let [entity (.getEntity evt)]
-        (lingr (str (entity2name entity) "\nis exploding"))))))
+        (lingr (str (entity2name entity) "is exploding"))))))
 
 (defn get-entity-damage-listener []
   (c/auto-proxy
-    [org.bukkit.event.entity.EntityListener] []
+    [EntityListener] []
     (onEntityDamage [evt]
       (let [entity (.getEntity evt)]
-        (when (and (instance? Villager entity) (instance? org.bukkit.event.entity.EntityDamageByEntityEvent evt))
+        (when (and (instance? Villager entity) (instance? EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
             (when (instance? Player attacker)
-              (lingr (str (name2icon (.getName attacker)) "\nis attacking a Villager"))
+              (lingr (str (name2icon (.getName attacker)) "is attacking a Villager"))
               (.damage attacker (.getDamage evt)))))))))
 
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
-    [org.bukkit.event.entity.EntityListener] []
+    [EntityListener] []
     (onProjectileHit [evt]
       (let [entity (.getEntity evt)]
         (when (instance? Fireball entity)
