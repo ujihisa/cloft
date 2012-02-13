@@ -92,11 +92,15 @@
                              (.getLocation target)
                              (org.bukkit.inventory.ItemStack. n 1)))]
           (cond
+            ; right-click zombie -> golden apple
             (and (instance? Zombie target) (not (instance? PigZombie target))) (d 322)
+            ; right-click villager -> cake
             (instance? Villager target) (d 92)
+            ; right-click squid -> chat and hungry
             (instance? Squid target) (let [player (.getPlayer evt)]
                                        (.chat player "ikakawaiidesu")
                                        (.setFoodLevel player 0))
+            ; right-click player -> makes it hungry
             (instance? Player target) (.setFoodLevel target (dec (.getFoodLevel target)))))))))
 
 (defn entity2name [entity]
