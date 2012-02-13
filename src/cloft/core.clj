@@ -60,7 +60,15 @@
     (onPlayerInteractEntity
       [evt]
       (let [target (.getRightClicked evt)]
-        (prn ["clicked" (.getName (.getPlayer evt)) target])))))
+        (letfn [(d [n]
+                  (.dropItem (.getWorld target)
+                             (.getLocation target)
+                             (org.bukkit.inventory.ItemStack. n 1)))]
+          (cond
+            (instance? org.bukkit.entity.Zombie target) (d 322)
+            (instance? org.bukkit.entity.Villager target) (d 92)
+            (instance? org.bukkit.entity.Squid target)  (.chat (.getPlayer evt) "ikakawaiidesu")
+            ))))))
 
 (defn entity2name [entity]
   (cond (instance? org.bukkit.entity.Blaze entity) "Blaze"
