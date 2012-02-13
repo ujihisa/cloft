@@ -46,9 +46,7 @@
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerChat
       [evt]
-      (prn (.getFormat evt))
-      (prn (.getRecipients evt))
-      (lingr (str (.getPlayer evt) ": " (.getMessage evt))))))
+      (lingr (str (.getName (.getPlayer evt)) ": " (.getMessage evt))))))
 
 (defn entity2name [entity]
   (cond (instance? org.bukkit.entity.Blaze entity) "Blaze"
