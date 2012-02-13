@@ -135,7 +135,7 @@
 
 (defn get-player-move []
   (c/auto-proxy
-    [org.bukkit.event.player.PlayerMove] []
+    [org.bukkit.event.player.PlayerListener] []
     (onPlayerMove
       [evt]
       (let [location (.getLocation (.getPlayer evt))]
