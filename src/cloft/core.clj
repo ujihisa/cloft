@@ -47,14 +47,14 @@
 ;   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
 ;  )
 
-(defn get-playerloginlistener []
+(defn get-player-login-listener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerLogin
       [evt]
       (lingr (str (name2icon (.getName (.getPlayer evt))) "\nlogged in now.")))))
 
-(defn get-playerquitlistener []
+(defn get-player-quit-listener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerQuit
@@ -161,7 +161,7 @@
               (lingr (str (name2icon (.getName attacker)) "\nis attacking a Villager"))
               (.damage attacker (.getDamage evt)))))))))
 
-(defn get-entity-projectilehit-listener []
+(defn get-entity-projectile-hit-listener []
   (c/auto-proxy
     [org.bukkit.event.entity.EntityListener] []
     (onProjectileHit [evt]
@@ -196,14 +196,14 @@
                   listener
                   (:Normal c/event-priorities)
                   plugin*)))]
-      (hehehe get-playerloginlistener :PLAYER_LOGIN)
-      (hehehe get-playerquitlistener :PLAYER_QUIT)
+      (hehehe get-player-login-listener :PLAYER_LOGIN)
+      (hehehe get-player-quit-listener :PLAYER_QUIT)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
-      (hehehe get-entity-projectilehit-listener :PROJECTILE_HIT))
+      (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT))
   (lingr "server running...")
   (c/log-info "cloft started"))
 
