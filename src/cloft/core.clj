@@ -128,7 +128,7 @@
         (when (instance? org.bukkit.entity.Pig entity)
           (pig-death-event entity))
         (cond
-          (instance? org.bukkit.entity.Player entity) (lingr (str (name2icon (.getName (.getPlayer evt))) " " (.getDeathMessage evt)))
+          (instance? org.bukkit.entity.Player entity) (lingr (str (name2icon (.getName entity)) " " (.getDeathMessage evt)))
           (and (instance? org.bukkit.entity.LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
