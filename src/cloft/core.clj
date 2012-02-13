@@ -143,6 +143,14 @@
       (let [entity (.getEntity evt)]
         (lingr (str (entity2name entity) " is exploding"))))))
 
+(defn get-entity-damage-listener []
+  (c/auto-proxy
+    [org.bukkit.event.entity.EntityListener] []
+    (onEntityDamage [evt]
+      (let [entity (.getEntity evt)]
+        (when (instance? org.bukkit.entity.Villager entity)
+          (lingr (str (.getCause evt) " " (entity2name entity))))))))
+
 (defn get-entity-projectilehit-listener []
   (c/auto-proxy
     [org.bukkit.event.entity.EntityListener] []
@@ -184,6 +192,7 @@
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
+      (hehehe get-entity-damage-listener :ENTITY_DAMEGE)
       (hehehe get-entity-projectilehit-listener :PROJECTILE_HIT))
   (lingr "server running...")
   (c/log-info "cloft started"))
