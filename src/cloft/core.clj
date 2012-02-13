@@ -210,9 +210,9 @@
           (let [attacker (.getDamager evt)]
             (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
               (comment (lingr (str (name2icon (.getName attacker)) "is attacking a Villager")))
-              (prn ["zombie attack" attacker entity])
               (swap! zombieplayers conj entity)
-              (prn @zombieplayers)
+              (.sendMessage entity "You turned into a zombie.")
+              (.setTarget attacker nil)
               (comment (.damage attacker (.getDamage evt))))))))))
 
 (defn get-entity-projectile-hit-listener []
