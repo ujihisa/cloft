@@ -94,6 +94,11 @@
           (cond
             ; right-click zombie -> golden apple
             (and (instance? Zombie target) (not (instance? PigZombie target))) (d 322)
+            ; right-click zombie pigman -> pig
+            (instance? PigZombie target) (let [location (.getLocation target)
+                                               world (.getWorld target)]
+                                           (.remove target)
+                                           (.spawn world location Pig))
             ; right-click villager -> cake
             (instance? Villager target) (d 92)
             ; right-click squid -> chat and hungry
