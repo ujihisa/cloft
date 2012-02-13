@@ -133,6 +133,14 @@
             ; right-click player -> makes it hungry
             (instance? Player target) (.setFoodLevel target (dec (.getFoodLevel target)))))))))
 
+(defn get-player-move []
+  (c/auto-proxy
+    [org.bukkit.event.player.PlayerMove] []
+    (onPlayerMove
+      [evt]
+      (let [location (.getLocation (.getPlayer evt))]
+        (prn location)))))
+
 (defn entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
         (instance? CaveSpider entity) "CaveSpider"
@@ -256,6 +264,7 @@
       (hehehe get-player-quit-listener :PLAYER_QUIT)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
+      (hehehe get-player-move :PLAYER_MOVE)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
