@@ -41,6 +41,15 @@
       [evt]
       (lingr (str (.getName (.getPlayer evt)) " quitted.")))))
 
+(defn get-player-chat []
+  (c/auto-proxy
+    [org.bukkit.event.player.PlayerListener] []
+    (onPlayerChat
+      [evt]
+      (prn (.getFormat evt))
+      (prn (.getRecipients evt))
+      (lingr (str (.getPlayer evt) ": " (.getMessage evt))))))
+
 (defn entity2name [entity]
   (cond (instance? org.bukkit.entity.Blaze entity) "Blaze"
         (instance? org.bukkit.entity.CaveSpider entity) "CaveSpider"
@@ -133,6 +142,7 @@
                   plugin*)))]
       (hehehe get-playerloginlistener :PLAYER_LOGIN)
       (hehehe get-playerquitlistener :PLAYER_QUIT)
+      (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-projectilehit-listener :PROJECTILE_HIT))
   (c/log-info "cloft started"))
