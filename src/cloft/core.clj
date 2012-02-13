@@ -131,29 +131,10 @@
                   listener
                   (:Normal c/event-priorities)
                   plugin*)))]
-      (hehehe get-playerloginlistener :PLAYER_LOGIN))
-
-    (let [listener (get-playerquitlistener)]
-      (.registerEvent
-        plugin-manager*
-        (:PLAYER_QUIT c/event-types)
-        listener
-        (:Normal c/event-priorities)
-        plugin*))
-    (let [listener (get-entity-death-listener)]
-      (.registerEvent
-        plugin-manager*
-        (:ENTITY_DEATH c/event-types)
-        listener
-        (:Normal c/event-priorities)
-        plugin*))
-    (let [listener (get-entity-projectilehit-listener)]
-      (.registerEvent
-        plugin-manager*
-        (:PROJECTILE_HIT c/event-types)
-        listener
-        (:Normal c/event-priorities)
-        plugin*))
+      (hehehe get-playerloginlistener :PLAYER_LOGIN)
+      (hehehe get-playerquitlistener :PLAYER_QUIT)
+      (hehehe get-entity-death-listener :ENTITY_DEATH)
+      (hehehe get-entity-projectilehit-listener :PROJECTILE_HIT))
   (c/log-info "cloft started"))
 
 (defn disable-plugin [plugin]
