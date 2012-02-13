@@ -148,8 +148,12 @@
     [org.bukkit.event.entity.EntityListener] []
     (onEntityDamage [evt]
       (let [entity (.getEntity evt)]
-        (when (instance? org.bukkit.entity.Villager entity)
-          (lingr (str (.getCause evt) " " (entity2name entity))))))))
+        (when (and
+                (instance? org.bukkit.entity.Villager entity)
+                (instance? org.bukkit.event.entity.EntityDamageByEntityEvent evt))
+          (let [attacker (.getDamager evt)]
+            (lingr (str (name2icon (.getName attacker)) " is attacking a Villager"))
+            (.damage attacker (.getDamage evt))))))))
 
 (defn get-entity-projectilehit-listener []
   (c/auto-proxy
@@ -192,7 +196,7 @@
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
-      (hehehe get-entity-damage-listener :ENTITY_DAMEGE)
+      (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe get-entity-projectilehit-listener :PROJECTILE_HIT))
   (lingr "server running...")
   (c/log-info "cloft started"))
