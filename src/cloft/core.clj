@@ -35,7 +35,7 @@
 (def zombie-players (atom #{}))
 
 (defn zombie-player? [p]
-  (boolean (get @zombie-players p)))
+  (boolean (get @zombie-players (.getName p))))
 
 (defn name2icon [name]
   (get NAME-ICON name (str name " ")))
@@ -143,7 +143,7 @@
       [evt]
       (let [player (.getPlayer evt)]
         (when (and
-                (get @zombie-players (.getName player))
+                (zombie-player? player)
                 (= 15 (.getLightFromSky (.getBlock (.getLocation player)))))
           (.setFireTicks player 30))))))
 
