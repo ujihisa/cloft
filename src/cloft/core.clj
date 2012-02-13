@@ -139,7 +139,7 @@
     (onPlayerMove
       [evt]
       (let [location (.getLocation (.getPlayer evt))
-            block (.getBlockAt (.getWorld evt) location)]
+            block (.getBlockY location)]
         (prn block)
         (prn (.getLightFromSky block))))))
 
