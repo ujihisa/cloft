@@ -161,8 +161,8 @@
 
 (defn enable-plugin [plugin]
     (def plugin* plugin)
-    ;(def server* (.getServer plugin*))
-    ;(def plugin-manager* (.getPluginManager server* ))
+    (def server* (.getServer plugin*))
+    (def plugin-manager* (.getPluginManager server* ))
     ;(def plugin-desc* (.getDescription plugin*))
 
     ;(let [listener (get-blocklistener)]
