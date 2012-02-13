@@ -52,14 +52,14 @@
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerLogin
       [evt]
-      (lingr (str (name2icon (.getName (.getPlayer evt))) " logged in now.")))))
+      (lingr (str (name2icon (.getName (.getPlayer evt))) "\nlogged in now.")))))
 
 (defn get-playerquitlistener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerQuit
       [evt]
-      (lingr (str (name2icon (.getName (.getPlayer evt))) " quitted.")))))
+      (lingr (str (name2icon (.getName (.getPlayer evt))) "\nquitted.")))))
 
 (defn get-player-chat []
   (c/auto-proxy
@@ -67,7 +67,7 @@
     (onPlayerChat
       [evt]
       (let [name (.getName (.getPlayer evt))]
-        (lingr (str (name2icon name) " " (.getMessage evt)))))))
+        (lingr (str (name2icon name) "\n" (.getMessage evt)))))))
 
 (defn get-player-interact-entity []
   (c/auto-proxy
@@ -129,7 +129,7 @@
 
 (defn entity-death-event [entity]
   (lingr
-    (str (name2icon (.getName (.getKiller entity))) " killed " (entity2name entity))))
+    (str (name2icon (.getName (.getKiller entity))) "\nkilled " (entity2name entity))))
 
 (defn get-entity-death-listener []
   (c/auto-proxy
@@ -139,7 +139,7 @@
         (when (instance? Pig entity)
           (pig-death-event entity))
         (cond
-          (instance? Player entity) (lingr (str (name2icon (.getName entity)) " " (.getDeathMessage evt)))
+          (instance? Player entity) (lingr (str (name2icon (.getName entity)) "\n" (.getDeathMessage evt)))
           (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
@@ -148,7 +148,7 @@
     [org.bukkit.event.entity.EntityListener] []
     (onEntityExplode [evt]
       (let [entity (.getEntity evt)]
-        (lingr (str (entity2name entity) " is exploding"))))))
+        (lingr (str (entity2name entity) "\nis exploding"))))))
 
 (defn get-entity-damage-listener []
   (c/auto-proxy
@@ -158,7 +158,7 @@
         (when (and (instance? Villager entity) (instance? org.bukkit.event.entity.EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
             (when (instance? Player attacker)
-              (lingr (str (name2icon (.getName attacker)) " is attacking a Villager"))
+              (lingr (str (name2icon (.getName attacker)) "\nis attacking a Villager"))
               (.damage attacker (.getDamage evt)))))))))
 
 (defn get-entity-projectilehit-listener []
