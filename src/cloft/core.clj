@@ -100,7 +100,15 @@
     (onPlayerChat
       [evt]
       (let [name (.getName (.getPlayer evt))]
-        (lingr (str (name2icon name) (.getMessage evt)))))))
+        (lingr (str (name2icon name) (.getMessage evt)))
+        (comment (let [creepers (filter #(instance? Creeper %) (.getLivingEntities (.getWorld (.getPlayer evt))))
+              your-location (.getLocation (.getPlayer evt))
+              distances (map #(.distance (.getLocation %) your-location) creepers)
+              close-distances (filter #(< 10 %) distances)]
+          (.sendMessage player
+                        (if (empty? close-distances)
+                          "safe"
+                          (str (seq (sort close-distances)))))))))))
 
 (defn- get-player-interact-entity []
   (c/auto-proxy
