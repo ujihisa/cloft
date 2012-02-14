@@ -222,6 +222,13 @@
       (let [entity (.getEntity evt)]
         (lingr (str (entity2name entity) " is exploding"))))))
 
+(defn- zombieze [entity]
+  (swap! zombie-players conj (.getName entity))
+  (.setMaximumAir entity 1)
+  (.setRemainingAir entity 1)
+  (.sendMessage entity "You turned into a zombie.")
+  (lingr (str (name2icon (.getName entity)) "turned into a zombie.")))
+
 (defn- get-entity-damage-listener []
   (c/auto-proxy
     [EntityListener] []
@@ -248,18 +255,11 @@
             (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
               (if (zombie-player? entity)
                 (.setCancelled evt true)
-                (do
-                  (swap! zombie-players conj (.getName entity))
-                  (.setMaximumAir entity 1)
-                  (.setRemainingAir entity 1)
-                  (lingr (str (name2icon (.getName entity)) "turned into a zombie."))
-                  (.sendMessage entity "You turned into a zombie."))))
+                (zombieze entity)))
             (when (and (instance? Player attacker) (zombie-player? attacker))
               (do
-                (swap! zombie-players conj (.getName entity))
-                (.setMaximumAir entity 1)
-                (.sendMessage attacker "You made a friend")
-                (.sendMessage entity "You also turned into a zombie.")))))))))
+                (zombieze entity)
+                (.sendMessage attacker "You made a friend")))))))))
 
 (defn- get-entity-projectile-hit-listener []
   (c/auto-proxy
