@@ -25,7 +25,8 @@
             FoodLevelChangeEvent ItemDespawnEvent ItemSpawnEvent PigZapEvent
             PlayerDeathEvent PotionSplashEvent ProjectileHitEvent
             SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
-  (:require clj-http.client))
+  (:require clj-http.client)
+  (:import [java.util Random]))
 
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
@@ -139,8 +140,9 @@
             ; right-click player -> makes it hungry
             (instance? Player target) (.setFoodLevel target (dec (.getFoodLevel target)))))))))
 
-(defn- get-player-move []
-  (c/auto-proxy
+(defn- periodically []
+  (prn "ok")
+  (comment (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerMove
       [evt]
@@ -148,7 +150,7 @@
         (when (and
                 (zombie-player? player)
                 (= 15 (.getLightLevel (.getBlock (.getLocation player)))))
-          (.setFireTicks player 30))))))
+          (.setFireTicks player 30)))))))
 
 (defn- entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
@@ -226,7 +228,8 @@
         (when (and
                 (instance? Player entity)
                 (zombie-player? entity)
-                (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt)))
+                (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
+                (< 5 (.nextInt (Random.) 10)))
           (.setCancelled evt true)
           (.setMaximumAir entity 300) ; default maximum value
           (.setRemainingAir entity 300)
@@ -292,11 +295,12 @@
       (hehehe get-player-quit-listener :PLAYER_QUIT)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
-      (hehehe get-player-move :PLAYER_MOVE)
+      ;(hehehe get-player-move :PLAYER_MOVE)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT))
+  (comment (.scheduleAsyncRepeatingTask (org.bukkit.scheduler.BukkitScheduler/getScheduler.) plugin* periodically 1000 1000))
   (lingr "server running...")
   (c/log-info "cloft started"))
 
