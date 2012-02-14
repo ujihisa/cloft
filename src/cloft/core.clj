@@ -147,7 +147,7 @@
       (let [player (.getPlayer evt)]
         (when (and
                 (zombie-player? player)
-                (= 15 (.getLightFromSky (.getBlock (.getLocation player)))))
+                (= 15 (.getLightLevel (.getBlock (.getLocation player)))))
           (.setFireTicks player 30))))))
 
 (defn- entity2name [entity]
