@@ -306,7 +306,7 @@
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT))
-  (.scheduleAsyncRepeatingTask
+  (.scheduleSyncRepeatingTask
     (org.bukkit.Bukkit/getScheduler)
     plugin*
     periodically
