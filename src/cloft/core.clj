@@ -88,11 +88,11 @@
         (.sendMessage player "[UPDATE] You can turn into a zombie.")))))
 
 (defn- get-player-quit-listener []
-  (c/auto-proxy
+  (comment (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerQuit
       [evt]
-      (lingr (str (name2icon (.getName (.getPlayer evt))) "quitted.")))))
+      (lingr (str (name2icon (.getName (.getPlayer evt))) "quitted."))))))
 
 (defn- get-player-chat []
   (c/auto-proxy
