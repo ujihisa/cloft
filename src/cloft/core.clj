@@ -300,7 +300,8 @@
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT))
-  (comment (.scheduleAsyncRepeatingTask (org.bukkit.scheduler.BukkitScheduler/getScheduler.) plugin* periodically 1000 1000))
+  (prn (org.bukkit.scheduler.BukkitScheduler/getScheduler))
+  (.scheduleAsyncRepeatingTask (org.bukkit.scheduler.BukkitScheduler/getScheduler) plugin* periodically 1000 1000)
   (lingr "server running...")
   (c/log-info "cloft started"))
 
