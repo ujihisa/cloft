@@ -153,7 +153,7 @@
   (when (and
           (zombie-player? player)
           (= 15 (.getLightLevel (.getBlock (.getLocation player)))))
-    (.setFireTicks player 20)))
+    (.setFireTicks player 100)))
 
 (defn- periodically []
   (seq (map zombie-player-sun (org.bukkit.Bukkit/getOnlinePlayers)))
@@ -310,8 +310,8 @@
     (org.bukkit.Bukkit/getScheduler)
     plugin*
     periodically
-    10
-    10)
+    50
+    50)
   (lingr "server running...")
   (c/log-info "cloft started"))
 
