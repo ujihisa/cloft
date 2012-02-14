@@ -42,14 +42,14 @@
   (get NAME-ICON name (str name " ")))
 
 (defn- lingr [msg]
-  (comment (future-call
+  (future-call
     #(clj-http.client/post
        "http://lingr.com/api/room/say"
        {:form-params
         {:room "computer_science"
          :bot 'cloft
          :text (str msg)
-         :bot_verifier "[FIXME]"}}))))
+         :bot_verifier "[FIXME]"}})))
 
 ;(defn block-break [evt]
 ;  (.sendMessage (.getPlayer evt) "You know. Breaking stuff should be illegal."))
@@ -82,7 +82,9 @@
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerLogin
       [evt]
-      (lingr (str (name2icon (.getName (.getPlayer evt))) "logged in now.")))))
+      (let [player (.getPlayer evt)]
+        (lingr (str (name2icon (.getName player)) "logged in now."))
+        (.sendMessage player "[UPDATE] You can turn into a zombie.")))))
 
 (defn- get-player-quit-listener []
   (c/auto-proxy
