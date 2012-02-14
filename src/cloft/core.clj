@@ -25,8 +25,7 @@
             FoodLevelChangeEvent ItemDespawnEvent ItemSpawnEvent PigZapEvent
             PlayerDeathEvent PotionSplashEvent ProjectileHitEvent
             SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
-  (:require clj-http.client)
-  (:import [java.util Random]))
+  (:require clj-http.client))
 
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
@@ -242,7 +241,7 @@
                 (instance? Player entity)
                 (zombie-player? entity)
                 (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
-                (< 5 (.nextInt (Random.) 10)))
+                (= 0 (rand-int 2)))
           (.setCancelled evt true)
           (.setMaximumAir entity 300) ; default maximum value
           (.setRemainingAir entity 300)
