@@ -17,6 +17,7 @@
             EntityCombustEvent EntityCreatePortalEvent EntityDamageByBlockEvent
             EntityDamageByEntityEvent EntityDamageByProjectileEvent
             EntityDamageEvent EntityDeathEvent EntityEvent EntityExplodeEvent
+            EntityDamageEvent$DamageCause
             EntityInteractEvent EntityListener EntityPortalEnterEvent
             EntityRegainHealthEvent EntityShootBowEvent EntityTameEvent
             ;EntityTargetEvent EntityTeleportEvent ExplosionPrimeEvent
@@ -220,6 +221,15 @@
             (when (instance? Player attacker)
               (lingr (str (name2icon (.getName attacker)) "is attacking a Villager"))
               (.damage attacker (.getDamage evt)))))
+        (when (and
+                (instance? Player entity)
+                (zombie-player? entity)
+                (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt)))
+          (.setCancelled evt true)
+          (.setMaximumAir entity 300) ; default maximum value
+          (.setHealth entity (.getMaxHealth entity))
+          (swap! zombie-players disj (.getName entity))
+          (.sendMessage entity "You rebirthed as a human."))
         (when (and (instance? Player entity) (instance? EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
             (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
@@ -228,11 +238,13 @@
                 (do
                   (comment (lingr (str (name2icon (.getName attacker)) "is attacking a Villager")))
                   (swap! zombie-players conj (.getName entity))
+                  (.setMaximumAir entity 1)
                   (.sendMessage entity "You turned into a zombie.")
                   (comment (.damage attacker (.getDamage evt))))))
             (when (and (instance? Player attacker) (zombie-player? attacker))
               (do
                 (swap! zombie-players conj (.getName entity))
+                (.setMaximumAir entity 1)
                 (.sendMessage attacker "You made a friend")
                 (.sendMessage entity "You also turned into a zombie.")))))))))
 
