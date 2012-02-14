@@ -229,6 +229,7 @@
                 (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt)))
           (.setCancelled evt true)
           (.setMaximumAir entity 300) ; default maximum value
+          (.setRemainingAir entity 300)
           (.setHealth entity (.getMaxHealth entity))
           (swap! zombie-players disj (.getName entity))
           (.sendMessage entity "You rebirthed as a human."))
@@ -238,11 +239,11 @@
               (if (zombie-player? entity)
                 (.setCancelled evt true)
                 (do
-                  (comment (lingr (str (name2icon (.getName attacker)) "is attacking a Villager")))
                   (swap! zombie-players conj (.getName entity))
                   (.setMaximumAir entity 1)
-                  (.sendMessage entity "You turned into a zombie.")
-                  (comment (.damage attacker (.getDamage evt))))))
+                  (.setRemainingAir entity 1)
+                  (lingr (str (name2icon (.getName entity)) "turned into a zombie."))
+                  (.sendMessage entity "You turned into a zombie."))))
             (when (and (instance? Player attacker) (zombie-player? attacker))
               (do
                 (swap! zombie-players conj (.getName entity))
