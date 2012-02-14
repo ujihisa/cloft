@@ -87,11 +87,11 @@
         (.sendMessage player "[UPDATE] You can turn into a zombie.")))))
 
 (defn- get-player-quit-listener []
-  (comment (c/auto-proxy
+  (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerQuit
       [evt]
-      (lingr (str (name2icon (.getName (.getPlayer evt))) "quitted."))))))
+      (lingr (str (name2icon (.getName (.getPlayer evt))) "quitted.")))))
 
 (defn- get-player-chat []
   (c/auto-proxy
@@ -300,7 +300,7 @@
                   (:Normal c/event-priorities)
                   plugin*)))]
       (hehehe get-player-login-listener :PLAYER_LOGIN)
-      (hehehe get-player-quit-listener :PLAYER_QUIT)
+      ;(hehehe get-player-quit-listener :PLAYER_QUIT)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
