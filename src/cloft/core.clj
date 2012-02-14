@@ -140,17 +140,16 @@
             ; right-click player -> makes it hungry
             (instance? Player target) (.setFoodLevel target (dec (.getFoodLevel target)))))))))
 
+; internal
+(defn- zombie-player-sun [player]
+  (when (and
+          (zombie-player? player)
+          (= 15 (.getLightLevel (.getBlock (.getLocation player)))))
+    (.setFireTicks player 20)))
+
 (defn- periodically []
-  (prn "ok")
-  (comment (c/auto-proxy
-    [org.bukkit.event.player.PlayerListener] []
-    (onPlayerMove
-      [evt]
-      (let [player (.getPlayer evt)]
-        (when (and
-                (zombie-player? player)
-                (= 15 (.getLightLevel (.getBlock (.getLocation player)))))
-          (.setFireTicks player 30)))))))
+  (seq (map zombie-player-sun (org.bukkit.Bukkit/getOnlinePlayers)))
+  nil)
 
 (defn- entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
@@ -295,13 +294,16 @@
       (hehehe get-player-quit-listener :PLAYER_QUIT)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
-      ;(hehehe get-player-move :PLAYER_MOVE)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT))
-  (prn (org.bukkit.scheduler.BukkitScheduler/getScheduler))
-  (.scheduleAsyncRepeatingTask (org.bukkit.scheduler.BukkitScheduler/getScheduler) plugin* periodically 1000 1000)
+  (.scheduleAsyncRepeatingTask
+    (org.bukkit.Bukkit/getScheduler)
+    plugin*
+    periodically
+    10
+    10)
   (lingr "server running...")
   (c/log-info "cloft started"))
 
