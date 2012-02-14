@@ -149,14 +149,13 @@
             (instance? Player target) (.setFoodLevel target (dec (.getFoodLevel target)))))))))
 
 ; internal
-(defn- zombie-player-sun [player]
-  (when (and
-          (zombie-player? player)
-          (= 15 (.getLightLevel (.getBlock (.getLocation player)))))
-    (.setFireTicks player 100)))
+(defn- zombie-player-periodically [zplayer]
+  (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
+    (.setFireTicks zplayer 100)))
 
 (defn- periodically []
-  (seq (map zombie-player-sun (org.bukkit.Bukkit/getOnlinePlayers)))
+  (seq (map (zombie-player-periodically)
+            (filter zombie-player? (org.bukkit.Bukkit/getOnlinePlayers))))
   nil)
 
 (defn- entity2name [entity]
