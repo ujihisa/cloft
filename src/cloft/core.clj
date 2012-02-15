@@ -41,7 +41,8 @@
 (defn- name2icon [name]
   (get NAME-ICON name (str name " ")))
 
-(def BOT-VERIFIER (slurp "bot_verifier.txt"))
+(def BOT-VERIFIER (apply str (drop-last (slurp "bot_verifier.txt"))))
+(prn (str "'" BOT-VERIFIER "'"))
 
 (defn- lingr [msg]
   (future-call
