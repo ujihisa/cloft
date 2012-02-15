@@ -1,5 +1,6 @@
 (ns cloft.core
   (:require [cljminecraft.core :as c])
+  (:import [org.bukkit Bukkit])
   (:import [org.bukkit.event Event Event$Type])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
@@ -48,7 +49,7 @@
     #(clj-http.client/post
        "http://lingr.com/api/room/say"
        {:form-params
-        {:room "computer_science"
+        {:room "Arch"
          :bot 'cloft
          :text (str msg)
          :bot_verifier BOT-VERIFIER}})))
@@ -79,14 +80,13 @@
   (let [itemstack (.getItemInHand player)]
     (.setAmount itemstack (dec (.getAmount itemstack)))))
 
-(def world (org.bukkit.Bukkit/getWorld "world"))
+(def world (Bukkit/getWorld "world"))
 (def place1 (org.bukkit.Location. world -55.5 71.5 73.5)) ; lighter
 (def place2 (org.bukkit.Location. world -63.5 71.5 73.5)) ; darker
 (def place3 (org.bukkit.Location. world 18.46875 111.0 41.53125 -10.501099 1.5000023)) ; on top of tree
 (def place4 (org.bukkit.Location. world -363.4252856675041 65.0 19.551327467732065 -273.89978 15.149968)) ; goboh villae
 (def place5 (org.bukkit.Location. world -5 73 -42.5)) ; top of pyramid
 (def place6 (org.bukkit.Location. world 308.98823982676504 78 133.16713120198153 -55.351166 20.250006)) ; dessert village
-"#<Location Location{world=CraftWorld{name=world},x=}>\n"
 (defn- get-player-move []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
@@ -193,7 +193,7 @@
 
 (defn- periodically []
   (seq (map zombie-player-periodically
-            (filter zombie-player? (org.bukkit.Bukkit/getOnlinePlayers))))
+            (filter zombie-player? (Bukkit/getOnlinePlayers))))
   nil)
 
 (defn- entity2name [entity]
@@ -313,7 +313,7 @@
                    (filter #(instance? Creeper %)
                            (.getLivingEntities world))))))
 
-(def plugin-manager* (org.bukkit.Bukkit/getPluginManager))
+(def plugin-manager* (Bukkit/getPluginManager))
 (def plugin* (.getPlugin plugin-manager* "cloft"))
 
 (defn hehehe [f label]
@@ -352,7 +352,7 @@
   (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
   (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
   (.scheduleSyncRepeatingTask
-    (org.bukkit.Bukkit/getScheduler)
+    (Bukkit/getScheduler)
     plugin*
     periodically
     50
