@@ -70,6 +70,7 @@
       (onPlayerChat
         [evt]
         (let [name (.getName (.getPlayer evt))]
+          (load-dynamic)
           (lingr (str (name2icon name) (.getMessage evt)))
           (comment (let [creepers (filter #(instance? Creeper %) (.getLivingEntities (.getWorld (.getPlayer evt))))
                 your-location (.getLocation (.getPlayer evt))
@@ -232,6 +233,7 @@
                 (do
                   (zombieze entity)
                   (.sendMessage attacker "You made a friend")))))))))
+  (prn 'loaded)
 
   (defn- get-entity-projectile-hit-listener []
     (c/auto-proxy

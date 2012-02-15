@@ -44,8 +44,11 @@
          :text (str msg)
          :bot_verifier "[FIXME]"}})))
 
+(defn load-dynamic []
+  (eval (read-string (str "(do " (slurp "dynamic.clj") ")"))))
+
 (defn enable-plugin [plugin]
-    (eval (read-string (str "(do " (slurp "dynamic.clj") ")")))
+    (load-synamic)
     (def plugin* plugin)
     (def server* (.getServer plugin*))
     (def plugin-manager* (.getPluginManager server* ))
