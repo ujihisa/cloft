@@ -36,15 +36,15 @@
 
 (def zombie-players (atom #{}))
 
-(defn- zombie-player? [p]
+(defn zombie-player? [p]
   (boolean (get @zombie-players (.getName p))))
 
-(defn- name2icon [name]
+(defn name2icon [name]
   (get NAME-ICON name (str name " ")))
 
 (def BOT-VERIFIER (apply str (drop-last (slurp "bot_verifier.txt"))))
 
-(defn- lingr [msg]
+(defn lingr [msg]
   (future-call
     #(clj-http.client/post
        "http://lingr.com/api/room/say"
@@ -70,13 +70,13 @@
 ;   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
 ;  )
 
-(defn- swap-entity [target klass]
+(defn swap-entity [target klass]
   (let [location (.getLocation target)
         world (.getWorld target)]
     (.remove target)
     (.spawn world location klass)))
 
-(defn- consume-item [player]
+(defn consume-item [player]
   (let [itemstack (.getItemInHand player)]
     (.setAmount itemstack (dec (.getAmount itemstack)))))
 
@@ -87,7 +87,7 @@
 (def place4 (org.bukkit.Location. world -363.4252856675041 65.0 19.551327467732065 -273.89978 15.149968)) ; goboh villae
 (def place5 (org.bukkit.Location. world -5 73 -42.5)) ; top of pyramid
 (def place6 (org.bukkit.Location. world 308.98823982676504 78 133.16713120198153 -55.351166 20.250006)) ; dessert village
-(defn- get-player-move []
+(defn get-player-move []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerMove
@@ -111,7 +111,7 @@
           (lingr (str (.getName player) " is teleporting..."))
           (.setTo evt place6))))))
 
-(defn- get-player-login-listener []
+(defn get-player-login-listener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerLogin
@@ -120,14 +120,14 @@
         (lingr (str (name2icon (.getName player)) "logged in now."))
         (.sendMessage player "[UPDATE] You can turn into a zombie.")))))
 
-(defn- get-player-quit-listener []
+(defn get-player-quit-listener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerQuit
       [evt]
       (lingr (str (name2icon (.getName (.getPlayer evt))) "quitted.")))))
 
-(defn- get-player-chat []
+(defn get-player-chat []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerChat
@@ -143,10 +143,10 @@
                           "safe"
                           (str (seq (sort close-distances)))))))))))
 
-(defn- touch-player [target]
+(defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
-(defn- get-player-interact-entity []
+(defn get-player-interact-entity []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerInteractEntity
@@ -185,18 +185,18 @@
             (instance? Player target) (touch-player)))))))
 
 ; internal
-(defn- zombie-player-periodically [zplayer]
+(defn zombie-player-periodically [zplayer]
   (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
     (.setFireTicks zplayer 100))
   (when (= 0 (rand-int 2))
     (.setFoodLevel zplayer (dec (.getFoodLevel zplayer)))))
 
-(defn- periodically []
+(defn periodically []
   (seq (map zombie-player-periodically
             (filter zombie-player? (Bukkit/getOnlinePlayers))))
   nil)
 
-(defn- entity2name [entity]
+(defn entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
         (instance? CaveSpider entity) "CaveSpider"
         (instance? Chicken entity) "Chicken"
@@ -231,16 +231,16 @@
         (instance? TNTPrimed entity) "TNT"
         :else (class entity)))
 
-(defn- pig-death-event [entity]
+(defn pig-death-event [entity]
   (comment (let [world (.getWorld entity)]
     (.setStorm world true)))
   (.setFireTicks (.getKiller entity) 100))
 
-(defn- entity-death-event [entity]
+(defn entity-death-event [entity]
   (lingr
     (str (name2icon (.getName (.getKiller entity))) "killed " (entity2name entity))))
 
-(defn- get-entity-death-listener []
+(defn get-entity-death-listener []
   (c/auto-proxy
     [EntityListener] []
     (onEntityDeath [evt]
@@ -252,21 +252,21 @@
           (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
-(defn- get-entity-explode-listener []
+(defn get-entity-explode-listener []
   (c/auto-proxy
     [EntityListener] []
     (onEntityExplode [evt]
       (let [entity (.getEntity evt)]
         (lingr (str (entity2name entity) " is exploding"))))))
 
-(defn- zombieze [entity]
+(defn zombieze [entity]
   (swap! zombie-players conj (.getName entity))
   (.setMaximumAir entity 1)
   (.setRemainingAir entity 1)
   (.sendMessage entity "You turned into a zombie.")
   (lingr (str (name2icon (.getName entity)) "turned into a zombie.")))
 
-(defn- get-entity-damage-listener []
+(defn get-entity-damage-listener []
   (c/auto-proxy
     [EntityListener] []
     (onEntityDamage [evt]
@@ -298,7 +298,7 @@
                 (zombieze entity)
                 (.sendMessage attacker "You made a friend")))))))))
 
-(defn- get-entity-projectile-hit-listener []
+(defn get-entity-projectile-hit-listener []
   (c/auto-proxy
     [EntityListener] []
     (onProjectileHit [evt]
@@ -357,11 +357,11 @@
     periodically
     50
     50)
-  (lingr "server running...")
+  (lingr "cloft plugin running...")
   (c/log-info "cloft started"))
 
 (defn disable-plugin [plugin]
-  (lingr "server stopping...")
+  (lingr "cloft plugin stopping...")
   (c/log-info "cloft stopped"))
 
 (defn restart []
