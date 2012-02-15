@@ -41,6 +41,8 @@
 (defn- name2icon [name]
   (get NAME-ICON name (str name " ")))
 
+(def BOT-VERIFIER (slurp "bot_verifier.txt"))
+
 (defn- lingr [msg]
   (future-call
     #(clj-http.client/post
@@ -49,7 +51,7 @@
         {:room "computer_science"
          :bot 'cloft
          :text (str msg)
-         :bot_verifier "[FIXME]"}})))
+         :bot_verifier BOT-VERIFIER}})))
 
 ;(defn block-break [evt]
 ;  (.sendMessage (.getPlayer evt) "You know. Breaking stuff should be illegal."))
