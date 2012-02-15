@@ -34,6 +34,16 @@
          get-entity-death-listener get-entity-explode-listener zombieze
          get-entity-damage-listener get-entity-projectile-hit-listener)
 
+; originally from clojure-contrib
+(defmacro with-ns
+  "Evaluates body in another namespace.  ns is either a namespace
+  object or a symbol.  This makes it possible to define functions in
+  namespaces other than the current one."
+  [ns & body]
+  `(binding [*ns* (the-ns ~ns)]
+     ~@(map (fn [form] `(eval '~form)) body)))
+
+
 (defn- lingr [msg]
   (future-call
     #(clj-http.client/post
@@ -46,7 +56,7 @@
 
 
 (defn enable-plugin [plugin]
-    (eval (read-string (str "(do" (slurp "dynamic.clj") ")")))
+    (eval (list 'with-ns 'cloft.core (read-string (slurp "dynamic.clj"))))
     (def plugin* plugin)
     (def server* (.getServer plugin*))
     (def plugin-manager* (.getPluginManager server* ))

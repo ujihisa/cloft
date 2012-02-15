@@ -1,32 +1,3 @@
-(ns cloft.core
-  (:require [cljminecraft.core :as c])
-  (:import [org.bukkit.event Event Event$Type])
-  (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
-            ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
-            EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
-            EnderSignal ExperienceOrb Explosive FallingSand Fireball Fish
-            Flying Ghast Giant HumanEntity Item LightningStrike LivingEntity
-            MagmaCube Minecart Monster MushroomCow NPC Painting Pig PigZombie
-            Player PoweredMinecart Projectile Sheep Silverfish Skeleton Slime
-            SmallFireball Snowball Snowman Spider Squid StorageMinecart
-            ThrownPotion TNTPrimed Vehicle Villager WaterMob Weather Wolf
-            Zombie])
-  (:import [org.bukkit.event.entity CreatureSpawnEvent CreeperPowerEvent
-            EndermanPickupEvent EndermanPlaceEvent EntityChangeBlockEvent
-            EntityCombustByBlockEvent EntityCombustByEntityEvent
-            EntityCombustEvent EntityCreatePortalEvent EntityDamageByBlockEvent
-            EntityDamageByEntityEvent EntityDamageByProjectileEvent
-            EntityDamageEvent EntityDeathEvent EntityEvent EntityExplodeEvent
-            EntityDamageEvent$DamageCause
-            EntityInteractEvent EntityListener EntityPortalEnterEvent
-            EntityRegainHealthEvent EntityShootBowEvent EntityTameEvent
-            ;EntityTargetEvent EntityTeleportEvent ExplosionPrimeEvent
-            EntityTargetEvent ExplosionPrimeEvent
-            FoodLevelChangeEvent ItemDespawnEvent ItemSpawnEvent PigZapEvent
-            PlayerDeathEvent PotionSplashEvent ProjectileHitEvent
-            SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
-  (:require clj-http.client))
-
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
    "sbwhitecap" "http://www.gravatar.com/avatar/198149c17c72f7db3a15e432b454067e.jpg?s=28\n"
