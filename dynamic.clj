@@ -64,13 +64,17 @@
         [evt]
         (lingr (str (name2icon (.getName (.getPlayer evt))) "quitted.")))))
 
+  ; re-defining for some reason
+  (defn load-dynamic []
+    (eval (read-string (str "(do " (slurp "dynamic.clj") ")"))))
+
   (defn- get-player-chat []
     (c/auto-proxy
       [org.bukkit.event.player.PlayerListener] []
       (onPlayerChat
         [evt]
         (let [name (.getName (.getPlayer evt))]
-          (eval (read-string (str "(do " (slurp "dynamic.clj") ")"))) ; == (load-dynamic)
+          (load-dynamic)
           (lingr (str (name2icon name) (.getMessage evt)))
           (comment (let [creepers (filter #(instance? Creeper %) (.getLivingEntities (.getWorld (.getPlayer evt))))
                 your-location (.getLocation (.getPlayer evt))
