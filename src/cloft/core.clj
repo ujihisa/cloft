@@ -56,7 +56,7 @@
 
 
 (defn enable-plugin [plugin]
-    (eval (list 'with-ns 'cloft.core (read-string (slurp "dynamic.clj"))))
+    (eval (macroexpand (list 'with-ns 'cloft.core (read-string (slurp "dynamic.clj")))))
     (def plugin* plugin)
     (def server* (.getServer plugin*))
     (def plugin-manager* (.getPluginManager server* ))
