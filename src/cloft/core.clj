@@ -109,6 +109,9 @@
                           "safe"
                           (str (seq (sort close-distances)))))))))))
 
+(defn- touch-player [target]
+  (.setFoodLevel target (dec (.getFoodLevel target))))
+
 (defn- get-player-interact-entity []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
@@ -145,7 +148,7 @@
                                        (.chat player "ikakawaiidesu")
                                        (.setFoodLevel player 0))
             ; right-click player -> makes it hungry
-            (instance? Player target) (.setFoodLevel target (dec (.getFoodLevel target)))))))))
+            (instance? Player target) (touch-player)))))))
 
 ; internal
 (defn- zombie-player-periodically [zplayer]
