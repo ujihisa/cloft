@@ -70,7 +70,7 @@
       (onPlayerChat
         [evt]
         (let [name (.getName (.getPlayer evt))]
-          (load-dynamic)
+          (eval (read-string (str "(do " (slurp "dynamic.clj") ")"))) ; == (load-dynamic)
           (lingr (str (name2icon name) (.getMessage evt)))
           (comment (let [creepers (filter #(instance? Creeper %) (.getLivingEntities (.getWorld (.getPlayer evt))))
                 your-location (.getLocation (.getPlayer evt))
