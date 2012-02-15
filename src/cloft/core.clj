@@ -42,7 +42,6 @@
   (get NAME-ICON name (str name " ")))
 
 (def BOT-VERIFIER (apply str (drop-last (slurp "bot_verifier.txt"))))
-(prn (str "'" BOT-VERIFIER "'"))
 
 (defn- lingr [msg]
   (future-call
@@ -79,6 +78,38 @@
 (defn- consume-item [player]
   (let [itemstack (.getItemInHand player)]
     (.setAmount itemstack (dec (.getAmount itemstack)))))
+
+(def world (org.bukkit.Bukkit/getWorld "world"))
+(def place1 (org.bukkit.Location. world -55.5 71.5 73.5)) ; lighter
+(def place2 (org.bukkit.Location. world -63.5 71.5 73.5)) ; darker
+(def place3 (org.bukkit.Location. world 18.46875 111.0 41.53125 -10.501099 1.5000023)) ; on top of tree
+(def place4 (org.bukkit.Location. world -363.4252856675041 65.0 19.551327467732065 -273.89978 15.149968)) ; goboh villae
+(def place5 (org.bukkit.Location. world -5 73 -42.5)) ; top of pyramid
+(def place6 (org.bukkit.Location. world 308.98823982676504 78 133.16713120198153 -55.351166 20.250006)) ; dessert village
+"#<Location Location{world=CraftWorld{name=world},x=}>\n"
+(defn- get-player-move []
+  (c/auto-proxy
+    [org.bukkit.event.player.PlayerListener] []
+    (onPlayerMove
+      [evt]
+      (let [player (.getPlayer evt)]
+        (when (and
+                (= (.getWorld player) world)
+                (< (.distance place2 (.getLocation player)) 1))
+          (lingr (str (.getName player) " is teleporting..."))
+          (.setTo evt place3))
+        (when (and
+                (= (.getWorld player) world)
+                (< (.distance place1 (.getLocation player)) 1)
+                (.isLoaded (.getChunk place4)))
+          (lingr (str (.getName player) " is teleporting..."))
+          (.setTo evt place4))
+        (when (and
+                (= (.getWorld player) world)
+                (< (.distance place5 (.getLocation player)) 1)
+                (.isLoaded (.getChunk place6)))
+          (lingr (str (.getName player) " is teleporting..."))
+          (.setTo evt place6))))))
 
 (defn- get-player-login-listener []
   (c/auto-proxy
@@ -277,10 +308,24 @@
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
           )))))
 
+(defn good-bye-creeper []
+  (count (seq (map #(.remove %)
+                   (filter #(instance? Creeper %)
+                           (.getLivingEntities world))))))
+
+(def plugin-manager* (org.bukkit.Bukkit/getPluginManager))
+(def plugin* (.getPlugin plugin-manager* "cloft"))
+
+(defn hehehe [f label]
+  (let [listener (f)]
+    (.registerEvent
+      plugin-manager*
+      (label c/event-types)
+      listener
+      (:Normal c/event-priorities)
+      plugin*)))
+
 (defn enable-plugin [plugin]
-    (def plugin* plugin)
-    (def server* (.getServer plugin*))
-    (def plugin-manager* (.getPluginManager server* ))
     ;(def plugin-desc* (.getDescription plugin*))
 
     ;(let [listener (get-blocklistener)]
@@ -296,22 +341,16 @@
     ;    listener
     ;    (:Normal c/event-priorities)
     ;    plugin*))
-    (letfn [(hehehe [f label]
-              (let [listener (f)]
-                (.registerEvent
-                  plugin-manager*
-                  (label c/event-types)
-                  listener
-                  (:Normal c/event-priorities)
-                  plugin*)))]
-      (hehehe get-player-login-listener :PLAYER_LOGIN)
-      ;(hehehe get-player-quit-listener :PLAYER_QUIT)
-      (hehehe get-player-chat :PLAYER_CHAT)
-      (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
-      (hehehe get-entity-death-listener :ENTITY_DEATH)
-      (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
-      (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
-      (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT))
+
+  (hehehe get-player-login-listener :PLAYER_LOGIN)
+  ;(hehehe get-player-quit-listener :PLAYER_QUIT)
+  (hehehe get-player-move :PLAYER_MOVE)
+  (hehehe get-player-chat :PLAYER_CHAT)
+  (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
+  (hehehe get-entity-death-listener :ENTITY_DEATH)
+  (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
+  (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
+  (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
   (.scheduleSyncRepeatingTask
     (org.bukkit.Bukkit/getScheduler)
     plugin*
@@ -324,3 +363,7 @@
 (defn disable-plugin [plugin]
   (lingr "server stopping...")
   (c/log-info "cloft stopped"))
+
+(defn restart []
+  (.disablePlugin plugin-manager* plugin*)
+  (.enablePlugin plugin-manager* plugin*))
