@@ -48,7 +48,7 @@
   (eval (read-string (str "(do " (slurp "dynamic.clj") ")"))))
 
 (defn enable-plugin [plugin]
-    (load-synamic)
+    (load-dynamic)
     (def plugin* plugin)
     (def server* (.getServer plugin*))
     (def plugin-manager* (.getPluginManager server* ))
