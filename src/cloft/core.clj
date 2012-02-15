@@ -149,14 +149,13 @@
 
 ; internal
 (defn- zombie-player-periodically [zplayer]
-  (prn (.getFoodLevel zplayer))
   (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
     (.setFireTicks zplayer 100))
   (when (= 0 (rand-int 2))
     (.setFoodLevel zplayer (dec (.getFoodLevel zplayer)))))
 
 (defn- periodically []
-  (seq (map (zombie-player-periodically)
+  (seq (map zombie-player-periodically
             (filter zombie-player? (org.bukkit.Bukkit/getOnlinePlayers))))
   nil)
 
