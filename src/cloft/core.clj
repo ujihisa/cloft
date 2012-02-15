@@ -27,6 +27,13 @@
             SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
   (:require clj-http.client))
 
+(declare zombie-player?  name2icon swap-entity consume-item
+         get-player-login-listener get-player-quit-listener get-player-chat
+         get-player-interact-entity zombie-player-periodically periodically
+         entity2name pig-death-event entity-death-event
+         get-entity-death-listener get-entity-explode-listener zombieze
+         get-entity-damage-listener get-entity-projectile-hit-listener)
+
 (defn- lingr [msg]
   (future-call
     #(clj-http.client/post
