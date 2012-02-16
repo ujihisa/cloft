@@ -285,15 +285,24 @@
     (org.bukkit.potion.PotionEffect. org.bukkit.potion.PotionEffectType/WEAKNESS 500 1)
     (Bukkit/getPlayer name)))
 
+(defn consume-itemstack [inventory mtype]
+  (let [idx (.first inventory mtype)
+        itemstack (.getItem inventory idx)
+        amount (.getAmount itemstack)]
+    (if (= 1 amount)
+      (.remove inventory itemstack)
+      (.setAmount itemstack (dec amount)))))
+
 (defn arrow-attacks-by-player-event [arrow target]
   (let [shooter (.getShooter arrow)]
     (when (and
             (instance? Player shooter)
-            (.hasPotionEffect shooter org.bukkit.potion.PotionEffectType/WEAKNESS))
+            (.contains (.getInventory shooter) org.bukkit.Material/WEB))
       (let [msg (str (.getName shooter) " chained " (entity2name target))]
         (.sendMessage shooter msg)
         (lingr msg))
-      (chain-entity target))))
+      (chain-entity target)
+      (consume-itemstack (.getInventory shooter) org.bukkit.Material/WEB))))
 
 (defn player-attacks-pig-event [player pig]
   nil)
