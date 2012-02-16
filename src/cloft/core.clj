@@ -267,6 +267,9 @@
   (.sendMessage entity "You turned into a zombie.")
   (lingr (str (name2icon (.getName entity)) "turned into a zombie.")))
 
+(defn player-attacks-pig-event [player pig]
+  (prn [player pig]))
+
 (defn get-entity-damage-listener []
   (c/auto-proxy
     [EntityListener] []
@@ -288,6 +291,8 @@
           (.setHealth target (.getMaxHealth target))
           (swap! zombie-players disj (.getName target))
           (.sendMessage target "You rebirthed as a human."))
+        (when (and (instance? Player attacker) (instance? Pig target))
+          (player-attacks-pig-event attacker target))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
               (if (zombie-player? target)
