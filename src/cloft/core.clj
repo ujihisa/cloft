@@ -179,8 +179,8 @@
             (and (instance? Zombie target) (not (instance? PigZombie target))) (d 367)
             ; right-click skelton -> arrow
             (instance? Skeleton target) (d 262)
-            ; right-click spider -> cat record
-            (instance? Spider target) (d 2257)
+            ; right-click spider -> string
+            (instance? Spider target) (d 287)
             ; right-click squid -> chat and hungry
             (instance? Squid target) (let [player (.getPlayer evt)]
                                        (.chat player "ikakawaiidesu")
