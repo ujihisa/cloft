@@ -40,7 +40,7 @@
   (boolean (get @zombie-players (.getName p))))
 
 (defn name2icon [name]
-  (get NAME-ICON name (str name " ")))
+  (get NAME-ICON name (str name ": ")))
 
 (def BOT-VERIFIER (apply str (drop-last (slurp "bot_verifier.txt"))))
 
@@ -325,6 +325,8 @@
       (:Normal c/event-priorities)
       plugin*)))
 
+(def first-time (ref true))
+
 (defn enable-plugin [plugin]
     ;(def plugin-desc* (.getDescription plugin*))
 
@@ -342,21 +344,20 @@
     ;    (:Normal c/event-priorities)
     ;    plugin*))
 
-  (hehehe get-player-login-listener :PLAYER_LOGIN)
-  ;(hehehe get-player-quit-listener :PLAYER_QUIT)
-  (hehehe get-player-move :PLAYER_MOVE)
-  (hehehe get-player-chat :PLAYER_CHAT)
-  (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
-  (hehehe get-entity-death-listener :ENTITY_DEATH)
-  (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
-  (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
-  (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
-  (.scheduleSyncRepeatingTask
-    (Bukkit/getScheduler)
-    plugin*
-    periodically
-    50
-    50)
+  (when @first-time
+    ;(hehehe get-player-quit-listener :PLAYER_QUIT)
+    (do
+      (hehehe get-player-login-listener :PLAYER_LOGIN)
+      (hehehe get-player-move :PLAYER_MOVE)
+      (hehehe get-player-chat :PLAYER_CHAT)
+      (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
+      (hehehe get-entity-death-listener :ENTITY_DEATH)
+      (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
+      (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
+      (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
+      (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* periodically 50 50)))
+  (dosync
+    (ref-set first-time false))
   (lingr "cloft plugin running...")
   (c/log-info "cloft started"))
 
