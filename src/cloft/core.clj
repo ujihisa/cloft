@@ -230,7 +230,7 @@
         ;(instance? NPC entity) "NPC"
         (instance? Pig entity) "Pig"
         (instance? PigZombie entity) "PigZombie"
-        ;(instance? Player entity) "Player"
+        (instance? Player entity) (.getName entity)
         (instance? Sheep entity) "Sheep"
         (instance? Silverfish entity) "Silverfish"
         (instance? Skeleton entity) "Skeleton"
@@ -280,13 +280,20 @@
   (.sendMessage entity "You turned into a zombie.")
   (lingr (str (name2icon (.getName entity)) "turned into a zombie.")))
 
-(defn arrow-attacks-pig-event [arrow pig]
+(defn potion-weakness [name]
+  (.apply
+    (org.bukkit.potion.PotionEffect. org.bukkit.potion.PotionEffectType/WEAKNESS 500 1)
+    (Bukkit/getPlayer name)))
+
+(defn arrow-attacks-by-player-event [arrow target]
   (let [shooter (.getShooter arrow)]
     (when (and
             (instance? Player shooter)
             (.hasPotionEffect shooter org.bukkit.potion.PotionEffectType/WEAKNESS))
-      (.sendMessage shooter "locked the pig.")
-      (chain-entity pig))))
+      (let [msg (str (.getName shooter) " chained " (entity2name target))]
+        (.sendMessage shooter msg)
+        (lingr msg))
+      (chain-entity target))))
 
 (defn player-attacks-pig-event [player pig]
   nil)
@@ -313,8 +320,8 @@
           (.setHealth target (.getMaxHealth target))
           (swap! zombie-players disj (.getName target))
           (.sendMessage target "You rebirthed as a human."))
-        (when (and (instance? Arrow attacker) (instance? Pig target))
-          (arrow-attacks-pig-event attacker target))
+        (when (instance? Arrow attacker)
+          (arrow-attacks-by-player-event attacker target))
         (when (and (instance? Player attacker) (instance? Pig target))
           (player-attacks-pig-event attacker target))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
