@@ -271,12 +271,12 @@
   (c/auto-proxy
     [EntityListener] []
     (onEntityDamage [evt]
-      (let [target (.getEntity evt)]
+      (let [target (.getEntity evt)
+            attacker (.getDamager evt)]
         (when (and (instance? Villager target) (instance? EntityDamageByEntityEvent evt))
-          (let [attacker (.getDamager evt)]
-            (when (instance? Player attacker)
+          (when (instance? Player attacker)
               (lingr (str (name2icon (.getName attacker)) "is attacking a Villager"))
-              (.damage attacker (.getDamage evt)))))
+              (.damage attacker (.getDamage evt))))
         (when (and
                 (instance? Player target)
                 (zombie-player? target)
@@ -289,15 +289,14 @@
           (swap! zombie-players disj (.getName target))
           (.sendMessage target "You rebirthed as a human."))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
-          (let [attacker (.getDamager evt)]
-            (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
+          (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
               (if (zombie-player? target)
                 (.setCancelled evt true)
                 (zombieze target)))
             (when (and (instance? Player attacker) (zombie-player? attacker))
               (do
                 (zombieze target)
-                (.sendMessage attacker "You made a friend")))))))))
+                (.sendMessage attacker "You made a friend"))))))))
 
 (defn arrow-hit-event [evt entity]
   (when (= (.getName (.getShooter entity)) "ujm")
