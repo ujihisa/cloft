@@ -42,9 +42,10 @@
 (defn name2icon [name]
   (get NAME-ICON name (str name ": ")))
 
-(def BOT-VERIFIER (apply str (drop-last (try
-                                          (slurp "bot_verifier.txt")
-                                          (catch java.io.FileNotFoundException e "")))))
+(def BOT-VERIFIER
+  (apply str (drop-last (try
+                          (slurp "bot_verifier.txt")
+                          (catch java.io.FileNotFoundException e "")))))
 
 (defn lingr [msg]
   (future-call
