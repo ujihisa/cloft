@@ -192,7 +192,20 @@
   (when (= 0 (rand-int 2))
     (.setFoodLevel zplayer (dec (.getFoodLevel zplayer)))))
 
+(def chain (atom {:entity nil :loc nil}))
+
+(defn chain-entity [entity]
+  (let [block (.getBlockAt world (:loc @chain))]
+    (when (instance? block org.bukkit.Material/AIR)
+      (.setType block org.bukkit.Material/WEB)))
+  (swap! chain assoc :entity entity :loc (.getLocation entity)))
+
+(defn rechain-entity []
+  (when (:entity @chain)
+    (.teleport (:entity @chain) (:loc @chain))))
+
 (defn periodically []
+  (rechain-entity)
   (seq (map zombie-player-periodically
             (filter zombie-player? (Bukkit/getOnlinePlayers))))
   nil)
@@ -267,15 +280,21 @@
   (.sendMessage entity "You turned into a zombie.")
   (lingr (str (name2icon (.getName entity)) "turned into a zombie.")))
 
+(defn arrow-attacks-pig-event [arrow pig]
+  (when (instance? Player (.getShooter arrow))
+    (.sendMessage (.getShooter arrow) "locked the pig.")
+    (chain-entity pig)))
+
 (defn player-attacks-pig-event [player pig]
-  (prn [player pig]))
+  nil)
 
 (defn get-entity-damage-listener []
   (c/auto-proxy
     [EntityListener] []
     (onEntityDamage [evt]
       (let [target (.getEntity evt)
-            attacker (.getDamager evt)]
+            attacker (when (instance? EntityDamageByEntityEvent evt)
+                       (.getDamager evt))]
         (when (and (instance? Villager target) (instance? EntityDamageByEntityEvent evt))
           (when (instance? Player attacker)
               (lingr (str (name2icon (.getName attacker)) "is attacking a Villager"))
@@ -291,6 +310,8 @@
           (.setHealth target (.getMaxHealth target))
           (swap! zombie-players disj (.getName target))
           (.sendMessage target "You rebirthed as a human."))
+        (when (and (instance? Arrow attacker) (instance? Pig target))
+          (arrow-attacks-pig-event attacker target))
         (when (and (instance? Player attacker) (instance? Pig target))
           (player-attacks-pig-event attacker target))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
@@ -367,7 +388,7 @@
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
-      (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* periodically 50 50)))
+      (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
   (dosync
     (ref-set first-time false))
   (lingr "cloft plugin running...")
