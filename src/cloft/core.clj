@@ -300,7 +300,10 @@
                 (.sendMessage attacker "You made a friend")))))))))
 
 (defn arrow-hit-event [evt entity]
-  nil)
+  (when (= (.getName (.getShooter entity)) "ujm")
+    (let [location (.getLocation entity)
+          world (.getWorld location)]
+      (.setType (.getBlockAt world location) org.bukkit.Material/TORCH))))
 
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
