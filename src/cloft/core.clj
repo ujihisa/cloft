@@ -299,6 +299,9 @@
                 (zombieze entity)
                 (.sendMessage attacker "You made a friend")))))))))
 
+(defn arrow-hit-event [evt entity]
+  nil)
+
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
     [EntityListener] []
@@ -306,6 +309,7 @@
       (let [entity (.getEntity evt)]
         (cond
           (instance? Fireball entity) (.setYield entity 0.0)
+          (instance? Arrow entity) (arrow-hit-event evt entity)
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
           )))))
 
