@@ -271,32 +271,32 @@
   (c/auto-proxy
     [EntityListener] []
     (onEntityDamage [evt]
-      (let [entity (.getEntity evt)]
-        (when (and (instance? Villager entity) (instance? EntityDamageByEntityEvent evt))
+      (let [target (.getEntity evt)]
+        (when (and (instance? Villager target) (instance? EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
             (when (instance? Player attacker)
               (lingr (str (name2icon (.getName attacker)) "is attacking a Villager"))
               (.damage attacker (.getDamage evt)))))
         (when (and
-                (instance? Player entity)
-                (zombie-player? entity)
+                (instance? Player target)
+                (zombie-player? target)
                 (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
                 (= 0 (rand-int 2)))
           (.setCancelled evt true)
-          (.setMaximumAir entity 300) ; default maximum value
-          (.setRemainingAir entity 300)
-          (.setHealth entity (.getMaxHealth entity))
-          (swap! zombie-players disj (.getName entity))
-          (.sendMessage entity "You rebirthed as a human."))
-        (when (and (instance? Player entity) (instance? EntityDamageByEntityEvent evt))
+          (.setMaximumAir target 300) ; default maximum value
+          (.setRemainingAir target 300)
+          (.setHealth target (.getMaxHealth target))
+          (swap! zombie-players disj (.getName target))
+          (.sendMessage target "You rebirthed as a human."))
+        (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (let [attacker (.getDamager evt)]
             (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
-              (if (zombie-player? entity)
+              (if (zombie-player? target)
                 (.setCancelled evt true)
-                (zombieze entity)))
+                (zombieze target)))
             (when (and (instance? Player attacker) (zombie-player? attacker))
               (do
-                (zombieze entity)
+                (zombieze target)
                 (.sendMessage attacker "You made a friend")))))))))
 
 (defn arrow-hit-event [evt entity]
