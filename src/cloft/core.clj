@@ -195,10 +195,10 @@
 (def chain (atom {:entity nil :loc nil}))
 
 (defn chain-entity [entity]
+  (swap! chain assoc :entity entity :loc (.getLocation entity))
   (let [block (.getBlockAt world (:loc @chain))]
-    (when (instance? block org.bukkit.Material/AIR)
-      (.setType block org.bukkit.Material/WEB)))
-  (swap! chain assoc :entity entity :loc (.getLocation entity)))
+    (when (= org.bukkit.Material/AIR (.getType block))
+      (.setType block org.bukkit.Material/WEB))))
 
 (defn rechain-entity []
   (when (:entity @chain)
@@ -281,9 +281,12 @@
   (lingr (str (name2icon (.getName entity)) "turned into a zombie.")))
 
 (defn arrow-attacks-pig-event [arrow pig]
-  (when (instance? Player (.getShooter arrow))
-    (.sendMessage (.getShooter arrow) "locked the pig.")
-    (chain-entity pig)))
+  (let [shooter (.getShooter arrow)]
+    (when (and
+            (instance? Player shooter)
+            (.hasPotionEffect shooter org.bukkit.potion.PotionEffectType/WEAKNESS))
+      (.sendMessage shooter "locked the pig.")
+      (chain-entity pig))))
 
 (defn player-attacks-pig-event [player pig]
   nil)
