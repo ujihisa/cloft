@@ -208,8 +208,18 @@
   (when (:entity @chain)
     (.teleport (:entity @chain) (:loc @chain))))
 
+(defn chicken-touch-player [chicken player]
+  (.damage player 1 chicken))
+
+(defn entity-touch-player-event []
+  (doseq [player (Bukkit/getOnlinePlayers)]
+    (doseq [entity (.getNearbyEntities player 1 1 1)]
+      (when (instance? Chicken entity)
+        (chicken-touch-player entity player)))))
+
 (defn periodically []
   (rechain-entity)
+  (entity-touch-player-event)
   (seq (map zombie-player-periodically
             (filter zombie-player? (Bukkit/getOnlinePlayers))))
   nil)
