@@ -257,6 +257,9 @@
   (lingr
     (str (name2icon (.getName (.getKiller entity))) "killed " (entity2name entity))))
 
+(defn player-death-event [evt player]
+  (lingr (str (name2icon (.getName player)) (.getDeathMessage evt))))
+
 (defn get-entity-death-listener []
   (c/auto-proxy
     [EntityListener] []
@@ -265,7 +268,7 @@
         (when (instance? Pig entity)
           (pig-death-event entity))
         (cond
-          (instance? Player entity) (lingr (str (name2icon (.getName entity)) (.getDeathMessage evt)))
+          (instance? Player entity) (player-death-event evt entity)
           (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
@@ -368,6 +371,17 @@
   (count (seq (map #(.remove %)
                    (filter #(instance? Creeper %)
                            (.getLivingEntities world))))))
+
+(def pre-stalk (atom nil))
+
+(defn stalk-on [player-name]
+  (let [player (Bukkit/getPlayer player-name)]
+    (.hidePlayer (ujm) player)
+    (swap! pre-stalk (.getLocation (ujm)))
+    (.teleport (ujm) (.getLocation player))))
+
+(defn stalk-off []
+  (.teleport (ujm) @pre-stalk))
 
 (def plugin-manager* (Bukkit/getPluginManager))
 (def plugin* (.getPlugin plugin-manager* "cloft"))
