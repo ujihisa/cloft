@@ -90,8 +90,10 @@
 (def place4 (org.bukkit.Location. world -363.4252856675041 65.0 19.551327467732065 -273.89978 15.149968)) ; goboh villae
 (def place5 (org.bukkit.Location. world -5 73 -42.5)) ; top of pyramid
 (def place6 (org.bukkit.Location. world 308.98823982676504 78 133.16713120198153 -55.351166 20.250006)) ; dessert village
+(def place7 (org.bukkit.Location. world -1.4375 63.5 5.28125)) ; toilet
 (defn ujm [] (Bukkit/getPlayer "ujm"))
 
+(def player-death-locations (atom {}))
 (defn get-player-move [evt]
   (let [player (.getPlayer evt)]
     (when (and
@@ -110,7 +112,15 @@
             (< (.distance place5 (.getLocation player)) 1)
             (.isLoaded (.getChunk place6)))
       (lingr (str (.getName player) " is teleporting..."))
-      (.setTo evt place6))))
+      (.setTo evt place6))
+    (when (and
+            (= (.getWorld player) world)
+            (< (.distance place7 (.getLocation player)) 1))
+      (let [death-point (get @player-death-locations (.getName player))]
+        (when death-point
+          (.isLoaded (.getChunk death-point)) ; for side-effect
+          (lingr (str (.getName player) " is teleporting to the last death place..."))
+          (.setTo evt death-point))))))
 
 (defn cap [f]
   (fn []
@@ -274,10 +284,7 @@
     (str (name2icon (.getName (.getKiller entity))) "killed " (entity2name entity))))
 
 (defn player-death-event [evt player]
-  (let [drops (.getDrops evt)]
-    (.clear (.getInventory player)) ; no (.setDrops evt) api
-    (prn drops))
-  ;(prn (.getInventory player))
+  (swap! player-death-locations assoc (.getName player) (.getLocation player))
   (lingr (str (name2icon (.getName player)) (.getDeathMessage evt))))
 
 (defn get-entity-death-listener []
@@ -375,7 +382,7 @@
       (let [location (.getLocation entity)
             world (.getWorld location)]
         (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
-    (when (= (.getName (.getShooter entity)) "sandkat")
+    (when (= (.getName (.getShooter entity)) "Sandkat")
       (doseq [near-target (filter
                             #(instance? LivingEntity %)
                             (.getNearbyEntities entity 2 2 2))]
@@ -402,12 +409,13 @@
                    (filter #(instance? Creeper %)
                            (.getLivingEntities world))))))
 
-(def pre-stalk (atom nil))
+(def pre-stalk (ref nil))
 
 (defn stalk-on [player-name]
   (let [player (Bukkit/getPlayer player-name)]
-    (.hidePlayer (ujm) player)
-    (swap! pre-stalk (.getLocation (ujm)))
+    (.hidePlayer player (ujm))
+    (dosync
+      (ref-set pre-stalk (.getLocation (ujm))))
     (.teleport (ujm) (.getLocation player))))
 
 (defn stalk-off []
