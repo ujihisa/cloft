@@ -258,6 +258,10 @@
     (str (name2icon (.getName (.getKiller entity))) "killed " (entity2name entity))))
 
 (defn player-death-event [evt player]
+  (let [drops (.getDrops evt)]
+    (.clear (.getInventory player)) ; no (.setDrops evt) api
+    (prn drops))
+  ;(prn (.getInventory player))
   (lingr (str (name2icon (.getName player)) (.getDeathMessage evt))))
 
 (defn get-entity-death-listener []
