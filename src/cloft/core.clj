@@ -371,10 +371,20 @@
 
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
-    (when (= (.getName (.getShooter entity)) "ujm")
+    (when (= (.getName (.getShooter entity)) "kldsas")
       (let [location (.getLocation entity)
             world (.getWorld location)]
-        (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))))
+        (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
+    (when (= (.getName (.getShooter entity)) "sandkat")
+      (doseq [near-target (filter
+                            #(instance? LivingEntity %)
+                            (.getNearbyEntities entity 2 2 2))]
+        (.damage near-target 3 entity)))
+    (when (= (.getName (.getShooter entity)) "ujm")
+      (doseq [near-target (filter
+                            #(instance? Monster %)
+                            (.getNearbyEntities entity 2 2 2))]
+        (.remove near-target)))))
 
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
