@@ -73,6 +73,16 @@
 ;   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
 ;  )
 
+(defn location-in-lisp [location]
+  (list
+    'org.bukkit.Location.
+    (.getName (.getWorld location))
+    (.getX location)
+    (.getY location)
+    (.getZ location)
+    (.getPitch location)
+    (.getYaw location)))
+
 (defn swap-entity [target klass]
   (let [location (.getLocation target)
         world (.getWorld target)]
@@ -91,6 +101,8 @@
 (def place5 (org.bukkit.Location. world -5 73 -42.5)) ; top of pyramid
 (def place6 (org.bukkit.Location. world 308.98823982676504 78 133.16713120198153 -55.351166 20.250006)) ; dessert village
 (def place7 (org.bukkit.Location. world -1.4375 63.5 5.28125)) ; toilet
+(def place8 (org.bukkit.Location. world 61.0 57.0 3.375)) ; at a log house
+
 (defn ujm [] (Bukkit/getPlayer "ujm"))
 
 (def player-death-locations (atom {}))
