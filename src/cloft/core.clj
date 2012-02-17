@@ -432,8 +432,9 @@
       (ref-set pre-stalk (.getLocation (ujm))))
     (.teleport (ujm) (.getLocation player))))
 
-(defn stalk-off []
-  (.teleport (ujm) @pre-stalk))
+(defn stalk-off [player-name]
+  (.teleport (ujm) @pre-stalk)
+  (.showPlayer player (ujm)))
 
 (def plugin-manager* (Bukkit/getPluginManager))
 (def plugin* (.getPlugin plugin-manager* "cloft"))
