@@ -354,6 +354,9 @@
 (defn player-attacks-pig-event [player pig]
   nil)
 
+(defn player-attacks-chicken-event [player chicken]
+  (prn chicken))
+
 (defn get-entity-damage-listener []
   (c/auto-proxy
     [EntityListener] []
@@ -380,6 +383,8 @@
           (arrow-attacks-by-player-event attacker target))
         (when (and (instance? Player attacker) (instance? Pig target))
           (player-attacks-pig-event attacker target))
+        (when (and (instance? Player attacker) (instance? Chicken target))
+          (player-attacks-chicken-event attacker target))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
               (if (zombie-player? target)
