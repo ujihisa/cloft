@@ -315,8 +315,10 @@
   (c/auto-proxy
     [EntityListener] []
     (onEntityExplode [evt]
-      (let [entity (.getEntity evt)]
-        (lingr (str (entity2name entity) " is exploding"))))))
+      (let [entity (.getEntity evt)
+            ename (entity2name entity)]
+        (when ename
+          (lingr (str ename " is exploding")))))))
 
 (defn zombieze [entity]
   (swap! zombie-players conj (.getName entity))
