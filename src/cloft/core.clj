@@ -91,29 +91,30 @@
 (def place5 (org.bukkit.Location. world -5 73 -42.5)) ; top of pyramid
 (def place6 (org.bukkit.Location. world 308.98823982676504 78 133.16713120198153 -55.351166 20.250006)) ; dessert village
 (defn ujm [] (Bukkit/getPlayer "ujm"))
-(defn get-player-move []
-  (c/auto-proxy
-    [org.bukkit.event.player.PlayerListener] []
-    (onPlayerMove
-      [evt]
-      (let [player (.getPlayer evt)]
-        (when (and
-                (= (.getWorld player) world)
-                (< (.distance place2 (.getLocation player)) 1))
-          (lingr (str (.getName player) " is teleporting..."))
-          (.setTo evt place3))
-        (when (and
-                (= (.getWorld player) world)
-                (< (.distance place1 (.getLocation player)) 1)
-                (.isLoaded (.getChunk place4)))
-          (lingr (str (.getName player) " is teleporting..."))
-          (.setTo evt place4))
-        (when (and
-                (= (.getWorld player) world)
-                (< (.distance place5 (.getLocation player)) 1)
-                (.isLoaded (.getChunk place6)))
-          (lingr (str (.getName player) " is teleporting..."))
-          (.setTo evt place6))))))
+
+(defn get-player-move [evt]
+  (let [player (.getPlayer evt)]
+    (when (and
+            (= (.getWorld player) world)
+            (< (.distance place2 (.getLocation player)) 1))
+      (lingr (str (.getName player) " is teleporting..."))
+      (.setTo evt place3))
+    (when (and
+            (= (.getWorld player) world)
+            (< (.distance place1 (.getLocation player)) 1)
+            (.isLoaded (.getChunk place4)))
+      (lingr (str (.getName player) " is teleporting..."))
+      (.setTo evt place4))
+    (when (and
+            (= (.getWorld player) world)
+            (< (.distance place5 (.getLocation player)) 1)
+            (.isLoaded (.getChunk place6)))
+      (lingr (str (.getName player) " is teleporting..."))
+      (.setTo evt place6))))
+
+(defn cap [f]
+  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+                (onPlayerMove [evt] (f evt))))
 
 (defn get-player-login-listener []
   (c/auto-proxy
@@ -422,7 +423,7 @@
     ;(hehehe get-player-quit-listener :PLAYER_QUIT)
     (do
       (hehehe get-player-login-listener :PLAYER_LOGIN)
-      (hehehe get-player-move :PLAYER_MOVE)
+      (hehehe (cap get-player-move) :PLAYER_MOVE)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
