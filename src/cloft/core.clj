@@ -113,8 +113,9 @@
       (.setTo evt place6))))
 
 (defn cap [f]
-  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
-                (onPlayerMove [evt] (f evt))))
+  (fn []
+    (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+                  (onPlayerMove [evt] (f evt)))))
 
 (defn get-player-login-listener []
   (c/auto-proxy
@@ -209,13 +210,17 @@
     (.teleport (:entity @chain) (:loc @chain))))
 
 (defn chicken-touch-player [chicken player]
+  ;(.setYaw (.getLocation chicken) (.getYaw (.getLocation player)))
+  (.teleport chicken (.getLocation player))
   (.damage player 1 chicken))
 
 (defn entity-touch-player-event []
   (doseq [player (Bukkit/getOnlinePlayers)]
-    (doseq [entity (.getNearbyEntities player 1 1 1)]
-      (when (instance? Chicken entity)
-        (chicken-touch-player entity player)))))
+    (let [entities (.getNearbyEntities player 2 2 2)
+          chickens (filter #(instance? Chicken %) entities)
+          chicken (first chickens)]
+      (when chicken
+        (chicken-touch-player chicken player)))))
 
 (defn periodically []
   (rechain-entity)
