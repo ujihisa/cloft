@@ -134,13 +134,30 @@
           (lingr (str (.getName player) " is teleporting to the last death place..."))
           (.setTo evt death-point))))))
 
+(def jobs (atom {}))
+
 (defn entity-shoot-bow-event* [evt]
   (when (= "ujm" (.getName (.getEntity evt)))
     (future-call #(do
                     (Thread/sleep 100) (.shootArrow (.getEntity evt))
                     (Thread/sleep 300) (.shootArrow (.getEntity evt))
                     (Thread/sleep 500) (.shootArrow (.getEntity evt))
-                    ))))
+                    )))
+  (let [shooter (.getEntity evt)]
+    (when (instance? Player shooter)
+
+      (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/TORCH)
+        (.sendMessage shooter "JOBCHANGE: torch")
+        (swap! jobs assoc (.getName shooter) arrow-skill-torch))
+      (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/YELLOW_FLOWER)
+        (.sendMessage shooter "JOBCHANGE: teleport")
+        (swap! jobs assoc (.getName shooter) arrow-skill-teleport))
+      (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/RED_ROSE)
+        (.sendMessage shooter "JOBCHANGE: fire")
+        (swap! jobs assoc (.getName shooter) arrow-skill-fire))
+      (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/SAPLING)
+        (.sendMessage shooter "JOBCHANGE: tree")
+        (swap! jobs assoc (.getName shooter) arrow-skill-tree)))))
 
 (defn entity-shoot-bow-event []
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
@@ -229,7 +246,7 @@
                                        (.chat player "ikakawaiidesu")
                                        (.setFoodLevel player 0))
             ; right-click player -> makes it hungry
-            (instance? Player target) (touch-player)))))))
+            (instance? Player target) (touch-player target)))))))
 
 ; internal
 (defn zombie-player-periodically [zplayer]
@@ -396,6 +413,29 @@
                           (Thread/sleep 10000)
                           (.remove chicken))))))))
 
+(defn arrow-skill-torch [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
+
+(defn arrow-skill-teleport [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (.teleport (.getShooter entity) location)))
+
+(defn arrow-skill-fire [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (doseq [target (filter #(instance? LivingEntity %) (.getNearbyEntities entity 1 1 1))]
+      (do
+        (prn (str "fire on " target))
+        (.setFireTicks target 200)))))
+
+(defn arrow-skill-tree [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (.generateTree world location org.bukkit.TreeType/BIRCH)))
+
 (defn get-entity-damage-listener []
   (c/auto-proxy
     [EntityListener] []
@@ -434,40 +474,35 @@
                 (zombieze target)
                 (.sendMessage attacker "You made a friend"))))))))
 
-(defn arrow-skill-1 [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
-
-(defn arrow-skill-2 [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (.teleport (.getShooter entity) location)))
-
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
-    (comment (when (= (.getName (.getShooter entity)) "sugizou")
-      (let [location (.getLocation entity)
-            world (.getWorld location)]
-        (.generateTree world location org.bukkit.TreeType/BIRCH))))
-    (when (= (.getName (.getShooter entity)) "kldsas")
-      (arrow-skill-1 entity))
-    (when (= (.getName (.getShooter entity)) "sbwhitecap")
-      (arrow-skill-2 entity))
-    (when (= (.getName (.getShooter entity)) "Sandkat")
-      (doseq [near-target (filter
-                            #(instance? LivingEntity %)
-                            (.getNearbyEntities entity 2 2 2))]
-        (.damage near-target 3 entity)))
-    (when (= (.getName (.getShooter entity)) "ujm")
-      (do
-        (let [location (.getLocation entity)
-              world (.getWorld location)]
-          (.strikeLightningEffect world location))
-        (doseq [near-target (filter
-                              #(instance? Monster %)
-                              (.getNearbyEntities entity 10 10 3))]
-          (.damage near-target 30 (.getShooter entity)))))))
+    (let [skill (get @jobs (.getName (.getShooter entity)))]
+      (if skill
+        (skill entity)
+        (do
+          (comment (when (= (.getName (.getShooter entity)) "sugizou")
+                     (let [location (.getLocation entity)
+                           world (.getWorld location)]
+                       (.generateTree world location org.bukkit.TreeType/BIRCH))))
+          (when (= (.getName (.getShooter entity)) "kldsas")
+            (arrow-skill-torch entity))
+          (when (= (.getName (.getShooter entity)) "sbwhitecap")
+            (arrow-skill-teleport entity))
+          (when (= (.getName (.getShooter entity)) "Sandkat")
+            (doseq [near-target (filter
+                                  #(instance? LivingEntity %)
+                                  (.getNearbyEntities entity 2 2 2))]
+              (.damage near-target 3 entity)))
+          (when (= (.getName (.getShooter entity)) "ujm")
+            (do
+              (let [location (.getLocation entity)
+                    world (.getWorld location)]
+                (.strikeLightningEffect world location))
+              (doseq [near-target (filter
+                                    #(instance? Monster %)
+                                    (.getNearbyEntities entity 10 10 3))]
+                (.damage near-target 30 (.getShooter entity))))))))
+    ))
 
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
