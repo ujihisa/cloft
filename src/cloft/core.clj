@@ -454,13 +454,14 @@
                             (.getNearbyEntities entity 2 2 2))]
         (.damage near-target 3 entity)))
     (when (= (.getName (.getShooter entity)) "ujm")
-      (let [location (.getLocation entity)
-            world (.getWorld location)]
-        (.strikeLightningEffect world location))
-      (doseq [near-target (filter
-                            #(instance? Monster %)
-                            (.getNearbyEntities entity 10 10 3))]
-        (.damage near-target 30 (.getShooter entity))))))
+      (do
+        (let [location (.getLocation entity)
+              world (.getWorld location)]
+          (.strikeLightningEffect world location))
+        (doseq [near-target (filter
+                              #(instance? Monster %)
+                              (.getNearbyEntities entity 10 10 3))]
+          (.damage near-target 30 (.getShooter entity)))))))
 
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
