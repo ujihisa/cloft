@@ -135,7 +135,12 @@
           (.setTo evt death-point))))))
 
 (defn entity-shoot-bow-event* [evt]
-  (prn evt))
+  (when (= "ujm" (.getName (.getEntity evt)))
+    (future-call #(do
+                    (Thread/sleep 100) (.shootArrow (.getEntity evt))
+                    (Thread/sleep 300) (.shootArrow (.getEntity evt))
+                    (Thread/sleep 500) (.shootArrow (.getEntity evt))
+                    ))))
 
 (defn entity-shoot-bow-event []
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
