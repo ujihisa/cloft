@@ -316,9 +316,12 @@
     [EntityListener] []
     (onEntityExplode [evt]
       (let [entity (.getEntity evt)
-            ename (entity2name entity)]
-        (when ename
-          (lingr (str ename " is exploding")))))))
+            ename (entity2name entity)
+            entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
+        (when (and ename (not-empty entities-nearby))
+          (letfn [(join [xs x]
+                    (apply str (interpose x xs)))]
+            (lingr (str ename " is exploding near " (join (map #(.getName %) entities-nearby) ", ")))))))))
 
 (defn zombieze [entity]
   (swap! zombie-players conj (.getName entity))
@@ -424,10 +427,10 @@
     (when (= (.getName (.getShooter entity)) "ujm")
       (let [location (.getLocation entity)
             world (.getWorld location)]
-        (.createExplosion world location 0))
+        (.strikeLightningEffect world location))
       (doseq [near-target (filter
                             #(instance? Monster %)
-                            (.getNearbyEntities entity 3 3 3))]
+                            (.getNearbyEntities entity 10 10 3))]
         (.damage near-target 30 (.getShooter entity))))))
 
 (defn get-entity-projectile-hit-listener []
