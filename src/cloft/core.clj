@@ -434,6 +434,16 @@
                 (zombieze target)
                 (.sendMessage attacker "You made a friend"))))))))
 
+(defn arrow-skill-1 [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
+
+(defn arrow-skill-2 [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (.teleport (.getShooter entity) location)))
+
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
     (comment (when (= (.getName (.getShooter entity)) "sugizou")
@@ -441,13 +451,9 @@
             world (.getWorld location)]
         (.generateTree world location org.bukkit.TreeType/BIRCH))))
     (when (= (.getName (.getShooter entity)) "kldsas")
-      (let [location (.getLocation entity)
-            world (.getWorld location)]
-        (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
+      (arrow-skill-1 entity))
     (when (= (.getName (.getShooter entity)) "sbwhitecap")
-      (let [location (.getLocation entity)
-            world (.getWorld location)]
-        (.teleport (.getShooter entity) location)))
+      (arrow-skill-2 entity))
     (when (= (.getName (.getShooter entity)) "Sandkat")
       (doseq [near-target (filter
                             #(instance? LivingEntity %)
