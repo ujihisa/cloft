@@ -352,7 +352,9 @@
       (consume-itemstack (.getInventory shooter) org.bukkit.Material/WEB))))
 
 (defn player-attacks-pig-event [player pig]
-  nil)
+  (let [location (.getLocation player)
+        world (.getWorld location)]
+    (.spawn world location Pig)))
 
 (defn player-attacks-chicken-event [player chicken]
   (prn chicken))
@@ -397,20 +399,31 @@
 
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
+    (comment (when (= (.getName (.getShooter entity)) "sugizou")
+      (let [location (.getLocation entity)
+            world (.getWorld location)]
+        (.generateTree world location org.bukkit.TreeType/BIRCH))))
     (when (= (.getName (.getShooter entity)) "kldsas")
       (let [location (.getLocation entity)
             world (.getWorld location)]
         (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
+    (when (= (.getName (.getShooter entity)) "sbwhitecap")
+      (let [location (.getLocation entity)
+            world (.getWorld location)]
+        (.teleport (.getShooter entity) location)))
     (when (= (.getName (.getShooter entity)) "Sandkat")
       (doseq [near-target (filter
                             #(instance? LivingEntity %)
                             (.getNearbyEntities entity 2 2 2))]
         (.damage near-target 3 entity)))
     (when (= (.getName (.getShooter entity)) "ujm")
+      (let [location (.getLocation entity)
+            world (.getWorld location)]
+        (.createExplosion world location 0))
       (doseq [near-target (filter
                             #(instance? Monster %)
-                            (.getNearbyEntities entity 2 2 2))]
-        (.remove near-target)))))
+                            (.getNearbyEntities entity 3 3 3))]
+        (.damage near-target 30 (.getShooter entity))))))
 
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
@@ -438,8 +451,9 @@
     (.teleport (ujm) (.getLocation player))))
 
 (defn stalk-off [player-name]
-  (.teleport (ujm) @pre-stalk)
-  (.showPlayer player (ujm)))
+  (let [player (Bukkit/getPlayer player-name)]
+    (.teleport (ujm) @pre-stalk)
+    (.showPlayer player (ujm))))
 
 (def plugin-manager* (Bukkit/getPluginManager))
 (def plugin* (.getPlugin plugin-manager* "cloft"))
