@@ -352,12 +352,17 @@
       (consume-itemstack (.getInventory shooter) org.bukkit.Material/WEB))))
 
 (defn player-attacks-pig-event [player pig]
-  (let [location (.getLocation player)
-        world (.getWorld location)]
-    (.spawn world location Pig)))
+  nil)
 
 (defn player-attacks-chicken-event [player chicken]
-  (prn chicken))
+  (when (= 0 (rand-int 3))
+    (let [location (.getLocation player)
+          world (.getWorld location)]
+      (doseq [x [-2 -1 0 1 2] z [-2 -1 0 1 2]]
+        (let [chicken (.spawn world (.add (.clone location) x 3 z) Chicken)]
+          (future-call #(do
+                          (Thread/sleep 10000)
+                          (.remove chicken))))))))
 
 (defn get-entity-damage-listener []
   (c/auto-proxy
