@@ -253,14 +253,13 @@
 (defn chicken-touch-player [chicken player]
   ;(.setYaw (.getLocation chicken) (.getYaw (.getLocation player)))
   (.teleport chicken (.getLocation player))
-  (.damage player 1 chicken))
+  (.damage player 2 chicken))
 
 (defn entity-touch-player-event []
   (doseq [player (Bukkit/getOnlinePlayers)]
     (let [entities (.getNearbyEntities player 2 2 2)
-          chickens (filter #(instance? Chicken %) entities)
-          chicken (first chickens)]
-      (when chicken
+          chickens (filter #(instance? Chicken %) entities)]
+      (for [chicken chickens]
         (chicken-touch-player chicken player)))))
 
 (defn periodically []
