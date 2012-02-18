@@ -134,6 +134,16 @@
           (lingr (str (.getName player) " is teleporting to the last death place..."))
           (.setTo evt death-point))))))
 
+(defn entity-shoot-bow-event [evt]
+  nil)
+
+(defn entity-target-event* [evt]
+  (prn evt))
+
+(defn entity-target-event []
+  (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
+                (onEntityTarget [evt] (entity-target-event* evt))))
+
 (defn cap [f]
   (fn []
     (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
@@ -289,11 +299,14 @@
 (defn pig-death-event [entity]
   (comment (let [world (.getWorld entity)]
     (.setStorm world true)))
-  (.setFireTicks (.getKiller entity) 100))
+  (let [killer (.getKiller entity)]
+    (when killer
+      (.setFireTicks killer 100))))
 
 (defn entity-death-event [entity]
-  (lingr
-    (str (name2icon (.getName (.getKiller entity))) "killed " (entity2name entity))))
+  (let [killer (.getKiller entity)]
+    (when (instance? Player killer)
+      (lingr (str (name2icon (.getName killer)) "killed " (entity2name entity))))))
 
 (defn player-death-event [evt player]
   (swap! player-death-locations assoc (.getName player) (.getLocation player))
@@ -343,7 +356,7 @@
       (.remove inventory itemstack)
       (.setAmount itemstack (dec amount)))))
 
-(defn arrow-attacks-by-player-event [arrow target]
+(defn arrow-attacks-by-player-event [_ arrow target]
   (let [shooter (.getShooter arrow)]
     (when (and
             (instance? Player shooter)
@@ -354,10 +367,18 @@
       (chain-entity target)
       (consume-itemstack (.getInventory shooter) org.bukkit.Material/WEB))))
 
-(defn player-attacks-pig-event [player pig]
-  nil)
+(defn vector-from-to [ent-from ent-to]
+  (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
 
-(defn player-attacks-chicken-event [player chicken]
+(defn player-attacks-pig-event [evt player pig]
+  (let [arrow (.shootArrow pig)
+        enemy (first (filter #(instance? Monster %) (.getNearbyEntities pig 20 20 20)))]
+    (when enemy
+      (.setTarget pig player)
+      (.setVelocity arrow (vector-from-to pig enemy))))
+  (.setCancelled evt true))
+
+(defn player-attacks-chicken-event [_ player chicken]
   (when (= 0 (rand-int 3))
     (let [location (.getLocation player)
           world (.getWorld location)]
@@ -390,11 +411,11 @@
           (swap! zombie-players disj (.getName target))
           (.sendMessage target "You rebirthed as a human."))
         (when (instance? Arrow attacker)
-          (arrow-attacks-by-player-event attacker target))
+          (arrow-attacks-by-player-event evt attacker target))
         (when (and (instance? Player attacker) (instance? Pig target))
-          (player-attacks-pig-event attacker target))
+          (player-attacks-pig-event evt attacker target))
         (when (and (instance? Player attacker) (instance? Chicken target))
-          (player-attacks-chicken-event attacker target))
+          (player-attacks-chicken-event evt attacker target))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
               (if (zombie-player? target)
@@ -504,6 +525,8 @@
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
+      (hehehe (cap entity-shoot-bow-event) :ENTITY_SHOOT_BOW)
+      (hehehe entity-target-event :ENTITY_TARGET)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
       (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
   (dosync
