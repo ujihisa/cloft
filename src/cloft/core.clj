@@ -134,8 +134,12 @@
           (lingr (str (.getName player) " is teleporting to the last death place..."))
           (.setTo evt death-point))))))
 
-(defn entity-shoot-bow-event [evt]
-  nil)
+(defn entity-shoot-bow-event* [evt]
+  (prn evt))
+
+(defn entity-shoot-bow-event []
+  (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
+                (onEntityShootBow [evt] (entity-shoot-bow-event* evt))))
 
 (defn entity-target-event* [evt]
   (prn evt))
@@ -525,7 +529,7 @@
       (hehehe get-entity-death-listener :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
-      (hehehe (cap entity-shoot-bow-event) :ENTITY_SHOOT_BOW)
+      (hehehe entity-shoot-bow-event :ENTITY_SHOOT_BOW)
       (hehehe entity-target-event :ENTITY_TARGET)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
       (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
