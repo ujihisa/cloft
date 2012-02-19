@@ -158,6 +158,9 @@
         world (.getWorld location)]
     (.generateTree world location org.bukkit.TreeType/BIRCH)))
 
+(defn broadcast [& strs]
+  (.broadcastMessage (Bukkit/getServer) (apply str strs)))
+
 (def jobs (atom {}))
 
 (defn entity-shoot-bow-event* [evt]
@@ -169,18 +172,17 @@
                       (Thread/sleep 500) (.shootArrow (.getEntity evt))
                       )))
     (when (instance? Player shooter)
-
       (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/TORCH)
-        (.sendMessage shooter "JOBCHANGE: torch")
+        (broadcast (.getName shooter) " changed arrow skill to TORCH")
         (swap! jobs assoc (.getName shooter) arrow-skill-torch))
       (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/YELLOW_FLOWER)
-        (.sendMessage shooter "JOBCHANGE: teleport")
+        (broadcast (.getName shooter) " changed arrow skill to TELEPORT")
         (swap! jobs assoc (.getName shooter) arrow-skill-teleport))
       (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/RED_ROSE)
-        (.sendMessage shooter "JOBCHANGE: fire")
+        (broadcast (.getName shooter) " changed arrow skill to FIRE")
         (swap! jobs assoc (.getName shooter) arrow-skill-fire))
       (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/SAPLING)
-        (.sendMessage shooter "JOBCHANGE: tree")
+        (broadcast (.getName shooter) " changed arrow skill to TREE")
         (swap! jobs assoc (.getName shooter) arrow-skill-tree)))))
 
 (defn entity-shoot-bow-event []
@@ -205,8 +207,7 @@
     (onPlayerLogin
       [evt]
       (let [player (.getPlayer evt)]
-        (lingr (str (name2icon (.getName player)) "logged in now."))
-        (.sendMessage player "[UPDATE] You can turn into a zombie.")))))
+        (lingr (str (name2icon (.getName player)) "logged in now."))))))
 
 (defn get-player-quit-listener []
   (c/auto-proxy
@@ -355,7 +356,7 @@
 (defn entity-death-event [entity]
   (let [killer (.getKiller entity)]
     (when (instance? Player killer)
-      (lingr (str (name2icon (.getName killer)) "killed " (entity2name entity))))))
+      (broadcast (.getName killer) " killed " (entity2name entity)))))
 
 (defn player-death-event [evt player]
   (swap! player-death-locations assoc (.getName player) (.getLocation player))
