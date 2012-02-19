@@ -106,34 +106,47 @@
 
 (defn ujm [] (Bukkit/getPlayer "ujm"))
 
+(def jumping-state (atom {}))
+(defn jumping? [moveevt]
+  (< (.getY (.getFrom moveevt)) (.getY (.getTo moveevt)))
+  (comment (let [name (.getName (.getPlayer moveevt))]
+    (if (< (.getY (.getFrom moveevt)) (.getY (.getTo moveevt)))
+      (do
+        (when (not (get @jumping-state name))
+            (swap! jumping-state name true))
+        true)
+      (do (swap! jumping-state name false)
+        false)))))
+
 (def player-death-locations (atom {}))
-(defn get-player-move [evt]
+(defn get-player-move* [evt]
   (let [player (.getPlayer evt)]
-    (when (and
-            (= (.getWorld player) world)
-            (< (.distance place2 (.getLocation player)) 1))
-      (lingr (str (.getName player) " is teleporting..."))
-      (.setTo evt place3))
-    (when (and
-            (= (.getWorld player) world)
-            (< (.distance place1 (.getLocation player)) 1)
-            (.isLoaded (.getChunk place4)))
-      (lingr (str (.getName player) " is teleporting..."))
-      (.setTo evt place4))
-    (when (and
-            (= (.getWorld player) world)
-            (< (.distance place5 (.getLocation player)) 1)
-            (.isLoaded (.getChunk place6)))
-      (lingr (str (.getName player) " is teleporting..."))
-      (.setTo evt place6))
-    (when (and
-            (= (.getWorld player) world)
-            (< (.distance place7 (.getLocation player)) 1))
-      (let [death-point (get @player-death-locations (.getName player))]
-        (when death-point
-          (.isLoaded (.getChunk death-point)) ; for side-effect
-          (lingr (str (.getName player) " is teleporting to the last death place..."))
-          (.setTo evt death-point))))))
+    (when (jumping? evt)
+      (when (and
+              (= (.getWorld player) world)
+              (< (.distance place2 (.getLocation player)) 1))
+        (lingr (str (.getName player) " is teleporting..."))
+        (.setTo evt place3))
+      (when (and
+              (= (.getWorld player) world)
+              (< (.distance place1 (.getLocation player)) 1)
+              (.isLoaded (.getChunk place4)))
+        (lingr (str (.getName player) " is teleporting..."))
+        (.setTo evt place4))
+      (when (and
+              (= (.getWorld player) world)
+              (< (.distance place5 (.getLocation player)) 1)
+              (.isLoaded (.getChunk place6)))
+        (lingr (str (.getName player) " is teleporting..."))
+        (.setTo evt place6))
+      (when (and
+              (= (.getWorld player) world)
+              (< (.distance place7 (.getLocation player)) 1))
+        (let [death-point (get @player-death-locations (.getName player))]
+          (when death-point
+            (.isLoaded (.getChunk death-point)) ; for side-effect
+            (lingr (str (.getName player) " is teleporting to the last death place..."))
+            (.setTo evt death-point)))))))
 
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)
@@ -196,10 +209,9 @@
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
                 (onEntityTarget [evt] (entity-target-event* evt))))
 
-(defn cap [f]
-  (fn []
-    (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
-                  (onPlayerMove [evt] (f evt)))))
+(defn get-player-move []
+  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+                  (onPlayerMove [evt] (get-player-move* evt))))
 
 (defn get-player-login-listener []
   (c/auto-proxy
@@ -572,7 +584,7 @@
     ;(hehehe get-player-quit-listener :PLAYER_QUIT)
     (do
       (hehehe get-player-login-listener :PLAYER_LOGIN)
-      (hehehe (cap get-player-move) :PLAYER_MOVE)
+      (hehehe get-player-move :PLAYER_MOVE)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe get-entity-death-listener :ENTITY_DEATH)
