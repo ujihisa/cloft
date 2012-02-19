@@ -625,7 +625,10 @@
             (= (.getType block-under) org.bukkit.Material/LAPIS_BLOCK))
       (let [direction (.getDirection (.getNewData (.getType rail) (.getData rail)))
             diff (cond
-                   (= org.bukkit.block.BlockFace/SOUTH direction) (org.bukkit.util.Vector. -1 0 0))
+                   (= org.bukkit.block.BlockFace/SOUTH direction) (org.bukkit.util.Vector. -1 0 0)
+                   (= org.bukkit.block.BlockFace/NORTH direction) (org.bukkit.util.Vector. 1 0 0)
+                   (= org.bukkit.block.BlockFace/WEST direction) (org.bukkit.util.Vector. 0 0 1)
+                   (= org.bukkit.block.BlockFace/EAST direction) (org.bukkit.util.Vector. 0 0 -1))
             destination (first (filter
                                  #(= (.getType %) org.bukkit.Material/LAPIS_BLOCK)
                                  (map
