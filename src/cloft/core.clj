@@ -155,8 +155,8 @@
         (future-call #(do
                    (Thread/sleep 5000)
                    (swap! super-jump-flags assoc name false)))
-        (let [x (/ (java.lang.Math/log (.getAmount (.getItemInHand player))) 4)]
-          (prn (str "super jump level " x))
+        (let [x (/ (java.lang.Math/log (.getAmount (.getItemInHand player))) 2)]
+          (lingr (str name " is super jumping with level " x))
           (.setVelocity
             player
             (.add (org.bukkit.util.Vector. 0.0 (double x) 0.0) (.getVelocity player))))))))
