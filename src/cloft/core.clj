@@ -203,32 +203,32 @@
 
 (defn entity-shoot-bow-event* [evt]
   (let [shooter (.getEntity evt)]
-    (when (= "ujm" (.getName shooter))
-      (future-call #(do
-                      (Thread/sleep 100) (.shootArrow (.getEntity evt))
-                      (Thread/sleep 300) (.shootArrow (.getEntity evt))
-                      (Thread/sleep 500) (.shootArrow (.getEntity evt))
-                      )))
     (when (instance? Player shooter)
-      (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/TORCH)
-        (broadcast (.getName shooter) " changed arrow skill to TORCH")
-        (swap! jobs assoc (.getName shooter) arrow-skill-torch))
-      (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/YELLOW_FLOWER)
-        (broadcast (.getName shooter) " changed arrow skill to TELEPORT")
-        (swap! jobs assoc (.getName shooter) arrow-skill-teleport))
-      (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/RED_ROSE)
-        (broadcast (.getName shooter) " changed arrow skill to FIRE")
-        (swap! jobs assoc (.getName shooter) arrow-skill-fire))
-      (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/SAPLING)
-        (broadcast (.getName shooter) " changed arrow skill to TREE")
-        (swap! jobs assoc (.getName shooter) arrow-skill-tree)))))
+      (when (= "ujm" (.getName shooter))
+        (future-call #(do
+                        (Thread/sleep 100) (.shootArrow (.getEntity evt))
+                        (Thread/sleep 300) (.shootArrow (.getEntity evt))
+                        (Thread/sleep 500) (.shootArrow (.getEntity evt))
+                        )))
+      (comment (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/TORCH)
+                 (broadcast (.getName shooter) " changed arrow skill to TORCH")
+                 (swap! jobs assoc (.getName shooter) arrow-skill-torch))
+               (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/YELLOW_FLOWER)
+                 (broadcast (.getName shooter) " changed arrow skill to TELEPORT")
+                 (swap! jobs assoc (.getName shooter) arrow-skill-teleport))
+               (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/RED_ROSE)
+                 (broadcast (.getName shooter) " changed arrow skill to FIRE")
+                 (swap! jobs assoc (.getName shooter) arrow-skill-fire))
+               (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/SAPLING)
+                 (broadcast (.getName shooter) " changed arrow skill to TREE")
+                 (swap! jobs assoc (.getName shooter) arrow-skill-tree))))))
 
 (defn entity-shoot-bow-event []
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
                 (onEntityShootBow [evt] (entity-shoot-bow-event* evt))))
 
 (defn entity-target-event* [evt]
-  (prn evt))
+  nil)
 
 (defn entity-target-event []
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
@@ -246,11 +246,31 @@
           (when (= (.getType newblock) org.bukkit.Material/AIR)
             (.setType newblock (.getType block))))))))
 
+(defn skillchange [player block block-against]
+  (when (every? identity (map
+                           #(=
+                              (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                              org.bukkit.Material/STONE)
+                           [0 0 -1 1] [-1 1 0 0]))
+    (when (= (.getType block) org.bukkit.Material/TORCH)
+      (broadcast (.getName player) " changed arrow skill to TORCH")
+      (swap! jobs assoc (.getName player) arrow-skill-torch))
+    (when (= (.getType block) org.bukkit.Material/YELLOW_FLOWER)
+      (broadcast (.getName player) " changed arrow skill to TELEPORT")
+      (swap! jobs assoc (.getName player) arrow-skill-teleport))
+    (when (= (.getType block) org.bukkit.Material/RED_ROSE)
+      (broadcast (.getName player) " changed arrow skill to FIRE")
+      (swap! jobs assoc (.getName player) arrow-skill-fire))
+    (when (= (.getType block) org.bukkit.Material/SAPLING)
+      (broadcast (.getName player) " changed arrow skill to TREE")
+      (swap! jobs assoc (.getName player) arrow-skill-tree))))
+
 (defn block-place-event* [evt]
   (let [block (.getBlock evt)]
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
-    (comment (let [player (.getPlayer evt)]
-               (prn (vector-from-to block player))
+    (let [player (.getPlayer evt)]
+      (skillchange player block (.getBlockAgainst evt))
+      (comment (prn (vector-from-to block player))
                (.setVelocity player (vector-from-to player block))
                (doseq [entity (.getNearbyEntities player 4 4 4)]
                  (.setVelocity entity (vector-from-to entity block)))))
