@@ -228,19 +228,7 @@
                         (Thread/sleep 100) (.shootArrow (.getEntity evt))
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
-                        )))
-      (comment (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/TORCH)
-                 (broadcast (.getName shooter) " changed arrow skill to TORCH")
-                 (swap! jobs assoc (.getName shooter) arrow-skill-torch))
-               (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/YELLOW_FLOWER)
-                 (broadcast (.getName shooter) " changed arrow skill to TELEPORT")
-                 (swap! jobs assoc (.getName shooter) arrow-skill-teleport))
-               (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/RED_ROSE)
-                 (broadcast (.getName shooter) " changed arrow skill to FIRE")
-                 (swap! jobs assoc (.getName shooter) arrow-skill-fire))
-               (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/SAPLING)
-                 (broadcast (.getName shooter) " changed arrow skill to TREE")
-                 (swap! jobs assoc (.getName shooter) arrow-skill-tree))))))
+                        ))))))
 
 (defn entity-shoot-bow-event []
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
