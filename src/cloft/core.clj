@@ -160,13 +160,13 @@
 (def jobs (atom {}))
 
 (defn entity-shoot-bow-event* [evt]
-  (when (= "ujm" (.getName (.getEntity evt)))
-    (future-call #(do
-                    (Thread/sleep 100) (.shootArrow (.getEntity evt))
-                    (Thread/sleep 300) (.shootArrow (.getEntity evt))
-                    (Thread/sleep 500) (.shootArrow (.getEntity evt))
-                    )))
   (let [shooter (.getEntity evt)]
+    (when (= "ujm" (.getName shooter))
+      (future-call #(do
+                      (Thread/sleep 100) (.shootArrow (.getEntity evt))
+                      (Thread/sleep 300) (.shootArrow (.getEntity evt))
+                      (Thread/sleep 500) (.shootArrow (.getEntity evt))
+                      )))
     (when (instance? Player shooter)
 
       (when (= (.getType (.getBlock (.getLocation shooter))) org.bukkit.Material/TORCH)
