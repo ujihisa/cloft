@@ -234,6 +234,33 @@
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
                 (onEntityTarget [evt] (entity-target-event* evt))))
 
+(defn build-long [block block-against]
+  (when (= (.getType block) (.getType block-against))
+    (let [world (.getWorld block)
+          loc (.getLocation block)
+          diff (.subtract (.clone loc) (.getLocation block-against))]
+      (doseq [m (range 1 10)]
+        (let [newblock (.getBlockAt
+                         world
+                         (.add (.clone loc) (.multiply (.clone diff) (double m))))]
+          (when (= (.getType newblock) org.bukkit.Material/AIR)
+            (.setType newblock (.getType block))))))))
+
+(defn block-place-event* [evt]
+  (let [block (.getBlock evt)]
+    (comment (.spawn (.getWorld block) (.getLocation block) Pig))
+    (comment (let [player (.getPlayer evt)]
+               (prn (vector-from-to block player))
+               (.setVelocity player (vector-from-to player block))
+               (doseq [entity (.getNearbyEntities player 4 4 4)]
+                 (.setVelocity entity (vector-from-to entity block)))))
+    (build-long block (.getBlockAgainst evt)))
+  (comment (.setCancelled evt true)))
+
+(defn block-place-event []
+  (c/auto-proxy [org.bukkit.event.block.BlockListener] []
+                (onBlockPlace [evt] (block-place-event* evt))))
+
 (defn get-player-move []
   (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
                   (onPlayerMove [evt] (get-player-move* evt))))
@@ -617,6 +644,7 @@
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe entity-shoot-bow-event :ENTITY_SHOOT_BOW)
       (hehehe entity-target-event :ENTITY_TARGET)
+      (hehehe block-place-event :BLOCK_PLACE)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
       (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
   (dosync
