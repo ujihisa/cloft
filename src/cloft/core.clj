@@ -102,6 +102,9 @@
 (def place6 (org.bukkit.Location. world 308.98823982676504 78 133.16713120198153 -55.351166 20.250006)) ; dessert village
 (def place7 (org.bukkit.Location. world -1.4375 63.5 5.28125)) ; toilet
 (def place8 (org.bukkit.Location. world 61.0 57.0 3.375)) ; at a log house
+(def place9 (org.bukkit.Location. world -456.6875 64.0 25.53125)) ; from goboh3 village
+(def place10 (org.bukkit.Location. world 317.4375 72.0 112.5)) ; from dessert village
+(def place-main (org.bukkit.Location. world 4.294394438259979 67.0 0.6542090982205075 -7.5000114 -40.35013))
 (def anotherbed (org.bukkit.Location.  world -237.8704284429714 72.5625 -53.82154923217098 19.349966 -180.45361))
 
 (defn ujm [] (Bukkit/getPlayer "ujm"))
@@ -139,6 +142,14 @@
     (.setTo evt place6))
   (when (and
           (= (.getWorld player) world)
+          (or
+            (< (.distance place9 (.getLocation player)) 1)
+            (< (.distance place10 (.getLocation player)) 1))
+          (.isLoaded (.getChunk place-main)))
+    (lingr (str (.getName player) " is teleporting..."))
+    (.setTo evt place-main))
+  (when (and
+          (= (.getWorld player) world)
           (< (.distance place7 (.getLocation player)) 1))
     (let [death-point (get @player-death-locations (.getName player))]
       (when death-point
@@ -162,7 +173,7 @@
               x (if (.isSprinting player) (* amount 2) amount)
               x2 (/ (java.lang.Math/log x) 2) ]
           (lingr (str name " is super jumping with level " x))
-          (consume-item player)
+          (consume-itemstack (.getInventory player) org.bukkit.Material/FEATHER)
           (.setVelocity
             player
             (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player))))))))
@@ -228,14 +239,15 @@
                 (onEntityShootBow [evt] (entity-shoot-bow-event* evt))))
 
 (defn entity-target-event* [evt]
-  nil)
+  (when (instance? Creeper (.getEntity evt))
+    (broadcast "Takumi is watching " (.getName (.getTarget evt)))))
 
 (defn entity-target-event []
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
                 (onEntityTarget [evt] (entity-target-event* evt))))
 
 (defn build-long [block block-against]
-  (when (= (.getType block) (.getType block-against))
+  (comment (when (= (.getType block) (.getType block-against))
     (let [world (.getWorld block)
           loc (.getLocation block)
           diff (.subtract (.clone loc) (.getLocation block-against))]
@@ -244,7 +256,7 @@
                          world
                          (.add (.clone loc) (.multiply (.clone diff) (double m))))]
           (when (= (.getType newblock) org.bukkit.Material/AIR)
-            (.setType newblock (.getType block))))))))
+            (.setType newblock (.getType block)))))))))
 
 (defn skillchange [player block block-against]
   (when (every? identity (map
