@@ -153,13 +153,19 @@
       (when (= (.getType (.getItemInHand player)) org.bukkit.Material/FEATHER)
         (swap! super-jump-flags assoc name true)
         (future-call #(do
-                   (Thread/sleep 5000)
-                   (swap! super-jump-flags assoc name false)))
-        (let [x (/ (java.lang.Math/log (.getAmount (.getItemInHand player))) 2)]
+                        (Thread/sleep 2000)
+                        (.sendMessage player "super jump charging...")
+                        (Thread/sleep 5000)
+                        (.sendMessage player "super jump charge done")
+                        (swap! super-jump-flags assoc name false)))
+        (let [amount (.getAmount (.getItemInHand player))
+              x (if (.isSprinting player) (* amount 2) amount)
+              x2 (/ (java.lang.Math/log x) 2) ]
           (lingr (str name " is super jumping with level " x))
+          (consume-item player)
           (.setVelocity
             player
-            (.add (org.bukkit.util.Vector. 0.0 (double x) 0.0) (.getVelocity player))))))))
+            (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player))))))))
 
 (defn get-player-move* [evt]
   (let [player (.getPlayer evt)]
