@@ -157,6 +157,14 @@
         (lingr (str (.getName player) " is teleporting to the last death place..."))
         (.setTo evt death-point)))))
 
+(defn consume-itemstack [inventory mtype]
+  (let [idx (.first inventory mtype)
+        itemstack (.getItem inventory idx)
+        amount (.getAmount itemstack)]
+    (if (= 1 amount)
+      (.remove inventory itemstack)
+      (.setAmount itemstack (dec amount)))))
+
 (def super-jump-flags (atom {}))
 (defn player-super-jump [evt player]
   (let [name (.getName player)]
@@ -494,14 +502,6 @@
     (org.bukkit.potion.PotionEffect. org.bukkit.potion.PotionEffectType/WEAKNESS 500 1)
     (Bukkit/getPlayer name)))
 
-(defn consume-itemstack [inventory mtype]
-  (let [idx (.first inventory mtype)
-        itemstack (.getItem inventory idx)
-        amount (.getAmount itemstack)]
-    (if (= 1 amount)
-      (.remove inventory itemstack)
-      (.setAmount itemstack (dec amount)))))
-
 (defn arrow-attacks-by-player-event [_ arrow target]
   (let [shooter (.getShooter arrow)]
     (when (and
@@ -614,6 +614,13 @@
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
           )))))
 
+(defn vehicle-enter-event* [evt]
+  (prn evt))
+
+(defn vehicle-enter-event []
+  (c/auto-proxy [org.bukkit.event.vehicle.VehicleListener] []
+                (onVehicleEnter [evt] (vehicle-enter-event* evt))))
+
 (defn good-bye-creeper []
   (count (seq (map #(.remove %)
                    (filter #(instance? Creeper %)
@@ -678,6 +685,7 @@
       (hehehe entity-target-event :ENTITY_TARGET)
       (hehehe block-place-event :BLOCK_PLACE)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
+      (hehehe vehicle-enter-event :VEHICLE_ENTER)
       (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
   (dosync
     (ref-set first-time false))
