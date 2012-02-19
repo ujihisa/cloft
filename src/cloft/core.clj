@@ -134,6 +134,29 @@
           (lingr (str (.getName player) " is teleporting to the last death place..."))
           (.setTo evt death-point))))))
 
+(defn arrow-skill-torch [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
+
+(defn arrow-skill-teleport [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (.teleport (.getShooter entity) location)))
+
+(defn arrow-skill-fire [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (doseq [target (filter #(instance? LivingEntity %) (.getNearbyEntities entity 1 1 1))]
+      (do
+        (prn (str "fire on " target))
+        (.setFireTicks target 200)))))
+
+(defn arrow-skill-tree [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)]
+    (.generateTree world location org.bukkit.TreeType/BIRCH)))
+
 (def jobs (atom {}))
 
 (defn entity-shoot-bow-event* [evt]
@@ -413,29 +436,6 @@
                           (Thread/sleep 10000)
                           (.remove chicken))))))))
 
-(defn arrow-skill-torch [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
-
-(defn arrow-skill-teleport [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (.teleport (.getShooter entity) location)))
-
-(defn arrow-skill-fire [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (doseq [target (filter #(instance? LivingEntity %) (.getNearbyEntities entity 1 1 1))]
-      (do
-        (prn (str "fire on " target))
-        (.setFireTicks target 200)))))
-
-(defn arrow-skill-tree [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (.generateTree world location org.bukkit.TreeType/BIRCH)))
-
 (defn get-entity-damage-listener []
   (c/auto-proxy
     [EntityListener] []
@@ -473,6 +473,7 @@
               (do
                 (zombieze target)
                 (.sendMessage attacker "You made a friend"))))))))
+
 
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
