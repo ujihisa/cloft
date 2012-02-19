@@ -102,6 +102,7 @@
 (def place6 (org.bukkit.Location. world 308.98823982676504 78 133.16713120198153 -55.351166 20.250006)) ; dessert village
 (def place7 (org.bukkit.Location. world -1.4375 63.5 5.28125)) ; toilet
 (def place8 (org.bukkit.Location. world 61.0 57.0 3.375)) ; at a log house
+(def anotherbed (org.bukkit.Location.  world -237.8704284429714 72.5625 -53.82154923217098 19.349966 -180.45361))
 
 (defn ujm [] (Bukkit/getPlayer "ujm"))
 
