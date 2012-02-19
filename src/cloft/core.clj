@@ -255,11 +255,17 @@
             (.setType newblock (.getType block)))))))))
 
 (defn skillchange [player block block-against]
-  (when (every? identity (map
-                           #(=
-                              (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-                              org.bukkit.Material/STONE)
-                           [0 0 -1 1] [-1 1 0 0]))
+  (when (all
+          (every? identity (map
+                             #(=
+                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                                org.bukkit.Material/STONE)
+                             [0 0 -1 1] [-1 1 0 0]))
+          (every? identity (map
+                             #(not=
+                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                                org.bukkit.Material/STONE)
+                             [-1 1 0 0] [-1 1 0 0])))
     (when (= (.getType block) org.bukkit.Material/TORCH)
       (broadcast (.getName player) " changed arrow skill to TORCH")
       (swap! jobs assoc (.getName player) arrow-skill-torch))
