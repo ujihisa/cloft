@@ -106,9 +106,8 @@
 
 (defn ujm [] (Bukkit/getPlayer "ujm"))
 
-(def jumping-state (atom {}))
+(comment (def jumping-state (atom {})))
 (defn jumping? [moveevt]
-  (< (.getY (.getFrom moveevt)) (.getY (.getTo moveevt)))
   (comment (let [name (.getName (.getPlayer moveevt))]
     (if (< (.getY (.getFrom moveevt)) (.getY (.getTo moveevt)))
       (do
@@ -116,37 +115,57 @@
             (swap! jumping-state name true))
         true)
       (do (swap! jumping-state name false)
-        false)))))
+        false))))
+  (< (.getY (.getFrom moveevt)) (.getY (.getTo moveevt))))
 
 (def player-death-locations (atom {}))
+(defn player-teleport-machine [evt player]
+  (when (and
+          (= (.getWorld player) world)
+          (< (.distance place2 (.getLocation player)) 1))
+    (lingr (str (.getName player) " is teleporting..."))
+    (.setTo evt place3))
+  (when (and
+          (= (.getWorld player) world)
+          (< (.distance place1 (.getLocation player)) 1)
+          (.isLoaded (.getChunk place4)))
+    (lingr (str (.getName player) " is teleporting..."))
+    (.setTo evt place4))
+  (when (and
+          (= (.getWorld player) world)
+          (< (.distance place5 (.getLocation player)) 1)
+          (.isLoaded (.getChunk place6)))
+    (lingr (str (.getName player) " is teleporting..."))
+    (.setTo evt place6))
+  (when (and
+          (= (.getWorld player) world)
+          (< (.distance place7 (.getLocation player)) 1))
+    (let [death-point (get @player-death-locations (.getName player))]
+      (when death-point
+        (.isLoaded (.getChunk death-point)) ; for side-effect
+        (lingr (str (.getName player) " is teleporting to the last death place..."))
+        (.setTo evt death-point)))))
+
+(def super-jump-flags (atom {}))
+(defn player-super-jump [evt player]
+  (let [name (.getName player)]
+    (when (not (get @super-jump-flags name))
+      (when (= (.getType (.getItemInHand player)) org.bukkit.Material/FEATHER)
+        (swap! super-jump-flags assoc name true)
+        (future-call #(do
+                   (Thread/sleep 5000)
+                   (swap! super-jump-flags assoc name false)))
+        (let [x (/ (java.lang.Math/log (.getAmount (.getItemInHand player))) 4)]
+          (prn (str "super jump level " x))
+          (.setVelocity
+            player
+            (.add (org.bukkit.util.Vector. 0.0 (double x) 0.0) (.getVelocity player))))))))
+
 (defn get-player-move* [evt]
   (let [player (.getPlayer evt)]
     (when (jumping? evt)
-      (when (and
-              (= (.getWorld player) world)
-              (< (.distance place2 (.getLocation player)) 1))
-        (lingr (str (.getName player) " is teleporting..."))
-        (.setTo evt place3))
-      (when (and
-              (= (.getWorld player) world)
-              (< (.distance place1 (.getLocation player)) 1)
-              (.isLoaded (.getChunk place4)))
-        (lingr (str (.getName player) " is teleporting..."))
-        (.setTo evt place4))
-      (when (and
-              (= (.getWorld player) world)
-              (< (.distance place5 (.getLocation player)) 1)
-              (.isLoaded (.getChunk place6)))
-        (lingr (str (.getName player) " is teleporting..."))
-        (.setTo evt place6))
-      (when (and
-              (= (.getWorld player) world)
-              (< (.distance place7 (.getLocation player)) 1))
-        (let [death-point (get @player-death-locations (.getName player))]
-          (when death-point
-            (.isLoaded (.getChunk death-point)) ; for side-effect
-            (lingr (str (.getName player) " is teleporting to the last death place..."))
-            (.setTo evt death-point)))))))
+      (player-teleport-machine evt player)
+      (player-super-jump evt player))))
 
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)
