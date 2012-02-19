@@ -615,7 +615,24 @@
           )))))
 
 (defn vehicle-enter-event* [evt]
-  (prn evt))
+  (let [vehicle (.getVehicle evt)
+        entity (.getEntered evt)
+        rail (.getBlock (.getLocation vehicle))
+        block-under (.getBlock (.add (.getLocation vehicle) 0 -1 0))]
+    (when (and
+            (instance? Player entity)
+            (= (.getType rail) org.bukkit.Material/RAILS)
+            (= (.getType block-under) org.bukkit.Material/LAPIS_BLOCK))
+      (let [direction (.getDirection (.getNewData (.getType rail) (.getData rail)))
+            diff (cond
+                   (= org.bukkit.block.BlockFace/SOUTH direction) (org.bukkit.util.Vector. -1 0 0))
+            destination (first (filter
+                                 #(= (.getType %) org.bukkit.Material/LAPIS_BLOCK)
+                                 (map
+                                   #(.getBlock (.add (.clone (.getLocation block-under)) (.multiply (.clone diff) %)))
+                                   (range 3 100))))]
+        (when destination
+          (.teleport vehicle (.add (.getLocation destination) 0 3 0)))))))
 
 (defn vehicle-enter-event []
   (c/auto-proxy [org.bukkit.event.vehicle.VehicleListener] []
