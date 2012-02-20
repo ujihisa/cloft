@@ -108,7 +108,9 @@
 (def place-main (org.bukkit.Location. world 4.294394438259979 67.0 0.6542090982205075 -7.5000114 -40.35013))
 (def anotherbed (org.bukkit.Location.  world -237.8704284429714 72.5625 -53.82154923217098 19.349966 -180.45361))
 
-(defn ujm [] (Bukkit/getPlayer "ujm"))
+(defn get-player [name]
+  (first (filter #(= (.getDisplayName %) name) (Bukkit/getOnlinePlayers))))
+(defn ujm [] (get-player "ujm"))
 
 (comment (def jumping-state (atom {})))
 (defn jumping? [moveevt]
