@@ -112,16 +112,7 @@
   (first (filter #(= (.getDisplayName %) name) (Bukkit/getOnlinePlayers))))
 (defn ujm [] (get-player "ujm"))
 
-(comment (def jumping-state (atom {})))
 (defn jumping? [moveevt]
-  (comment (let [name (.getDisplayName (.getPlayer moveevt))]
-    (if (< (.getY (.getFrom moveevt)) (.getY (.getTo moveevt)))
-      (do
-        (when (not (get @jumping-state name))
-            (swap! jumping-state name true))
-        true)
-      (do (swap! jumping-state name false)
-        false))))
   (< (.getY (.getFrom moveevt)) (.getY (.getTo moveevt))))
 
 (def player-death-locations (atom {}))
