@@ -238,6 +238,7 @@
 
 (defn entity-shoot-bow-event* [evt]
   (let [shooter (.getEntity evt)]
+    (comment (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 2)))
     (when (instance? Player shooter)
       (when (and
               (get @bowgun-players (.getDisplayName shooter))
