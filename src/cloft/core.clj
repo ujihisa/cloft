@@ -38,7 +38,7 @@
 (def zombie-players (atom #{}))
 
 (defn zombie-player? [p]
-  (boolean (get @zombie-players (.getName p))))
+  (boolean (get @zombie-players (.getDisplayName p))))
 
 (defn name2icon [name]
   (get NAME-ICON name (str name ": ")))
@@ -77,7 +77,7 @@
 (defn location-in-lisp [location]
   (list
     'org.bukkit.Location.
-    (.getName (.getWorld location))
+    (.getDisplayName (.getWorld location))
     (.getX location)
     (.getY location)
     (.getZ location)
@@ -112,7 +112,7 @@
 
 (comment (def jumping-state (atom {})))
 (defn jumping? [moveevt]
-  (comment (let [name (.getName (.getPlayer moveevt))]
+  (comment (let [name (.getDisplayName (.getPlayer moveevt))]
     (if (< (.getY (.getFrom moveevt)) (.getY (.getTo moveevt)))
       (do
         (when (not (get @jumping-state name))
@@ -127,19 +127,19 @@
   (when (and
           (= (.getWorld player) world)
           (< (.distance place2 (.getLocation player)) 1))
-    (lingr (str (.getName player) " is teleporting..."))
+    (lingr (str (.getDisplayName player) " is teleporting..."))
     (.setTo evt place3))
   (when (and
           (= (.getWorld player) world)
           (< (.distance place1 (.getLocation player)) 1)
           (.isLoaded (.getChunk place4)))
-    (lingr (str (.getName player) " is teleporting..."))
+    (lingr (str (.getDisplayName player) " is teleporting..."))
     (.setTo evt place4))
   (when (and
           (= (.getWorld player) world)
           (< (.distance place5 (.getLocation player)) 1)
           (.isLoaded (.getChunk place6)))
-    (lingr (str (.getName player) " is teleporting..."))
+    (lingr (str (.getDisplayName player) " is teleporting..."))
     (.setTo evt place6))
   (when (and
           (= (.getWorld player) world)
@@ -147,15 +147,15 @@
             (< (.distance place9 (.getLocation player)) 1)
             (< (.distance place10 (.getLocation player)) 1))
           (.isLoaded (.getChunk place-main)))
-    (lingr (str (.getName player) " is teleporting..."))
+    (lingr (str (.getDisplayName player) " is teleporting..."))
     (.setTo evt place-main))
   (when (and
           (= (.getWorld player) world)
           (< (.distance place7 (.getLocation player)) 1))
-    (let [death-point (get @player-death-locations (.getName player))]
+    (let [death-point (get @player-death-locations (.getDisplayName player))]
       (when death-point
         (.isLoaded (.getChunk death-point)) ; for side-effect
-        (lingr (str (.getName player) " is teleporting to the last death place..."))
+        (lingr (str (.getDisplayName player) " is teleporting to the last death place..."))
         (.setTo evt death-point)))))
 
 (defn consume-itemstack [inventory mtype]
@@ -168,7 +168,7 @@
 
 (def super-jump-flags (atom {}))
 (defn player-super-jump [evt player]
-  (let [name (.getName player)]
+  (let [name (.getDisplayName player)]
     (when (not (get @super-jump-flags name))
       (when (= (.getType (.getItemInHand player)) org.bukkit.Material/FEATHER)
         (swap! super-jump-flags assoc name true)
@@ -242,7 +242,7 @@
 (defn entity-shoot-bow-event* [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
-      (when (= "ujm" (.getName shooter))
+      (when (= "ujm" (.getDisplayName shooter))
         (future-call #(do
                         (Thread/sleep 100) (.shootArrow (.getEntity evt))
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
@@ -255,7 +255,7 @@
 
 (defn entity-target-event* [evt]
   (when (instance? Creeper (.getEntity evt))
-    (broadcast "Takumi is watching " (.getName (.getTarget evt)))))
+    (broadcast "Takumi is watching " (.getDisplayName (.getTarget evt)))))
 
 (defn entity-target-event []
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
@@ -286,20 +286,20 @@
                                 org.bukkit.Material/STONE)
                              [-1 1 0 0] [-1 1 0 0])))
     (when (= (.getType block) org.bukkit.Material/TORCH)
-      (broadcast (.getName player) " changed arrow skill to TORCH")
-      (swap! jobs assoc (.getName player) arrow-skill-torch))
+      (broadcast (.getDisplayName player) " changed arrow skill to TORCH")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-torch))
     (when (= (.getType block) org.bukkit.Material/YELLOW_FLOWER)
-      (broadcast (.getName player) " changed arrow skill to TELEPORT")
-      (swap! jobs assoc (.getName player) arrow-skill-teleport))
+      (broadcast (.getDisplayName player) " changed arrow skill to TELEPORT")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-teleport))
     (when (= (.getType block) org.bukkit.Material/RED_ROSE)
-      (broadcast (.getName player) " changed arrow skill to FIRE")
-      (swap! jobs assoc (.getName player) arrow-skill-fire))
+      (broadcast (.getDisplayName player) " changed arrow skill to FIRE")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-fire))
     (when (= (.getType block) org.bukkit.Material/SAPLING)
-      (broadcast (.getName player) " changed arrow skill to TREE")
-      (swap! jobs assoc (.getName player) arrow-skill-tree))
+      (broadcast (.getDisplayName player) " changed arrow skill to TREE")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-tree))
     (when (= (.getType block) org.bukkit.Material/WORKBENCH)
-      (broadcast (.getName player) " changed arrow skill to ORE")
-      (swap! jobs assoc (.getName player) arrow-skill-ore))))
+      (broadcast (.getDisplayName player) " changed arrow skill to ORE")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))))
 
 (defn block-place-event* [evt]
   (let [block (.getBlock evt)]
@@ -327,21 +327,21 @@
     (onPlayerLogin
       [evt]
       (let [player (.getPlayer evt)]
-        (lingr (str (name2icon (.getName player)) "logged in now."))))))
+        (lingr (str (name2icon (.getDisplayName player)) "logged in now."))))))
 
 (defn get-player-quit-listener []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerQuit
       [evt]
-      (lingr (str (name2icon (.getName (.getPlayer evt))) "quitted.")))))
+      (lingr (str (name2icon (.getDisplayName (.getPlayer evt))) "quitted.")))))
 
 (defn get-player-chat []
   (c/auto-proxy
     [org.bukkit.event.player.PlayerListener] []
     (onPlayerChat
       [evt]
-      (let [name (.getName (.getPlayer evt))]
+      (let [name (.getDisplayName (.getPlayer evt))]
         (lingr (str (name2icon name) (.getMessage evt)))
         (comment (let [creepers (filter #(instance? Creeper %) (.getLivingEntities (.getWorld (.getPlayer evt))))
               your-location (.getLocation (.getPlayer evt))
@@ -451,7 +451,7 @@
         ;(instance? NPC entity) "NPC"
         (instance? Pig entity) "Pig"
         (instance? PigZombie entity) "PigZombie"
-        (instance? Player entity) (.getName entity)
+        (instance? Player entity) (.getDisplayName entity)
         (instance? Sheep entity) "Sheep"
         (instance? Silverfish entity) "Silverfish"
         (instance? Skeleton entity) "Skeleton"
@@ -476,11 +476,11 @@
 (defn entity-death-event [entity]
   (let [killer (.getKiller entity)]
     (when (instance? Player killer)
-      (broadcast (.getName killer) " killed " (entity2name entity)))))
+      (broadcast (.getDisplayName killer) " killed " (entity2name entity)))))
 
 (defn player-death-event [evt player]
-  (swap! player-death-locations assoc (.getName player) (.getLocation player))
-  (lingr (str (name2icon (.getName player)) (.getDeathMessage evt))))
+  (swap! player-death-locations assoc (.getDisplayName player) (.getLocation player))
+  (lingr (str (name2icon (.getDisplayName player)) (.getDeathMessage evt))))
 
 (defn get-entity-death-listener []
   (c/auto-proxy
@@ -504,14 +504,14 @@
         (when (and ename (not-empty entities-nearby))
           (letfn [(join [xs x]
                     (apply str (interpose x xs)))]
-            (lingr (str ename " is exploding near " (join (map #(.getName %) entities-nearby) ", ")))))))))
+            (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))))
 
 (defn zombieze [entity]
-  (swap! zombie-players conj (.getName entity))
+  (swap! zombie-players conj (.getDisplayName entity))
   (.setMaximumAir entity 1)
   (.setRemainingAir entity 1)
   (.sendMessage entity "You turned into a zombie.")
-  (lingr (str (name2icon (.getName entity)) "turned into a zombie.")))
+  (lingr (str (name2icon (.getDisplayName entity)) "turned into a zombie.")))
 
 (defn potion-weakness [name]
   (.apply
@@ -523,7 +523,7 @@
     (when (and
             (instance? Player shooter)
             (.contains (.getInventory shooter) org.bukkit.Material/WEB))
-      (let [msg (str (.getName shooter) " chained " (entity2name target))]
+      (let [msg (str (.getDisplayName shooter) " chained " (entity2name target))]
         (.sendMessage shooter msg)
         (lingr msg))
       (chain-entity target)
@@ -559,7 +559,7 @@
                        (.getDamager evt))]
         (when (and (instance? Villager target) (instance? EntityDamageByEntityEvent evt))
           (when (instance? Player attacker)
-              (lingr (str (name2icon (.getName attacker)) "is attacking a Villager"))
+              (lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
               (.damage attacker (.getDamage evt))))
         (when (and
                 (instance? Player target)
@@ -570,7 +570,7 @@
           (.setMaximumAir target 300) ; default maximum value
           (.setRemainingAir target 300)
           (.setHealth target (.getMaxHealth target))
-          (swap! zombie-players disj (.getName target))
+          (swap! zombie-players disj (.getDisplayName target))
           (.sendMessage target "You rebirthed as a human."))
         (when (instance? Arrow attacker)
           (arrow-attacks-by-player-event evt attacker target))
@@ -591,24 +591,24 @@
 
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
-    (let [skill (get @jobs (.getName (.getShooter entity)))]
+    (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
       (if skill
         (skill entity)
         (do
-          (comment (when (= (.getName (.getShooter entity)) "sugizou")
+          (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
                      (let [location (.getLocation entity)
                            world (.getWorld location)]
                        (.generateTree world location org.bukkit.TreeType/BIRCH))))
-          (when (= (.getName (.getShooter entity)) "kldsas")
+          (when (= (.getDisplayName (.getShooter entity)) "kldsas")
             (arrow-skill-torch entity))
-          (when (= (.getName (.getShooter entity)) "sbwhitecap")
+          (when (= (.getDisplayName (.getShooter entity)) "sbwhitecap")
             (arrow-skill-teleport entity))
-          (when (= (.getName (.getShooter entity)) "Sandkat")
+          (when (= (.getDisplayName (.getShooter entity)) "Sandkat")
             (doseq [near-target (filter
                                   #(instance? LivingEntity %)
                                   (.getNearbyEntities entity 2 2 2))]
               (.damage near-target 3 entity)))
-          (when (= (.getName (.getShooter entity)) "ujm")
+          (when (= (.getDisplayName (.getShooter entity)) "ujm")
             (do
               (let [location (.getLocation entity)
                     world (.getWorld location)]
