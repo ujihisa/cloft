@@ -215,6 +215,24 @@
         world (.getWorld location)]
     (.generateTree world location org.bukkit.TreeType/BIRCH)))
 
+(defn arrow-skill-ore [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)
+        velocity (.getVelocity entity)
+        direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))
+        block (.getBlock (.add (.clone location) direction))]
+    (when (= (.getType block) org.bukkit.Material/STONE)
+      (let [block-to-choices [org.bukkit.Material/COAL_ORE
+                              org.bukkit.Material/COAL_ORE
+                              org.bukkit.Material/COBBLESTONE
+                              org.bukkit.Material/COBBLESTONE
+                              org.bukkit.Material/GRAVEL
+                              org.bukkit.Material/IRON_ORE
+                              org.bukkit.Material/LAPIS_ORE
+                              org.bukkit.Material/GOLD_ORE
+                              org.bukkit.Material/REDSTONE_ORE]]
+        (.setType block (rand-nth block-to-choices))))))
+
 (defn broadcast [& strs]
   (.broadcastMessage (Bukkit/getServer) (apply str strs)))
 
@@ -255,7 +273,7 @@
             (.setType newblock (.getType block)))))))))
 
 (defn skillchange [player block block-against]
-  (when (all
+  (when (and
           (every? identity (map
                              #(=
                                 (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
@@ -277,7 +295,10 @@
       (swap! jobs assoc (.getName player) arrow-skill-fire))
     (when (= (.getType block) org.bukkit.Material/SAPLING)
       (broadcast (.getName player) " changed arrow skill to TREE")
-      (swap! jobs assoc (.getName player) arrow-skill-tree))))
+      (swap! jobs assoc (.getName player) arrow-skill-tree))
+    (when (= (.getType block) org.bukkit.Material/WORKBENCH)
+      (broadcast (.getName player) " changed arrow skill to ORE")
+      (swap! jobs assoc (.getName player) arrow-skill-ore))))
 
 (defn block-place-event* [evt]
   (let [block (.getBlock evt)]
