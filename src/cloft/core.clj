@@ -232,10 +232,16 @@
 
 (def jobs (atom {}))
 
+(def bowgun-players (atom #{"ujm"}))
+(defn add-bowgun-player [name]
+  (swap! bowgun-players conj name))
+
 (defn entity-shoot-bow-event* [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
-      (when (= "ujm" (.getDisplayName shooter))
+      (when (and
+              (get @bowgun-players (.getDisplayName shooter))
+              (not= arrow-skill-teleport (get @jobs (.getDisplayName shooter))))
         (future-call #(do
                         (Thread/sleep 100) (.shootArrow (.getEntity evt))
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
