@@ -577,19 +577,20 @@
           (.sendMessage target "You rebirthed as a human."))
         (when (instance? Arrow attacker)
           (arrow-attacks-by-player-event evt attacker target))
-        (when (and (instance? Player attacker) (instance? Pig target))
-          (player-attacks-pig-event evt attacker target))
-        (when (and (instance? Player attacker) (instance? Chicken target))
-          (player-attacks-chicken-event evt attacker target))
-        (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
-          (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
-            (if (zombie-player? target)
-              (.setCancelled evt true)
-              (zombieze target)))
-          (when (and (instance? Player attacker) (zombie-player? attacker))
-            (do
-              (zombieze target)
-              (.sendMessage attacker "You made a friend"))))))))
+        (when (instance? Player target)
+          (when (instance? Pig target)
+            (player-attacks-pig-event evt attacker target))
+          (when (instance? Chicken target)
+            (player-attacks-chicken-event evt attacker target))
+          (when (instance? EntityDamageByEntityEvent evt)
+            (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
+              (if (zombie-player? target)
+                (.setCancelled evt true)
+                (zombieze target)))
+            (when (and (instance? Player attacker) (zombie-player? attacker))
+              (do
+                (zombieze target)
+                (.sendMessage attacker "You made a friend")))))))))
 
 
 (defn arrow-hit-event [evt entity]
