@@ -327,6 +327,8 @@
     (onPlayerLogin
       [evt]
       (let [player (.getPlayer evt)]
+        (when (= (.getDisplayName player) "Player")
+          (.setDisplayName player "raa0121"))
         (lingr (str (name2icon (.getDisplayName player)) "logged in now."))))))
 
 (defn get-player-quit-listener []
