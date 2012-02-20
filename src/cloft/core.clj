@@ -558,38 +558,39 @@
       (let [target (.getEntity evt)
             attacker (when (instance? EntityDamageByEntityEvent evt)
                        (.getDamager evt))]
-        (when (and
-                (instance? Villager target)
-                (instance? EntityDamageByEntityEvent evt)
-                (instance? Player attacker))
-          (lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
-          (.damage attacker (.getDamage evt)))
-        (when (and
-                (instance? Player target)
-                (zombie-player? target)
-                (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
-                (= 0 (rand-int 2)))
-          (.setCancelled evt true)
-          (.setMaximumAir target 300) ; default maximum value
-          (.setRemainingAir target 300)
-          (.setHealth target (.getMaxHealth target))
-          (swap! zombie-players disj (.getDisplayName target))
-          (.sendMessage target "You rebirthed as a human."))
-        (when (instance? Arrow attacker)
-          (arrow-attacks-by-player-event evt attacker target))
-        (when (and (instance? Player attacker) (instance? Pig target))
-          (player-attacks-pig-event evt attacker target))
-        (when (and (instance? Player attacker) (instance? Chicken target))
-          (player-attacks-chicken-event evt attacker target))
-        (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
-          (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
-            (if (zombie-player? target)
-              (.setCancelled evt true)
-              (zombieze target)))
-          (when (and (instance? Player attacker) (zombie-player? attacker))
-            (do
-              (zombieze target)
-              (.sendMessage attacker "You made a friend"))))))))
+        (if (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
+          (when (and
+                  (instance? Player target)
+                  (zombie-player? target)
+                  (= 0 (rand-int 2)))
+            (.setCancelled evt true)
+            (.setMaximumAir target 300) ; default maximum value
+            (.setRemainingAir target 300)
+            (.setHealth target (.getMaxHealth target))
+            (swap! zombie-players disj (.getDisplayName target))
+            (.sendMessage target "You rebirthed as a human."))
+          (do
+            (when (and
+                    (instance? Villager target)
+                    (instance? EntityDamageByEntityEvent evt)
+                    (instance? Player attacker))
+              (lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
+              (.damage attacker (.getDamage evt)))
+            (when (instance? Arrow attacker)
+              (arrow-attacks-by-player-event evt attacker target))
+            (when (and (instance? Player attacker) (instance? Pig target))
+              (player-attacks-pig-event evt attacker target))
+            (when (and (instance? Player attacker) (instance? Chicken target))
+              (player-attacks-chicken-event evt attacker target))
+            (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
+              (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
+                (if (zombie-player? target)
+                  (.setCancelled evt true)
+                  (zombieze target)))
+              (when (and (instance? Player attacker) (zombie-player? attacker))
+                (do
+                  (zombieze target)
+                  (.sendMessage attacker "You made a friend"))))))))))
 
 
 (defn arrow-hit-event [evt entity]
