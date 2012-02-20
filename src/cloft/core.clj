@@ -558,10 +558,12 @@
       (let [target (.getEntity evt)
             attacker (when (instance? EntityDamageByEntityEvent evt)
                        (.getDamager evt))]
-        (when (and (instance? Villager target) (instance? EntityDamageByEntityEvent evt))
-          (when (instance? Player attacker)
-              (lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
-              (.damage attacker (.getDamage evt))))
+        (when (and
+                (instance? Villager target)
+                (instance? EntityDamageByEntityEvent evt)
+                (instance? Player attacker))
+          (lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
+          (.damage attacker (.getDamage evt)))
         (when (and
                 (instance? Player target)
                 (zombie-player? target)
