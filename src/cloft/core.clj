@@ -182,6 +182,18 @@
 
 (defn get-player-move* [evt]
   (let [player (.getPlayer evt)]
+    (comment(let [before-y (.getY (.getFrom evt))
+          after-y (.getY (.getTo evt))]
+      (when (< (- after-y before-y) 0)
+        (let [tmp (.getTo evt)]
+          (.setY tmp (+ 1 (.getY (.getTo evt))))
+          (prn tmp)
+          (.setTo evt tmp)))))
+    (comment (let [new-velo (.getDirection (.getLocation player))]
+      (.setY new-velo 0)
+      (.setVelocity player new-velo)))
+    (comment(when (> -0.1 (.getY (.getVelocity player)))
+      (.setVelocity player (.setY (.clone (.getVelocity player)) -0.1))))
     (when (jumping? evt)
       (player-teleport-machine evt player)
       (player-super-jump evt player))))
@@ -193,8 +205,11 @@
 
 (defn arrow-skill-teleport [entity]
   (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (.teleport (.getShooter entity) location)))
+        world (.getWorld location)
+        shooter (.getShooter entity)]
+    (.setYaw location (.getYaw (.getLocation shooter)))
+    (.setPitch location (.getPitch (.getLocation shooter)))
+    (.teleport shooter location)))
 
 (defn arrow-skill-fire [entity]
   (let [location (.getLocation entity)
@@ -238,16 +253,19 @@
 
 (defn entity-shoot-bow-event* [evt]
   (let [shooter (.getEntity evt)]
-    (comment (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 2)))
     (when (instance? Player shooter)
-      (when (and
+      (when (.isSneaking shooter)
+        (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 3)))
+      (comment (.setCancelled evt true))
+      (comment (.setVelocity shooter (.multiply (.getVelocity (.getProjectile evt)) 2)))
+      (comment (when (and
               (get @bowgun-players (.getDisplayName shooter))
               (not= arrow-skill-teleport (get @jobs (.getDisplayName shooter))))
         (future-call #(do
                         (Thread/sleep 100) (.shootArrow (.getEntity evt))
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
-                        ))))))
+                        )))))))
 
 (defn entity-shoot-bow-event []
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
