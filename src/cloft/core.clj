@@ -507,6 +507,25 @@
           (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
+(defn creeper-explosion-1 [evt entity]
+  (.setCancelled evt true)
+  (.createExplosion (.getWorld entity) (.getLocation entity) 0)
+  (doseq [e (filter #(instance? LivingEntity %) (.getNearbyEntities entity 5 5 5))]
+    (let [v (.multiply (.toVector (.subtract (.getLocation e) (.getLocation entity))) 2.0)]
+      (.setVelocity e (org.bukkit.util.Vector. (.getX v) 1.5 (.getZ v)))))
+  (comment (let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
+             (.setVelocity another (org.bukkit.util.Vector. 0 1 0)))))
+
+(defn creeper-explosion-2 [evt entity]
+  (.setCancelled evt true)
+  (let [loc (.getLocation entity)]
+    (.setType (.getBlock loc) org.bukkit.Material/PUMPKIN)
+    (broadcast "break the bomb before it explodes!")
+    (future-call #(do
+                    (Thread/sleep 7000)
+                    (when (= (.getType (.getBlock loc)) org.bukkit.Material/PUMPKIN)
+                      (.createExplosion (.getWorld loc) loc 5))))))
+
 (defn get-entity-explode-listener* [evt]
   (let [entity (.getEntity evt)
         ename (entity2name entity)
@@ -516,14 +535,10 @@
                 (apply str (interpose x xs)))]
         (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))
     (when (instance? Creeper entity)
-      (do
-        (.setCancelled evt true)
-        (.createExplosion (.getWorld entity) (.getLocation entity) 0)
-        (doseq [e (filter #(instance? LivingEntity %) (.getNearbyEntities entity 5 5 5))]
-          (let [v (.multiply (.toVector (.subtract (.getLocation e) (.getLocation entity))) 2.0)]
-            (.setVelocity e (org.bukkit.util.Vector. (.getX v) 1.5 (.getZ v)))))
-        (comment (let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
-                   (.setVelocity another (org.bukkit.util.Vector. 0 1 0))))))))
+      ((rand-nth [(fn [_ _] nil)
+                  creeper-explosion-1
+                  creeper-explosion-2
+                  ]) evt entity))))
 
 (defn get-entity-explode-listener []
   (c/auto-proxy [EntityListener] []
