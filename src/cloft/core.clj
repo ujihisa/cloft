@@ -522,7 +522,14 @@
     (when (and ename (not-empty entities-nearby))
       (letfn [(join [xs x]
                 (apply str (interpose x xs)))]
-        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))
+        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))
+    (when (instance? Creeper entity)
+      (.setCancelled evt true)
+      (.createExplosion (.getWorld entity) (.getLocation entity) 0)
+      (doseq [e (filter #(instance? LivingEntity %) (.getNearbyEntities entity 5 5 5))]
+        (.setVelocity e (org.bukkit.util.Vector. 0.0 1.5 0.0)))
+      (comment (let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
+        (.setVelocity another (org.bukkit.util.Vector. 0 1 0)))))))
 
 (defn get-entity-explode-listener []
   (c/auto-proxy [EntityListener] []
