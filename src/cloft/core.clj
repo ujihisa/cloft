@@ -432,16 +432,17 @@
   (when (:entity @chain)
     (.teleport (:entity @chain) (:loc @chain))))
 
+(def chicken-attacking (atom 0))
 (defn chicken-touch-player [chicken player]
-  ;(.setYaw (.getLocation chicken) (.getYaw (.getLocation player)))
-  (.teleport chicken (.getLocation player))
-  (.damage player 2 chicken))
+  (when (not= @chicken-attacking 0)
+    (.teleport chicken (.getLocation player))
+    (.damage player 3 chicken)))
 
 (defn entity-touch-player-event []
   (doseq [player (Bukkit/getOnlinePlayers)]
     (let [entities (.getNearbyEntities player 2 2 2)
           chickens (filter #(instance? Chicken %) entities)]
-      (for [chicken chickens]
+      (doseq [chicken chickens]
         (chicken-touch-player chicken player)))))
 
 (defn periodically []
@@ -514,17 +515,18 @@
           (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
           )))))
 
+(defn get-entity-explode-listener* [evt]
+  (let [entity (.getEntity evt)
+        ename (entity2name entity)
+        entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
+    (when (and ename (not-empty entities-nearby))
+      (letfn [(join [xs x]
+                (apply str (interpose x xs)))]
+        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))
+
 (defn get-entity-explode-listener []
-  (c/auto-proxy
-    [EntityListener] []
-    (onEntityExplode [evt]
-      (let [entity (.getEntity evt)
-            ename (entity2name entity)
-            entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
-        (when (and ename (not-empty entities-nearby))
-          (letfn [(join [xs x]
-                    (apply str (interpose x xs)))]
-            (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))))
+  (c/auto-proxy [EntityListener] []
+                (onEntityExplode [evt] (get-entity-explode-listener* evt))))
 
 (defn zombieze [entity]
   (swap! zombie-players conj (.getDisplayName entity))
@@ -561,9 +563,13 @@
   (.setCancelled evt true))
 
 (defn player-attacks-chicken-event [_ player chicken]
-  (when (= 0 (rand-int 3))
+  (when (not= 0 (rand-int 3))
     (let [location (.getLocation player)
           world (.getWorld location)]
+      (swap! chicken-attacking inc)
+      (future-call #(do
+                      (Thread/sleep 20000)
+                      (swap! chicken-attacking dec)))
       (doseq [x [-2 -1 0 1 2] z [-2 -1 0 1 2]]
         (let [chicken (.spawn world (.add (.clone location) x 3 z) Chicken)]
           (future-call #(do
@@ -617,29 +623,31 @@
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
       (if skill
         (skill entity)
-        (do
-          (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
-                     (let [location (.getLocation entity)
-                           world (.getWorld location)]
-                       (.generateTree world location org.bukkit.TreeType/BIRCH))))
-          (when (= (.getDisplayName (.getShooter entity)) "kldsas")
-            (arrow-skill-torch entity))
-          (when (= (.getDisplayName (.getShooter entity)) "sbwhitecap")
-            (arrow-skill-teleport entity))
-          (when (= (.getDisplayName (.getShooter entity)) "Sandkat")
-            (doseq [near-target (filter
-                                  #(instance? LivingEntity %)
-                                  (.getNearbyEntities entity 2 2 2))]
-              (.damage near-target 3 entity)))
-          (when (= (.getDisplayName (.getShooter entity)) "ujm")
-            (do
-              (let [location (.getLocation entity)
-                    world (.getWorld location)]
-                (.strikeLightningEffect world location))
-              (doseq [near-target (filter
-                                    #(instance? Monster %)
-                                    (.getNearbyEntities entity 10 10 3))]
-                (.damage near-target 30 (.getShooter entity))))))))
+        (.sendMessage (.getShooter entity) "You don't have a skill yet.")
+        ;(do
+        ;  (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
+        ;             (let [location (.getLocation entity)
+        ;                   world (.getWorld location)]
+        ;               (.generateTree world location org.bukkit.TreeType/BIRCH))))
+        ;  (when (= (.getDisplayName (.getShooter entity)) "kldsas")
+        ;    (arrow-skill-torch entity))
+        ;  (when (= (.getDisplayName (.getShooter entity)) "sbwhitecap")
+        ;    (arrow-skill-teleport entity))
+        ;  (when (= (.getDisplayName (.getShooter entity)) "Sandkat")
+        ;    (doseq [near-target (filter
+        ;                          #(instance? LivingEntity %)
+        ;                          (.getNearbyEntities entity 2 2 2))]
+        ;      (.damage near-target 3 entity)))
+        ;  (when (= (.getDisplayName (.getShooter entity)) "ujm")
+        ;    (do
+        ;      (let [location (.getLocation entity)
+        ;            world (.getWorld location)]
+        ;        (.strikeLightningEffect world location))
+        ;      (doseq [near-target (filter
+        ;                            #(instance? Monster %)
+        ;                            (.getNearbyEntities entity 10 10 3))]
+        ;        (.damage near-target 30 (.getShooter entity))))))
+        ))
     ))
 
 (defn get-entity-projectile-hit-listener []
