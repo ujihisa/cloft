@@ -405,6 +405,13 @@
             ; right-click player -> makes it hungry
             (instance? Player target) (touch-player target)))))))
 
+(defn player-level-change-event* [evt]
+  (prn 'levelup))
+
+(defn player-level-change-event []
+  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+                (onPlayerLevelChange [evt] (player-level-change-event* evt))))
+
 ; internal
 (defn zombie-player-periodically [zplayer]
   (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
@@ -537,7 +544,9 @@
       ((rand-nth [(fn [_ _] nil)
                   creeper-explosion-1
                   creeper-explosion-2
-                  ]) evt entity))))
+                  ]) evt entity))
+    (when (instance? TNTPrimed entity)
+      (prn ['TNT entity]))))
 
 (defn get-entity-explode-listener []
   (c/auto-proxy [EntityListener] []
@@ -760,6 +769,7 @@
       (hehehe get-player-move :PLAYER_MOVE)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
+      (hehehe player-level-change-event :PLAYER_LEVEL_CHANGE)
       (hehehe entity-death-event :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
