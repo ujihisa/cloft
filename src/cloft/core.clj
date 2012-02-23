@@ -406,7 +406,8 @@
             (instance? Player target) (touch-player target)))))))
 
 (defn player-level-change-event* [evt]
-  (prn 'levelup))
+  (when (< (.getOldLevel evt) (.getNewLevel evt))
+    (broadcast "Level up! "(.getDisplayName (.getPlayer evt)) " is Lv" (.getNewLevel evt))))
 
 (defn player-level-change-event []
   (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
