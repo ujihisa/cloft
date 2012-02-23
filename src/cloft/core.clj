@@ -495,17 +495,17 @@
   (swap! player-death-locations assoc (.getDisplayName player) (.getLocation player))
   (lingr (str (name2icon (.getDisplayName player)) (.getDeathMessage evt))))
 
+(defn entity-death-event* [evt]
+  (let [entity (.getEntity evt)]
+    (when (instance? Pig entity)
+      (pig-death-event entity))
+    (cond
+      (instance? Player entity) (player-death-event evt entity)
+      (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity))))
+
 (defn entity-death-event []
-  (c/auto-proxy
-    [EntityListener] []
-    (onEntityDeath [evt]
-      (let [entity (.getEntity evt)]
-        (when (instance? Pig entity)
-          (pig-death-event entity))
-        (cond
-          (instance? Player entity) (player-death-event evt entity)
-          (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity)
-          )))))
+  (c/auto-proxy [EntityListener] []
+                (onEntityDeath [evt] (entity-death-event* evt))))
 
 (defn creeper-explosion-1 [evt entity]
   (.setCancelled evt true)
