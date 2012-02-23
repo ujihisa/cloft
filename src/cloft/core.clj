@@ -497,9 +497,8 @@
 
 (defn entity-death-event* [evt]
   (let [entity (.getEntity evt)]
-    (when (instance? Pig entity)
-      (pig-death-event entity))
     (cond
+      (instance? Pig entity) (pig-death-event entity)
       (instance? Player entity) (player-death-event evt entity)
       (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event entity))))
 
