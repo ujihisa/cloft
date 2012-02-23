@@ -488,6 +488,7 @@
 (defn entity-murder-event [evt entity]
   (let [killer (.getKiller entity)]
     (when (instance? Player killer)
+      (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 10 (.getHealth killer)))))
       (broadcast (.getDisplayName killer) " killed " (entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
 
 (defn player-death-event [evt player]
