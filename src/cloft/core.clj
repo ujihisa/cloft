@@ -495,7 +495,7 @@
   (swap! player-death-locations assoc (.getDisplayName player) (.getLocation player))
   (lingr (str (name2icon (.getDisplayName player)) (.getDeathMessage evt))))
 
-(defn get-entity-death-listener []
+(defn entity-death-event []
   (c/auto-proxy
     [EntityListener] []
     (onEntityDeath [evt]
@@ -761,7 +761,7 @@
       (hehehe get-player-move :PLAYER_MOVE)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
-      (hehehe get-entity-death-listener :ENTITY_DEATH)
+      (hehehe entity-death-event :ENTITY_DEATH)
       (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe entity-shoot-bow-event :ENTITY_SHOOT_BOW)
