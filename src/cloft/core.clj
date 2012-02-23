@@ -480,10 +480,9 @@
         :else (class entity)))
 
 (defn pig-death-event [entity]
-  (comment (let [world (.getWorld entity)]
-    (.setStorm world true)))
   (let [killer (.getKiller entity)]
     (when killer
+      (.sendMessage killer "PIG: Pig Is God")
       (.setFireTicks killer 100))))
 
 (defn entity-murder-event [evt entity]
