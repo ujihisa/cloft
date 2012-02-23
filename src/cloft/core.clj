@@ -486,7 +486,7 @@
     (when killer
       (.setFireTicks killer 100))))
 
-(defn entity-death-event [evt entity]
+(defn entity-murder-event [evt entity]
   (let [killer (.getKiller entity)]
     (when (instance? Player killer)
       (broadcast (.getDisplayName killer) " killed " (entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
@@ -500,7 +500,7 @@
     (cond
       (instance? Pig entity) (pig-death-event entity)
       (instance? Player entity) (player-death-event evt entity)
-      (and (instance? LivingEntity entity) (.getKiller entity)) (entity-death-event evt entity))))
+      (and (instance? LivingEntity entity) (.getKiller entity)) (entity-murder-event evt entity))))
 
 (defn entity-death-event []
   (c/auto-proxy [EntityListener] []
