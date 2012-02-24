@@ -279,6 +279,13 @@
   (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
                 (onEntityTarget [evt] (entity-target-event* evt))))
 
+(defn entity-explosion-prime-event* [evt]
+  nil)
+
+(defn entity-explosion-prime-event []
+  (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
+                (onEntityExplosionPrime [evt] (entity-explosion-prime-event* evt))))
+
 (defn build-long [block block-against]
   (comment (when (= (.getType block) (.getType block-against))
     (let [world (.getWorld block)
@@ -780,6 +787,7 @@
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe entity-shoot-bow-event :ENTITY_SHOOT_BOW)
       (hehehe entity-target-event :ENTITY_TARGET)
+      (hehehe entity-explosion-prime-event :ENTITY_EXPLOSION_PRIME)
       (hehehe block-place-event :BLOCK_PLACE)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
       (hehehe vehicle-enter-event :VEHICLE_ENTER)
