@@ -496,6 +496,8 @@
 (defn entity-murder-event [evt entity]
   (let [killer (.getKiller entity)]
     (when (instance? Player killer)
+      (when (instance? Creeper entity)
+        (.setDroppedExp 20)); killing a creeper is hard.
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 10 (.getHealth killer)))))
       (broadcast (.getDisplayName killer) " killed " (entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
 
