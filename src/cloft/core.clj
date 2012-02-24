@@ -527,8 +527,12 @@
   (.setCancelled evt true)
   (.createExplosion (.getWorld entity) (.getLocation entity) 0)
   (doseq [e (filter #(instance? LivingEntity %) (.getNearbyEntities entity 5 5 5))]
-    (let [v (.multiply (.toVector (.subtract (.getLocation e) (.getLocation entity))) 2.0)]
-      (.setVelocity e (org.bukkit.util.Vector. (.getX v) 1.5 (.getZ v)))))
+    (let [v (.multiply (.toVector (.subtract (.getLocation e) (.getLocation entity))) 2.0)
+          x (.getX v)
+          z (.getZ v)]
+      (when (instance? Player e)
+        (.sendMessage e "Air Explosion"))
+      (.setVelocity e (org.bukkit.util.Vector. x 1.5 z))))
   (comment (let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
              (.setVelocity another (org.bukkit.util.Vector. 0 1 0)))))
 
