@@ -528,8 +528,8 @@
   (.createExplosion (.getWorld entity) (.getLocation entity) 0)
   (doseq [e (filter #(instance? LivingEntity %) (.getNearbyEntities entity 5 5 5))]
     (let [v (.multiply (.toVector (.subtract (.getLocation e) (.getLocation entity))) 2.0)
-          x (.getX v)
-          z (.getZ v)]
+          x (- 5 (.getX v))
+          z (- 5 (.getZ v))]
       (when (instance? Player e)
         (.sendMessage e "Air Explosion"))
       (.setVelocity e (org.bukkit.util.Vector. x 1.5 z))))
