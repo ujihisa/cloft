@@ -505,7 +505,7 @@
     (when (instance? Player killer)
       (when (instance? Creeper entity)
         (.setDroppedExp 20)); killing a creeper is hard.
-      (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 10 (.getHealth killer)))))
+      (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
       (broadcast (.getDisplayName killer) " killed " (entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
 
 (defn player-death-event [evt player]
@@ -543,8 +543,10 @@
     (broadcast "break the bomb before it explodes!")
     (future-call #(do
                     (Thread/sleep 7000)
+                    (broadcast "zawa...")
+                    (Thread/sleep 1000)
                     (when (= (.getType (.getBlock loc)) org.bukkit.Material/PUMPKIN)
-                      (.createExplosion (.getWorld loc) loc 5))))))
+                      (.createExplosion (.getWorld loc) loc 6))))))
 
 (def creeper-explosion-idx (atom 0))
 (defn entity-explode-event* [evt]
@@ -791,7 +793,7 @@
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe entity-shoot-bow-event :ENTITY_SHOOT_BOW)
       (hehehe entity-target-event :ENTITY_TARGET)
-      (hehehe entity-explosion-prime-event :ENTITY_EXPLOSION_PRIME)
+      ;(hehehe entity-explosion-prime-event :ENTITY_EXPLOSION_PRIME)
       (hehehe block-place-event :BLOCK_PLACE)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
       (hehehe vehicle-enter-event :VEHICLE_ENTER)
