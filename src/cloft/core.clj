@@ -533,6 +533,7 @@
                     (when (= (.getType (.getBlock loc)) org.bukkit.Material/PUMPKIN)
                       (.createExplosion (.getWorld loc) loc 5))))))
 
+(def creeper-explosion-idx (atom 0))
 (defn entity-explode-event* [evt]
   (let [entity (.getEntity evt)
         ename (entity2name entity)
@@ -542,10 +543,11 @@
                 (apply str (interpose x xs)))]
         (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))
     (when (instance? Creeper entity)
-      ((rand-nth [(fn [_ _] nil)
-                  creeper-explosion-1
-                  creeper-explosion-2
-                  ]) evt entity))
+      ((get [(fn [_ _] nil)
+             creeper-explosion-1
+             creeper-explosion-2
+             ] (rem @creeper-explosion-idx 3)) evt entity)
+      (swap! creeper-explosion-idx inc))
     (when (instance? TNTPrimed entity)
       (prn ['TNT entity]))))
 
