@@ -180,7 +180,7 @@
             player
             (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player))))))))
 
-(defn get-player-move* [evt]
+(defn player-move-event* [evt]
   (let [player (.getPlayer evt)]
     (comment(let [before-y (.getY (.getFrom evt))
           after-y (.getY (.getTo evt))]
@@ -335,9 +335,9 @@
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
                 (onBlockPlace [evt] (block-place-event* evt))))
 
-(defn get-player-move []
+(defn player-move-event []
   (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
-                  (onPlayerMove [evt] (get-player-move* evt))))
+                  (onPlayerMove [evt] (player-move-event* evt))))
 
 (defn player-login-event* [evt]
   (let [player (.getPlayer evt)]
@@ -767,7 +767,7 @@
     ;(hehehe get-player-quit-listener :PLAYER_QUIT)
     (do
       (hehehe player-login-event :PLAYER_LOGIN)
-      (hehehe get-player-move :PLAYER_MOVE)
+      (hehehe player-move-event :PLAYER_MOVE)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe player-level-change-event :PLAYER_LEVEL_CHANGE)
