@@ -571,10 +571,10 @@
   (.sendMessage entity "You turned into a zombie.")
   (lingr (str (name2icon (.getDisplayName entity)) "turned into a zombie.")))
 
-(defn potion-weakness [name]
+(comment (defn potion-weakness [name]
   (.apply
     (org.bukkit.potion.PotionEffect. org.bukkit.potion.PotionEffectType/WEAKNESS 500 1)
-    (Bukkit/getPlayer name)))
+    (Bukkit/getPlayer name))))
 
 (defn arrow-attacks-by-player-event [_ arrow target]
   (let [shooter (.getShooter arrow)]
