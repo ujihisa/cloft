@@ -533,7 +533,7 @@
                     (when (= (.getType (.getBlock loc)) org.bukkit.Material/PUMPKIN)
                       (.createExplosion (.getWorld loc) loc 5))))))
 
-(defn get-entity-explode-listener* [evt]
+(defn entity-explode-event* [evt]
   (let [entity (.getEntity evt)
         ename (entity2name entity)
         entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
@@ -549,9 +549,9 @@
     (when (instance? TNTPrimed entity)
       (prn ['TNT entity]))))
 
-(defn get-entity-explode-listener []
+(defn entity-explode-event []
   (c/auto-proxy [EntityListener] []
-                (onEntityExplode [evt] (get-entity-explode-listener* evt))))
+                (onEntityExplode [evt] (entity-explode-event* evt))))
 
 (defn zombieze [entity]
   (swap! zombie-players conj (.getDisplayName entity))
@@ -772,7 +772,7 @@
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe player-level-change-event :PLAYER_LEVEL_CHANGE)
       (hehehe entity-death-event :ENTITY_DEATH)
-      (hehehe get-entity-explode-listener :ENTITY_EXPLODE)
+      (hehehe entity-explode-event :ENTITY_EXPLODE)
       (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
       (hehehe entity-shoot-bow-event :ENTITY_SHOOT_BOW)
       (hehehe entity-target-event :ENTITY_TARGET)
