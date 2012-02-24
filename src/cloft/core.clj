@@ -339,15 +339,15 @@
   (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
                   (onPlayerMove [evt] (get-player-move* evt))))
 
-(defn get-player-login-listener []
-  (c/auto-proxy
-    [org.bukkit.event.player.PlayerListener] []
-    (onPlayerLogin
-      [evt]
-      (let [player (.getPlayer evt)]
-        (when (= (.getDisplayName player) "Player")
-          (.setDisplayName player "raa0121"))
-        (lingr (str (name2icon (.getDisplayName player)) "logged in now."))))))
+(defn player-login-event* [evt]
+  (let [player (.getPlayer evt)]
+    (when (= (.getDisplayName player) "Player")
+      (.setDisplayName player "raa0121"))
+    (lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
+
+(defn player-login-event []
+  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+     (onPlayerLogin [evt] (player-login-event* evt))))
 
 (defn get-player-quit-listener []
   (c/auto-proxy
@@ -766,7 +766,7 @@
   (when @first-time
     ;(hehehe get-player-quit-listener :PLAYER_QUIT)
     (do
-      (hehehe get-player-login-listener :PLAYER_LOGIN)
+      (hehehe player-login-event :PLAYER_LOGIN)
       (hehehe get-player-move :PLAYER_MOVE)
       (hehehe get-player-chat :PLAYER_CHAT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
