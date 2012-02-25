@@ -342,6 +342,14 @@
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
                 (onBlockPlace [evt] (block-place-event* evt))))
 
+(defn block-break-event* [evt]
+  (let [block (.getBlock evt)]
+    (prn (.getLocation block))))
+
+(defn block-break-event []
+  (c/auto-proxy [org.bukkit.event.block.BlockListener] []
+                (onBlockBreak [evt] (block-break-event* evt))))
+
 (defn player-move-event []
   (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
                   (onPlayerMove [evt] (player-move-event* evt))))
@@ -795,6 +803,7 @@
       (hehehe entity-target-event :ENTITY_TARGET)
       ;(hehehe entity-explosion-prime-event :ENTITY_EXPLOSION_PRIME)
       (hehehe block-place-event :BLOCK_PLACE)
+      (hehehe block-break-event :BLOCK_BREAK)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
       (hehehe vehicle-enter-event :VEHICLE_ENTER)
       (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
