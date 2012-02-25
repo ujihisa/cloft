@@ -77,7 +77,7 @@
 (defn location-in-lisp [location]
   (list
     'org.bukkit.Location.
-    (.getDisplayName (.getWorld location))
+    (.getName (.getWorld location))
     (.getX location)
     (.getY location)
     (.getZ location)
@@ -326,6 +326,9 @@
       (broadcast (.getDisplayName player) " changed arrow skill to ORE")
       (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))))
 
+(defn location-bound? [loc min max]
+  (.isInAABB (.toVector loc) (.toVector min) (.toVector max)))
+
 (defn block-place-event* [evt]
   (let [block (.getBlock evt)]
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
@@ -335,16 +338,18 @@
                (.setVelocity player (vector-from-to player block))
                (doseq [entity (.getNearbyEntities player 4 4 4)]
                  (.setVelocity entity (vector-from-to entity block)))))
-    (build-long block (.getBlockAgainst evt)))
-  (comment (.setCancelled evt true)))
+    (build-long block (.getBlockAgainst evt))
+    (comment (when (location-bound? (.getLocation block) (org.bukkit.Location.  world -75.5 66.0 -25.5) (org.bukkit.Location. world -62.5 128 -4.5))
+      (.setCancelled evt true)))))
 
 (defn block-place-event []
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
                 (onBlockPlace [evt] (block-place-event* evt))))
 
 (defn block-break-event* [evt]
-  (let [block (.getBlock evt)]
-    (prn (.getLocation block))))
+  (comment (let [block (.getBlock evt)]
+    (.setCancelled evt true)
+    (prn (.getLocation block)))))
 
 (defn block-break-event []
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
