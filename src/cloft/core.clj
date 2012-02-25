@@ -329,6 +329,9 @@
 (defn location-bound? [loc min max]
   (.isInAABB (.toVector loc) (.toVector min) (.toVector max)))
 
+(def sanctuary [(org.bukkit.Location. world 45 30 -75)
+                (org.bukkit.Location. world 84 90 -44)])
+
 (defn block-place-event* [evt]
   (let [block (.getBlock evt)]
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
@@ -339,17 +342,17 @@
                (doseq [entity (.getNearbyEntities player 4 4 4)]
                  (.setVelocity entity (vector-from-to entity block)))))
     (build-long block (.getBlockAgainst evt))
-    (comment (when (location-bound? (.getLocation block) (org.bukkit.Location.  world -75.5 66.0 -25.5) (org.bukkit.Location. world -62.5 128 -4.5))
-      (.setCancelled evt true)))))
+    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true))))
 
 (defn block-place-event []
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
                 (onBlockPlace [evt] (block-place-event* evt))))
 
 (defn block-break-event* [evt]
-  (comment (let [block (.getBlock evt)]
-    (.setCancelled evt true)
-    (prn (.getLocation block)))))
+  (let [block (.getBlock evt)]
+    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true))))
 
 (defn block-break-event []
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
@@ -551,15 +554,17 @@
 
 (defn creeper-explosion-2 [evt entity]
   (.setCancelled evt true)
-  (let [loc (.getLocation entity)]
-    (.setType (.getBlock loc) org.bukkit.Material/PUMPKIN)
-    (broadcast "break the bomb before it explodes!")
-    (future-call #(do
-                    (Thread/sleep 7000)
-                    (broadcast "zawa...")
-                    (Thread/sleep 1000)
-                    (when (= (.getType (.getBlock loc)) org.bukkit.Material/PUMPKIN)
-                      (.createExplosion (.getWorld loc) loc 6))))))
+  (if (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+    (prn 'cancelled)
+    (let [loc (.getLocation entity)]
+      (.setType (.getBlock loc) org.bukkit.Material/PUMPKIN)
+      (broadcast "break the bomb before it explodes!")
+      (future-call #(do
+                      (Thread/sleep 7000)
+                      (broadcast "zawa...")
+                      (Thread/sleep 1000)
+                      (when (= (.getType (.getBlock loc)) org.bukkit.Material/PUMPKIN)
+                        (.createExplosion (.getWorld loc) loc 6)))))))
 
 (def creeper-explosion-idx (atom 0))
 (defn entity-explode-event* [evt]
@@ -577,7 +582,9 @@
              ] (rem @creeper-explosion-idx 3)) evt entity)
       (swap! creeper-explosion-idx inc))
     (when (instance? TNTPrimed entity)
-      (prn ['TNT entity]))))
+      (prn ['TNT entity]))
+    (when (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true))))
 
 (defn entity-explode-event []
   (c/auto-proxy [EntityListener] []
