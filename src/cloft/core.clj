@@ -180,6 +180,16 @@
             player
             (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player))))))))
 
+(defn broadcast [& strs]
+  (.broadcastMessage (Bukkit/getServer) (apply str strs)))
+
+(def sanctuary [(org.bukkit.Location. world 45 30 -75)
+                (org.bukkit.Location. world 84 90 -44)])
+(def sanctuary-players (atom #{}))
+
+(defn location-bound? [loc min max]
+  (.isInAABB (.toVector loc) (.toVector min) (.toVector max)))
+
 (defn player-move-event* [evt]
   (let [player (.getPlayer evt)]
     (comment(let [before-y (.getY (.getFrom evt))
@@ -194,6 +204,13 @@
       (.setVelocity player new-velo)))
     (comment(when (> -0.1 (.getY (.getVelocity player)))
       (.setVelocity player (.setY (.clone (.getVelocity player)) -0.1))))
+    (let [name (.getDisplayName player)]
+      (if (get @sanctuary-players name)
+        (when (not (location-bound? (.getLocation player) (first sanctuary) (second sanctuary)))
+          (swap! sanctuary-players disj name))
+        (when (location-bound? (.getLocation player) (first sanctuary) (second sanctuary))
+          (broadcast name " entered the sanctuary.")
+          (swap! sanctuary-players conj name))))
     (when (jumping? evt)
       (player-teleport-machine evt player)
       (player-super-jump evt player))))
@@ -241,9 +258,6 @@
                               org.bukkit.Material/GOLD_ORE
                               org.bukkit.Material/REDSTONE_ORE]]
         (.setType block (rand-nth block-to-choices))))))
-
-(defn broadcast [& strs]
-  (.broadcastMessage (Bukkit/getServer) (apply str strs)))
 
 (def jobs (atom {}))
 
@@ -325,12 +339,6 @@
     (when (= (.getType block) org.bukkit.Material/WORKBENCH)
       (broadcast (.getDisplayName player) " changed arrow skill to ORE")
       (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))))
-
-(defn location-bound? [loc min max]
-  (.isInAABB (.toVector loc) (.toVector min) (.toVector max)))
-
-(def sanctuary [(org.bukkit.Location. world 45 30 -75)
-                (org.bukkit.Location. world 84 90 -44)])
 
 (defn block-place-event* [evt]
   (let [block (.getBlock evt)]
@@ -471,6 +479,7 @@
 (defn periodically []
   (rechain-entity)
   (entity-touch-player-event)
+  (comment (.setHealth v (inc (.getHealth v))))
   (seq (map zombie-player-periodically
             (filter zombie-player? (Bukkit/getOnlinePlayers))))
   nil)
@@ -571,7 +580,7 @@
   (let [entity (.getEntity evt)
         ename (entity2name entity)
         entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
-    (when (and ename (not-empty entities-nearby))
+    (when (and ename (not-empty entities-nearby) (not (instance? entity EnderDragon)))
       (letfn [(join [xs x]
                 (apply str (interpose x xs)))]
         (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))
