@@ -778,8 +778,8 @@
   (prn 'epe))
 
 (defn enderman-pickup-event []
-  (c/auto-proxy [org.bukkit.event.entity.EndermanPickupEvent] []
-                (onEndermanPickup [evt] (enderman-pickup-event* evt))))
+  (comment (c/auto-proxy [EntityChangeBlockEvent] []
+                (onEndermanPickup [evt] (enderman-pickup-event* evt)))))
 
 (defn good-bye-creeper []
   (count (seq (map #(.remove %)
@@ -849,7 +849,7 @@
       (hehehe block-break-event :BLOCK_BREAK)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
       (hehehe vehicle-enter-event :VEHICLE_ENTER)
-      (hehehe enderman-pickup-event :ENDERMAN_PICKUP)
+      ;(hehehe enderman-pickup-event :ENDERMAN_PICKUP)
       (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
   (dosync
     (ref-set first-time false))
