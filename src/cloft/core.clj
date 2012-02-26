@@ -350,8 +350,8 @@
                (doseq [entity (.getNearbyEntities player 4 4 4)]
                  (.setVelocity entity (vector-from-to entity block)))))
     (build-long block (.getBlockAgainst evt))
-    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
-      (.setCancelled evt true))))
+    (comment (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true)))))
 
 (defn block-place-event []
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
@@ -359,8 +359,8 @@
 
 (defn block-break-event* [evt]
   (let [block (.getBlock evt)]
-    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
-      (.setCancelled evt true))))
+    (comment (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true)))))
 
 (defn block-break-event []
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
@@ -528,8 +528,10 @@
 (defn entity-murder-event [evt entity]
   (let [killer (.getKiller entity)]
     (when (instance? Player killer)
+      (when (instance? Giant entity)
+        (.setDroppedExp evt 1000))
       (when (instance? Creeper entity)
-        (.setDroppedExp 20)); killing a creeper is hard.
+        (.setDroppedExp evt 20))
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
       (broadcast (.getDisplayName killer) " killed " (entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
 
