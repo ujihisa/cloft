@@ -215,6 +215,7 @@
       (when (< (.distance (org.bukkit.Location. world 70 66 -58) (.getLocation player)) 1)
         (if (jumping? evt)
           (when (not= @bossbattle-player player)
+            (broadcast player " entered the boss' room!")
             (dosync
               (ref-set bossbattle-player player)))
           (do
@@ -773,6 +774,13 @@
   (c/auto-proxy [org.bukkit.event.vehicle.VehicleListener] []
                 (onVehicleEnter [evt] (vehicle-enter-event* evt))))
 
+(defn enderman-pickup-event* [evt]
+  (prn 'epe))
+
+(defn enderman-pickup-event []
+  (c/auto-proxy [org.bukkit.event.entity.EndermanPickupEvent] []
+                (onEndermanPickup [evt] (enderman-pickup-event* evt))))
+
 (defn good-bye-creeper []
   (count (seq (map #(.remove %)
                    (filter #(instance? Creeper %)
@@ -841,6 +849,7 @@
       (hehehe block-break-event :BLOCK_BREAK)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
       (hehehe vehicle-enter-event :VEHICLE_ENTER)
+      (hehehe enderman-pickup-event :ENDERMAN_PICKUP)
       (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
   (dosync
     (ref-set first-time false))
