@@ -582,7 +582,7 @@
   (let [entity (.getEntity evt)
         ename (entity2name entity)
         entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
-    (when (and ename (not-empty entities-nearby) (not (instance? entity EnderDragon)))
+    (when (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
       (letfn [(join [xs x]
                 (apply str (interpose x xs)))]
         (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))
