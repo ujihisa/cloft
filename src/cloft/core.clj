@@ -350,8 +350,8 @@
                (doseq [entity (.getNearbyEntities player 4 4 4)]
                  (.setVelocity entity (vector-from-to entity block)))))
     (build-long block (.getBlockAgainst evt))
-    (comment (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
-      (.setCancelled evt true)))))
+    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true))))
 
 (defn block-place-event []
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
@@ -359,8 +359,8 @@
 
 (defn block-break-event* [evt]
   (let [block (.getBlock evt)]
-    (comment (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
-      (.setCancelled evt true)))))
+    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true))))
 
 (defn block-break-event []
   (c/auto-proxy [org.bukkit.event.block.BlockListener] []
