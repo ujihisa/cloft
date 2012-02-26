@@ -517,7 +517,7 @@
         (instance? Wolf entity) "Wolf"
         (instance? Zombie entity) "Zombie"
         (instance? TNTPrimed entity) "TNT"
-        :else (class entity)))
+        :else (str (class entity))))
 
 (defn pig-death-event [entity]
   (let [killer (.getKiller entity)]
