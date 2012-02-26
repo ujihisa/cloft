@@ -649,6 +649,14 @@
                           (Thread/sleep 10000)
                           (.remove chicken))))))))
 
+(defn rebirth-from-zombie [evt target]
+  (.setCancelled evt true)
+  (.setMaximumAir target 300) ; default maximum value
+  (.setRemainingAir target 300)
+  (.setHealth target (.getMaxHealth target))
+  (swap! zombie-players disj (.getDisplayName target))
+  (.sendMessage target "You rebirthed as a human."))
+
 (defn get-entity-damage-listener []
   (c/auto-proxy
     [EntityListener] []
@@ -661,12 +669,7 @@
                   (instance? Player target)
                   (zombie-player? target)
                   (= 0 (rand-int 2)))
-            (.setCancelled evt true)
-            (.setMaximumAir target 300) ; default maximum value
-            (.setRemainingAir target 300)
-            (.setHealth target (.getMaxHealth target))
-            (swap! zombie-players disj (.getDisplayName target))
-            (.sendMessage target "You rebirthed as a human."))
+            (rebirth-from-zombie evt target))
           (do
             (when (and
                     (instance? Villager target)
