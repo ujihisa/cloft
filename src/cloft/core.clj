@@ -190,6 +190,7 @@
 (defn location-bound? [loc min max]
   (.isInAABB (.toVector loc) (.toVector min) (.toVector max)))
 
+(def bossbattle-player nil)
 (defn player-move-event* [evt]
   (let [player (.getPlayer evt)]
     (comment(let [before-y (.getY (.getFrom evt))
@@ -210,7 +211,15 @@
           (swap! sanctuary-players disj name))
         (when (location-bound? (.getLocation player) (first sanctuary) (second sanctuary))
           (broadcast name " entered the sanctuary.")
-          (swap! sanctuary-players conj name))))
+          (swap! sanctuary-players conj name)))
+      (when (< (.distance (org.bukkit.Location. world 70 66 -58) (.getLocation player)) 1)
+        (if (jumping? evt)
+          (when (not= @bossbattle-player player)
+            (dosync
+              (ref-set bossbattle-player player)))
+          (do
+            (.sendMessage player "You can't leave")
+            (.setTo evt (.add (.getFrom evt) 0 0.5 0))))))
     (when (jumping? evt)
       (player-teleport-machine evt player)
       (player-super-jump evt player))))
