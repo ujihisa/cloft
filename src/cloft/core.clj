@@ -384,6 +384,13 @@
   (let [player (.getPlayer evt)]
     (when (= (.getDisplayName player) "Player")
       (.setDisplayName player "raa0121"))
+    (future-call #(do
+                    (Thread/sleep 1000)
+                    (if (= "10.0" (apply str (take 4 (.. player getAddress getAddress getHostAddress))))
+                      (do
+                        (.setOp player true)
+                        (prn [player 'is 'op]))
+                      (.setOp player false))))
     (lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn player-login-event []
