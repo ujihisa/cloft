@@ -647,12 +647,11 @@
   (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
 
 (defn player-attacks-pig-event [evt player pig]
-  (let [arrow (.shootArrow pig)
-        enemy (first (filter #(instance? Monster %) (.getNearbyEntities pig 20 20 20)))]
-    (when enemy
-      (.setTarget pig player)
-      (.setVelocity arrow (vector-from-to pig enemy))))
-  (.setCancelled evt true))
+  (when (= 0 (rand-int 2))
+    (future-call #(let [another-pig (.spawn (.getWorld pig) (.getLocation pig) Pig)]
+                    (Thread/sleep 3000)
+                    (when (not (.isDead another-pig))
+                      (.remove another-pig))))))
 
 (defn player-attacks-chicken-event [_ player chicken]
   (when (not= 0 (rand-int 3))
