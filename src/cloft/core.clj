@@ -470,17 +470,17 @@
   (when (= 0 (rand-int 2))
     (.setFoodLevel zplayer (dec (.getFoodLevel zplayer)))))
 
-(def chain (atom {:entity nil :loc nil}))
+(comment (def chain (atom {:entity nil :loc nil})))
 
 (defn chain-entity [entity]
-  (swap! chain assoc :entity entity :loc (.getLocation entity))
+  (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
   (let [block (.getBlockAt world (:loc @chain))]
-    (when (= org.bukkit.Material/AIR (.getType block))
+    (when (not (.isLiquid block))
       (.setType block org.bukkit.Material/WEB))))
 
-(defn rechain-entity []
+(comment (defn rechain-entity []
   (when (:entity @chain)
-    (.teleport (:entity @chain) (:loc @chain))))
+    (.teleport (:entity @chain) (:loc @chain)))))
 
 (def chicken-attacking (atom 0))
 (defn chicken-touch-player [chicken player]
@@ -496,7 +496,7 @@
         (chicken-touch-player chicken player)))))
 
 (defn periodically []
-  (rechain-entity)
+  (comment (rechain-entity))
   (entity-touch-player-event)
   (comment (.setHealth v (inc (.getHealth v))))
   (seq (map zombie-player-periodically
