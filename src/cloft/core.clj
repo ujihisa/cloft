@@ -474,7 +474,7 @@
 
 (defn chain-entity [entity]
   (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
-  (let [block (.getBlockAt world (:loc @chain))]
+  (let [block (.getBlock (.getLocation entity))]
     (when (not (.isLiquid block))
       (.setType block org.bukkit.Material/WEB))))
 
@@ -810,8 +810,8 @@
 
 (def recipe-string-web
   (let [x (org.bukkit.inventory.ShapelessRecipe.
-            (org.bukkit.inventory.ItemStack. org.bukkit.Material/WEB 4))]
-    (.addIngredient x 4 org.bukkit.Material/STRING)
+            (org.bukkit.inventory.ItemStack. org.bukkit.Material/WEB 3))]
+    (.addIngredient x 3 org.bukkit.Material/STRING)
     x))
 
 (def plugin-manager* (Bukkit/getPluginManager))
