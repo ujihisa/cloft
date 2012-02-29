@@ -808,6 +808,12 @@
     (.teleport (ujm) @pre-stalk)
     (.showPlayer player (ujm))))
 
+(def recipe-string-web
+  (let [x (org.bukkit.inventory.ShapelessRecipe.
+            (org.bukkit.inventory.ItemStack. org.bukkit.Material/WEB 4))]
+    (.addIngredient x 4 org.bukkit.Material/STRING)
+    x))
+
 (def plugin-manager* (Bukkit/getPluginManager))
 (def plugin* (.getPlugin plugin-manager* "cloft"))
 
@@ -842,6 +848,7 @@
   (when @first-time
     ;(hehehe get-player-quit-listener :PLAYER_QUIT)
     (do
+      (Bukkit/addRecipe recipe-string-web)
       (hehehe player-login-event :PLAYER_LOGIN)
       (hehehe player-move-event :PLAYER_MOVE)
       (hehehe get-player-chat :PLAYER_CHAT)
