@@ -472,40 +472,6 @@
 
 (comment (def chain (atom {:entity nil :loc nil})))
 
-(defn chain-entity [entity]
-  (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
-  (let [block (.getBlock (.getLocation entity))]
-    (when (not (.isLiquid block))
-      (let [msg (str (.getDisplayName shooter) " chained " (entity2name target))]
-        (.sendMessage shooter msg)
-        (lingr msg))
-      (.setType block org.bukkit.Material/WEB))))
-
-(comment (defn rechain-entity []
-  (when (:entity @chain)
-    (.teleport (:entity @chain) (:loc @chain)))))
-
-(def chicken-attacking (atom 0))
-(defn chicken-touch-player [chicken player]
-  (when (not= @chicken-attacking 0)
-    (.teleport chicken (.getLocation player))
-    (.damage player 3 chicken)))
-
-(defn entity-touch-player-event []
-  (doseq [player (Bukkit/getOnlinePlayers)]
-    (let [entities (.getNearbyEntities player 2 2 2)
-          chickens (filter #(instance? Chicken %) entities)]
-      (doseq [chicken chickens]
-        (chicken-touch-player chicken player)))))
-
-(defn periodically []
-  (comment (rechain-entity))
-  (entity-touch-player-event)
-  (comment (.setHealth v (inc (.getHealth v))))
-  (seq (map zombie-player-periodically
-            (filter zombie-player? (Bukkit/getOnlinePlayers))))
-  nil)
-
 (defn entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
         (instance? CaveSpider entity) "CaveSpider"
@@ -540,6 +506,44 @@
         (instance? Zombie entity) "Zombie"
         (instance? TNTPrimed entity) "TNT"
         :else (str (class entity))))
+
+(defn chain-entity [entity shooter]
+  (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
+  (let [block (.getBlock (.getLocation entity))]
+    (when (not (.isLiquid block))
+      (let [msg (str (.getDisplayName shooter) " chained " (entity2name entity))]
+        (.sendMessage shooter msg)
+        (lingr msg))
+      (.setType block org.bukkit.Material/WEB)
+      (future-call #(do
+                      (Thread/sleep 10000)
+                      (when (= (.getType block) org.bukkit.Material/WEB)
+                        (.setType block org.bukkit.Material/AIR)))))))
+
+(comment (defn rechain-entity []
+  (when (:entity @chain)
+    (.teleport (:entity @chain) (:loc @chain)))))
+
+(def chicken-attacking (atom 0))
+(defn chicken-touch-player [chicken player]
+  (when (not= @chicken-attacking 0)
+    (.teleport chicken (.getLocation player))
+    (.damage player 3 chicken)))
+
+(defn entity-touch-player-event []
+  (doseq [player (Bukkit/getOnlinePlayers)]
+    (let [entities (.getNearbyEntities player 2 2 2)
+          chickens (filter #(instance? Chicken %) entities)]
+      (doseq [chicken chickens]
+        (chicken-touch-player chicken player)))))
+
+(defn periodically []
+  (comment (rechain-entity))
+  (entity-touch-player-event)
+  (comment (.setHealth v (inc (.getHealth v))))
+  (seq (map zombie-player-periodically
+            (filter zombie-player? (Bukkit/getOnlinePlayers))))
+  nil)
 
 (defn pig-death-event [entity]
   (let [killer (.getKiller entity)]
@@ -640,7 +644,7 @@
     (when (and
             (instance? Player shooter)
             (.contains (.getInventory shooter) org.bukkit.Material/WEB))
-      (chain-entity target)
+      (chain-entity target shooter)
       (consume-itemstack (.getInventory shooter) org.bukkit.Material/WEB))))
 
 (defn vector-from-to [ent-from ent-to]
@@ -710,7 +714,6 @@
                 (do
                   (zombieze target)
                   (.sendMessage attacker "You made a friend"))))))))))
-
 
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
