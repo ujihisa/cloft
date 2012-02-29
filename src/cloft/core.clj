@@ -476,6 +476,9 @@
   (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
   (let [block (.getBlock (.getLocation entity))]
     (when (not (.isLiquid block))
+      (let [msg (str (.getDisplayName shooter) " chained " (entity2name target))]
+        (.sendMessage shooter msg)
+        (lingr msg))
       (.setType block org.bukkit.Material/WEB))))
 
 (comment (defn rechain-entity []
@@ -637,9 +640,6 @@
     (when (and
             (instance? Player shooter)
             (.contains (.getInventory shooter) org.bukkit.Material/WEB))
-      (let [msg (str (.getDisplayName shooter) " chained " (entity2name target))]
-        (.sendMessage shooter msg)
-        (lingr msg))
       (chain-entity target)
       (consume-itemstack (.getInventory shooter) org.bukkit.Material/WEB))))
 
