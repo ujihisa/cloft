@@ -417,11 +417,21 @@
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
 (defn player-interact-event* [evt]
-  (prn evt))
+  (when (and
+          (= (.getType (.getClickedBlock evt)) org.bukkit.Material/CAKE_BLOCK)
+          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK))
+    (let [player (.getPlayer evt)
+          death-point (get @player-death-locations (.getDisplayName player))]
+      (if death-point
+        (do
+          (.getChunk death-point)
+          (broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
+          (.teleport player death-point))
+        (.sendMessage player "You didn't die yet.")))))
 
 (defn player-interact-event []
   (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
-     (onPlayerInteractEntity [evt] (player-interact-event* evt))))
+     (onPlayerInteract [evt] (player-interact-event* evt))))
 
 (defn get-player-interact-entity* [evt]
   (let [target (.getRightClicked evt)]
