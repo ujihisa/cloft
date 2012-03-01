@@ -417,17 +417,25 @@
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
 (defn player-interact-event* [evt]
-  (when (and
-          (= (.getType (.getClickedBlock evt)) org.bukkit.Material/CAKE_BLOCK)
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK))
-    (let [player (.getPlayer evt)
-          death-point (get @player-death-locations (.getDisplayName player))]
-      (if death-point
-        (do
-          (.getChunk death-point)
-          (broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
-          (.teleport player death-point))
-        (.sendMessage player "You didn't die yet.")))))
+  (let [player (.getPlayer evt)]
+    (cond
+      (and
+        (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)
+        (= (.getType (.getClickedBlock evt)) org.bukkit.Material/CAKE_BLOCK))
+      (let [ death-point (get @player-death-locations (.getDisplayName player))]
+        (if death-point
+          (do
+            (.getChunk death-point)
+            (broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
+            (.teleport player death-point))
+          (.sendMessage player "You didn't die yet.")))
+      (and
+        (= (.. player (getItemInHand) (getType)) org.bukkit.Material/GOLD_SWORD)
+        (= (.getHealth player) (.getMaxHealth player))
+        (or
+          (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_AIR)
+          (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_BLOCK)))
+      (.throwSnowball player))))
 
 (defn player-interact-event []
   (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
