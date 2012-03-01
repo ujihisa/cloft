@@ -299,7 +299,7 @@
 
 (defn entity-target-event* [evt]
   (when (instance? Creeper (.getEntity evt))
-    (broadcast "Takumi is watching " (.getDisplayName (.getTarget evt)))))
+    (broadcast "Takumi is watching " (.. evt (getTarget) (getDisplayName)))))
 
 (defn entity-target-event []
   (c/auto-proxy [Listener] []
