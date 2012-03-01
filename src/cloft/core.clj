@@ -416,44 +416,44 @@
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
+(defn get-player-interact-entity* [evt]
+  (let [target (.getRightClicked evt)]
+    (letfn [(d [n]
+              (.dropItem (.getWorld target)
+                         (.getLocation target)
+                         (org.bukkit.inventory.ItemStack. n 1)))]
+      (cond
+        ; give wheat to zombie pigman -> pig
+        (and (instance? PigZombie target)
+             (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296))
+        (do
+          (swap-entity target Pig)
+          (consume-item (.getPlayer evt)))
+        ; give zombeef to pig -> zombie pigman
+        (and (instance? Pig target)
+             (= (.getTypeId (.getItemInHand (.getPlayer evt))) 367))
+        (do
+          (swap-entity target PigZombie)
+          (consume-item (.getPlayer evt)))
+        ; right-click villager -> cake
+        (instance? Villager target) (d 92)
+        ; right-click zombie -> zombeef
+        (and (instance? Zombie target) (not (instance? PigZombie target))) (d 367)
+        ; right-click skelton -> arrow
+        (instance? Skeleton target) (d 262)
+        ; right-click spider -> string
+        (instance? Spider target) (d 287)
+        ; right-click squid -> chat and hungry
+        (instance? Squid target)
+        (let [player (.getPlayer evt)]
+          (.chat player "ikakawaiidesu")
+          (.setFoodLevel player 0))
+        ; right-click player -> makes it hungry
+        (instance? Player target) (touch-player target)))))
+
 (defn get-player-interact-entity []
-  (c/auto-proxy
-    [org.bukkit.event.player.PlayerListener] []
-    (onPlayerInteractEntity
-      [evt]
-      (let [target (.getRightClicked evt)]
-        (letfn [(d [n]
-                  (.dropItem (.getWorld target)
-                             (.getLocation target)
-                             (org.bukkit.inventory.ItemStack. n 1)))]
-          (cond
-            ; give wheat to zombie pigman -> pig
-            (and (instance? PigZombie target)
-                 (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296))
-            (do
-              (swap-entity target Pig)
-              (consume-item (.getPlayer evt)))
-            ; give zombeef to pig -> zombie pigman
-            (and (instance? Pig target)
-                 (= (.getTypeId (.getItemInHand (.getPlayer evt))) 367))
-            (do
-              (swap-entity target PigZombie)
-              (consume-item (.getPlayer evt)))
-            ; right-click villager -> cake
-            (instance? Villager target) (d 92)
-            ; right-click zombie -> zombeef
-            (and (instance? Zombie target) (not (instance? PigZombie target))) (d 367)
-            ; right-click skelton -> arrow
-            (instance? Skeleton target) (d 262)
-            ; right-click spider -> string
-            (instance? Spider target) (d 287)
-            ; right-click squid -> chat and hungry
-            (instance? Squid target)
-            (let [player (.getPlayer evt)]
-              (.chat player "ikakawaiidesu")
-              (.setFoodLevel player 0))
-            ; right-click player -> makes it hungry
-            (instance? Player target) (touch-player target)))))))
+  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+     (onPlayerInteractEntity [evt] (get-player-interact-entity* evt))))
 
 (defn player-level-change-event* [evt]
   (when (< (.getOldLevel evt) (.getNewLevel evt))
