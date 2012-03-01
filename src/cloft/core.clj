@@ -416,6 +416,13 @@
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
+(defn player-interact-event* [evt]
+  (prn evt))
+
+(defn player-interact-event []
+  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+     (onPlayerInteractEntity [evt] (player-interact-event* evt))))
+
 (defn get-player-interact-entity* [evt]
   (let [target (.getRightClicked evt)]
     (letfn [(d [n]
@@ -855,6 +862,7 @@
       (hehehe player-login-event :PLAYER_LOGIN)
       (hehehe player-move-event :PLAYER_MOVE)
       (hehehe get-player-chat :PLAYER_CHAT)
+      (hehehe player-interact-event :PLAYER_INTERACT)
       (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
       (hehehe player-level-change-event :PLAYER_LEVEL_CHANGE)
       (hehehe entity-death-event :ENTITY_DEATH)
