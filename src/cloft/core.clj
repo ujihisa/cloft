@@ -1,8 +1,9 @@
 (ns cloft.core
   (:require [cljminecraft.core :as c])
-  (:require [clojure.core.match :as m])
+  ;(:require [clojure.core.match :as m])
+  (:require [clojure.string :as s])
   (:import [org.bukkit Bukkit])
-  (:import [org.bukkit.event Event Event$Type])
+  (:import [org.bukkit.event Listener])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
             EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
@@ -14,13 +15,13 @@
             ThrownPotion TNTPrimed Vehicle Villager WaterMob Weather Wolf
             Zombie])
   (:import [org.bukkit.event.entity CreatureSpawnEvent CreeperPowerEvent
-            EndermanPickupEvent EndermanPlaceEvent EntityChangeBlockEvent
+            EntityChangeBlockEvent
             EntityCombustByBlockEvent EntityCombustByEntityEvent
             EntityCombustEvent EntityCreatePortalEvent EntityDamageByBlockEvent
-            EntityDamageByEntityEvent EntityDamageByProjectileEvent
+            EntityDamageByEntityEvent
             EntityDamageEvent EntityDeathEvent EntityEvent EntityExplodeEvent
             EntityDamageEvent$DamageCause
-            EntityInteractEvent EntityListener EntityPortalEnterEvent
+            EntityInteractEvent EntityPortalEnterEvent
             EntityRegainHealthEvent EntityShootBowEvent EntityTameEvent
             ;EntityTargetEvent EntityTeleportEvent ExplosionPrimeEvent
             EntityTargetEvent ExplosionPrimeEvent
@@ -70,7 +71,7 @@
 ;
 ;(defn get-blocklistener []
 ;  (c/auto-proxy
-;   [org.bukkit.event.block.BlockListener] []
+;   [Listener] []
 ;   (onBlockBreak [evt] (if (.isCancelled evt) nil (block-break evt)))
 ;   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
 ;  )
@@ -293,7 +294,7 @@
                         )))))))
 
 (defn entity-shoot-bow-event []
-  (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
+  (c/auto-proxy [Listener] []
                 (onEntityShootBow [evt] (entity-shoot-bow-event* evt))))
 
 (defn entity-target-event* [evt]
@@ -301,14 +302,14 @@
     (broadcast "Takumi is watching " (.getDisplayName (.getTarget evt)))))
 
 (defn entity-target-event []
-  (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
+  (c/auto-proxy [Listener] []
                 (onEntityTarget [evt] (entity-target-event* evt))))
 
 (defn entity-explosion-prime-event* [evt]
   nil)
 
 (defn entity-explosion-prime-event []
-  (c/auto-proxy [org.bukkit.event.entity.EntityListener] []
+  (c/auto-proxy [Listener] []
                 (onEntityExplosionPrime [evt] (entity-explosion-prime-event* evt))))
 
 (defn build-long [block block-against]
@@ -365,7 +366,7 @@
       (.setCancelled evt true))))
 
 (defn block-place-event []
-  (c/auto-proxy [org.bukkit.event.block.BlockListener] []
+  (c/auto-proxy [Listener] []
                 (onBlockPlace [evt] (block-place-event* evt))))
 
 (defn block-break-event* [evt]
@@ -374,11 +375,11 @@
       (.setCancelled evt true))))
 
 (defn block-break-event []
-  (c/auto-proxy [org.bukkit.event.block.BlockListener] []
+  (c/auto-proxy [Listener] []
                 (onBlockBreak [evt] (block-break-event* evt))))
 
 (defn player-move-event []
-  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+  (c/auto-proxy [Listener] []
                   (onPlayerMove [evt] (player-move-event* evt))))
 
 (defn player-login-event* [evt]
@@ -395,19 +396,19 @@
     (lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn player-login-event []
-  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+  (c/auto-proxy [Listener] []
      (onPlayerLogin [evt] (player-login-event* evt))))
 
 (defn get-player-quit-listener []
   (c/auto-proxy
-    [org.bukkit.event.player.PlayerListener] []
+    [Listener] []
     (onPlayerQuit
       [evt]
       (lingr (str (name2icon (.getDisplayName (.getPlayer evt))) "quitted.")))))
 
 (defn get-player-chat []
   (c/auto-proxy
-    [org.bukkit.event.player.PlayerListener] []
+    [Listener] []
     (onPlayerChat
       [evt]
       (let [name (.getDisplayName (.getPlayer evt))]
@@ -485,7 +486,7 @@
     (broadcast "Level up! "(.getDisplayName (.getPlayer evt)) " is Lv" (.getNewLevel evt))))
 
 (defn player-level-change-event []
-  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+  (c/auto-proxy [Listener] []
                 (onPlayerLevelChange [evt] (player-level-change-event* evt))))
 
 ; internal
@@ -598,7 +599,7 @@
       (and (instance? LivingEntity entity) (.getKiller entity)) (entity-murder-event evt entity))))
 
 (defn entity-death-event []
-  (c/auto-proxy [EntityListener] []
+  (c/auto-proxy [Listener] []
                 (onEntityDeath [evt] (entity-death-event* evt))))
 
 (defn creeper-explosion-1 [evt entity]
@@ -649,7 +650,7 @@
       (.setCancelled evt true))))
 
 (defn entity-explode-event []
-  (c/auto-proxy [EntityListener] []
+  (c/auto-proxy [Listener] []
                 (onEntityExplode [evt] (entity-explode-event* evt))))
 
 (defn zombieze [entity]
@@ -706,7 +707,7 @@
 
 (defn get-entity-damage-listener []
   (c/auto-proxy
-    [EntityListener] []
+    [Listener] []
     (onEntityDamage [evt]
       (let [target (.getEntity evt)
             attacker (when (instance? EntityDamageByEntityEvent evt)
@@ -774,7 +775,7 @@
 
 (defn get-entity-projectile-hit-listener []
   (c/auto-proxy
-    [EntityListener] []
+    [Listener] []
     (onProjectileHit [evt]
       (let [entity (.getEntity evt)]
         (cond
@@ -807,15 +808,15 @@
           (.teleport vehicle (.add (.getLocation destination) 0 3 0)))))))
 
 (defn vehicle-enter-event []
-  (c/auto-proxy [org.bukkit.event.vehicle.VehicleListener] []
+  (c/auto-proxy [Listener] []
                 (onVehicleEnter [evt] (vehicle-enter-event* evt))))
 
-(defn enderman-pickup-event* [evt]
-  (prn 'epe))
+(comment (defn enderman-pickup-event* [evt]
+  (prn 'epe)))
 
-(defn enderman-pickup-event []
-  (c/auto-proxy [EntityListener] []
-                (onEndermanPickup [evt] (enderman-pickup-event* evt))))
+(comment (defn enderman-pickup-event []
+  (c/auto-proxy [Listener] []
+                (onEndermanPickup [evt] (enderman-pickup-event* evt)))))
 
 (defn good-bye-creeper []
   (count (seq (map #(.remove %)
@@ -849,7 +850,7 @@
   (let [listener (f)]
     (.registerEvent
       plugin-manager*
-      (label c/event-types)
+      ;(label c/event-types)
       listener
       (:Normal c/event-priorities)
       plugin*)))
@@ -893,7 +894,7 @@
       (hehehe block-break-event :BLOCK_BREAK)
       (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
       (hehehe vehicle-enter-event :VEHICLE_ENTER)
-      (hehehe enderman-pickup-event :ENDERMAN_PICKUP)
+      ;(hehehe enderman-pickup-event :ENDERMAN_PICKUP)
       (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
   (dosync
     (ref-set first-time false))
