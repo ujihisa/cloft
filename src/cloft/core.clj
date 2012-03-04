@@ -439,7 +439,7 @@
       (.throwSnowball player))))
 
 (defn player-interact-event []
-  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+  (c/auto-proxy [Listener] []
      (onPlayerInteract [evt] (player-interact-event* evt))))
 
 (defn get-player-interact-entity* [evt]
@@ -478,7 +478,7 @@
         (instance? Player target) (touch-player target)))))
 
 (defn get-player-interact-entity []
-  (c/auto-proxy [org.bukkit.event.player.PlayerListener] []
+  (c/auto-proxy [Listener] []
      (onPlayerInteractEntity [evt] (get-player-interact-entity* evt))))
 
 (defn player-level-change-event* [evt]
@@ -848,11 +848,11 @@
 
 (defn hehehe [f label]
   (let [listener (f)]
-    (.registerEvent
+    (.registerEvents
       plugin-manager*
       ;(label c/event-types)
       listener
-      (:Normal c/event-priorities)
+      ;(:Normal c/event-priorities)
       plugin*)))
 
 (def first-time (ref true))
