@@ -2,7 +2,6 @@
   ;(:require [clojure.core.match :as m])
   (:require [clojure.string :as s])
   (:import [org.bukkit Bukkit])
-  (:import [org.bukkit.event Listener])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
             EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
@@ -195,7 +194,7 @@
   (prn evt))
 
 (def bossbattle-player nil)
-(defn player-move-event* [evt]
+(defn player-move-event [evt]
   (let [player (.getPlayer evt)]
     (comment(let [before-y (.getY (.getFrom evt))
           after-y (.getY (.getTo evt))]
