@@ -64,6 +64,16 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
 
     /* begin auto-generated code */
     @EventHandler
+    public void onPlayerBedEnter(PlayerBedEnterEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-bed-enter-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onPlayerBedLeave(PlayerBedLeaveEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-bed-leave-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onPlayerChat(PlayerChatEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-chat-event");
         if (f.isBound()) f.invoke(event);
