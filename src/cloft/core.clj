@@ -797,7 +797,7 @@
 
 (defn on-enable [plugin]
   (Bukkit/addRecipe recipe-string-web)
-  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)
+  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) (.getPlugin plugin-manager* "cloft") (fn [] (periodically)) 50 50)
   (lingr "cloft plugin running..."))
 
 ;  (lingr "cloft plugin stopping...")
