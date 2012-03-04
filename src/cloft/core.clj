@@ -436,7 +436,15 @@
         (or
           (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_AIR)
           (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_BLOCK)))
-      (.throwSnowball player))))
+      (.throwSnowball player)
+      (and
+        (= (.. evt (getMaterial)) org.bukkit.Material/MILK_BUCKET)
+        (or
+          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
+      (do
+        (.damage player 8)
+        (.sendMessage player "you drunk milk")))))
 
 (defn player-interact-event []
   (c/auto-proxy [Listener] []
@@ -554,7 +562,7 @@
 (defn chicken-touch-player [chicken player]
   (when (not= @chicken-attacking 0)
     (.teleport chicken (.getLocation player))
-    (.damage player 3 chicken)))
+    (.damage player 8 chicken)))
 
 (defn entity-touch-player-event []
   (doseq [player (Bukkit/getOnlinePlayers)]
