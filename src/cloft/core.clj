@@ -416,45 +416,41 @@
         (.damage player 8)
         (.sendMessage player "you drunk milk")))))
 
-;(defn get-player-interact-entity* [evt]
-;  (let [target (.getRightClicked evt)]
-;    (letfn [(d [n]
-;              (.dropItem (.getWorld target)
-;                         (.getLocation target)
-;                         (org.bukkit.inventory.ItemStack. n 1)))]
-;      (cond
-;        ; give wheat to zombie pigman -> pig
-;        (and (instance? PigZombie target)
-;             (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296))
-;        (do
-;          (swap-entity target Pig)
-;          (consume-item (.getPlayer evt)))
-;        ; give zombeef to pig -> zombie pigman
-;        (and (instance? Pig target)
-;             (= (.getTypeId (.getItemInHand (.getPlayer evt))) 367))
-;        (do
-;          (swap-entity target PigZombie)
-;          (consume-item (.getPlayer evt)))
-;        ; right-click villager -> cake
-;        (instance? Villager target) (d 92)
-;        ; right-click zombie -> zombeef
-;        (and (instance? Zombie target) (not (instance? PigZombie target))) (d 367)
-;        ; right-click skelton -> arrow
-;        (instance? Skeleton target) (d 262)
-;        ; right-click spider -> string
-;        (instance? Spider target) (d 287)
-;        ; right-click squid -> chat and hungry
-;        (instance? Squid target)
-;        (let [player (.getPlayer evt)]
-;          (.chat player "ikakawaiidesu")
-;          (.setFoodLevel player 0))
-;        ; right-click player -> makes it hungry
-;        (instance? Player target) (touch-player target)))))
-;
-;(defn get-player-interact-entity []
-;  (c/auto-proxy [Listener] []
-;     (onPlayerInteractEntity [evt] (get-player-interact-entity* evt))))
-;
+(defn player-interact-entity-event [evt]
+  (let [target (.getRightClicked evt)]
+    (letfn [(d [n]
+              (.dropItem (.getWorld target)
+                         (.getLocation target)
+                         (org.bukkit.inventory.ItemStack. n 1)))]
+      (cond
+        ; give wheat to zombie pigman -> pig
+        (and (instance? PigZombie target)
+             (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296))
+        (do
+          (swap-entity target Pig)
+          (consume-item (.getPlayer evt)))
+        ; give zombeef to pig -> zombie pigman
+        (and (instance? Pig target)
+             (= (.getTypeId (.getItemInHand (.getPlayer evt))) 367))
+        (do
+          (swap-entity target PigZombie)
+          (consume-item (.getPlayer evt)))
+        ; right-click villager -> cake
+        (instance? Villager target) (d 92)
+        ; right-click zombie -> zombeef
+        (and (instance? Zombie target) (not (instance? PigZombie target))) (d 367)
+        ; right-click skelton -> arrow
+        (instance? Skeleton target) (d 262)
+        ; right-click spider -> string
+        (instance? Spider target) (d 287)
+        ; right-click squid -> chat and hungry
+        (instance? Squid target)
+        (let [player (.getPlayer evt)]
+          (.chat player "ikakawaiidesu")
+          (.setFoodLevel player 0))
+        ; right-click player -> makes it hungry
+        (instance? Player target) (touch-player target)))))
+
 (defn player-level-change-event [evt]
   (when (< (.getOldLevel evt) (.getNewLevel evt))
     (broadcast "Level up! "(.getDisplayName (.getPlayer evt)) " is Lv" (.getNewLevel evt))))
@@ -667,42 +663,39 @@
   (swap! zombie-players disj (.getDisplayName target))
   (.sendMessage target "You rebirthed as a human."))
 
-;(defn get-entity-damage-listener []
-;  (c/auto-proxy
-;    [Listener] []
-;    (onEntityDamage [evt]
-;      (let [target (.getEntity evt)
-;            attacker (when (instance? EntityDamageByEntityEvent evt)
-;                       (.getDamager evt))]
-;        (if (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
-;          (when (and
-;                  (instance? Player target)
-;                  (zombie-player? target)
-;                  (= 0 (rand-int 2)))
-;            (rebirth-from-zombie evt target))
-;          (do
-;            (when (and
-;                    (instance? Villager target)
-;                    (instance? EntityDamageByEntityEvent evt)
-;                    (instance? Player attacker))
-;              (lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
-;              (.damage attacker (.getDamage evt)))
-;            (when (instance? Arrow attacker)
-;              (arrow-attacks-by-player-event evt attacker target))
-;            (when (and (instance? Player attacker) (instance? Pig target))
-;              (player-attacks-pig-event evt attacker target))
-;            (when (and (instance? Player attacker) (instance? Chicken target))
-;              (player-attacks-chicken-event evt attacker target))
-;            (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
-;              (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
-;                (if (zombie-player? target)
-;                  (.setCancelled evt true)
-;                  (zombieze target)))
-;              (when (and (instance? Player attacker) (zombie-player? attacker))
-;                (do
-;                  (zombieze target)
-;                  (.sendMessage attacker "You made a friend"))))))))))
-;
+(defn entity-damage-event [evt]
+  (let [target (.getEntity evt)
+        attacker (when (instance? EntityDamageByEntityEvent evt)
+                   (.getDamager evt))]
+    (if (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
+      (when (and
+              (instance? Player target)
+              (zombie-player? target)
+              (= 0 (rand-int 2)))
+        (rebirth-from-zombie evt target))
+      (do
+        (when (and
+                (instance? Villager target)
+                (instance? EntityDamageByEntityEvent evt)
+                (instance? Player attacker))
+          (lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
+          (.damage attacker (.getDamage evt)))
+        (when (instance? Arrow attacker)
+          (arrow-attacks-by-player-event evt attacker target))
+        (when (and (instance? Player attacker) (instance? Pig target))
+          (player-attacks-pig-event evt attacker target))
+        (when (and (instance? Player attacker) (instance? Chicken target))
+          (player-attacks-chicken-event evt attacker target))
+        (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
+          (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
+            (if (zombie-player? target)
+              (.setCancelled evt true)
+              (zombieze target)))
+          (when (and (instance? Player attacker) (zombie-player? attacker))
+            (do
+              (zombieze target)
+              (.sendMessage attacker "You made a friend"))))))))
+
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
@@ -802,71 +795,9 @@
     (.addIngredient x 3 org.bukkit.Material/STRING)
     x))
 
-;(def plugin-manager* (Bukkit/getPluginManager))
-;(def plugin* (.getPlugin plugin-manager* "cloft"))
-;
-;(defn hehehe [f label]
-;  (let [listener (f)]
-;    (.registerEvents
-;      plugin-manager*
-;      ;(label c/event-types)
-;      listener
-;      ;(:Normal c/event-priorities)
-;      plugin*)))
-;
-;(def first-time (ref true))
-;
-;(defn enable-plugin [plugin]
-;    ;(def plugin-desc* (.getDescription plugin*))
-;
-;    ;(let [listener (get-blocklistener)]
-;    ;  (.registerEvent
-;    ;    plugin-manager*
-;    ;    (:BLOCK_BREAK c/event-types)
-;    ;    listener
-;    ;    (:Normal c/event-priorities)
-;    ;    plugin*)
-;    ;  (.registerEvent
-;    ;    plugin-manager*
-;    ;    (:SIGN_CHANGE c/event-types)
-;    ;    listener
-;    ;    (:Normal c/event-priorities)
-;    ;    plugin*))
-;
-;  (when @first-time
-;    ;(hehehe get-player-quit-listener :PLAYER_QUIT)
-;    (do
-;      (Bukkit/addRecipe recipe-string-web)
-;      (hehehe player-login-event :PLAYER_LOGIN)
-;      (hehehe player-move-event :PLAYER_MOVE)
-;      (hehehe get-player-chat :PLAYER_CHAT)
-;      (hehehe player-interact-event :PLAYER_INTERACT)
-;      (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
-;      (hehehe player-level-change-event :PLAYER_LEVEL_CHANGE)
-;      (hehehe entity-death-event :ENTITY_DEATH)
-;      (hehehe entity-explode-event :ENTITY_EXPLODE)
-;      (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
-;      (hehehe entity-shoot-bow-event :ENTITY_SHOOT_BOW)
-;      (hehehe entity-target-event :ENTITY_TARGET)
-;      ;(hehehe entity-explosion-prime-event :ENTITY_EXPLOSION_PRIME)
-;      (hehehe block-place-event :BLOCK_PLACE)
-;      (hehehe block-break-event :BLOCK_BREAK)
-;      (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
-;      (hehehe vehicle-enter-event :VEHICLE_ENTER)
-;      ;(hehehe enderman-pickup-event :ENDERMAN_PICKUP)
-;      (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
-;  (dosync
-;    (ref-set first-time false))
-;  (lingr "cloft plugin running...")
-;  (c/log-info "cloft started"))
-;
-;(defn disable-plugin [plugin]
-;  (lingr "cloft plugin stopping...")
-;  (c/log-info "cloft stopped"))
-;
-;(defn restart []
-;  (.disablePlugin plugin-manager* plugin*)
-;  (.enablePlugin plugin-manager* plugin*))
-
 (defn on-enable [plugin]
+  (Bukkit/addRecipe recipe-string-web)
+  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)
   (lingr "cloft plugin running..."))
+
+;  (lingr "cloft plugin stopping...")
