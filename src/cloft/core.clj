@@ -520,7 +520,7 @@
 (defn chicken-touch-player [chicken player]
   (when (not= @chicken-attacking 0)
     (.teleport chicken (.getLocation player))
-    (.damage player 8 chicken)))
+    (.damage player 1 chicken)))
 
 (defn periodically-entity-touch-player-event []
   (doseq [player (Bukkit/getOnlinePlayers)]
@@ -728,7 +728,7 @@
         ))
     ))
 
-(defn entity-projectile-hit-event [evt]
+(defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
         (cond
           (instance? Fireball entity) (.setYield entity 0.0)
