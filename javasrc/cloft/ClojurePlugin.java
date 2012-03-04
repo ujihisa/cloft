@@ -12,7 +12,10 @@ import java.net.URL;
 import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Event;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.block.*;
+import org.bukkit.event.vehicle.*;
 
 public class ClojurePlugin extends JavaPlugin implements Listener {
     public void onEnable() {
@@ -37,6 +40,12 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
             onEnable(name+".core", "disable-plugin");
         }
         */
+    }
+
+    @EventHandler
+    public void onPlayerChat(PlayerChatEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-chat");
+        if (f.isBound()) f.invoke(event);
     }
 
     @EventHandler
