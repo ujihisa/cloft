@@ -1,5 +1,6 @@
 (ns cloft.core
   ;(:require [clojure.core.match :as m])
+  (:require [swank.swank])
   (:require [clojure.string :as s])
   (:import [org.bukkit Bukkit])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
@@ -794,7 +795,10 @@
     (.addIngredient x 3 org.bukkit.Material/STRING)
     x))
 
+(defonce swank* nil)
 (defn on-enable [plugin]
+  (when (nil? swank*)
+    (def swank* (swank.swank/start-repl 4005)))
   (Bukkit/addRecipe recipe-string-web)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (periodically)) 50 50)
   (lingr "cloft plugin running..."))
