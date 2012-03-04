@@ -42,6 +42,13 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         */
     }
 
+    /*
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-interact");
+        if (f.isBound()) f.invoke(event);
+    }
+
     @EventHandler
     public void onPlayerChat(PlayerChatEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-chat");
@@ -53,6 +60,100 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-login");
         if (f.isBound()) f.invoke(event);
     }
+    */
+
+    /* begin auto-generated code */
+    @EventHandler
+    public void onPlayerChat(PlayerChatEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-chat-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-interact-entity-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-interact-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onPlayerLevelChange(PlayerLevelChangeEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-level-change-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onPlayerLogin(PlayerLoginEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-login-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-move-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onEntityDamage(EntityDamageEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-damage-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onEntityDeath(EntityDeathEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-death-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-explode-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onEntityShootBow(EntityShootBowEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-shoot-bow-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onEntityTarget(EntityTargetEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-target-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onExplosionPrime(ExplosionPrimeEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "explosion-prime-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onProjectileHit(ProjectileHitEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "projectile-hit-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "block-break-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onBlockDamage(BlockDamageEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "block-damage-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "block-place-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onBlockRedstone(BlockRedstoneEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "block-redstone-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onVehicleEnter(VehicleEnterEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-enter-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    /* end auto-generated code */
 
     private void invokeClojureFunc(String enableFunction, Object arg) {
         String ns = "cloft.core";

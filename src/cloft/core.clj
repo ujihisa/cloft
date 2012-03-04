@@ -191,6 +191,9 @@
 (defn location-bound? [loc min max]
   (.isInAABB (.toVector loc) (.toVector min) (.toVector max)))
 
+(defn event [evt]
+  (prn evt))
+
 (def bossbattle-player nil)
 (defn player-move-event* [evt]
   (let [player (.getPlayer evt)]
@@ -276,7 +279,7 @@
 (defn add-bowgun-player [name]
   (swap! bowgun-players conj name))
 
-(defn entity-shoot-bow-event* [evt]
+(defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
       (when (.isSneaking shooter)
@@ -292,25 +295,13 @@
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
                         )))))))
 
-;(defn entity-shoot-bow-event []
-;  (c/auto-proxy [Listener] []
-;                (onEntityShootBow [evt] (entity-shoot-bow-event* evt))))
-;
-;(defn entity-target-event* [evt]
-;  (when (instance? Creeper (.getEntity evt))
-;    (broadcast "Takumi is watching " (.. evt (getTarget) (getDisplayName)))))
-;
-;(defn entity-target-event []
-;  (c/auto-proxy [Listener] []
-;                (onEntityTarget [evt] (entity-target-event* evt))))
-;
-;(defn entity-explosion-prime-event* [evt]
-;  nil)
-;
-;(defn entity-explosion-prime-event []
-;  (c/auto-proxy [Listener] []
-;                (onEntityExplosionPrime [evt] (entity-explosion-prime-event* evt))))
-;
+(defn entity-target-event [evt]
+  (when (instance? Creeper (.getEntity evt))
+    (broadcast "Takumi is watching " (.. evt (getTarget) (getDisplayName)))))
+
+(defn entity-explosion-prime-event [evt]
+  nil)
+
 ;(defn build-long [block block-against]
 ;  (comment (when (= (.getType block) (.getType block-against))
 ;    (let [world (.getWorld block)
@@ -323,81 +314,65 @@
 ;          (when (= (.getType newblock) org.bukkit.Material/AIR)
 ;            (.setType newblock (.getType block)))))))))
 ;
-;(defn skillchange [player block block-against]
-;  (when (and
-;          (every? identity (map
-;                             #(=
-;                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-;                                org.bukkit.Material/STONE)
-;                             [0 0 -1 1] [-1 1 0 0]))
-;          (every? identity (map
-;                             #(not=
-;                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-;                                org.bukkit.Material/STONE)
-;                             [-1 1 0 0] [-1 1 0 0])))
-;    (when (= (.getType block) org.bukkit.Material/TORCH)
-;      (broadcast (.getDisplayName player) " changed arrow skill to TORCH")
-;      (swap! jobs assoc (.getDisplayName player) arrow-skill-torch))
-;    (when (= (.getType block) org.bukkit.Material/YELLOW_FLOWER)
-;      (broadcast (.getDisplayName player) " changed arrow skill to TELEPORT")
-;      (swap! jobs assoc (.getDisplayName player) arrow-skill-teleport))
-;    (when (= (.getType block) org.bukkit.Material/RED_ROSE)
-;      (broadcast (.getDisplayName player) " changed arrow skill to FIRE")
-;      (swap! jobs assoc (.getDisplayName player) arrow-skill-fire))
-;    (when (= (.getType block) org.bukkit.Material/SAPLING)
-;      (broadcast (.getDisplayName player) " changed arrow skill to TREE")
-;      (swap! jobs assoc (.getDisplayName player) arrow-skill-tree))
-;    (when (= (.getType block) org.bukkit.Material/WORKBENCH)
-;      (broadcast (.getDisplayName player) " changed arrow skill to ORE")
-;      (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))))
-;
-;(defn block-place-event* [evt]
-;  (let [block (.getBlock evt)]
-;    (comment (.spawn (.getWorld block) (.getLocation block) Pig))
-;    (let [player (.getPlayer evt)]
-;      (skillchange player block (.getBlockAgainst evt))
-;      (comment (prn (vector-from-to block player))
-;               (.setVelocity player (vector-from-to player block))
-;               (doseq [entity (.getNearbyEntities player 4 4 4)]
-;                 (.setVelocity entity (vector-from-to entity block)))))
-;    (build-long block (.getBlockAgainst evt))
-;    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
-;      (.setCancelled evt true))))
-;
-;(defn block-place-event []
-;  (c/auto-proxy [Listener] []
-;                (onBlockPlace [evt] (block-place-event* evt))))
-;
-;(defn block-break-event* [evt]
-;  (let [block (.getBlock evt)]
-;    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
-;      (.setCancelled evt true))))
-;
-;(defn block-break-event []
-;  (c/auto-proxy [Listener] []
-;                (onBlockBreak [evt] (block-break-event* evt))))
-;
-;(defn player-move-event []
-;  (c/auto-proxy [Listener] []
-;                  (onPlayerMove [evt] (player-move-event* evt))))
-;
-;(defn player-login-event* [evt]
-;  (let [player (.getPlayer evt)]
-;    (when (= (.getDisplayName player) "Player")
-;      (.setDisplayName player "raa0121"))
-;    (future-call #(do
-;                    (Thread/sleep 1000)
-;                    (if (= "10.0" (apply str (take 4 (.. player getAddress getAddress getHostAddress))))
-;                      (do
-;                        (.setOp player true)
-;                        (prn [player 'is 'op]))
-;                      (.setOp player false))))
-;    (lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
-;
-;(defn player-login-event []
-;  (c/auto-proxy [Listener] []
-;     (onPlayerLogin [evt] (player-login-event* evt))))
-;
+(defn skillchange [player block block-against]
+  (when (and
+          (every? identity (map
+                             #(=
+                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                                org.bukkit.Material/STONE)
+                             [0 0 -1 1] [-1 1 0 0]))
+          (every? identity (map
+                             #(not=
+                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                                org.bukkit.Material/STONE)
+                             [-1 1 0 0] [-1 1 0 0])))
+    (when (= (.getType block) org.bukkit.Material/TORCH)
+      (broadcast (.getDisplayName player) " changed arrow skill to TORCH")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-torch))
+    (when (= (.getType block) org.bukkit.Material/YELLOW_FLOWER)
+      (broadcast (.getDisplayName player) " changed arrow skill to TELEPORT")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-teleport))
+    (when (= (.getType block) org.bukkit.Material/RED_ROSE)
+      (broadcast (.getDisplayName player) " changed arrow skill to FIRE")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-fire))
+    (when (= (.getType block) org.bukkit.Material/SAPLING)
+      (broadcast (.getDisplayName player) " changed arrow skill to TREE")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-tree))
+    (when (= (.getType block) org.bukkit.Material/WORKBENCH)
+      (broadcast (.getDisplayName player) " changed arrow skill to ORE")
+      (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))))
+
+(defn block-place-event [evt]
+  (let [block (.getBlock evt)]
+    (comment (.spawn (.getWorld block) (.getLocation block) Pig))
+    (let [player (.getPlayer evt)]
+      (skillchange player block (.getBlockAgainst evt))
+      (comment (prn (vector-from-to block player))
+               (.setVelocity player (vector-from-to player block))
+               (doseq [entity (.getNearbyEntities player 4 4 4)]
+                 (.setVelocity entity (vector-from-to entity block)))))
+    ;(build-long block (.getBlockAgainst evt))
+    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true))))
+
+(defn block-break-event [evt]
+  (let [block (.getBlock evt)]
+    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true))))
+
+(defn player-login-event [evt]
+  (let [player (.getPlayer evt)]
+    (when (= (.getDisplayName player) "Player")
+      (.setDisplayName player "raa0121"))
+    (future-call #(do
+                    (Thread/sleep 1000)
+                    (if (= "10.0" (apply str (take 4 (.. player getAddress getAddress getHostAddress))))
+                      (do
+                        (.setOp player true)
+                        (prn [player 'is 'op]))
+                      (.setOp player false))))
+    (lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
+
 ;(defn get-player-quit-listener []
 ;  (c/auto-proxy
 ;    [Listener] []
@@ -405,14 +380,14 @@
 ;      [evt]
 ;      (lingr (str (name2icon (.getDisplayName (.getPlayer evt))) "quitted.")))))
 
-(defn player-chat [evt]
+(defn player-chat-event [evt]
   (let [name (.getDisplayName (.getPlayer evt))]
     (lingr (str (name2icon name) (.getMessage evt)))))
 
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
-(defn player-interact-event* [evt]
+(defn player-interact-event [evt]
   (let [player (.getPlayer evt)]
     (cond
       (and
@@ -441,10 +416,6 @@
         (.damage player 8)
         (.sendMessage player "you drunk milk")))))
 
-;(defn player-interact-event []
-;  (c/auto-proxy [Listener] []
-;     (onPlayerInteract [evt] (player-interact-event* evt))))
-;
 ;(defn get-player-interact-entity* [evt]
 ;  (let [target (.getRightClicked evt)]
 ;    (letfn [(d [n]
@@ -484,230 +455,218 @@
 ;  (c/auto-proxy [Listener] []
 ;     (onPlayerInteractEntity [evt] (get-player-interact-entity* evt))))
 ;
-;(defn player-level-change-event* [evt]
-;  (when (< (.getOldLevel evt) (.getNewLevel evt))
-;    (broadcast "Level up! "(.getDisplayName (.getPlayer evt)) " is Lv" (.getNewLevel evt))))
-;
-;(defn player-level-change-event []
-;  (c/auto-proxy [Listener] []
-;                (onPlayerLevelChange [evt] (player-level-change-event* evt))))
-;
-;; internal
-;(defn zombie-player-periodically [zplayer]
-;  (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
-;    (.setFireTicks zplayer 100))
-;  (when (= 0 (rand-int 2))
-;    (.setFoodLevel zplayer (dec (.getFoodLevel zplayer)))))
-;
-;(comment (def chain (atom {:entity nil :loc nil})))
-;
-;(defn entity2name [entity]
-;  (cond (instance? Blaze entity) "Blaze"
-;        (instance? CaveSpider entity) "CaveSpider"
-;        (instance? Chicken entity) "Chicken"
-;        ;(instance? ComplexLivingEntity entity) "ComplexLivingEntity"
-;        (instance? Cow entity) "Cow"
-;        ;(instance? Creature entity) "Creature"
-;        (instance? Creeper entity) "Creeper"
-;        (instance? EnderDragon entity) "EnderDragon"
-;        (instance? Enderman entity) "Enderman"
-;        ;(instance? Flying entity) "Flying"
-;        (instance? Ghast entity) "Ghast"
-;        (instance? Giant entity) "Giant"
-;        ;(instance? HumanEntity entity) "HumanEntity"
-;        (instance? MagmaCube entity) "MagmaCube"
-;        ;(instance? Monster entity) "Monster"
-;        (instance? MushroomCow entity) "MushroomCow"
-;        ;(instance? NPC entity) "NPC"
-;        (instance? Pig entity) "Pig"
-;        (instance? PigZombie entity) "PigZombie"
-;        (instance? Player entity) (.getDisplayName entity)
-;        (instance? Sheep entity) "Sheep"
-;        (instance? Silverfish entity) "Silverfish"
-;        (instance? Skeleton entity) "Skeleton"
-;        (instance? Slime entity) "Slime"
-;        (instance? Snowman entity) "Snowman"
-;        (instance? Spider entity) "Spider"
-;        (instance? Squid entity) "Squid"
-;        (instance? Villager entity) "Villager"
-;        ;(instance? WaterMob entity) "WaterMob"
-;        (instance? Wolf entity) "Wolf"
-;        (instance? Zombie entity) "Zombie"
-;        (instance? TNTPrimed entity) "TNT"
-;        :else (str (class entity))))
-;
-;(defn chain-entity [entity shooter]
-;  (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
-;  (let [block (.getBlock (.getLocation entity))]
-;    (when (not (.isLiquid block))
-;      (let [msg (str (.getDisplayName shooter) " chained " (entity2name entity))]
-;        (.sendMessage shooter msg)
-;        (lingr msg))
-;      (.setType block org.bukkit.Material/WEB)
-;      (future-call #(do
-;                      (Thread/sleep 10000)
-;                      (when (= (.getType block) org.bukkit.Material/WEB)
-;                        (.setType block org.bukkit.Material/AIR)))))))
-;
-;(comment (defn rechain-entity []
-;  (when (:entity @chain)
-;    (.teleport (:entity @chain) (:loc @chain)))))
-;
-;(def chicken-attacking (atom 0))
-;(defn chicken-touch-player [chicken player]
-;  (when (not= @chicken-attacking 0)
-;    (.teleport chicken (.getLocation player))
-;    (.damage player 8 chicken)))
-;
-;(defn entity-touch-player-event []
-;  (doseq [player (Bukkit/getOnlinePlayers)]
-;    (let [entities (.getNearbyEntities player 2 2 2)
-;          chickens (filter #(instance? Chicken %) entities)]
-;      (doseq [chicken chickens]
-;        (chicken-touch-player chicken player)))))
-;
-;(defn periodically []
-;  (comment (rechain-entity))
-;  (entity-touch-player-event)
-;  (comment (.setHealth v (inc (.getHealth v))))
-;  (seq (map zombie-player-periodically
-;            (filter zombie-player? (Bukkit/getOnlinePlayers))))
-;  nil)
-;
-;(defn pig-death-event [entity]
-;  (let [killer (.getKiller entity)]
-;    (when killer
-;      (.sendMessage killer "PIG: Pig Is God")
-;      (.setFireTicks killer 100))))
-;
-;(defn entity-murder-event [evt entity]
-;  (let [killer (.getKiller entity)]
-;    (when (instance? Player killer)
-;      (when (instance? Giant entity)
-;        (.setDroppedExp evt 1000))
-;      (when (instance? Creeper entity)
-;        (.setDroppedExp evt 20))
-;      (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
-;      (broadcast (.getDisplayName killer) " killed " (entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
-;
-;(defn player-death-event [evt player]
-;  (swap! player-death-locations assoc (.getDisplayName player) (.getLocation player))
-;  (lingr (str (name2icon (.getDisplayName player)) (.getDeathMessage evt))))
-;
-;(defn entity-death-event* [evt]
-;  (let [entity (.getEntity evt)]
-;    (cond
-;      (instance? Pig entity) (pig-death-event entity)
-;      (instance? Player entity) (player-death-event evt entity)
-;      (and (instance? LivingEntity entity) (.getKiller entity)) (entity-murder-event evt entity))))
-;
-;(defn entity-death-event []
-;  (c/auto-proxy [Listener] []
-;                (onEntityDeath [evt] (entity-death-event* evt))))
-;
-;(defn creeper-explosion-1 [evt entity]
-;  (.setCancelled evt true)
-;  (.createExplosion (.getWorld entity) (.getLocation entity) 0)
-;  (doseq [e (filter #(instance? LivingEntity %) (.getNearbyEntities entity 5 5 5))]
-;    (let [v (.multiply (.toVector (.subtract (.getLocation e) (.getLocation entity))) 2.0)
-;          x (- 5 (.getX v))
-;          z (- 5 (.getZ v))]
-;      (when (instance? Player e)
-;        (.sendMessage e "Air Explosion"))
-;      (.setVelocity e (org.bukkit.util.Vector. x 1.5 z))))
-;  (comment (let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
-;             (.setVelocity another (org.bukkit.util.Vector. 0 1 0)))))
-;
-;(defn creeper-explosion-2 [evt entity]
-;  (.setCancelled evt true)
-;  (if (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
-;    (prn 'cancelled)
-;    (let [loc (.getLocation entity)]
-;      (.setType (.getBlock loc) org.bukkit.Material/PUMPKIN)
-;      (broadcast "break the bomb before it explodes!")
-;      (future-call #(do
-;                      (Thread/sleep 7000)
-;                      (broadcast "zawa...")
-;                      (Thread/sleep 1000)
-;                      (when (= (.getType (.getBlock loc)) org.bukkit.Material/PUMPKIN)
-;                        (.createExplosion (.getWorld loc) loc 6)))))))
-;
-;(def creeper-explosion-idx (atom 0))
-;(defn entity-explode-event* [evt]
-;  (let [entity (.getEntity evt)
-;        ename (entity2name entity)
-;        entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
-;    (when (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
-;      (letfn [(join [xs x]
-;                (apply str (interpose x xs)))]
-;        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))
-;    (when (instance? Creeper entity)
-;      ((get [(fn [_ _] nil)
-;             creeper-explosion-1
-;             creeper-explosion-2
-;             ] (rem @creeper-explosion-idx 3)) evt entity)
-;      (swap! creeper-explosion-idx inc))
-;    (when (instance? TNTPrimed entity)
-;      (prn ['TNT entity]))
-;    (when (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
-;      (.setCancelled evt true))))
-;
-;(defn entity-explode-event []
-;  (c/auto-proxy [Listener] []
-;                (onEntityExplode [evt] (entity-explode-event* evt))))
-;
-;(defn zombieze [entity]
-;  (swap! zombie-players conj (.getDisplayName entity))
-;  (.setMaximumAir entity 1)
-;  (.setRemainingAir entity 1)
-;  (.sendMessage entity "You turned into a zombie.")
-;  (lingr (str (name2icon (.getDisplayName entity)) "turned into a zombie.")))
-;
-;(comment (defn potion-weakness [name]
-;  (.apply
-;    (org.bukkit.potion.PotionEffect. org.bukkit.potion.PotionEffectType/WEAKNESS 500 1)
-;    (Bukkit/getPlayer name))))
-;
-;(defn arrow-attacks-by-player-event [_ arrow target]
-;  (let [shooter (.getShooter arrow)]
-;    (when (and
-;            (instance? Player shooter)
-;            (.contains (.getInventory shooter) org.bukkit.Material/WEB))
-;      (chain-entity target shooter)
-;      (consume-itemstack (.getInventory shooter) org.bukkit.Material/WEB))))
-;
-;(defn vector-from-to [ent-from ent-to]
-;  (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
-;
-;(defn player-attacks-pig-event [evt player pig]
-;  (when (= 0 (rand-int 2))
-;    (future-call #(let [another-pig (.spawn (.getWorld pig) (.getLocation pig) Pig)]
-;                    (Thread/sleep 3000)
-;                    (when (not (.isDead another-pig))
-;                      (.remove another-pig))))))
-;
-;(defn player-attacks-chicken-event [_ player chicken]
-;  (when (not= 0 (rand-int 3))
-;    (let [location (.getLocation player)
-;          world (.getWorld location)]
-;      (swap! chicken-attacking inc)
-;      (future-call #(do
-;                      (Thread/sleep 20000)
-;                      (swap! chicken-attacking dec)))
-;      (doseq [x [-2 -1 0 1 2] z [-2 -1 0 1 2]]
-;        (let [chicken (.spawn world (.add (.clone location) x 3 z) Chicken)]
-;          (future-call #(do
-;                          (Thread/sleep 10000)
-;                          (.remove chicken))))))))
-;
-;(defn rebirth-from-zombie [evt target]
-;  (.setCancelled evt true)
-;  (.setMaximumAir target 300) ; default maximum value
-;  (.setRemainingAir target 300)
-;  (.setHealth target (.getMaxHealth target))
-;  (swap! zombie-players disj (.getDisplayName target))
-;  (.sendMessage target "You rebirthed as a human."))
-;
+(defn player-level-change-event [evt]
+  (when (< (.getOldLevel evt) (.getNewLevel evt))
+    (broadcast "Level up! "(.getDisplayName (.getPlayer evt)) " is Lv" (.getNewLevel evt))))
+
+; internal
+(defn zombie-player-periodically [zplayer]
+  (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
+    (.setFireTicks zplayer 100))
+  (when (= 0 (rand-int 2))
+    (.setFoodLevel zplayer (dec (.getFoodLevel zplayer)))))
+
+(comment (def chain (atom {:entity nil :loc nil})))
+
+(defn entity2name [entity]
+  (cond (instance? Blaze entity) "Blaze"
+        (instance? CaveSpider entity) "CaveSpider"
+        (instance? Chicken entity) "Chicken"
+        ;(instance? ComplexLivingEntity entity) "ComplexLivingEntity"
+        (instance? Cow entity) "Cow"
+        ;(instance? Creature entity) "Creature"
+        (instance? Creeper entity) "Creeper"
+        (instance? EnderDragon entity) "EnderDragon"
+        (instance? Enderman entity) "Enderman"
+        ;(instance? Flying entity) "Flying"
+        (instance? Ghast entity) "Ghast"
+        (instance? Giant entity) "Giant"
+        ;(instance? HumanEntity entity) "HumanEntity"
+        (instance? MagmaCube entity) "MagmaCube"
+        ;(instance? Monster entity) "Monster"
+        (instance? MushroomCow entity) "MushroomCow"
+        ;(instance? NPC entity) "NPC"
+        (instance? Pig entity) "Pig"
+        (instance? PigZombie entity) "PigZombie"
+        (instance? Player entity) (.getDisplayName entity)
+        (instance? Sheep entity) "Sheep"
+        (instance? Silverfish entity) "Silverfish"
+        (instance? Skeleton entity) "Skeleton"
+        (instance? Slime entity) "Slime"
+        (instance? Snowman entity) "Snowman"
+        (instance? Spider entity) "Spider"
+        (instance? Squid entity) "Squid"
+        (instance? Villager entity) "Villager"
+        ;(instance? WaterMob entity) "WaterMob"
+        (instance? Wolf entity) "Wolf"
+        (instance? Zombie entity) "Zombie"
+        (instance? TNTPrimed entity) "TNT"
+        :else (str (class entity))))
+
+(defn chain-entity [entity shooter]
+  (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
+  (let [block (.getBlock (.getLocation entity))]
+    (when (not (.isLiquid block))
+      (let [msg (str (.getDisplayName shooter) " chained " (entity2name entity))]
+        (.sendMessage shooter msg)
+        (lingr msg))
+      (.setType block org.bukkit.Material/WEB)
+      (future-call #(do
+                      (Thread/sleep 10000)
+                      (when (= (.getType block) org.bukkit.Material/WEB)
+                        (.setType block org.bukkit.Material/AIR)))))))
+
+(comment (defn rechain-entity []
+  (when (:entity @chain)
+    (.teleport (:entity @chain) (:loc @chain)))))
+
+(def chicken-attacking (atom 0))
+(defn chicken-touch-player [chicken player]
+  (when (not= @chicken-attacking 0)
+    (.teleport chicken (.getLocation player))
+    (.damage player 8 chicken)))
+
+(defn periodically-entity-touch-player-event []
+  (doseq [player (Bukkit/getOnlinePlayers)]
+    (let [entities (.getNearbyEntities player 2 2 2)
+          chickens (filter #(instance? Chicken %) entities)]
+      (doseq [chicken chickens]
+        (chicken-touch-player chicken player)))))
+
+(defn periodically []
+  (comment (rechain-entity))
+  (periodically-entity-touch-player-event)
+  (comment (.setHealth v (inc (.getHealth v))))
+  (seq (map zombie-player-periodically
+            (filter zombie-player? (Bukkit/getOnlinePlayers))))
+  nil)
+
+(defn pig-death-event [entity]
+  (let [killer (.getKiller entity)]
+    (when killer
+      (.sendMessage killer "PIG: Pig Is God")
+      (.setFireTicks killer 100))))
+
+(defn entity-murder-event [evt entity]
+  (let [killer (.getKiller entity)]
+    (when (instance? Player killer)
+      (when (instance? Giant entity)
+        (.setDroppedExp evt 1000))
+      (when (instance? Creeper entity)
+        (.setDroppedExp evt 20))
+      (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
+      (broadcast (.getDisplayName killer) " killed " (entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
+
+(defn player-death-event [evt player]
+  (swap! player-death-locations assoc (.getDisplayName player) (.getLocation player))
+  (lingr (str (name2icon (.getDisplayName player)) (.getDeathMessage evt))))
+
+(defn entity-death-event [evt]
+  (let [entity (.getEntity evt)]
+    (cond
+      (instance? Pig entity) (pig-death-event entity)
+      (instance? Player entity) (player-death-event evt entity)
+      (and (instance? LivingEntity entity) (.getKiller entity)) (entity-murder-event evt entity))))
+
+(defn creeper-explosion-1 [evt entity]
+  (.setCancelled evt true)
+  (.createExplosion (.getWorld entity) (.getLocation entity) 0)
+  (doseq [e (filter #(instance? LivingEntity %) (.getNearbyEntities entity 5 5 5))]
+    (let [v (.multiply (.toVector (.subtract (.getLocation e) (.getLocation entity))) 2.0)
+          x (- 5 (.getX v))
+          z (- 5 (.getZ v))]
+      (when (instance? Player e)
+        (.sendMessage e "Air Explosion"))
+      (.setVelocity e (org.bukkit.util.Vector. x 1.5 z))))
+  (comment (let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
+             (.setVelocity another (org.bukkit.util.Vector. 0 1 0)))))
+
+(defn creeper-explosion-2 [evt entity]
+  (.setCancelled evt true)
+  (if (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+    (prn 'cancelled)
+    (let [loc (.getLocation entity)]
+      (.setType (.getBlock loc) org.bukkit.Material/PUMPKIN)
+      (broadcast "break the bomb before it explodes!")
+      (future-call #(do
+                      (Thread/sleep 7000)
+                      (broadcast "zawa...")
+                      (Thread/sleep 1000)
+                      (when (= (.getType (.getBlock loc)) org.bukkit.Material/PUMPKIN)
+                        (.createExplosion (.getWorld loc) loc 6)))))))
+
+(def creeper-explosion-idx (atom 0))
+(defn entity-explode-event [evt]
+  (let [entity (.getEntity evt)
+        ename (entity2name entity)
+        entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
+    (when (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
+      (letfn [(join [xs x]
+                (apply str (interpose x xs)))]
+        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))
+    (when (instance? Creeper entity)
+      ((get [(fn [_ _] nil)
+             creeper-explosion-1
+             creeper-explosion-2
+             ] (rem @creeper-explosion-idx 3)) evt entity)
+      (swap! creeper-explosion-idx inc))
+    (when (instance? TNTPrimed entity)
+      (prn ['TNT entity]))
+    (when (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true))))
+
+(defn zombieze [entity]
+  (swap! zombie-players conj (.getDisplayName entity))
+  (.setMaximumAir entity 1)
+  (.setRemainingAir entity 1)
+  (.sendMessage entity "You turned into a zombie.")
+  (lingr (str (name2icon (.getDisplayName entity)) "turned into a zombie.")))
+
+(comment (defn potion-weakness [name]
+  (.apply
+    (org.bukkit.potion.PotionEffect. org.bukkit.potion.PotionEffectType/WEAKNESS 500 1)
+    (Bukkit/getPlayer name))))
+
+(defn arrow-attacks-by-player-event [_ arrow target]
+  (let [shooter (.getShooter arrow)]
+    (when (and
+            (instance? Player shooter)
+            (.contains (.getInventory shooter) org.bukkit.Material/WEB))
+      (chain-entity target shooter)
+      (consume-itemstack (.getInventory shooter) org.bukkit.Material/WEB))))
+
+(defn vector-from-to [ent-from ent-to]
+  (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
+
+(defn player-attacks-pig-event [evt player pig]
+  (when (= 0 (rand-int 2))
+    (future-call #(let [another-pig (.spawn (.getWorld pig) (.getLocation pig) Pig)]
+                    (Thread/sleep 3000)
+                    (when (not (.isDead another-pig))
+                      (.remove another-pig))))))
+
+(defn player-attacks-chicken-event [_ player chicken]
+  (when (not= 0 (rand-int 3))
+    (let [location (.getLocation player)
+          world (.getWorld location)]
+      (swap! chicken-attacking inc)
+      (future-call #(do
+                      (Thread/sleep 20000)
+                      (swap! chicken-attacking dec)))
+      (doseq [x [-2 -1 0 1 2] z [-2 -1 0 1 2]]
+        (let [chicken (.spawn world (.add (.clone location) x 3 z) Chicken)]
+          (future-call #(do
+                          (Thread/sleep 10000)
+                          (.remove chicken))))))))
+
+(defn rebirth-from-zombie [evt target]
+  (.setCancelled evt true)
+  (.setMaximumAir target 300) ; default maximum value
+  (.setRemainingAir target 300)
+  (.setHealth target (.getMaxHealth target))
+  (swap! zombie-players disj (.getDisplayName target))
+  (.sendMessage target "You rebirthed as a human."))
+
 ;(defn get-entity-damage-listener []
 ;  (c/auto-proxy
 ;    [Listener] []
@@ -744,49 +703,46 @@
 ;                  (zombieze target)
 ;                  (.sendMessage attacker "You made a friend"))))))))))
 ;
-;(defn arrow-hit-event [evt entity]
-;  (when (instance? Player (.getShooter entity))
-;    (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
-;      (if skill
-;        (skill entity)
-;        (.sendMessage (.getShooter entity) "You don't have a skill yet.")
-;        ;(do
-;        ;  (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
-;        ;             (let [location (.getLocation entity)
-;        ;                   world (.getWorld location)]
-;        ;               (.generateTree world location org.bukkit.TreeType/BIRCH))))
-;        ;  (when (= (.getDisplayName (.getShooter entity)) "kldsas")
-;        ;    (arrow-skill-torch entity))
-;        ;  (when (= (.getDisplayName (.getShooter entity)) "sbwhitecap")
-;        ;    (arrow-skill-teleport entity))
-;        ;  (when (= (.getDisplayName (.getShooter entity)) "Sandkat")
-;        ;    (doseq [near-target (filter
-;        ;                          #(instance? LivingEntity %)
-;        ;                          (.getNearbyEntities entity 2 2 2))]
-;        ;      (.damage near-target 3 entity)))
-;        ;  (when (= (.getDisplayName (.getShooter entity)) "ujm")
-;        ;    (do
-;        ;      (let [location (.getLocation entity)
-;        ;            world (.getWorld location)]
-;        ;        (.strikeLightningEffect world location))
-;        ;      (doseq [near-target (filter
-;        ;                            #(instance? Monster %)
-;        ;                            (.getNearbyEntities entity 10 10 3))]
-;        ;        (.damage near-target 30 (.getShooter entity))))))
-;        ))
-;    ))
-;
-;(defn get-entity-projectile-hit-listener []
-;  (c/auto-proxy
-;    [Listener] []
-;    (onProjectileHit [evt]
-;      (let [entity (.getEntity evt)]
-;        (cond
-;          (instance? Fireball entity) (.setYield entity 0.0)
-;          (instance? Arrow entity) (arrow-hit-event evt entity)
-;          ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
-;          )))))
-;
+(defn arrow-hit-event [evt entity]
+  (when (instance? Player (.getShooter entity))
+    (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
+      (if skill
+        (skill entity)
+        (.sendMessage (.getShooter entity) "You don't have a skill yet.")
+        ;(do
+        ;  (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
+        ;             (let [location (.getLocation entity)
+        ;                   world (.getWorld location)]
+        ;               (.generateTree world location org.bukkit.TreeType/BIRCH))))
+        ;  (when (= (.getDisplayName (.getShooter entity)) "kldsas")
+        ;    (arrow-skill-torch entity))
+        ;  (when (= (.getDisplayName (.getShooter entity)) "sbwhitecap")
+        ;    (arrow-skill-teleport entity))
+        ;  (when (= (.getDisplayName (.getShooter entity)) "Sandkat")
+        ;    (doseq [near-target (filter
+        ;                          #(instance? LivingEntity %)
+        ;                          (.getNearbyEntities entity 2 2 2))]
+        ;      (.damage near-target 3 entity)))
+        ;  (when (= (.getDisplayName (.getShooter entity)) "ujm")
+        ;    (do
+        ;      (let [location (.getLocation entity)
+        ;            world (.getWorld location)]
+        ;        (.strikeLightningEffect world location))
+        ;      (doseq [near-target (filter
+        ;                            #(instance? Monster %)
+        ;                            (.getNearbyEntities entity 10 10 3))]
+        ;        (.damage near-target 30 (.getShooter entity))))))
+        ))
+    ))
+
+(defn entity-projectile-hit-event [evt]
+  (let [entity (.getEntity evt)]
+        (cond
+          (instance? Fireball entity) (.setYield entity 0.0)
+          (instance? Arrow entity) (arrow-hit-event evt entity)
+          ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
+          )))
+
 ;(defn vehicle-enter-event* [evt]
 ;  (let [vehicle (.getVehicle evt)
 ;        entity (.getEntered evt)
@@ -913,4 +869,4 @@
 ;  (.enablePlugin plugin-manager* plugin*))
 
 (defn on-enable [plugin]
-  (prn "cloft is working"))
+  (lingr "cloft plugin running..."))
