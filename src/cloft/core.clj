@@ -1,5 +1,4 @@
 (ns cloft.core
-  (:require [cljminecraft.core :as c])
   ;(:require [clojure.core.match :as m])
   (:require [clojure.string :as s])
   (:import [org.bukkit Bukkit])
@@ -851,68 +850,71 @@
     (.addIngredient x 3 org.bukkit.Material/STRING)
     x))
 
-(def plugin-manager* (Bukkit/getPluginManager))
-(def plugin* (.getPlugin plugin-manager* "cloft"))
+;(def plugin-manager* (Bukkit/getPluginManager))
+;(def plugin* (.getPlugin plugin-manager* "cloft"))
+;
+;(defn hehehe [f label]
+;  (let [listener (f)]
+;    (.registerEvents
+;      plugin-manager*
+;      ;(label c/event-types)
+;      listener
+;      ;(:Normal c/event-priorities)
+;      plugin*)))
+;
+;(def first-time (ref true))
+;
+;(defn enable-plugin [plugin]
+;    ;(def plugin-desc* (.getDescription plugin*))
+;
+;    ;(let [listener (get-blocklistener)]
+;    ;  (.registerEvent
+;    ;    plugin-manager*
+;    ;    (:BLOCK_BREAK c/event-types)
+;    ;    listener
+;    ;    (:Normal c/event-priorities)
+;    ;    plugin*)
+;    ;  (.registerEvent
+;    ;    plugin-manager*
+;    ;    (:SIGN_CHANGE c/event-types)
+;    ;    listener
+;    ;    (:Normal c/event-priorities)
+;    ;    plugin*))
+;
+;  (when @first-time
+;    ;(hehehe get-player-quit-listener :PLAYER_QUIT)
+;    (do
+;      (Bukkit/addRecipe recipe-string-web)
+;      (hehehe player-login-event :PLAYER_LOGIN)
+;      (hehehe player-move-event :PLAYER_MOVE)
+;      (hehehe get-player-chat :PLAYER_CHAT)
+;      (hehehe player-interact-event :PLAYER_INTERACT)
+;      (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
+;      (hehehe player-level-change-event :PLAYER_LEVEL_CHANGE)
+;      (hehehe entity-death-event :ENTITY_DEATH)
+;      (hehehe entity-explode-event :ENTITY_EXPLODE)
+;      (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
+;      (hehehe entity-shoot-bow-event :ENTITY_SHOOT_BOW)
+;      (hehehe entity-target-event :ENTITY_TARGET)
+;      ;(hehehe entity-explosion-prime-event :ENTITY_EXPLOSION_PRIME)
+;      (hehehe block-place-event :BLOCK_PLACE)
+;      (hehehe block-break-event :BLOCK_BREAK)
+;      (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
+;      (hehehe vehicle-enter-event :VEHICLE_ENTER)
+;      ;(hehehe enderman-pickup-event :ENDERMAN_PICKUP)
+;      (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
+;  (dosync
+;    (ref-set first-time false))
+;  (lingr "cloft plugin running...")
+;  (c/log-info "cloft started"))
+;
+;(defn disable-plugin [plugin]
+;  (lingr "cloft plugin stopping...")
+;  (c/log-info "cloft stopped"))
+;
+;(defn restart []
+;  (.disablePlugin plugin-manager* plugin*)
+;  (.enablePlugin plugin-manager* plugin*))
 
-(defn hehehe [f label]
-  (let [listener (f)]
-    (.registerEvents
-      plugin-manager*
-      ;(label c/event-types)
-      listener
-      ;(:Normal c/event-priorities)
-      plugin*)))
-
-(def first-time (ref true))
-
-(defn enable-plugin [plugin]
-    ;(def plugin-desc* (.getDescription plugin*))
-
-    ;(let [listener (get-blocklistener)]
-    ;  (.registerEvent
-    ;    plugin-manager*
-    ;    (:BLOCK_BREAK c/event-types)
-    ;    listener
-    ;    (:Normal c/event-priorities)
-    ;    plugin*)
-    ;  (.registerEvent
-    ;    plugin-manager*
-    ;    (:SIGN_CHANGE c/event-types)
-    ;    listener
-    ;    (:Normal c/event-priorities)
-    ;    plugin*))
-
-  (when @first-time
-    ;(hehehe get-player-quit-listener :PLAYER_QUIT)
-    (do
-      (Bukkit/addRecipe recipe-string-web)
-      (hehehe player-login-event :PLAYER_LOGIN)
-      (hehehe player-move-event :PLAYER_MOVE)
-      (hehehe get-player-chat :PLAYER_CHAT)
-      (hehehe player-interact-event :PLAYER_INTERACT)
-      (hehehe get-player-interact-entity :PLAYER_INTERACT_ENTITY)
-      (hehehe player-level-change-event :PLAYER_LEVEL_CHANGE)
-      (hehehe entity-death-event :ENTITY_DEATH)
-      (hehehe entity-explode-event :ENTITY_EXPLODE)
-      (hehehe get-entity-damage-listener :ENTITY_DAMAGE)
-      (hehehe entity-shoot-bow-event :ENTITY_SHOOT_BOW)
-      (hehehe entity-target-event :ENTITY_TARGET)
-      ;(hehehe entity-explosion-prime-event :ENTITY_EXPLOSION_PRIME)
-      (hehehe block-place-event :BLOCK_PLACE)
-      (hehehe block-break-event :BLOCK_BREAK)
-      (hehehe get-entity-projectile-hit-listener :PROJECTILE_HIT)
-      (hehehe vehicle-enter-event :VEHICLE_ENTER)
-      ;(hehehe enderman-pickup-event :ENDERMAN_PICKUP)
-      (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin* (fn [] (periodically)) 50 50)))
-  (dosync
-    (ref-set first-time false))
-  (lingr "cloft plugin running...")
-  (c/log-info "cloft started"))
-
-(defn disable-plugin [plugin]
-  (lingr "cloft plugin stopping...")
-  (c/log-info "cloft stopped"))
-
-(defn restart []
-  (.disablePlugin plugin-manager* plugin*)
-  (.enablePlugin plugin-manager* plugin*))
+(defn on-enable [plugin]
+  (prn "cloft is working"))
