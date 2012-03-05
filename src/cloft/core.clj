@@ -2,7 +2,7 @@
   ;(:require [clojure.core.match :as m])
   (:require [swank.swank])
   (:require [clojure.string :as s])
-  (:import [org.bukkit Bukkit])
+  (:import [org.bukkit Bukkit Material])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
             EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
@@ -164,7 +164,7 @@
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
     (when (not (get @super-jump-flags name))
-      (when (= (.getType (.getItemInHand player)) org.bukkit.Material/FEATHER)
+      (when (= (.getType (.getItemInHand player)) Material/FEATHER)
         (swap! super-jump-flags assoc name true)
         (future-call #(do
                         (Thread/sleep 2000)
@@ -176,7 +176,7 @@
               x (if (.isSprinting player) (* amount 2) amount)
               x2 (/ (java.lang.Math/log x) 2) ]
           (lingr (str name " is super jumping with level " x))
-          (consume-itemstack (.getInventory player) org.bukkit.Material/FEATHER)
+          (consume-itemstack (.getInventory player) Material/FEATHER)
           (.setVelocity
             player
             (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player))))))))
@@ -232,7 +232,7 @@
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)
         world (.getWorld location)]
-    (.setType (.getBlockAt world location) org.bukkit.Material/TORCH)))
+    (.setType (.getBlockAt world location) Material/TORCH)))
 
 (defn arrow-skill-teleport [entity]
   (let [location (.getLocation entity)
@@ -261,16 +261,16 @@
         velocity (.getVelocity entity)
         direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))
         block (.getBlock (.add (.clone location) direction))]
-    (when (= (.getType block) org.bukkit.Material/STONE)
-      (let [block-to-choices [org.bukkit.Material/COAL_ORE
-                              org.bukkit.Material/COAL_ORE
-                              org.bukkit.Material/COBBLESTONE
-                              org.bukkit.Material/COBBLESTONE
-                              org.bukkit.Material/GRAVEL
-                              org.bukkit.Material/IRON_ORE
-                              org.bukkit.Material/LAPIS_ORE
-                              org.bukkit.Material/GOLD_ORE
-                              org.bukkit.Material/REDSTONE_ORE]]
+    (when (= (.getType block) Material/STONE)
+      (let [block-to-choices [Material/COAL_ORE
+                              Material/COAL_ORE
+                              Material/COBBLESTONE
+                              Material/COBBLESTONE
+                              Material/GRAVEL
+                              Material/IRON_ORE
+                              Material/LAPIS_ORE
+                              Material/GOLD_ORE
+                              Material/REDSTONE_ORE]]
         (.setType block (rand-nth block-to-choices))))))
 
 (def jobs (atom {}))
@@ -312,7 +312,7 @@
 ;        (let [newblock (.getBlockAt
 ;                         world
 ;                         (.add (.clone loc) (.multiply (.clone diff) (double m))))]
-;          (when (= (.getType newblock) org.bukkit.Material/AIR)
+;          (when (= (.getType newblock) Material/AIR)
 ;            (.setType newblock (.getType block)))))))))
 ;
 (defn skillchange [player block block-against]
@@ -320,26 +320,26 @@
           (every? identity (map
                              #(=
                                 (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-                                org.bukkit.Material/STONE)
+                                Material/STONE)
                              [0 0 -1 1] [-1 1 0 0]))
           (every? identity (map
                              #(not=
                                 (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-                                org.bukkit.Material/STONE)
+                                Material/STONE)
                              [-1 1 0 0] [-1 1 0 0])))
-    (when (= (.getType block) org.bukkit.Material/TORCH)
+    (when (= (.getType block) Material/TORCH)
       (broadcast (.getDisplayName player) " changed arrow skill to TORCH")
       (swap! jobs assoc (.getDisplayName player) arrow-skill-torch))
-    (when (= (.getType block) org.bukkit.Material/YELLOW_FLOWER)
+    (when (= (.getType block) Material/YELLOW_FLOWER)
       (broadcast (.getDisplayName player) " changed arrow skill to TELEPORT")
       (swap! jobs assoc (.getDisplayName player) arrow-skill-teleport))
-    (when (= (.getType block) org.bukkit.Material/RED_ROSE)
+    (when (= (.getType block) Material/RED_ROSE)
       (broadcast (.getDisplayName player) " changed arrow skill to FIRE")
       (swap! jobs assoc (.getDisplayName player) arrow-skill-fire))
-    (when (= (.getType block) org.bukkit.Material/SAPLING)
+    (when (= (.getType block) Material/SAPLING)
       (broadcast (.getDisplayName player) " changed arrow skill to TREE")
       (swap! jobs assoc (.getDisplayName player) arrow-skill-tree))
-    (when (= (.getType block) org.bukkit.Material/WORKBENCH)
+    (when (= (.getType block) Material/WORKBENCH)
       (broadcast (.getDisplayName player) " changed arrow skill to ORE")
       (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))))
 
@@ -393,7 +393,7 @@
     (cond
       (and
         (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)
-        (= (.getType (.getClickedBlock evt)) org.bukkit.Material/CAKE_BLOCK))
+        (= (.getType (.getClickedBlock evt)) Material/CAKE_BLOCK))
       (let [ death-point (get @player-death-locations (.getDisplayName player))]
         (if death-point
           (do
@@ -402,14 +402,14 @@
             (.teleport player death-point))
           (.sendMessage player "You didn't die yet.")))
       (and
-        (= (.. player (getItemInHand) (getType)) org.bukkit.Material/GOLD_SWORD)
+        (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
         (= (.getHealth player) (.getMaxHealth player))
         (or
           (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_AIR)
           (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_BLOCK)))
       (.throwSnowball player)
       (and
-        (= (.. evt (getMaterial)) org.bukkit.Material/MILK_BUCKET)
+        (= (.. evt (getMaterial)) Material/MILK_BUCKET)
         (or
           (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
           (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
@@ -507,11 +507,11 @@
       (let [msg (str (.getDisplayName shooter) " chained " (entity2name entity))]
         (.sendMessage shooter msg)
         (lingr msg))
-      (.setType block org.bukkit.Material/WEB)
+      (.setType block Material/WEB)
       (future-call #(do
                       (Thread/sleep 10000)
-                      (when (= (.getType block) org.bukkit.Material/WEB)
-                        (.setType block org.bukkit.Material/AIR)))))))
+                      (when (= (.getType block) Material/WEB)
+                        (.setType block Material/AIR)))))))
 
 (comment (defn rechain-entity []
   (when (:entity @chain)
@@ -583,13 +583,13 @@
   (if (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
     (prn 'cancelled)
     (let [loc (.getLocation entity)]
-      (.setType (.getBlock loc) org.bukkit.Material/PUMPKIN)
+      (.setType (.getBlock loc) Material/PUMPKIN)
       (broadcast "break the bomb before it explodes!")
       (future-call #(do
                       (Thread/sleep 7000)
                       (broadcast "zawa...")
                       (Thread/sleep 1000)
-                      (when (= (.getType (.getBlock loc)) org.bukkit.Material/PUMPKIN)
+                      (when (= (.getType (.getBlock loc)) Material/PUMPKIN)
                         (.createExplosion (.getWorld loc) loc 6)))))))
 
 (def creeper-explosion-idx (atom 0))
@@ -628,9 +628,9 @@
   (let [shooter (.getShooter arrow)]
     (when (and
             (instance? Player shooter)
-            (.contains (.getInventory shooter) org.bukkit.Material/WEB))
+            (.contains (.getInventory shooter) Material/WEB))
       (chain-entity target shooter)
-      (consume-itemstack (.getInventory shooter) org.bukkit.Material/WEB))))
+      (consume-itemstack (.getInventory shooter) Material/WEB))))
 
 (defn vector-from-to [ent-from ent-to]
   (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
@@ -755,8 +755,8 @@
 ;        block-under (.getBlock (.add (.getLocation vehicle) 0 -1 0))]
 ;    (when (and
 ;            (instance? Player entity)
-;            (= (.getType rail) org.bukkit.Material/RAILS)
-;            (= (.getType block-under) org.bukkit.Material/LAPIS_BLOCK))
+;            (= (.getType rail) Material/RAILS)
+;            (= (.getType block-under) Material/LAPIS_BLOCK))
 ;      (let [direction (.getDirection (.getNewData (.getType rail) (.getData rail)))
 ;            diff (cond
 ;                   (= org.bukkit.block.BlockFace/SOUTH direction) (org.bukkit.util.Vector. -1 0 0)
@@ -764,7 +764,7 @@
 ;                   (= org.bukkit.block.BlockFace/WEST direction) (org.bukkit.util.Vector. 0 0 1)
 ;                   (= org.bukkit.block.BlockFace/EAST direction) (org.bukkit.util.Vector. 0 0 -1))
 ;            destination (first (filter
-;                                 #(= (.getType %) org.bukkit.Material/LAPIS_BLOCK)
+;                                 #(= (.getType %) Material/LAPIS_BLOCK)
 ;                                 (map
 ;                                   #(.getBlock (.add (.clone (.getLocation block-under)) (.multiply (.clone diff) %)))
 ;                                   (range 3 100))))]
@@ -803,8 +803,8 @@
 
 (def recipe-string-web
   (let [x (org.bukkit.inventory.ShapelessRecipe.
-            (org.bukkit.inventory.ItemStack. org.bukkit.Material/WEB 3))]
-    (.addIngredient x 3 org.bukkit.Material/STRING)
+            (org.bukkit.inventory.ItemStack. Material/WEB 3))]
+    (.addIngredient x 3 Material/STRING)
     x))
 
 (defonce swank* nil)
