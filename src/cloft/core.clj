@@ -711,16 +711,12 @@
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
       (if skill
         (skill entity)
-        (.sendMessage (.getShooter entity) "You don't have a skill yet.")
+        (.sendMessage (.getShooter entity) "You don't have a skill yet.")))))
         ;(do
         ;  (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
         ;             (let [location (.getLocation entity)
         ;                   world (.getWorld location)]
         ;               (.generateTree world location org.bukkit.TreeType/BIRCH))))
-        ;  (when (= (.getDisplayName (.getShooter entity)) "kldsas")
-        ;    (arrow-skill-torch entity))
-        ;  (when (= (.getDisplayName (.getShooter entity)) "sbwhitecap")
-        ;    (arrow-skill-teleport entity))
         ;  (when (= (.getDisplayName (.getShooter entity)) "Sandkat")
         ;    (doseq [near-target (filter
         ;                          #(instance? LivingEntity %)
@@ -735,8 +731,6 @@
         ;                            #(instance? Monster %)
         ;                            (.getNearbyEntities entity 10 10 3))]
         ;        (.damage near-target 30 (.getShooter entity))))))
-        ))
-    ))
 
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
