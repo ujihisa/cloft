@@ -385,6 +385,15 @@
   (let [name (.getDisplayName (.getPlayer evt))]
     (lingr (str (name2icon name) (.getMessage evt)))))
 
+(defn add-velocity [entity x y z]
+  (.setVelocity entity (.add (.getVelocity entity) (org.bukkit.util.Vector. (double x) (double y) (double z)))))
+
+(defn player-drop-item-event [evt]
+  (let [player (.getPlayer evt)]
+    (when false
+      (.sendMessage player "feather jump!")
+      (add-velocity player 0 0.5 0))))
+
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
