@@ -363,8 +363,8 @@
 
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
-    (when (= (.getDisplayName player) "Player")
-      (.setDisplayName player "raa0121"))
+    (comment (when (= (.getDisplayName player) "Player")
+      (.setDisplayName player "raa0121")))
     (future-call #(do
                     (Thread/sleep 1000)
                     (if (= "10.0" (apply str (take 4 (.. player getAddress getAddress getHostAddress))))
