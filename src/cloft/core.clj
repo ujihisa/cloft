@@ -736,6 +736,18 @@
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
           )))
 
+(defn player-bed-enter-event [evt]
+  (broadcast (.. evt (getPlayer) (getDisplayName)) " is sleeping.")
+  (future-call #(do
+                  (Thread/sleep 3000)
+                  (when (.. evt (getPlayer) (isSleeping))
+                    (let [all-players (Bukkit/getOnlinePlayers)
+                          bed-players (filter (memfn isSleeping) all-players)]
+                      (prn [(count all-players) (inc (* (count bed-players) 2))])
+                      (when (< (count all-players) (inc (* (count bed-players) 2)))
+                        (.setTime world 0)
+                        (broadcast "good morning everyone!")))))))
+
 ;(defn vehicle-enter-event* [evt]
 ;  (let [vehicle (.getVehicle evt)
 ;        entity (.getEntered evt)
