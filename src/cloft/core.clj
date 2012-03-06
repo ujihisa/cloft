@@ -230,7 +230,19 @@
             (.setTo evt (.add (.getFrom evt) 0 0.5 0))))))
     (when (jumping? evt)
       (player-teleport-machine evt player)
-      (player-super-jump evt player))))
+      (player-super-jump evt player))
+    (let [l (.getLocation player)
+          b-up (.getBlock l)
+          b-down (.getBlock (.add l 0 -1 0))]
+      (when (and
+              (= (.getType (.getItemInHand player)) Material/RAILS)
+              (= (.getType b-up) Material/AIR)
+              (contains? #{Material/STONE Material/COBBLESTONE
+                           Material/SAND Material/GRAVEL
+                           Material/GRASS Material/DIRT}
+                         (.getType b-down)))
+        (.setType b-up Material/RAILS)
+        (consume-item player)))))
 
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)
