@@ -357,7 +357,10 @@
           (swap! jobs assoc (.getDisplayName player) arrow-skill-tree))
       (= (.getType block) Material/WORKBENCH)
       (do (broadcast (.getDisplayName player) " changed arrow skill to ORE")
-          (swap! jobs assoc (.getDisplayName player) arrow-skill-ore)))))
+          (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))
+      (= (.getType block) Material/MINECART)
+      (do (broadcast (.getDisplayName player) " changed arrow skill to CART")
+          (swap! jobs assoc (.getDisplayName player) 'cart)))))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
@@ -735,7 +738,7 @@
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
-      (if skill
+      (if (and skill (not= 'cart))
         (skill entity)
         (.sendMessage (.getShooter entity) "You don't have a skill yet.")))))
         ;(do
