@@ -648,7 +648,7 @@
     (org.bukkit.potion.PotionEffect. org.bukkit.potion.PotionEffectType/WEAKNESS 500 1)
     (Bukkit/getPlayer name))))
 
-(defn arrow-attacks-by-player-event [_ arrow target]
+(defn arrow-damages-entity-event [_ arrow target]
   (let [shooter (.getShooter arrow)]
     (cond
       (and
@@ -717,7 +717,7 @@
           (lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
           (.damage attacker (.getDamage evt)))
         (when (instance? Arrow attacker)
-          (arrow-attacks-by-player-event evt attacker target))
+          (arrow-damages-entity-event evt attacker target))
         (when (and (instance? Player attacker) (instance? Pig target))
           (player-attacks-pig-event evt attacker target))
         (when (and (instance? Player attacker) (instance? Chicken target))
