@@ -650,16 +650,15 @@
 
 (defn arrow-damages-entity-event [_ arrow target]
   (let [shooter (.getShooter arrow)]
-    (cond
-      (and
-        (instance? Player shooter)
-        (.contains (.getInventory shooter) Material/WEB))
-      (do
-        (chain-entity target shooter)
-        (consume-itemstack (.getInventory shooter) Material/WEB))
-      (= 'cart (get @jobs (.getDisplayName shooter)))
-      (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
-        (.setPassenger cart target)))))
+    (when (instance? Player shooter)
+      (cond
+        (.contains (.getInventory shooter) Material/WEB)
+        (do
+          (chain-entity target shooter)
+          (consume-itemstack (.getInventory shooter) Material/WEB))
+        (= 'cart (get @jobs (.getDisplayName shooter)))
+        (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
+          (.setPassenger cart target))))))
 
 (comment (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
            (future-call #(let [b (.getBlock (.getLocation target))]
