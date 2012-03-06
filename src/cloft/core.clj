@@ -92,8 +92,11 @@
     (.spawn world location klass)))
 
 (defn consume-item [player]
-  (let [itemstack (.getItemInHand player)]
-    (.setAmount itemstack (dec (.getAmount itemstack)))))
+  (let [itemstack (.getItemInHand player)
+        amount (.getAmount itemstack)]
+    (if (= 1 amount)
+      (.remove (.getInventory player) itemstack)
+      (.setAmount itemstack (dec amount)))))
 
 (def world (Bukkit/getWorld "world"))
 (def place1 (org.bukkit.Location. world -55.5 71.5 73.5)) ; lighter
