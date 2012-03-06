@@ -650,11 +650,22 @@
 
 (defn arrow-attacks-by-player-event [_ arrow target]
   (let [shooter (.getShooter arrow)]
-    (when (and
-            (instance? Player shooter)
-            (.contains (.getInventory shooter) Material/WEB))
-      (chain-entity target shooter)
-      (consume-itemstack (.getInventory shooter) Material/WEB))))
+    (cond
+      (and
+        (instance? Player shooter)
+        (.contains (.getInventory shooter) Material/WEB))
+      (do
+        (chain-entity target shooter)
+        (consume-itemstack (.getInventory shooter) Material/WEB))
+      (= 'cart (get @jobs (.getDisplayName shooter)))
+      (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
+        (.setPassenger cart target)))))
+
+(comment (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
+           (future-call #(let [b (.getBlock (.getLocation target))]
+                           (.setType b Material/RAILS)))
+           (.setPassenger cart target)
+           (add-velocity cart 0 5 0)))
 
 (defn vector-from-to [ent-from ent-to]
   (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
