@@ -2,6 +2,7 @@
   ;(:require [clojure.core.match :as m])
   (:require [swank.swank])
   (:require [clojure.string :as s])
+  (comment (:import [org.bukkit.command CommandExecuter CommandSender Command]))
   (:import [org.bukkit Bukkit Material])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
@@ -219,7 +220,7 @@
         (when (location-bound? (.getLocation player) (first sanctuary) (second sanctuary))
           (broadcast name " entered the sanctuary.")
           (swap! sanctuary-players conj name)))
-      (when (< (.distance (org.bukkit.Location. world 70 66 -58) (.getLocation player)) 1)
+      (when (= (.getWorld player) world) (< (.distance (org.bukkit.Location. world 70 66 -58) (.getLocation player)) 1)
         (if (jumping? evt)
           (when (not= @bossbattle-player player)
             (broadcast player " entered the boss' room!")
@@ -860,6 +861,9 @@
     (def swank* (swank.swank/start-repl 4005)))
   (Bukkit/addRecipe recipe-string-web)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (periodically)) 50 50)
+  (comment (proxy [java.lang.Object CommandExecuter] []
+    (onCommand [this ^CommandSender sender ^Command command ^String label ^String[] args]
+      (prn command))))
   (lingr "cloft plugin running..."))
 
 ;  (lingr "cloft plugin stopping...")
