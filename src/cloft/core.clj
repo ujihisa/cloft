@@ -628,6 +628,12 @@
         ename (entity2name entity)
         entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
     (cond
+      (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+      (.setCancelled evt true)
+
+      (instance? TNTPrimed entity)
+      (prn ['TNT entity])
+
       (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
       (letfn [(join [xs x]
                 (apply str (interpose x xs)))]
@@ -639,13 +645,7 @@
                creeper-explosion-1
                creeper-explosion-2
                ] (rem @creeper-explosion-idx 3)) evt entity)
-        (swap! creeper-explosion-idx inc))
-
-      (instance? TNTPrimed entity)
-      (prn ['TNT entity])
-
-      (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
-      (.setCancelled evt true))))
+        (swap! creeper-explosion-idx inc)))))
 
 (defn zombieze [entity]
   (swap! zombie-players conj (.getDisplayName entity))
