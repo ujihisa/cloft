@@ -821,10 +821,13 @@
   (c/auto-proxy [Listener] []
                 (onEndermanPickup [evt] (enderman-pickup-event* evt)))))
 
-(defn good-bye-creeper []
+(defn good-bye [klass]
   (count (seq (map #(.remove %)
-                   (filter #(instance? Creeper %)
+                   (filter #(instance? klass %)
                            (.getLivingEntities world))))))
+
+(defn good-bye-creeper []
+  (good-bye Creeper))
 
 (def pre-stalk (ref nil))
 
