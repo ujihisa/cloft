@@ -826,8 +826,7 @@
                    (filter #(instance? klass %)
                            (.getLivingEntities world))))))
 
-(defn good-bye-creeper []
-  (good-bye Creeper))
+(def good-bye-creeper [] (partial good-bye Creeper))
 
 (def pre-stalk (ref nil))
 
