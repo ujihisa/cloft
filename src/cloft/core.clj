@@ -627,19 +627,24 @@
   (let [entity (.getEntity evt)
         ename (entity2name entity)
         entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
-    (when (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
+    (cond
+      (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
       (letfn [(join [xs x]
                 (apply str (interpose x xs)))]
-        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))
-    (when (instance? Creeper entity)
-      ((get [(fn [_ _] nil)
-             creeper-explosion-1
-             creeper-explosion-2
-             ] (rem @creeper-explosion-idx 3)) evt entity)
-      (swap! creeper-explosion-idx inc))
-    (when (instance? TNTPrimed entity)
-      (prn ['TNT entity]))
-    (when (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", "))))
+
+      (instance? Creeper entity)
+      (do
+        ((get [(fn [_ _] nil)
+               creeper-explosion-1
+               creeper-explosion-2
+               ] (rem @creeper-explosion-idx 3)) evt entity)
+        (swap! creeper-explosion-idx inc))
+
+      (instance? TNTPrimed entity)
+      (prn ['TNT entity])
+
+      (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
       (.setCancelled evt true))))
 
 (defn zombieze [entity]
