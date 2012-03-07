@@ -245,6 +245,9 @@
           (.setType b-up Material/RAILS)
           (consume-item player)))))))
 
+(defn add-velocity [entity x y z]
+  (.setVelocity entity (.add (.getVelocity entity) (org.bukkit.util.Vector. (double x) (double y) (double z)))))
+
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)
         world (.getWorld location)]
@@ -288,6 +291,9 @@
                               Material/GOLD_ORE
                               Material/REDSTONE_ORE]]
         (.setType block (rand-nth block-to-choices))))))
+
+(defn arrow-skill-fly [entity]
+  (add-velocity entity 0 1 0))
 
 (def jobs (atom {}))
 
@@ -360,7 +366,10 @@
       (= (.getType block) Material/WORKBENCH)
       (do (broadcast (.getDisplayName player) " changed arrow skill to ORE")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))
-      (= (.getType block) Material/MINECART)
+      (= (.getType block) Material/BROWN_MUSHROOM)
+      (do (broadcast (.getDisplayName player) " changed arrow skill to FLY")
+          (swap! jobs assoc (.getDisplayName player) arrow-skill-fly))
+      (= (.getType block) Material/RAILS)
       (do (broadcast (.getDisplayName player) " changed arrow skill to CART")
           (swap! jobs assoc (.getDisplayName player) 'cart)))))
 
@@ -405,9 +414,6 @@
 (defn player-chat-event [evt]
   (let [name (.getDisplayName (.getPlayer evt))]
     (lingr (str (name2icon name) (.getMessage evt)))))
-
-(defn add-velocity [entity x y z]
-  (.setVelocity entity (.add (.getVelocity entity) (org.bukkit.util.Vector. (double x) (double y) (double z)))))
 
 (defn player-drop-item-event [evt]
   (let [player (.getPlayer evt)]
