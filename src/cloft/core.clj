@@ -314,7 +314,8 @@
 (defn entity-target-event [evt]
   (when (instance? Creeper (.getEntity evt))
     (let [target (.getTarget evt)]
-      (broadcast "Takumi is watching " (.getDisplayName target)))))
+      (when (instance? Player target)
+        (broadcast "Takumi is watching " (.getDisplayName target))))))
 
 (defn entity-explosion-prime-event [evt]
   nil)
