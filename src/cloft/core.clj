@@ -231,18 +231,19 @@
     (when (jumping? evt)
       (player-teleport-machine evt player)
       (player-super-jump evt player))
-    (let [l (.getLocation player)
-          b-up (.getBlock l)
-          b-down (.getBlock (.add l 0 -1 0))]
-      (when (and
-              (= (.getType (.getItemInHand player)) Material/RAILS)
-              (= (.getType b-up) Material/AIR)
-              (contains? #{Material/STONE Material/COBBLESTONE
-                           Material/SAND Material/GRAVEL
-                           Material/GRASS Material/DIRT}
-                         (.getType b-down)))
-        (.setType b-up Material/RAILS)
-        (consume-item player)))))
+    (comment (when (walking? evt)
+      (let [l (.getLocation player)
+            b-up (.getBlock l)
+            b-down (.getBlock (.add l 0 -1 0))]
+        (when (and
+                (= (.getType (.getItemInHand player)) Material/RAILS)
+                (= (.getType b-up) Material/AIR)
+                (contains? #{Material/STONE Material/COBBLESTONE
+                             Material/SAND Material/GRAVEL
+                             Material/GRASS Material/DIRT}
+                           (.getType b-down)))
+          (.setType b-up Material/RAILS)
+          (consume-item player)))))))
 
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)
@@ -738,7 +739,7 @@
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
-      (if (and skill (not= 'cart))
+      (if (and skill (not= 'cart skill))
         (skill entity)
         (.sendMessage (.getShooter entity) "You don't have a skill yet.")))))
         ;(do
