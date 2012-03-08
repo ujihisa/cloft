@@ -220,7 +220,7 @@
         (when (location-bound? (.getLocation player) (first sanctuary) (second sanctuary))
           (broadcast name " entered the sanctuary.")
           (swap! sanctuary-players conj name)))
-      (when (= (.getWorld player) world) (< (.distance (org.bukkit.Location. world 70 66 -58) (.getLocation player)) 1)
+      (when (and (= (.getWorld player) world) (< (.distance (org.bukkit.Location. world 70 66 -58) (.getLocation player)) 1))
         (if (jumping? evt)
           (when (not= @bossbattle-player player)
             (broadcast player " entered the boss' room!")
@@ -294,7 +294,7 @@
         (.setType block (rand-nth block-to-choices))))))
 
 (defn arrow-skill-fly [entity]
-  (add-velocity entity 0 1 0))
+  (add-velocity (.getShooter entity) 0 1 0))
 
 (def jobs (atom {}))
 
