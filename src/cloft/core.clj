@@ -720,12 +720,15 @@
   (let [target (.getEntity evt)
         attacker (when (instance? EntityDamageByEntityEvent evt)
                    (.getDamager evt))]
-    (if (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
+    (cond
+      (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
       (when (and
               (instance? Player target)
               (zombie-player? target)
               (= 0 (rand-int 2)))
         (rebirth-from-zombie evt target))
+
+      :else
       (do
         (when (and
                 (instance? Villager target)
