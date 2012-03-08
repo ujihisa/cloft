@@ -728,6 +728,11 @@
               (= 0 (rand-int 2)))
         (rebirth-from-zombie evt target))
 
+      (= EntityDamageEvent$DamageCause/ENTITY_EXPLOSION (.getCause evt))
+      (if (= (rem @creeper-explosion-idx 3) 1)
+        (.setDamage evt 0)
+        (.setDamage evt (max (.getDamage evt) 19)))
+
       :else
       (do
         (when (and
