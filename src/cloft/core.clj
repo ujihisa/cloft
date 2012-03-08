@@ -641,18 +641,18 @@
       (instance? TNTPrimed entity)
       (prn ['TNT entity])
 
-      (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
-      (letfn [(join [xs x]
-                (apply str (interpose x xs)))]
-        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", "))))
-
       (instance? Creeper entity)
       (do
         ((get [(fn [_ _] nil)
                creeper-explosion-1
                creeper-explosion-2
                ] (rem @creeper-explosion-idx 3)) evt entity)
-        (swap! creeper-explosion-idx inc)))))
+        (swap! creeper-explosion-idx inc))
+
+      (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
+      (letfn [(join [xs x]
+                (apply str (interpose x xs)))]
+        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))
 
 (defn zombieze [entity]
   (swap! zombie-players conj (.getDisplayName entity))
