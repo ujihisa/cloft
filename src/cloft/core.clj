@@ -630,29 +630,33 @@
                         (.createExplosion (.getWorld loc) loc 6)))))))
 
 (def creeper-explosion-idx (atom 0))
+(defn current-creeper-explosion []
+  (get [(fn [_ _] nil)
+        creeper-explosion-1
+        creeper-explosion-2
+        ] (rem @creeper-explosion-idx 3)))
+
 (defn entity-explode-event [evt]
-  (let [entity (.getEntity evt)
-        ename (entity2name entity)
-        entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
-    (cond
-      (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
-      (.setCancelled evt true)
+  (let [entity (.getEntity evt)]
+    (when entity
+      (let [ename (entity2name entity)
+            entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
+        (cond
+          (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+          (.setCancelled evt true)
 
-      (instance? TNTPrimed entity)
-      (prn ['TNT entity])
+        (instance? TNTPrimed entity)
+        (prn ['TNT entity])
 
-      (instance? Creeper entity)
-      (do
-        ((get [(fn [_ _] nil)
-               creeper-explosion-1
-               creeper-explosion-2
-               ] (rem @creeper-explosion-idx 3)) evt entity)
-        (swap! creeper-explosion-idx inc))
+        (instance? Creeper entity)
+        (do
+          ((current-creeper-explosion) evt entity)
+          (swap! creeper-explosion-idx inc))
 
-      (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
-      (letfn [(join [xs x]
-                (apply str (interpose x xs)))]
-        (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))
+        (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
+        (letfn [(join [xs x]
+                  (apply str (interpose x xs)))]
+          (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))))
 
 (defn zombieze [entity]
   (swap! zombie-players conj (.getDisplayName entity))
@@ -729,9 +733,9 @@
         (rebirth-from-zombie evt target))
 
       (= EntityDamageEvent$DamageCause/ENTITY_EXPLOSION (.getCause evt))
-      (if (= (rem @creeper-explosion-idx 3) 1)
-        (.setDamage evt 0)
-        (.setDamage evt (max (.getDamage evt) 19)))
+      (if (= (rem @creeper-explosion-idx 3) 0)
+        (.setDamage evt (min (.getDamage evt) 19))
+        (.setDamage evt 0))
 
       :else
       (do
