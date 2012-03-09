@@ -728,8 +728,7 @@
       (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
       (when (and
               (instance? Player target)
-              (zombie-player? target)
-              (= 0 (rand-int 2)))
+              (zombie-player? target))
         (rebirth-from-zombie evt target))
 
       (= EntityDamageEvent$DamageCause/ENTITY_EXPLOSION (.getCause evt))
