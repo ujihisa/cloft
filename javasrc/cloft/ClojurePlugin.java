@@ -154,7 +154,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     /* end auto-generated code */
 
     private void invokeClojureFunc(String enableFunction, Object arg) {
-        String ns = ns;
         try {
             ClassLoader previous = Thread.currentThread().getContextClassLoader();
             Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader()); 
