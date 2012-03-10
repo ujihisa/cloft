@@ -1,4 +1,5 @@
 (ns cloft.core
+  (:require [cloft.cloft :as c])
   ;(:require [clojure.core.match :as m])
   (:require [swank.swank])
   (:require [clojure.string :as s])
@@ -14,21 +15,8 @@
             SmallFireball Snowball Snowman Spider Squid StorageMinecart
             ThrownPotion TNTPrimed Vehicle Villager WaterMob Weather Wolf
             Zombie])
-  (:import [org.bukkit.event.entity CreatureSpawnEvent CreeperPowerEvent
-            EntityChangeBlockEvent
-            EntityCombustByBlockEvent EntityCombustByEntityEvent
-            EntityCombustEvent EntityCreatePortalEvent EntityDamageByBlockEvent
-            EntityDamageByEntityEvent
-            EntityDamageEvent EntityDeathEvent EntityEvent EntityExplodeEvent
-            EntityDamageEvent$DamageCause
-            EntityInteractEvent EntityPortalEnterEvent
-            EntityRegainHealthEvent EntityShootBowEvent EntityTameEvent
-            ;EntityTargetEvent EntityTeleportEvent ExplosionPrimeEvent
-            EntityTargetEvent ExplosionPrimeEvent
-            FoodLevelChangeEvent ItemDespawnEvent ItemSpawnEvent PigZapEvent
-            PlayerDeathEvent PotionSplashEvent ProjectileHitEvent
-            SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
-  (:require clj-http.client))
+  (:import [org.bukkit.event.entity EntityDamageByEntityEvent
+            EntityDamageEvent$DamageCause]))
 
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
@@ -44,21 +32,6 @@
 
 (defn name2icon [name]
   (get NAME-ICON name (str name ": ")))
-
-(def BOT-VERIFIER
-  (apply str (drop-last (try
-                          (slurp "bot_verifier.txt")
-                          (catch java.io.FileNotFoundException e "")))))
-
-(defn lingr [msg]
-  (future-call
-    #(clj-http.client/post
-       "http://lingr.com/api/room/say"
-       {:form-params
-        {:room "mcujm"
-         :bot 'cloft
-         :text (str msg)
-         :bot_verifier BOT-VERIFIER}})))
 
 ;(defn block-break [evt]
 ;  (.sendMessage (.getPlayer evt) "You know. Breaking stuff should be illegal."))
@@ -76,29 +49,6 @@
 ;   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
 ;  )
 
-(defn location-in-lisp [location]
-  (list
-    'org.bukkit.Location.
-    (.getName (.getWorld location))
-    (.getX location)
-    (.getY location)
-    (.getZ location)
-    (.getPitch location)
-    (.getYaw location)))
-
-(defn swap-entity [target klass]
-  (let [location (.getLocation target)
-        world (.getWorld target)]
-    (.remove target)
-    (.spawn world location klass)))
-
-(defn consume-item [player]
-  (let [itemstack (.getItemInHand player)
-        amount (.getAmount itemstack)]
-    (if (= 1 amount)
-      (.remove (.getInventory player) itemstack)
-      (.setAmount itemstack (dec amount)))))
-
 (def world (Bukkit/getWorld "world"))
 (def place1 (org.bukkit.Location. world -55.5 71.5 73.5)) ; lighter
 (def place2 (org.bukkit.Location. world -63.5 71.5 73.5)) ; darker
@@ -113,31 +63,24 @@
 (def place-main (org.bukkit.Location. world 4.294394438259979 67.0 0.6542090982205075 -7.5000114 -40.35013))
 (def anotherbed (org.bukkit.Location.  world -237.8704284429714 72.5625 -53.82154923217098 19.349966 -180.45361))
 
-(defn get-player [name]
-  (first (filter #(= (.getDisplayName %) name) (Bukkit/getOnlinePlayers))))
-(defn ujm [] (get-player "ujm"))
-
-(defn jumping? [moveevt]
-  (< (.getY (.getFrom moveevt)) (.getY (.getTo moveevt))))
-
 (def player-death-locations (atom {}))
 (defn player-teleport-machine [evt player]
   (when (and
           (= (.getWorld player) world)
           (< (.distance place2 (.getLocation player)) 1))
-    (lingr (str (.getDisplayName player) " is teleporting..."))
+    (c/lingr (str (.getDisplayName player) " is teleporting..."))
     (.setTo evt place3))
   (when (and
           (= (.getWorld player) world)
           (< (.distance place1 (.getLocation player)) 1)
           (.isLoaded (.getChunk place4)))
-    (lingr (str (.getDisplayName player) " is teleporting..."))
+    (c/lingr (str (.getDisplayName player) " is teleporting..."))
     (.setTo evt place4))
   (when (and
           (= (.getWorld player) world)
           (< (.distance place5 (.getLocation player)) 1)
           (.isLoaded (.getChunk place6)))
-    (lingr (str (.getDisplayName player) " is teleporting..."))
+    (c/lingr (str (.getDisplayName player) " is teleporting..."))
     (.setTo evt place6))
   (when (and
           (= (.getWorld player) world)
@@ -145,7 +88,7 @@
             (< (.distance place9 (.getLocation player)) 1)
             (< (.distance place10 (.getLocation player)) 1))
           (.isLoaded (.getChunk place-main)))
-    (lingr (str (.getDisplayName player) " is teleporting..."))
+    (c/lingr (str (.getDisplayName player) " is teleporting..."))
     (.setTo evt place-main))
   (when (and
           (= (.getWorld player) world)
@@ -153,16 +96,9 @@
     (let [death-point (get @player-death-locations (.getDisplayName player))]
       (when death-point
         (.isLoaded (.getChunk death-point)) ; for side-effect
-        (lingr (str (.getDisplayName player) " is teleporting to the last death place..."))
+        (c/lingr (str (.getDisplayName player) " is teleporting to the last death place..."))
         (.setTo evt death-point)))))
 
-(defn consume-itemstack [inventory mtype]
-  (let [idx (.first inventory mtype)
-        itemstack (.getItem inventory idx)
-        amount (.getAmount itemstack)]
-    (if (= 1 amount)
-      (.remove inventory itemstack)
-      (.setAmount itemstack (dec amount)))))
 
 (def super-jump-flags (atom {}))
 (defn player-super-jump [evt player]
@@ -179,21 +115,15 @@
         (let [amount (.getAmount (.getItemInHand player))
               x (if (.isSprinting player) (* amount 2) amount)
               x2 (/ (java.lang.Math/log x) 2) ]
-          (lingr (str name " is super jumping with level " x))
-          (consume-itemstack (.getInventory player) Material/FEATHER)
+          (c/lingr (str name " is super jumping with level " x))
+          (c/consume-itemstack (.getInventory player) Material/FEATHER)
           (.setVelocity
             player
             (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player))))))))
 
-(defn broadcast [& strs]
-  (.broadcastMessage (Bukkit/getServer) (apply str strs)))
-
 (def sanctuary [(org.bukkit.Location. world 45 30 -75)
                 (org.bukkit.Location. world 84 90 -44)])
 (def sanctuary-players (atom #{}))
-
-(defn location-bound? [loc min max]
-  (.isInAABB (.toVector loc) (.toVector min) (.toVector max)))
 
 (defn event [evt]
   (prn evt))
@@ -215,21 +145,21 @@
       (.setVelocity player (.setY (.clone (.getVelocity player)) -0.1))))
     (let [name (.getDisplayName player)]
       (if (get @sanctuary-players name)
-        (when (not (location-bound? (.getLocation player) (first sanctuary) (second sanctuary)))
+        (when (not (c/location-bound? (.getLocation player) (first sanctuary) (second sanctuary)))
           (swap! sanctuary-players disj name))
-        (when (location-bound? (.getLocation player) (first sanctuary) (second sanctuary))
-          (broadcast name " entered the sanctuary.")
+        (when (c/location-bound? (.getLocation player) (first sanctuary) (second sanctuary))
+          (c/broadcast name " entered the sanctuary.")
           (swap! sanctuary-players conj name)))
       (when (and (= (.getWorld player) world) (< (.distance (org.bukkit.Location. world 70 66 -58) (.getLocation player)) 1))
-        (if (jumping? evt)
+        (if (c/jumping? evt)
           (when (not= @bossbattle-player player)
-            (broadcast player " entered the boss' room!")
+            (c/broadcast player " entered the boss' room!")
             (dosync
               (ref-set bossbattle-player player)))
           (do
             (.sendMessage player "You can't leave")
             (.setTo evt (.add (.getFrom evt) 0 0.5 0))))))
-    (when (jumping? evt)
+    (when (c/jumping? evt)
       (player-teleport-machine evt player)
       (player-super-jump evt player))
     (comment (when (walking? evt)
@@ -244,10 +174,7 @@
                              Material/GRASS Material/DIRT}
                            (.getType b-down)))
           (.setType b-up Material/RAILS)
-          (consume-item player)))))))
-
-(defn add-velocity [entity x y z]
-  (.setVelocity entity (.add (.getVelocity entity) (org.bukkit.util.Vector. (double x) (double y) (double z)))))
+          (c/consume-item player)))))))
 
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)
@@ -294,7 +221,7 @@
         (.setType block (rand-nth block-to-choices))))))
 
 (defn arrow-skill-fly [entity]
-  (add-velocity (.getShooter entity) 0 1 0))
+  (c/add-velocity (.getShooter entity) 0 1 0))
 
 (def jobs (atom {}))
 
@@ -322,7 +249,7 @@
   (when (instance? Creeper (.getEntity evt))
     (let [target (.getTarget evt)]
       (when (instance? Player target)
-        (broadcast "Takumi is watching " (.getDisplayName target))))))
+        (c/broadcast "Takumi is watching " (.getDisplayName target))))))
 
 (defn entity-explosion-prime-event [evt]
   nil)
@@ -353,25 +280,25 @@
                              [-1 1 0 0] [-1 1 0 0])))
     (cond
       (= (.getType block) Material/TORCH)
-      (do (broadcast (.getDisplayName player) " changed arrow skill to TORCH")
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to TORCH")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-torch))
       (= (.getType block) Material/YELLOW_FLOWER)
-      (do (broadcast (.getDisplayName player) " changed arrow skill to TELEPORT")
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to TELEPORT")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-teleport))
       (= (.getType block) Material/RED_ROSE)
-      (do (broadcast (.getDisplayName player) " changed arrow skill to FIRE")
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to FIRE")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-fire))
       (= (.getType block) Material/SAPLING)
-      (do (broadcast (.getDisplayName player) " changed arrow skill to TREE")
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to TREE")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-tree))
       (= (.getType block) Material/WORKBENCH)
-      (do (broadcast (.getDisplayName player) " changed arrow skill to ORE")
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to ORE")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))
       (= (.getType block) Material/BROWN_MUSHROOM)
-      (do (broadcast (.getDisplayName player) " changed arrow skill to FLY")
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to FLY")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-fly))
       (= (.getType block) Material/RAILS)
-      (do (broadcast (.getDisplayName player) " changed arrow skill to CART")
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to CART")
           (swap! jobs assoc (.getDisplayName player) 'cart)))))
 
 (defn block-place-event [evt]
@@ -384,12 +311,12 @@
                (doseq [entity (.getNearbyEntities player 4 4 4)]
                  (.setVelocity entity (vector-from-to entity block)))))
     ;(build-long block (.getBlockAgainst evt))
-    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+    (when (c/location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
       (.setCancelled evt true))))
 
 (defn block-break-event [evt]
   (let [block (.getBlock evt)]
-    (when (location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+    (when (c/location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
       (.setCancelled evt true))))
 
 (defn player-login-event [evt]
@@ -403,24 +330,24 @@
                         (.setOp player true)
                         (prn [player 'is 'op]))
                       (.setOp player false))))
-    (lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
+    (c/lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
-;(defn get-player-quit-listener []
+;(defn c/get-player-quit-listener []
 ;  (c/auto-proxy
 ;    [Listener] []
 ;    (onPlayerQuit
 ;      [evt]
-;      (lingr (str (name2icon (.getDisplayName (.getPlayer evt))) "quitted.")))))
+;      (c/lingr (str (name2icon (.getDisplayName (.getPlayer evt))) "quitted.")))))
 
 (defn player-chat-event [evt]
   (let [name (.getDisplayName (.getPlayer evt))]
-    (lingr (str (name2icon name) (.getMessage evt)))))
+    (c/lingr (str (name2icon name) (.getMessage evt)))))
 
 (defn player-drop-item-event [evt]
   (let [player (.getPlayer evt)]
     (when false
       (.sendMessage player "feather jump!")
-      (add-velocity player 0 0.5 0))))
+      (c/add-velocity player 0 0.5 0))))
 
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
@@ -435,7 +362,7 @@
         (if death-point
           (do
             (.getChunk death-point)
-            (broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
+            (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
             (.teleport player death-point))
           (.sendMessage player "You didn't die yet.")))
       (and
@@ -465,14 +392,14 @@
         (and (instance? PigZombie target)
              (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296))
         (do
-          (swap-entity target Pig)
-          (consume-item (.getPlayer evt)))
+          (c/swap-entity target Pig)
+          (c/consume-item (.getPlayer evt)))
         ; give zombeef to pig -> zombie pigman
         (and (instance? Pig target)
              (= (.getTypeId (.getItemInHand (.getPlayer evt))) 367))
         (do
-          (swap-entity target PigZombie)
-          (consume-item (.getPlayer evt)))
+          (c/swap-entity target PigZombie)
+          (c/consume-item (.getPlayer evt)))
         ; right-click villager -> cake
         (instance? Villager target) (d 92)
         ; right-click zombie -> zombeef
@@ -491,7 +418,7 @@
 
 (defn player-level-change-event [evt]
   (when (< (.getOldLevel evt) (.getNewLevel evt))
-    (broadcast "Level up! "(.getDisplayName (.getPlayer evt)) " is Lv" (.getNewLevel evt))))
+    (c/broadcast "Level up! "(.getDisplayName (.getPlayer evt)) " is Lv" (.getNewLevel evt))))
 
 ; internal
 (defn zombie-player-periodically [zplayer]
@@ -502,48 +429,13 @@
 
 (comment (def chain (atom {:entity nil :loc nil})))
 
-(defn entity2name [entity]
-  (cond (instance? Blaze entity) "Blaze"
-        (instance? CaveSpider entity) "CaveSpider"
-        (instance? Chicken entity) "Chicken"
-        ;(instance? ComplexLivingEntity entity) "ComplexLivingEntity"
-        (instance? Cow entity) "Cow"
-        ;(instance? Creature entity) "Creature"
-        (instance? Creeper entity) "Creeper"
-        (instance? EnderDragon entity) "EnderDragon"
-        (instance? Enderman entity) "Enderman"
-        ;(instance? Flying entity) "Flying"
-        (instance? Ghast entity) "Ghast"
-        (instance? Giant entity) "Giant"
-        ;(instance? HumanEntity entity) "HumanEntity"
-        (instance? MagmaCube entity) "MagmaCube"
-        ;(instance? Monster entity) "Monster"
-        (instance? MushroomCow entity) "MushroomCow"
-        ;(instance? NPC entity) "NPC"
-        (instance? Pig entity) "Pig"
-        (instance? PigZombie entity) "PigZombie"
-        (instance? Player entity) (.getDisplayName entity)
-        (instance? Sheep entity) "Sheep"
-        (instance? Silverfish entity) "Silverfish"
-        (instance? Skeleton entity) "Skeleton"
-        (instance? Slime entity) "Slime"
-        (instance? Snowman entity) "Snowman"
-        (instance? Spider entity) "Spider"
-        (instance? Squid entity) "Squid"
-        (instance? Villager entity) "Villager"
-        ;(instance? WaterMob entity) "WaterMob"
-        (instance? Wolf entity) "Wolf"
-        (instance? Zombie entity) "Zombie"
-        (instance? TNTPrimed entity) "TNT"
-        :else (str (class entity))))
-
 (defn chain-entity [entity shooter]
   (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
   (let [block (.getBlock (.getLocation entity))]
     (when (not (.isLiquid block))
-      (let [msg (str (.getDisplayName shooter) " chained " (entity2name entity))]
+      (let [msg (str (.getDisplayName shooter) " chained " (c/entity2name entity))]
         (.sendMessage shooter msg)
-        (lingr msg))
+        (c/lingr msg))
       (.setType block Material/WEB)
       (future-call #(do
                       (Thread/sleep 10000)
@@ -589,11 +481,11 @@
       (when (instance? Creeper entity)
         (.setDroppedExp evt 20))
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
-      (broadcast (.getDisplayName killer) " killed " (entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
+      (c/broadcast (.getDisplayName killer) " killed " (c/entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
 
 (defn player-death-event [evt player]
   (swap! player-death-locations assoc (.getDisplayName player) (.getLocation player))
-  (lingr (str (name2icon (.getDisplayName player)) (.getDeathMessage evt))))
+  (c/lingr (str (name2icon (.getDisplayName player)) (.getDeathMessage evt))))
 
 (defn entity-death-event [evt]
   (let [entity (.getEntity evt)]
@@ -617,14 +509,14 @@
 
 (defn creeper-explosion-2 [evt entity]
   (.setCancelled evt true)
-  (if (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+  (if (c/location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
     (prn 'cancelled)
     (let [loc (.getLocation entity)]
       (.setType (.getBlock loc) Material/PUMPKIN)
-      (broadcast "break the bomb before it explodes!")
+      (c/broadcast "break the bomb before it explodes!")
       (future-call #(do
                       (Thread/sleep 7000)
-                      (broadcast "zawa...")
+                      (c/broadcast "zawa...")
                       (Thread/sleep 1000)
                       (when (= (.getType (.getBlock loc)) Material/PUMPKIN)
                         (.createExplosion (.getWorld loc) loc 6)))))))
@@ -639,10 +531,10 @@
 (defn entity-explode-event [evt]
   (let [entity (.getEntity evt)]
     (when entity
-      (let [ename (entity2name entity)
+      (let [ename (c/entity2name entity)
             entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
         (cond
-          (location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+          (c/location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
           (.setCancelled evt true)
 
         (instance? TNTPrimed entity)
@@ -656,14 +548,14 @@
         (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
         (letfn [(join [xs x]
                   (apply str (interpose x xs)))]
-          (lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))))
+          (c/lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))))
 
 (defn zombieze [entity]
   (swap! zombie-players conj (.getDisplayName entity))
   (.setMaximumAir entity 1)
   (.setRemainingAir entity 1)
   (.sendMessage entity "You turned into a zombie.")
-  (lingr (str (name2icon (.getDisplayName entity)) "turned into a zombie.")))
+  (c/lingr (str (name2icon (.getDisplayName entity)) "turned into a zombie.")))
 
 (comment (defn potion-weakness [name]
   (.apply
@@ -677,7 +569,7 @@
         (.contains (.getInventory shooter) Material/WEB)
         (do
           (chain-entity target shooter)
-          (consume-itemstack (.getInventory shooter) Material/WEB))
+          (c/consume-itemstack (.getInventory shooter) Material/WEB))
         (= 'cart (get @jobs (.getDisplayName shooter)))
         (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
           (.setPassenger cart target))))))
@@ -686,7 +578,7 @@
            (future-call #(let [b (.getBlock (.getLocation target))]
                            (.setType b Material/RAILS)))
            (.setPassenger cart target)
-           (add-velocity cart 0 5 0)))
+           (c/add-velocity cart 0 5 0)))
 
 (defn vector-from-to [ent-from ent-to]
   (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
@@ -742,7 +634,7 @@
                 (instance? Villager target)
                 (instance? EntityDamageByEntityEvent evt)
                 (instance? Player attacker))
-          (lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
+          (c/lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
           (.damage attacker (.getDamage evt)))
         (when (instance? Arrow attacker)
           (arrow-damages-entity-event evt attacker target))
@@ -795,7 +687,7 @@
           )))
 
 (defn player-bed-enter-event [evt]
-  (broadcast (.. evt (getPlayer) (getDisplayName)) " is sleeping.")
+  (c/broadcast (.. evt (getPlayer) (getDisplayName)) " is sleeping.")
   (future-call #(do
                   (Thread/sleep 3000)
                   (when (.. evt (getPlayer) (isSleeping))
@@ -803,7 +695,7 @@
                           bed-players (filter (memfn isSleeping) all-players)]
                       (when (< (count all-players) (inc (* (count bed-players) 2)))
                         (.setTime world 0)
-                        (broadcast "good morning everyone!")))))))
+                        (c/broadcast "good morning everyone!")))))))
 
 ;(defn vehicle-enter-event* [evt]
 ;  (let [vehicle (.getVehicle evt)
@@ -850,15 +742,15 @@
 
 (defn stalk-on [player-name]
   (let [player (Bukkit/getPlayer player-name)]
-    (.hidePlayer player (ujm))
+    (.hidePlayer player (c/ujm))
     (dosync
-      (ref-set pre-stalk (.getLocation (ujm))))
-    (.teleport (ujm) (.getLocation player))))
+      (ref-set pre-stalk (.getLocation (c/ujm))))
+    (.teleport (c/ujm) (.getLocation player))))
 
 (defn stalk-off [player-name]
   (let [player (Bukkit/getPlayer player-name)]
-    (.teleport (ujm) @pre-stalk)
-    (.showPlayer player (ujm))))
+    (.teleport (c/ujm) @pre-stalk)
+    (.showPlayer player (c/ujm))))
 
 (def recipe-string-web
   (let [x (org.bukkit.inventory.ShapelessRecipe.
@@ -875,6 +767,6 @@
   (comment (proxy [java.lang.Object CommandExecuter] []
     (onCommand [this ^CommandSender sender ^Command command ^String label ^String[] args]
       (prn command))))
-  (lingr "cloft plugin running..."))
+  (c/lingr "cloft plugin running..."))
 
-;  (lingr "cloft plugin stopping...")
+;  (c/lingr "cloft plugin stopping...")
