@@ -424,8 +424,7 @@
 (defn zombie-player-periodically [zplayer]
   (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
     (.setFireTicks zplayer 100))
-  (when (= 0 (rand-int 2))
-    (.setFoodLevel zplayer (dec (.getFoodLevel zplayer)))))
+  (.setFoodLevel zplayer (dec (.getFoodLevel zplayer))))
 
 (comment (def chain (atom {:entity nil :loc nil})))
 
