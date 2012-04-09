@@ -544,7 +544,7 @@
                       (c/broadcast "zawa...")
                       (Thread/sleep 1000)
                       (when (= (.getType (.getBlock loc)) Material/PUMPKIN)
-                        (.createExplosion (.getWorld loc) loc 6)))))))
+                        (.createExplosion (.getWorld loc) loc 6 true)))))))
 
 (def creeper-explosion-idx (atom 0))
 (defn current-creeper-explosion []
