@@ -146,7 +146,7 @@
       (.setVelocity player new-velo)))
     (comment(when (> -0.1 (.getY (.getVelocity player)))
       (.setVelocity player (.setY (.clone (.getVelocity player)) -0.1))))
-    (let [name (.getDisplayName player)]
+    #_(let [name (.getDisplayName player)]
       (if (get @sanctuary-players name)
         (when (not (c/location-bound? (.getLocation player) (first sanctuary) (second sanctuary)))
           (swap! sanctuary-players disj name))
@@ -163,8 +163,7 @@
             (.sendMessage player "You can't leave")
             (.setTo evt (.add (.getFrom evt) 0 0.5 0))))))
     (when (c/jumping? evt)
-      (player-teleport-machine evt player)
-      (player-super-jump evt player))
+      (player-teleport-machine evt player))
     (comment (when (walking? evt)
       (let [l (.getLocation player)
             b-up (.getBlock l)
@@ -382,7 +381,13 @@
           (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
       (do
         (.damage player 8)
-        (.sendMessage player "you drunk milk")))))
+        (.sendMessage player "you drunk milk"))
+      (and
+        (= (.. evt (getMaterial)) Material/FEATHER)
+        (or
+          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
+      (player-super-jump evt player))))
 
 (defn player-interact-entity-event [evt]
   (let [target (.getRightClicked evt)]
