@@ -128,6 +128,9 @@
 (defn event [evt]
   (prn evt))
 
+(defn entity-combust-event [evt]
+  (.setCancelled evt true))
+
 (def bossbattle-player nil)
 (defn player-move-event [evt]
   (let [player (.getPlayer evt)]
@@ -400,8 +403,14 @@
         (do
           (c/swap-entity target PigZombie)
           (c/consume-item (.getPlayer evt)))
+        ; right-click chicken -> rail
+        (instance? Chicken target) (d 66)
+        ; right-click cow -> charcoal
+        (instance? Cow target) (d 263)
         ; right-click villager -> cake
         (instance? Villager target) (d 92)
+        ; right-click creeper -> gunpowder
+        (instance? Creeper target) (d 289)
         ; right-click zombie -> zombeef
         (and (instance? Zombie target) (not (instance? PigZombie target))) (d 367)
         ; right-click skelton -> arrow
@@ -472,9 +481,21 @@
       (.sendMessage killer "PIG: Pig Is God")
       (.setFireTicks killer 100))))
 
+(defn player-respawn-event [evt]
+  (let [player (.getPlayer evt)]
+    (future-call #(do
+                    (swap! zombie-players disj (.getDisplayName player))
+                    (.setHealth player (/ (.getMaxHealth player) 2))
+                    (.setFoodLevel player 10)))))
+
 (defn entity-murder-event [evt entity]
   (let [killer (.getKiller entity)]
     (when (instance? Player killer)
+      (when (instance? Zombie entity)
+        ((rand-nth
+           [#(.createExplosion (.getWorld entity) (.getLocation entity) 2)
+            #(.spawn (.getWorld entity) (.getLocation entity) Villager)
+            #(.dropItem (.getWorld entity) (.getLocation entity) (org.bukkit.inventory.ItemStack. Material/IRON_SWORD))])))
       (when (instance? Giant entity)
         (.setDroppedExp evt 1000))
       (when (instance? Creeper entity)
@@ -651,12 +672,20 @@
               (zombieze target)
               (.sendMessage attacker "You made a friend"))))))))
 
+(defn block-break-event [evt]
+  (if-let [player (.getPlayer evt)]
+    (when (= (.getType (.getItemInHand player)) Material/AIR)
+      (.sendMessage player "Your hand hurts!")
+      (.damage player (rand-int 5)))))
+
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
       (if (and skill (not= 'cart skill))
         (skill entity)
-        (.sendMessage (.getShooter entity) "You don't have a skill yet.")))))
+        (.sendMessage (.getShooter entity) "You don't have a skill yet."))))
+  (when (instance? Skeleton (.getShooter entity))
+    (.createExplosion (.getWorld entity) (.getLocation entity) 1)))
         ;(do
         ;  (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
         ;             (let [location (.getLocation entity)
