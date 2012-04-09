@@ -100,13 +100,13 @@
         (.setTo evt death-point)))))
 
 
-(def super-jump-flags (atom {}))
+(comment (def super-jump-flags (atom {})))
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
     (when (not (get @super-jump-flags name))
       (when (= (.getType (.getItemInHand player)) Material/FEATHER)
-        (swap! super-jump-flags assoc name true)
-        (future-call #(do
+        #_(swap! super-jump-flags assoc name true)
+        #_(future-call #(do
                         (Thread/sleep 2000)
                         (.sendMessage player "super jump charging...")
                         (Thread/sleep 5000)
@@ -546,12 +546,18 @@
                       (when (= (.getType (.getBlock loc)) Material/PUMPKIN)
                         (.createExplosion (.getWorld loc) loc 6 true)))))))
 
+(defn creeper-explosion-3 [evt entity]
+  (.setCancelled evt true)
+  (.createExplosion (.getWorld entity) (.getLocation entity) 0)
+  )
+
 (def creeper-explosion-idx (atom 0))
 (defn current-creeper-explosion []
   (get [(fn [_ _] nil)
         creeper-explosion-1
         creeper-explosion-2
-        ] (rem @creeper-explosion-idx 3)))
+        creeper-explosion-3
+        ] (rem @creeper-explosion-idx 4)))
 
 (defn entity-explode-event [evt]
   (let [entity (.getEntity evt)]
