@@ -100,18 +100,9 @@
         (.setTo evt death-point)))))
 
 
-(comment (def super-jump-flags (atom {})))
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
-    (when (not (get @super-jump-flags name))
-      (when (= (.getType (.getItemInHand player)) Material/FEATHER)
-        #_(swap! super-jump-flags assoc name true)
-        #_(future-call #(do
-                        (Thread/sleep 2000)
-                        (.sendMessage player "super jump charging...")
-                        (Thread/sleep 5000)
-                        (.sendMessage player "super jump charge done")
-                        (swap! super-jump-flags assoc name false)))
+    (when (= (.getType (.getItemInHand player)) Material/FEATHER)
         (let [amount (.getAmount (.getItemInHand player))
               x (if (.isSprinting player) (* amount 2) amount)
               x2 (/ (java.lang.Math/log x) 2) ]
@@ -119,7 +110,7 @@
           (c/consume-itemstack (.getInventory player) Material/FEATHER)
           (.setVelocity
             player
-            (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player))))))))
+            (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player)))))))
 
 (def sanctuary [(org.bukkit.Location. world 45 30 -75)
                 (org.bukkit.Location. world 84 90 -44)])
@@ -222,9 +213,6 @@
                               Material/REDSTONE_ORE]]
         (.setType block (rand-nth block-to-choices))))))
 
-(defn arrow-skill-fly [entity]
-  (c/add-velocity (.getShooter entity) 0 1 0))
-
 (def jobs (atom {}))
 
 (def bowgun-players (atom #{"ujm"}))
@@ -298,7 +286,7 @@
           (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))
       (= (.getType block) Material/BROWN_MUSHROOM)
       (do (c/broadcast (.getDisplayName player) " changed arrow skill to FLY")
-          (swap! jobs assoc (.getDisplayName player) arrow-skill-fly))
+          (swap! jobs assoc (.getDisplayName player) 'fly))
       (= (.getType block) Material/RAILS)
       (do (c/broadcast (.getDisplayName player) " changed arrow skill to CART")
           (swap! jobs assoc (.getDisplayName player) 'cart)))))
@@ -601,6 +589,8 @@
         (do
           (chain-entity target shooter)
           (c/consume-itemstack (.getInventory shooter) Material/WEB))
+        (= 'fly (get @jobs (.getDisplayName shooter)))
+        (c/add-velocity target 0 (rand-nth (range 2 5)) 0)
         (= 'cart (get @jobs (.getDisplayName shooter)))
         (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
           (.setPassenger cart target))))))
@@ -692,7 +682,7 @@
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
-      (if (and skill (not= 'cart skill))
+      (if (and skill (or (not= 'cart skill) (not= 'fly skill)))
         (skill entity)
         (.sendMessage (.getShooter entity) "You don't have a skill yet."))))
   (when (instance? Skeleton (.getShooter entity))
