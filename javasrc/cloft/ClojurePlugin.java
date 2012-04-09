@@ -87,8 +87,18 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-respawn-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "player-move-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onEntityCombust(EntityCombustEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-combust-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
