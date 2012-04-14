@@ -17,7 +17,8 @@
             Zombie])
   (:import [org.bukkit.event.entity EntityDamageByEntityEvent
             EntityDamageEvent$DamageCause])
-  (:import [org.bukkit.potion PotionEffect PotionEffectType]))
+  (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
+  (:import [org.bukkit.inventory ItemStack]))
 
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
@@ -357,6 +358,12 @@
             (.teleport player death-point))
           (.sendMessage player "You didn't die yet.")))
       (and
+        (= (.. player (getItemInHand) (getType)) Material/GLASS_BOTTLE)
+        (or
+          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
+      (.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
+      (and
         (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
         (= (.getHealth player) (.getMaxHealth player))
         (or
@@ -383,7 +390,7 @@
     (letfn [(d [n]
               (.dropItem (.getWorld target)
                          (.getLocation target)
-                         (org.bukkit.inventory.ItemStack. n 1)))]
+                         (ItemStack. n 1)))]
       (cond
         ; give wheat to zombie pigman -> pig
         (and (instance? PigZombie target)
@@ -489,7 +496,7 @@
         ((rand-nth
            [#(.createExplosion (.getWorld entity) (.getLocation entity) 2)
             #(.spawn (.getWorld entity) (.getLocation entity) Villager)
-            #(.dropItem (.getWorld entity) (.getLocation entity) (org.bukkit.inventory.ItemStack. Material/IRON_SWORD))])))
+            #(.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/IRON_SWORD))])))
       (when (instance? Giant entity)
         (.setDroppedExp evt 1000))
       (when (instance? Creeper entity)
@@ -795,7 +802,7 @@
 
 (def recipe-string-web
   (let [x (org.bukkit.inventory.ShapelessRecipe.
-            (org.bukkit.inventory.ItemStack. Material/WEB 3))]
+            (ItemStack. Material/WEB 3))]
     (.addIngredient x 3 Material/STRING)
     x))
 

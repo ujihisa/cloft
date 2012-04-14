@@ -25,6 +25,7 @@
             FoodLevelChangeEvent ItemDespawnEvent ItemSpawnEvent PigZapEvent
             PlayerDeathEvent PotionSplashEvent ProjectileHitEvent
             SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
+  (:import [org.bukkit.potion PotionType])
   (:require clj-http.client))
 
 (def BOT-VERIFIER
@@ -123,3 +124,8 @@
         (instance? Zombie entity) "Zombie"
         (instance? TNTPrimed entity) "TNT"
         :else (str (class entity))))
+
+(def potion-types [PotionType/FIRE_RESISTANCE PotionType/INSTANT_DAMAGE
+                   PotionType/INSTANT_HEAL PotionType/POISON PotionType/REGEN
+                   PotionType/SLOWNESS PotionType/SPEED PotionType/STRENGTH
+                   PotionType/WATER PotionType/WEAKNESS])
