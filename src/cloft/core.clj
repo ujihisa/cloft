@@ -16,7 +16,8 @@
             ThrownPotion TNTPrimed Vehicle Villager WaterMob Weather Wolf
             Zombie])
   (:import [org.bukkit.event.entity EntityDamageByEntityEvent
-            EntityDamageEvent$DamageCause]))
+            EntityDamageEvent$DamageCause])
+  (:import [org.bukkit.potion PotionEffect PotionEffectType]))
 
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
@@ -604,6 +605,15 @@
 (defn vector-from-to [ent-from ent-to]
   (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
 
+(defn player-attacks-spider-event [evt player spider]
+  (let [cave-spider (.spawn (.getWorld spider) (.getLocation spider) CaveSpider)]
+    (.sendMessage player "The spider turned into a cave spider!")
+    (.addPotionEffect cave-spider (PotionEffect.
+                                    PotionEffectType/BLINDNESS
+                                    500
+                                    3)))
+  (.remove spider))
+
 (defn player-attacks-pig-event [evt player pig]
   (when (= 0 (rand-int 2))
     (future-call #(let [another-pig (.spawn (.getWorld pig) (.getLocation pig) Pig)]
@@ -659,6 +669,8 @@
           (.damage attacker (.getDamage evt)))
         (when (instance? Arrow attacker)
           (arrow-damages-entity-event evt attacker target))
+        (when (and (instance? Player attacker) (instance? Spider target))
+          (player-attacks-spider-event evt attacker target))
         (when (and (instance? Player attacker) (instance? Pig target))
           (player-attacks-pig-event evt attacker target))
         (when (and (instance? Player attacker) (instance? Chicken target))
