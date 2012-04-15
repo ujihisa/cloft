@@ -772,6 +772,9 @@
 ;  (c/auto-proxy [Listener] []
 ;                (onVehicleEnter [evt] (vehicle-enter-event* evt))))
 
+(defn vehicle-collision-event [evt]
+  (prn (.getVehicle evt)))
+
 (comment (defn enderman-pickup-event* [evt]
   (prn 'epe)))
 

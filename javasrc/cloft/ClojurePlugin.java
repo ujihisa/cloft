@@ -157,6 +157,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onVehicleCollision(VehicleCollisionEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-collision-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onVehicleEnter(VehicleEnterEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-enter-event");
         if (f.isBound()) f.invoke(event);
