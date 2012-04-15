@@ -392,6 +392,19 @@
                          (.getLocation target)
                          (ItemStack. n 1)))]
       (cond
+        (and (= (.getType (.getItemInHand (.getPlayer evt))) Material/COAL)
+             (instance? PoweredMinecart target))
+        (do
+          (.setMaxSpeed target 5.0)
+          (let [v (.getVelocity target)
+                x (.getX v)
+                z (.getY v)
+                r2 (max (+ (* x x) (* z z)) 0.1)
+                new-x (* 2 (/ x r2))
+                new-z (* 2 (/ z r2))]
+            (future-call #(do
+                            (Thread/sleep 100)
+                            (.setVelocity target (org.bukkit.util.Vector. new-x (.getY v) new-z))))))
         ; give wheat to zombie pigman -> pig
         (and (instance? PigZombie target)
              (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296))
@@ -771,9 +784,6 @@
 ;(defn vehicle-enter-event []
 ;  (c/auto-proxy [Listener] []
 ;                (onVehicleEnter [evt] (vehicle-enter-event* evt))))
-
-(defn vehicle-collision-event [evt]
-  (prn (.getVehicle evt)))
 
 (comment (defn enderman-pickup-event* [evt]
   (prn 'epe)))
