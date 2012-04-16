@@ -322,7 +322,9 @@
     (future-call #(do
                     (Thread/sleep 1000)
                     (let [ip (.. player getAddress getAddress getHostAddress)]
-                      (if (= "10.0" (apply str (take 4 ip)))
+                      (if (or
+                            (= "10.0" (apply str (take 4 ip)))
+                            (= "127.0.0.1" ip))
                         (do
                           (.setOp player true)
                           (prn [player 'is 'op]))
