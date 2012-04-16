@@ -224,7 +224,8 @@
 (defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
-      (when (.isSneaking shooter)
+      (when (or (.isSneaking shooter)
+                (= 'strong (get @jobs (.getDisplayName shooter))))
         (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 3)))
       (comment (.setCancelled evt true))
       (comment (.setVelocity shooter (.multiply (.getVelocity (.getProjectile evt)) 2)))
@@ -271,6 +272,9 @@
                                 Material/STONE)
                              [-1 1 0 0] [-1 1 0 0])))
     (cond
+      (= (.getType block) Material/GLOWSTONE)
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to STRONG")
+          (swap! jobs assoc (.getDisplayName player) 'strong))
       (= (.getType block) Material/TORCH)
       (do (c/broadcast (.getDisplayName player) " changed arrow skill to TORCH")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-torch))
@@ -317,11 +321,12 @@
       (.setDisplayName player "raa0121")))
     (future-call #(do
                     (Thread/sleep 1000)
-                    (if (= "10.0" (apply str (take 4 (.. player getAddress getAddress getHostAddress))))
-                      (do
-                        (.setOp player true)
-                        (prn [player 'is 'op]))
-                      (.setOp player false))))
+                    (let [ip (.. player getAddress getAddress getHostAddress)]
+                      (if (= "10.0" (apply str (take 4 ip)))
+                        (do
+                          (.setOp player true)
+                          (prn [player 'is 'op]))
+                        (.setOp player false)))))
     (c/lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
 ;(defn c/get-player-quit-listener []
@@ -714,7 +719,7 @@
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
-      (if (and skill (or (not= 'cart skill) (not= 'fly skill)))
+      (if (and skill (or (not= 'cart skill) (not= 'fly skill) (not= 'strong skill)))
         (skill entity)
         (.sendMessage (.getShooter entity) "You don't have a skill yet."))))
   (when (instance? Skeleton (.getShooter entity))
