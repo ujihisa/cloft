@@ -506,7 +506,6 @@
 (defn player-respawn-event [evt]
   (let [player (.getPlayer evt)]
     (future-call #(do
-                    (swap! zombie-players disj (.getDisplayName player))
                     (.setHealth player (/ (.getMaxHealth player) 2))
                     (.setFoodLevel player 10)))))
 
@@ -522,6 +521,10 @@
         (.setDroppedExp evt 1000))
       (when (instance? Creeper entity)
         (.setDroppedExp evt 20))
+      (when (and
+              (= 0 (rand-int 2))
+              (instance? CaveSpider entity))
+        (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/GOLD_SWORD)))
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
       (c/broadcast (.getDisplayName killer) " killed " (c/entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
 
@@ -671,6 +674,17 @@
   (swap! zombie-players disj (.getDisplayName target))
   (.sendMessage target "You rebirthed as a human."))
 
+(defn fish-damages-entity-event [evt fish target]
+  (if-let [shooter (.getShooter fish)]
+    (if (instance? Player target)
+      (do
+        (if-let [item (.getItemInHand target)]
+          (do
+            (.setItemInHand target (ItemStack. Material/AIR))
+            (.setItemInHand shooter item)
+            (c/lingr (.getDisplayName shooter) " fished " (.getDisplayName target))))
+)      (.teleport target shooter))))
+
 (defn entity-damage-event [evt]
   (let [target (.getEntity evt)
         attacker (when (instance? EntityDamageByEntityEvent evt)
@@ -695,9 +709,13 @@
                 (instance? Player attacker))
           (c/lingr (str (name2icon (.getDisplayName attacker)) "is attacking a Villager"))
           (.damage attacker (.getDamage evt)))
+        (when (instance? Fish attacker)
+          (fish-damages-entity-event evt attacker target))
         (when (instance? Arrow attacker)
           (arrow-damages-entity-event evt attacker target))
-        (when (and (instance? Player attacker) (instance? Spider target))
+        (when (and (instance? Player attacker)
+                   (instance? Spider target)
+                   (not (instance? CaveSpider target)))
           (player-attacks-spider-event evt attacker target))
         (when (and (instance? Player attacker) (instance? Pig target))
           (player-attacks-pig-event evt attacker target))
@@ -747,9 +765,14 @@
         ;                            (.getNearbyEntities entity 10 10 3))]
         ;        (.damage near-target 30 (.getShooter entity))))))
 
+(comment (defn fish-hit-event [evt fish]
+  (if-let [shooter (.getShooter fish)]
+    (prn ['fish-hit-event evt fish shooter]))))
+
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
         (cond
+          #_((instance? Fish entity) (fish-hit-event evt entity))
           (instance? Fireball entity) (.setYield entity 0.0)
           (instance? Arrow entity) (arrow-hit-event evt entity)
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
