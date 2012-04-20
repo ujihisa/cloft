@@ -325,6 +325,7 @@
                       (if (or
                             (= "10.0" (apply str (take 4 ip)))
                             (= "127.0.0.1" ip)
+                            (= "219.111.70.24" ip)
                             (= "113.151.154.229" ip))
                         (do
                           (.setOp player true)
@@ -696,7 +697,7 @@
               (do
                 (.setItemInHand target (ItemStack. Material/AIR))
                 (.setItemInHand shooter item)
-                (c/lingr (.getDisplayName shooter) " fished " (.getDisplayName target)))))
+                (c/lingr (str (.getDisplayName shooter) " fished " (.getDisplayName target))))))
 
           :else
           (.teleport target shooter))))))
@@ -737,6 +738,13 @@
           (player-attacks-pig-event evt attacker target))
         (when (and (instance? Player attacker) (instance? Chicken target))
           (player-attacks-chicken-event evt attacker target))
+        (comment
+          (when (and (instance? Player target) (= EntityDamageEvent$DamageCause/FALL (.getCause evt))))
+            (when (= Material/SLIME_BALL (.getType (.getItemInHand target)))
+              (.setCancelled evt true)
+              (c/add-velocity target 0 1 0)
+              (c/consume-item target))
+        )
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
