@@ -789,7 +789,8 @@
         (skill entity)
         (.sendMessage (.getShooter entity) "You don't have a skill yet."))))
   (when (instance? Skeleton (.getShooter entity))
-    (.createExplosion (.getWorld entity) (.getLocation entity) 1)))
+    (.createExplosion (.getWorld entity) (.getLocation entity) 1)
+    (.remove entity)))
         ;(do
         ;  (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
         ;             (let [location (.getLocation entity)
