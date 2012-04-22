@@ -176,6 +176,17 @@
         world (.getWorld location)]
     (.setType (.getBlockAt world location) Material/TORCH)))
 
+(defn arrow-skill-pull [entity]
+  (let [location (.getLocation entity)
+        world (.getWorld location)
+        velocity (.getVelocity entity)
+        direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))
+        block (.getBlock (.add (.clone location) direction))]
+    (when (not= (.getType block) Material/CHEST)
+      (.setType (.getBlock (.getLocation (.getShooter entity))) (.getType block))
+      (.setType block Material/AIR))
+    (.remove entity)))
+
 (defn arrow-skill-teleport [entity]
   (let [location (.getLocation entity)
         world (.getWorld location)
@@ -278,6 +289,9 @@
       (= (.getType block) Material/TORCH)
       (do (c/broadcast (.getDisplayName player) " changed arrow skill to TORCH")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-torch))
+      (= (.getType block) Material/REDSTONE_TORCH_ON)
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to PULL")
+          (swap! jobs assoc (.getDisplayName player) arrow-skill-pull))
       (= (.getType block) Material/YELLOW_FLOWER)
       (do (c/broadcast (.getDisplayName player) " changed arrow skill to TELEPORT")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-teleport))
@@ -624,6 +638,8 @@
           (c/consume-itemstack (.getInventory shooter) Material/WEB))
         (= 'fly (get @jobs (.getDisplayName shooter)))
         (c/add-velocity target 0 (rand-nth (range 2 5)) 0)
+        (= arrow-skill-pull (get @jobs (.getDisplayName shooter)))
+        (.teleport target shooter)
         (= 'cart (get @jobs (.getDisplayName shooter)))
         (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
           (.setPassenger cart target))))))
