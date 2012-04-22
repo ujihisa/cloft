@@ -186,8 +186,8 @@
             (nil? (#{Material/CHEST Material/FURNACE Material/BURNING_FURNACE} (.getType block)))
             (not (.isLiquid block)))
       (.setType (.getBlock (.getLocation (.getShooter entity))) (.getType block))
-      (.setType block Material/AIR))
-    (.remove entity)))
+      (.setType block Material/AIR)
+      (.remove entity))))
 
 (defn arrow-skill-teleport [entity]
   (let [location (.getLocation entity)
