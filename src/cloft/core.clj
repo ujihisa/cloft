@@ -182,12 +182,14 @@
         velocity (.getVelocity entity)
         direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))
         block (.getBlock (.add (.clone location) direction))]
-    (when (and
+    (if (and
             (nil? (#{Material/CHEST Material/FURNACE Material/BURNING_FURNACE} (.getType block)))
             (not (.isLiquid block)))
-      (.setType (.getBlock (.getLocation (.getShooter entity))) (.getType block))
-      (.setType block Material/AIR)
-      (.remove entity))))
+      (do
+        (.setType (.getBlock (.getLocation (.getShooter entity))) (.getType block))
+        (.setType block Material/AIR)
+        (.remove entity))
+      (.sendMessage (.getShooter entity) "PULL failed"))))
 
 (defn arrow-skill-teleport [entity]
   (let [location (.getLocation entity)
