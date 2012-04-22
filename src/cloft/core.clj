@@ -182,7 +182,9 @@
         velocity (.getVelocity entity)
         direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))
         block (.getBlock (.add (.clone location) direction))]
-    (when (not= (.getType block) Material/CHEST)
+    (when (and
+            (nil? (#{Material/CHEST Material/FURNACE Material/BURNING_FURNACE} (.getType block)))
+            (not (.isLiquid block)))
       (.setType (.getBlock (.getLocation (.getShooter entity))) (.getType block))
       (.setType block Material/AIR))
     (.remove entity)))
