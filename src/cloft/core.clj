@@ -183,12 +183,13 @@
         direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))
         block (.getBlock (.add (.clone location) direction))]
     (if (and
-            (nil? (#{Material/CHEST Material/FURNACE Material/BURNING_FURNACE} (.getType block)))
+            (nil? (#{Material/AIR Material/CHEST Material/FURNACE Material/BURNING_FURNACE} (.getType block)))
             (not (.isLiquid block)))
-      (do
-        (.setType (.getBlock (.getLocation (.getShooter entity))) (.getType block))
+      (let [shooter-loc (.getLocation (.getShooter entity))]
+        (.setType (.getBlock shooter-loc) (.getType block))
         (.setType block Material/AIR)
-        (.remove entity))
+        (.remove entity)
+        (.teleport (.getShooter entity) (.add shooter-loc 0 1 0)))
       (.sendMessage (.getShooter entity) "PULL failed"))))
 
 (defn arrow-skill-teleport [entity]
