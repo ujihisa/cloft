@@ -495,7 +495,7 @@
 (defn chicken-touch-player [chicken player]
   (when (not= @chicken-attacking 0)
     (.teleport chicken (.getLocation player))
-    (.damage player 1 chicken)))
+    (.damage player (rand-int 3) chicken)))
 
 (defn periodically-entity-touch-player-event []
   (doseq [player (Bukkit/getOnlinePlayers)]
