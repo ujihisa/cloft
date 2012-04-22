@@ -199,9 +199,7 @@
   (let [location (.getLocation entity)
         world (.getWorld location)]
     (doseq [target (filter #(instance? LivingEntity %) (.getNearbyEntities entity 1 1 1))]
-      (do
-        (prn (str "fire on " target))
-        (.setFireTicks target 200)))))
+      (.setFireTicks target 200))))
 
 (defn arrow-skill-tree [entity]
   (let [location (.getLocation entity)
@@ -639,6 +637,9 @@
         (= 'fly (get @jobs (.getDisplayName shooter)))
         (c/add-velocity target 0 (rand-nth (range 2 5)) 0)
         (= arrow-skill-pull (get @jobs (.getDisplayName shooter)))
+        (.teleport target shooter)
+        (= arrow-skill-fire (get @jobs (.getDisplayName shooter)))
+        (.setFireTicks target 400)
         (.teleport target shooter)
         (= 'cart (get @jobs (.getDisplayName shooter)))
         (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
