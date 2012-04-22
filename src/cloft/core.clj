@@ -643,8 +643,9 @@
         (= arrow-skill-pull (get @jobs (.getDisplayName shooter)))
         (.teleport target shooter)
         (= arrow-skill-fire (get @jobs (.getDisplayName shooter)))
-        (.setFireTicks target 400)
-        (.teleport target shooter)
+        (do
+          (.setFireTicks target 400)
+          (.teleport target shooter))
         (= 'cart (get @jobs (.getDisplayName shooter)))
         (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
           (.setPassenger cart target))))))
