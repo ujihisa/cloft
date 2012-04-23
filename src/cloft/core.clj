@@ -873,11 +873,15 @@
     (prn ['fish-hit-event evt fish shooter]))))
 
 (defn snowball-hit-event [evt snowball]
-  (when (@special-snowball-set snowball)
-    (swap! special-snowball-set disj snowball)
-    (comment (let [block (.getBlock (.getLocation snowball))]
-      (when (= Material/AIR (.getType block))
-        (.setType block Material/SNOW))))))
+  (if (@special-snowball-set snowball)
+    (do
+      (swap! special-snowball-set disj snowball)
+      (comment (let [block (.getBlock (.getLocation snowball))]
+                 (when (= Material/AIR (.getType block))
+                   (.setType block Material/SNOW)))))
+    (do
+      (.createExplosion (.getWorld snowball) (.getLocation snowball) 0)
+      (.remove snowball))))
 
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
