@@ -171,6 +171,11 @@
           (.setType b-up Material/RAILS)
           (c/consume-item player)))))))
 
+(defn arrow-skill-explosion [entity]
+  (.createExplosion (.getWorld entity) (.getLocation entity) 1)
+  (.damage (.getShooter entity) 5 entity)
+  (.remove entity))
+
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)
         world (.getWorld location)]
@@ -289,6 +294,9 @@
       (= (.getType block) Material/GLOWSTONE)
       (do (c/broadcast (.getDisplayName player) " changed arrow skill to STRONG")
           (swap! jobs assoc (.getDisplayName player) 'strong))
+      (= (.getType block) Material/TNT)
+      (do (c/broadcast (.getDisplayName player) " changed arrow skill to EXPLOSION")
+          (swap! jobs assoc (.getDisplayName player) arrow-skill-explosion))
       (= (.getType block) Material/TORCH)
       (do (c/broadcast (.getDisplayName player) " changed arrow skill to TORCH")
           (swap! jobs assoc (.getDisplayName player) arrow-skill-torch))
