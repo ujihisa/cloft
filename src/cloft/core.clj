@@ -443,7 +443,8 @@
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
         (do
           (c/consume-item (.getPlayer evt))
-          (.setPassenger (.getPlayer evt) target))
+          (.setPassenger (.getPlayer evt) target)
+          (.setCancelled evt true))
 
         (and (= (.getType (.getItemInHand (.getPlayer evt))) Material/COAL)
              (instance? PoweredMinecart target))
