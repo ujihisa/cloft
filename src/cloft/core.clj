@@ -444,7 +444,9 @@
         (do
           (c/consume-item (.getPlayer evt))
           (.setPassenger (.getPlayer evt) target)
-          (.setCancelled evt true))
+          (.setCancelled evt true)
+          (when (instance? Chicken target)
+            (.setAllowFlight (.getPlayer evt) true)))
 
         (and (= (.getType (.getItemInHand (.getPlayer evt))) Material/COAL)
              (instance? PoweredMinecart target))
@@ -535,7 +537,13 @@
       (doseq [chicken chickens]
         (chicken-touch-player chicken player)))))
 
+(defn periodically-terminate-nonchicken-fligher []
+  (doseq [player (Bukkit/getOnlinePlayers)]
+    (when (nil? (.getPassenger player))
+      (.setAllowFlight player false))))
+
 (defn periodically []
+  (periodically-terminate-nonchicken-fligher)
   (comment (rechain-entity))
   (periodically-entity-touch-player-event)
   (comment (.setHealth v (inc (.getHealth v))))
