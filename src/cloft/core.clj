@@ -383,6 +383,8 @@
   (let [entity (.getEntity evt)]
     (entity-interact-physical-event evt entity)))
 
+(def special-snowball-set (atom #{}))
+
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)]
     (cond
@@ -410,7 +412,9 @@
         (or
           (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_AIR)
           (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_BLOCK)))
-      (.throwSnowball player)
+      (let [snowball (.launchProjectile player Snowball)]
+        (swap! special-snowball-set conj snowball)
+        (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
       (and
         (= (.. evt (getMaterial)) Material/MILK_BUCKET)
         (or
@@ -776,6 +780,12 @@
           (.damage attacker (.getDamage evt)))
         (when (instance? Fish attacker)
           (fish-damages-entity-event evt attacker target))
+        (when (and
+                (instance? Snowball attacker)
+                (.getShooter attacker)
+                (@special-snowball-set attacker))
+          (.setFireTicks target 50)
+          (.damage target 2 (.getShooter attacker)))
         (when (instance? Arrow attacker)
           (arrow-damages-entity-event evt attacker target))
         (when (instance? Player attacker)
@@ -845,12 +855,20 @@
   (if-let [shooter (.getShooter fish)]
     (prn ['fish-hit-event evt fish shooter]))))
 
+(defn snowball-hit-event [evt snowball]
+  (when (@special-snowball-set snowball)
+    (swap! special-snowball-set disj snowball)
+    (comment (let [block (.getBlock (.getLocation snowball))]
+      (when (= Material/AIR (.getType block))
+        (.setType block Material/SNOW))))))
+
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
         (cond
           #_((instance? Fish entity) (fish-hit-event evt entity))
           (instance? Fireball entity) (.setYield entity 0.0)
           (instance? Arrow entity) (arrow-hit-event evt entity)
+          (instance? Snowball entity) (snowball-hit-event evt entity)
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
           )))
 
