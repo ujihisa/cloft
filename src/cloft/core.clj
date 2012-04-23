@@ -669,7 +669,7 @@
           (chain-entity target shooter)
           (c/consume-itemstack (.getInventory shooter) Material/WEB))
         (= 'fly (get @jobs (.getDisplayName shooter)))
-        (c/add-velocity target 0 (rand-nth (range 2 5)) 0)
+        (future-call #(c/add-velocity target 0 1 0))
         (= arrow-skill-pull (get @jobs (.getDisplayName shooter)))
         (.teleport target shooter)
         (= arrow-skill-fire (get @jobs (.getDisplayName shooter)))
@@ -814,9 +814,10 @@
 (defn arrow-hit-event [evt entity]
   (when (instance? Player (.getShooter entity))
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
-      (if (and skill (or (not= 'cart skill) (not= 'fly skill) (not= 'strong skill)))
-        (skill entity)
-        (.sendMessage (.getShooter entity) "You don't have a skill yet."))))
+      (cond
+        (fn? skill) (skill entity)
+        (symbol? skill) nil
+        :else (.sendMessage (.getShooter entity) "You don't have a skill yet."))))
   (when (instance? Skeleton (.getShooter entity))
     (.createExplosion (.getWorld entity) (.getLocation entity) (rand-nth [1 2]))
     (.remove entity)))
