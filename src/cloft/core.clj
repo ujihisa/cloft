@@ -290,37 +290,19 @@
                                 (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
                                 Material/STONE)
                              [-1 1 0 0] [-1 1 0 0])))
-    (cond
-      (= (.getType block) Material/GLOWSTONE)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to STRONG")
-          (swap! jobs assoc (.getDisplayName player) 'strong))
-      (= (.getType block) Material/TNT)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to EXPLOSION")
-          (swap! jobs assoc (.getDisplayName player) arrow-skill-explosion))
-      (= (.getType block) Material/TORCH)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to TORCH")
-          (swap! jobs assoc (.getDisplayName player) arrow-skill-torch))
-      (= (.getType block) Material/REDSTONE_TORCH_ON)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to PULL")
-          (swap! jobs assoc (.getDisplayName player) arrow-skill-pull))
-      (= (.getType block) Material/YELLOW_FLOWER)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to TELEPORT")
-          (swap! jobs assoc (.getDisplayName player) arrow-skill-teleport))
-      (= (.getType block) Material/RED_ROSE)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to FIRE")
-          (swap! jobs assoc (.getDisplayName player) arrow-skill-fire))
-      (= (.getType block) Material/SAPLING)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to TREE")
-          (swap! jobs assoc (.getDisplayName player) arrow-skill-tree))
-      (= (.getType block) Material/WORKBENCH)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to ORE")
-          (swap! jobs assoc (.getDisplayName player) arrow-skill-ore))
-      (= (.getType block) Material/BROWN_MUSHROOM)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to FLY")
-          (swap! jobs assoc (.getDisplayName player) 'fly))
-      (= (.getType block) Material/RAILS)
-      (do (c/broadcast (.getDisplayName player) " changed arrow skill to CART")
-          (swap! jobs assoc (.getDisplayName player) 'cart)))))
+    (let [table {Material/GLOWSTONE ['strong "STRONG"]
+                 Material/TNT [arrow-skill-explosion "EXPLOTION"]
+                 Material/TORCH [arrow-skill-torch "TORCH"]
+                 Material/REDSTONE_TORCH_ON [arrow-skill-pull "PULL"]
+                 Material/YELLOW_FLOWER [arrow-skill-teleport "TELEPORT"]
+                 Material/SAPLING [arrow-skill-tree "TREE"]
+                 Material/WORKBENCH [arrow-skill-ore "ORE"]
+                 Material/BROWN_MUSHROOM ['fly "FLY"]
+                 Material/RAILS ['cart "CART"]}]
+      (if-let [skill-name (table (.getType block))]
+        (when
+          (c/broadcast (.getDisplayName player) " changed arrow skill to " (last skill-name))
+          (swap! jobs assoc (.getDisplayName player) (first skill-name)))))))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
