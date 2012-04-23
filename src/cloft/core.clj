@@ -372,7 +372,8 @@
 
 (defn teleport-up [entity block]
   (when (= (.getType block) Material/STONE_PLATE)
-    (let [loc (.add (.getLocation block) 0 -1 0)]
+    (let [entity-loc (.getLocation entity)
+          loc (.add (.getLocation block) 0 -1 0)]
       (when (=
               (for [x [-1 0 1] z [-1 0 1]]
                 (.getType (.getBlock (.add (.clone loc) x 0 z))))
@@ -384,7 +385,9 @@
         (future-call #(let [newloc (.add (.getLocation entity) 0 30 0)]
                         (Thread/sleep 10)
                         (.teleport entity newloc)
+                        (.playEffect (.getWorld entity-loc) (.add entity-loc 0 1 0) org.bukkit.Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/BOW_FIRE nil)
+                        (.playEffect (.getWorld entity-loc) entity-loc org.bukkit.Effect/ENDER_SIGNAL nil)
                         (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/ENDER_SIGNAL nil)))))))
 
 (defn entity-interact-physical-event [evt entity]
