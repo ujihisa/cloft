@@ -797,12 +797,14 @@
           (.damage attacker (.getDamage evt)))
         (when (instance? Fish attacker)
           (fish-damages-entity-event evt attacker target))
-        (when (and
-                (instance? Snowball attacker)
-                (.getShooter attacker)
-                (@special-snowball-set attacker))
-          (.setFireTicks target 50)
-          (.damage target 2 (.getShooter attacker)))
+        (when (instance? Snowball attacker)
+          (if-let [shooter (.getShooter attacker)]
+            (when (or
+                    (@special-snowball-set attacker)
+                    (instance? Snowman shooter))
+              (do
+                (.setFireTicks target 50)
+                (.damage target 2 (.getShooter attacker))))))
         (when (instance? Arrow attacker)
           (arrow-damages-entity-event evt attacker target))
         (when (instance? Player attacker)
@@ -873,12 +875,17 @@
     (prn ['fish-hit-event evt fish shooter]))))
 
 (defn snowball-hit-event [evt snowball]
-  (if (@special-snowball-set snowball)
+  (cond
+    (@special-snowball-set snowball)
     (do
       (swap! special-snowball-set disj snowball)
       (comment (let [block (.getBlock (.getLocation snowball))]
                  (when (= Material/AIR (.getType block))
                    (.setType block Material/SNOW)))))
+    (instance? Snowman (.getShooter snowball))
+    nil
+
+    :else
     (do
       (.createExplosion (.getWorld snowball) (.getLocation snowball) 0)
       (.remove snowball))))
