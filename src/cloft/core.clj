@@ -412,9 +412,12 @@
         (or
           (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_AIR)
           (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_BLOCK)))
-      (let [snowball (.launchProjectile player Snowball)]
-        (swap! special-snowball-set conj snowball)
-        (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
+      (if (empty? (.getEnchantments (.getItemInHand player)))
+        (let [snowball (.launchProjectile player Snowball)]
+          (swap! special-snowball-set conj snowball)
+          (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
+        (let [arrow (.launchProjectile player Arrow)]
+          (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))
       (and
         (= (.. evt (getMaterial)) Material/MILK_BUCKET)
         (or
