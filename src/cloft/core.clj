@@ -787,7 +787,9 @@
           (when (instance? Pig target)
             (player-attacks-pig-event evt attacker target))
           (when (instance? Chicken target)
-            (player-attacks-chicken-event evt attacker target)))
+            (player-attacks-chicken-event evt attacker target))
+          (when (= 'fly (get @jobs (.getDisplayName attacker)))
+            (future-call #(c/add-velocity target 0 1 0))))
         (comment
           (when (and (instance? Player target) (= EntityDamageEvent$DamageCause/FALL (.getCause evt))))
             (when (= Material/SLIME_BALL (.getType (.getItemInHand target)))
