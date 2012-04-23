@@ -381,9 +381,11 @@
                     Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE))
         (when (instance? Player entity)
           (.sendMessage entity "teleport up!"))
-        (future-call #(do
+        (future-call #(let [newloc (.add (.getLocation entity) 0 30 0)]
                         (Thread/sleep 10)
-                        (.teleport entity (.add (.getLocation entity) 0 30 0))))))))
+                        (.teleport entity newloc)
+                        (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/BOW_FIRE nil)
+                        (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/ENDER_SIGNAL nil)))))))
 
 (defn entity-interact-physical-event [evt entity]
   (teleport-up entity (.getBlock evt)))
