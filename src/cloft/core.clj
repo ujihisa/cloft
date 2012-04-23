@@ -370,9 +370,33 @@
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
+(defn teleport-up [entity block]
+  (when (= (.getType block) Material/STONE_PLATE)
+    (let [loc (.add (.getLocation block) 0 -1 0)]
+      (when (=
+              (for [x [-1 0 1] z [-1 0 1]]
+                (.getType (.getBlock (.add (.clone loc) x 0 z))))
+              (list Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE
+                    Material/GLOWSTONE Material/STONE Material/GLOWSTONE
+                    Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE))
+        (when (instance? Player entity)
+          (.sendMessage entity "teleport up!"))
+        (future-call #(do
+                        (Thread/sleep 10)
+                        (.teleport entity (.add (.getLocation entity) 0 30 0))))))))
+
+(defn entity-interact-physical-event [evt entity]
+  (teleport-up entity (.getBlock evt)))
+
+(defn entity-interact-event [evt]
+  (let [entity (.getEntity evt)]
+    (entity-interact-physical-event evt entity)))
+
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)]
     (cond
+      (= (.getAction evt) org.bukkit.event.block.Action/PHYSICAL)
+      (teleport-up player (.getClickedBlock evt))
       (and
         (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)
         (= (.getType (.getClickedBlock evt)) Material/CAKE_BLOCK))

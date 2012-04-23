@@ -127,6 +127,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onEntityInteract(EntityInteractEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-interact-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onExplosionPrime(ExplosionPrimeEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "explosion-prime-event");
         if (f.isBound()) f.invoke(event);
