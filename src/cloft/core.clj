@@ -440,6 +440,11 @@
                          (.getLocation target)
                          (ItemStack. n 1)))]
       (cond
+        (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
+        (do
+          (c/consume-item (.getPlayer evt))
+          (.setPassenger (.getPlayer evt) target))
+
         (and (= (.getType (.getItemInHand (.getPlayer evt))) Material/COAL)
              (instance? PoweredMinecart target))
         (do
