@@ -14,7 +14,7 @@
             Player PoweredMinecart Projectile Sheep Silverfish Skeleton Slime
             SmallFireball Snowball Snowman Spider Squid StorageMinecart
             ThrownPotion TNTPrimed Vehicle Villager WaterMob Weather Wolf
-            Zombie])
+            Zombie Ocelot])
   (:import [org.bukkit.event.entity EntityDamageByEntityEvent
             EntityDamageEvent$DamageCause])
   (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
@@ -298,7 +298,8 @@
                  Material/SAPLING [arrow-skill-tree "TREE"]
                  Material/WORKBENCH [arrow-skill-ore "ORE"]
                  Material/BROWN_MUSHROOM ['fly "FLY"]
-                 Material/RAILS ['cart "CART"]}]
+                 Material/RAILS ['cart "CART"]
+                 Material/BOOKSHELF ['mobchange "MOBCHANGE"]}]
       (if-let [skill-name (table (.getType block))]
         (when
           (c/broadcast (.getDisplayName player) " changed arrow skill to " (last skill-name))
@@ -660,6 +661,18 @@
           (c/consume-itemstack (.getInventory shooter) Material/WEB))
         (= 'fly (get @jobs (.getDisplayName shooter)))
         (future-call #(c/add-velocity target 0 1 0))
+        (= 'mobchange (get @jobs (.getDisplayName shooter)))
+        (do
+          (let [change-to (rand-nth [Blaze Boat CaveSpider Chicken Chicken
+                                     Chicken Cow Cow Cow Creeper Enderman
+                                     Ghast Giant MagmaCube Minecart
+                                     MushroomCow Pig Pig Pig PigZombie
+                                     PoweredMinecart Sheep Sheep Sheep
+                                     Silverfish Skeleton Slime Snowman Spider
+                                     Squid Squid Squid StorageMinecart
+                                     TNTPrimed Villager Wolf Ocelot Zombie])]
+            (.spawn (.getWorld target) (.getLocation target) change-to))
+          (.remove target))
         (= arrow-skill-pull (get @jobs (.getDisplayName shooter)))
         (.teleport target shooter)
         (= arrow-skill-fire (get @jobs (.getDisplayName shooter)))
