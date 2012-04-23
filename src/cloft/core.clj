@@ -318,11 +318,6 @@
     (comment (when (c/location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
       (.setCancelled evt true)))))
 
-(defn block-break-event [evt]
-  (let [block (.getBlock evt)]
-    (when (c/location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
-      (.setCancelled evt true))))
-
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
     (comment (when (= (.getDisplayName player) "Player")
