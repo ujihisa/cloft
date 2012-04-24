@@ -171,20 +171,22 @@
           (.setType b-up Material/RAILS)
           (c/consume-item player)))))))
 
+(defn block-of-arrow [entity]
+  (let [location (.getLocation entity)
+        velocity (.getVelocity entity)
+        direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))]
+    (.getBlock (.add (.clone location) direction))))
+
 (defn arrow-skill-explosion [entity]
   (.createExplosion (.getWorld entity) (.getLocation entity) 0)
+  (let [block (block-of-arrow entity)]
+    (.breakNaturally block (ItemStack. Material/DIAMOND_PICKAXE)))
   (.remove entity))
 
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)
         world (.getWorld location)]
     (.setType (.getBlockAt world location) Material/TORCH)))
-
-(defn block-of-arrow [entity]
-  (let [location (.getLocation entity)
-        velocity (.getVelocity entity)
-        direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))]
-    (.getBlock (.add (.clone location) direction))))
 
 (defn arrow-skill-pull [entity]
   (let [block (block-of-arrow [entity])]
