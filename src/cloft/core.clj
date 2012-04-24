@@ -356,23 +356,30 @@
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
+(defn teleport-machine? [loc]
+  (=
+    (for [x [-1 0 1] z [-1 0 1]]
+      (if (and (= x 0) (= z 0))
+        'any
+        (.getType (.getBlock (.add (.clone loc) x 0 z)))))
+    (list Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE
+          Material/GLOWSTONE 'any Material/GLOWSTONE
+          Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE)))
+
 (defn teleport-up [entity block]
-  (when (= (.getType block) Material/STONE_PLATE)
+  (when (#{Material/STONE_PLATE Material/WOOD_PLATE} (.getType block))
     (let [entity-loc (.getLocation entity)
           loc (.add (.getLocation block) 0 -1 0)]
-      (when (=
-              (for [x [-1 0 1] z [-1 0 1]]
-                (if (and (= x 0) (= z 0))
-                  'any
-                  (.getType (.getBlock (.add (.clone loc) x 0 z)))))
-              (list Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE
-                    Material/GLOWSTONE 'any Material/GLOWSTONE
-                    Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE))
+      (when (teleport-machine? loc)
         (when (instance? Player entity)
           (.sendMessage entity "teleport up!"))
         (future-call #(let [newloc (.add (.getLocation entity) 0 30 0)]
                         (Thread/sleep 10)
-                        (.teleport entity newloc)
+                        (cond
+                          (= (.getType block) Material/STONE_PLATE)
+                          (.teleport entity newloc)
+                          (= (.getType block) Material/WOOD_PLATE)
+                          (c/add-velocity entity 0 1.5 0))
                         (.playEffect (.getWorld entity-loc) (.add entity-loc 0 1 0) org.bukkit.Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld entity-loc) entity-loc org.bukkit.Effect/ENDER_SIGNAL nil)
