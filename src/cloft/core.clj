@@ -362,11 +362,11 @@
           loc (.add (.getLocation block) 0 -1 0)]
       (when (=
               (for [x [-1 0 1] z [-1 0 1]]
-                (if (and (= x 0) (= z 0) (not= (.getType (.getBlock (.add (.clone loc) x 0 z))) Material/GLOWSTONE))
-                  'non-glow
+                (if (and (= x 0) (= z 0))
+                  'any
                   (.getType (.getBlock (.add (.clone loc) x 0 z)))))
               (list Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE
-                    Material/GLOWSTONE 'non-glow Material/GLOWSTONE
+                    Material/GLOWSTONE 'any Material/GLOWSTONE
                     Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE))
         (when (instance? Player entity)
           (.sendMessage entity "teleport up!"))
@@ -541,7 +541,7 @@
 
 (defn periodically-terminate-nonchicken-fligher []
   (doseq [player (Bukkit/getOnlinePlayers)]
-    (when (nil? (.getPassenger player))
+    (when (and (nil? (.getPassenger player)) (not= "ujm" (.getDisplayName player)))
       (.setAllowFlight player false))))
 
 (defn periodically []
