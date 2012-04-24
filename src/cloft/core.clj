@@ -576,7 +576,10 @@
     (when (instance? Player killer)
       (when (instance? Zombie entity)
         ((rand-nth
-           [#(.createExplosion (.getWorld entity) (.getLocation entity) 2)
+           [#(let [loc (.getLocation entity)]
+               (.createExplosion (.getWorld entity) loc 0)
+               (when (= Material/AIR (.getType (.getBlock loc)))
+                 (.setType (.getBlock loc) Material/FIRE)))
             #(.spawn (.getWorld entity) (.getLocation entity) Villager)
             #(.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/IRON_SWORD))])))
       (when (instance? Giant entity)
@@ -683,6 +686,8 @@
         (do
           (chain-entity target shooter)
           (c/consume-itemstack (.getInventory shooter) Material/WEB))
+        (= arrow-skill-explosion (get @jobs (.getDisplayName shooter)))
+        (.damage target 10 shooter)
         (= 'fly (get @jobs (.getDisplayName shooter)))
         (future-call #(c/add-velocity target 0 1 0))
         (= 'mobchange (get @jobs (.getDisplayName shooter)))
