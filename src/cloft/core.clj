@@ -172,8 +172,7 @@
           (c/consume-item player)))))))
 
 (defn arrow-skill-explosion [entity]
-  (.createExplosion (.getWorld entity) (.getLocation entity) 1)
-  (.damage (.getShooter entity) 5 entity)
+  (.createExplosion (.getWorld entity) (.getLocation entity) 0)
   (.remove entity))
 
 (defn arrow-skill-torch [entity]
@@ -181,12 +180,14 @@
         world (.getWorld location)]
     (.setType (.getBlockAt world location) Material/TORCH)))
 
-(defn arrow-skill-pull [entity]
+(defn block-of-arrow [entity]
   (let [location (.getLocation entity)
-        world (.getWorld location)
         velocity (.getVelocity entity)
-        direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))
-        block (.getBlock (.add (.clone location) direction))]
+        direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))]
+    (.getBlock (.add (.clone location) direction))))
+
+(defn arrow-skill-pull [entity]
+  (let [block (block-of-arrow [entity])]
     (if (and
             (nil? (#{Material/AIR Material/CHEST Material/FURNACE Material/BURNING_FURNACE} (.getType block)))
             (not (.isLiquid block)))
@@ -217,11 +218,7 @@
     (.generateTree world location org.bukkit.TreeType/BIRCH)))
 
 (defn arrow-skill-ore [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)
-        velocity (.getVelocity entity)
-        direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))
-        block (.getBlock (.add (.clone location) direction))]
+  (let [block (block-of-arrow entity)]
     (when (= (.getType block) Material/STONE)
       (let [block-to-choices [Material/COAL_ORE
                               Material/COAL_ORE
