@@ -294,6 +294,7 @@
                  Material/TORCH [arrow-skill-torch "TORCH"]
                  Material/REDSTONE_TORCH_ON [arrow-skill-pull "PULL"]
                  Material/YELLOW_FLOWER [arrow-skill-teleport "TELEPORT"]
+                 Material/RED_ROSE [arrow-skill-fire "FIRE"]
                  Material/SAPLING [arrow-skill-tree "TREE"]
                  Material/WORKBENCH [arrow-skill-ore "ORE"]
                  Material/BROWN_MUSHROOM ['fly "FLY"]
