@@ -362,9 +362,11 @@
           loc (.add (.getLocation block) 0 -1 0)]
       (when (=
               (for [x [-1 0 1] z [-1 0 1]]
-                (.getType (.getBlock (.add (.clone loc) x 0 z))))
+                (if (and (= x 0) (= z 0) (not= (.getType (.getBlock (.add (.clone loc) x 0 z))) Material/GLOWSTONE))
+                  'non-glow
+                  (.getType (.getBlock (.add (.clone loc) x 0 z)))))
               (list Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE
-                    Material/GLOWSTONE Material/STONE Material/GLOWSTONE
+                    Material/GLOWSTONE 'non-glow Material/GLOWSTONE
                     Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE))
         (when (instance? Player entity)
           (.sendMessage entity "teleport up!"))
