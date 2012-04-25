@@ -493,12 +493,21 @@
                          (ItemStack. n 1)))]
       (cond
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
-        (do
-          (c/consume-item (.getPlayer evt))
-          (.setPassenger (.getPlayer evt) target)
+        (let [player (.getPlayer evt)]
+          (c/consume-item player)
+          (.setPassenger player target)
           (.setCancelled evt true)
-          (when (instance? Chicken target)
-            (.setAllowFlight (.getPlayer evt) true)))
+          (cond
+            (or
+              (instance? Pig target)
+              (instance? Chicken target))
+            (.setAllowFlight player true)
+
+            (instance? Player target)
+            (future-call #(do
+              (Thread/sleep 10000)
+              (when (= player (.getPassenger player))
+                (.setPassenger player nil))))))
 
         (and (= (.getType (.getItemInHand (.getPlayer evt))) Material/COAL)
              (instance? PoweredMinecart target))
