@@ -189,7 +189,7 @@
     (.setType (.getBlockAt world location) Material/TORCH)))
 
 (defn arrow-skill-pull [entity]
-  (let [block (block-of-arrow [entity])]
+  (let [block (block-of-arrow entity)]
     (if (and
             (nil? (#{Material/AIR Material/CHEST Material/FURNACE Material/BURNING_FURNACE} (.getType block)))
             (not (.isLiquid block)))
