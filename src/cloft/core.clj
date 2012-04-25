@@ -233,6 +233,17 @@
                               Material/REDSTONE_ORE]]
         (.setType block (rand-nth block-to-choices))))))
 
+(defn arrow-skill-ice [entity]
+  (if (.isLiquid (.getBlock (.getLocation entity)))
+    (.setType (.getBlock (.getLocation entity)) Material/ICE)
+    (let [block (block-of-arrow entity)
+          loc-above (.add (.getLocation block) 0 1 0)]
+      (when
+        (= Material/AIR (.getType (.getBlock loc-above)))
+        (.setType (.getBlock loc-above) Material/SNOW))
+      (.dropItem (.getWorld loc-above) loc-above (ItemStack. Material/ARROW))))
+  (.remove entity))
+
 (def jobs (atom {}))
 
 (def bowgun-players (atom #{"ujm"}))
@@ -299,7 +310,8 @@
                  Material/WORKBENCH [arrow-skill-ore "ORE"]
                  Material/BROWN_MUSHROOM ['fly "FLY"]
                  Material/RAILS ['cart "CART"]
-                 Material/BOOKSHELF ['mobchange "MOBCHANGE"]}]
+                 Material/BOOKSHELF ['mobchange "MOBCHANGE"]
+                 Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
       (if-let [skill-name (table (.getType block))]
         (when
           (c/broadcast (.getDisplayName player) " changed arrow skill to " (last skill-name))
@@ -394,9 +406,40 @@
 
 (def special-snowball-set (atom #{}))
 
+(comment (defn elevator [player door]
+  (let [loc (.getLocation (.getBlock (.getLocation player)))]
+    (when (and
+            (every?
+              #(= Material/COBBLESTONE %)
+              (for [x [-1 0 1] z [-1 0 1]]
+                (.getType (.getBlock (.add (.clone loc) x -1 z)))))
+            (every?
+              #(= Material/COBBLESTONE %)
+              (for [x [-1 0 1] z [-1 0 1]]
+                (.getType (.getBlock (.add (.clone loc) x 2 z))))))
+      (.teleport player (.add (.getLocation player) 0 10 0))
+      (doseq [x [-1 0 1] z [-1 0 1]]
+        (.setType (.getBlock (.add (.clone loc) x -1 z)) Material/AIR))
+      (doseq [x [-1 0 1] z [-1 0 1]]
+        (.setType (.getBlock (.add (.clone loc) x 2 z)) Material/AIR))
+      (doseq [x [-1 0 1] z [-1 0 1]]
+        (.setType (.getBlock (.add (.clone loc) x 9 z)) Material/COBBLESTONE))
+      (doseq [x [-1 0 1] z [-1 0 1]]
+        (.setType (.getBlock (.add (.clone loc) x 12 z)) Material/COBBLESTONE))
+      (.setType (.getBlock (.getLocation door)) Material/AIR)
+      (.setType (.getBlock (.add (.getLocation door) 0 10 0)) Material/IRON_DOOR)
+      ))))
+
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)]
     (cond
+      #_(
+        (and
+          (= org.bukkit.event.block.Action/LEFT_CLICK_BLOCK (.getAction evt))
+          (= Material/WOODEN_DOOR (.getType (.getClickedBlock evt))))
+        (elevator player (.getClickedBlock evt))
+      )
+
       (= (.getAction evt) org.bukkit.event.block.Action/PHYSICAL)
       (teleport-up player (.getClickedBlock evt))
       (and
