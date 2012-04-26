@@ -7,5 +7,7 @@
   ;:repl-options [:init nil :caught clj-stacktrace.repl/pst+]
   ;:repositories {"spout-repo-snap" "http://repo.getspout.org/content/repositories/snapshots/"
   ;               "spout-repo-rel" "http://repo.getspout.org/content/repositories/releases/"})
+  :repositories {"org.bukkit"
+                 "http://repo.bukkit.org/service/local/repositories/snapshots/content/"}
   :javac-options {:destdir "classes/"}
   :java-source-path "javasrc")
