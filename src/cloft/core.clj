@@ -487,10 +487,10 @@
 
 (defn player-interact-entity-event [evt]
   (let [target (.getRightClicked evt)]
-    (letfn [(d [n]
+    (letfn [(d [n m]
               (.dropItem (.getWorld target)
                          (.getLocation target)
-                         (ItemStack. n 1)))]
+                         (ItemStack. n m)))]
       (cond
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
         (let [player (.getPlayer evt)]
@@ -535,19 +535,21 @@
           (c/swap-entity target PigZombie)
           (c/consume-item (.getPlayer evt)))
         ; right-click chicken -> rail
-        (instance? Chicken target) (d 66)
+        (instance? Chicken target) (d 66 0)
+        ; right-click pig -> cocoa
+        (instance? Pig target) (d 351 3)
         ; right-click cow -> charcoal
-        (instance? Cow target) (d 263)
+        (instance? Cow target) (d 263 1)
         ; right-click villager -> cake
-        (instance? Villager target) (d 92)
+        (instance? Villager target) (d 92 0)
         ; right-click creeper -> gunpowder
-        (instance? Creeper target) (d 289)
+        (instance? Creeper target) (d 289 0)
         ; right-click zombie -> zombeef
         (and (instance? Zombie target) (not (instance? PigZombie target))) (d 367)
         ; right-click skelton -> arrow
-        (instance? Skeleton target) (d 262)
+        (instance? Skeleton target) (d 262 0)
         ; right-click spider -> string
-        (instance? Spider target) (d 287)
+        (instance? Spider target) (d 287 0)
         ; right-click squid -> chat and hungry
         (instance? Squid target)
         (let [player (.getPlayer evt)]
