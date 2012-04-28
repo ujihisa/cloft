@@ -616,7 +616,7 @@
   (let [killer (.getKiller entity)]
     (when killer
       (.sendMessage killer "PIG: Pig Is God")
-      (.setFireTicks killer 100))))
+      (.setFireTicks killer 1000))))
 
 (defn player-respawn-event [evt]
   (let [player (.getPlayer evt)]
