@@ -9,7 +9,7 @@
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
             EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
             EnderSignal ExperienceOrb Explosive FallingSand Fireball Fish
-            Flying Ghast Giant HumanEntity Item LightningStrike LivingEntity
+            Flying Ghast Giant HumanEntity IronGolem Item LightningStrike LivingEntity
             MagmaCube Minecart Monster MushroomCow NPC Painting Pig PigZombie
             Player PoweredMinecart Projectile Sheep Silverfish Skeleton Slime
             SmallFireball Snowball Snowman Spider Squid StorageMinecart
