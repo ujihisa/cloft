@@ -615,7 +615,8 @@
 (defn pig-death-event [entity]
   (let [killer (.getKiller entity)]
     (when killer
-      (.sendMessage killer "PIG: Pig Is God")
+      (when (instance? Player killer)
+        (.sendMessage killer "PIG: Pig Is God"))
       (.setFireTicks killer 1000))))
 
 (defn player-respawn-event [evt]
