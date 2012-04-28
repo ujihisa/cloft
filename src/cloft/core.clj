@@ -598,13 +598,13 @@
       (doseq [chicken chickens]
         (chicken-touch-player chicken player)))))
 
-(defn periodically-terminate-nonchicken-fligher []
+(defn periodically-terminate-nonchicken-flighter []
   (doseq [player (Bukkit/getOnlinePlayers)]
     (when (and (nil? (.getPassenger player)) (not= "ujm" (.getDisplayName player)))
       (.setAllowFlight player false))))
 
 (defn periodically []
-  (periodically-terminate-nonchicken-fligher)
+  (periodically-terminate-nonchicken-flighter)
   (comment (rechain-entity))
   (periodically-entity-touch-player-event)
   (comment (.setHealth v (inc (.getHealth v))))
