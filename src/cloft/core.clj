@@ -268,10 +268,14 @@
                         )))))))
 
 (defn entity-target-event [evt]
-  (when (instance? Creeper (.getEntity evt))
-    (let [target (.getTarget evt)]
-      (when (instance? Player target)
-        (c/broadcast "Takumi is watching " (.getDisplayName target))))))
+  (let [entity (.getEntity evt)]
+    (when (instance? Creeper entity)
+      (when-let [target (.getTarget evt)]
+        (let [block (.getBlock (.getLocation entity))]
+          (when (= Material/AIR (.getType block))
+            (.setType block Material/FIRE)))
+        (when (instance? Player target)
+          (c/broadcast "Takumi is watching " (.getDisplayName target)))))))
 
 (defn entity-explosion-prime-event [evt]
   nil)
@@ -613,7 +617,7 @@
   nil)
 
 (defn pig-death-event [entity]
-  (if-let [killer (.getKiller entity)]
+  (when-let [killer (.getKiller entity)]
     (when (instance? Player killer)
       (.sendMessage killer "PIG: Pig Is God"))
     (.setFireTicks killer 1000)))
