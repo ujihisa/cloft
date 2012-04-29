@@ -449,13 +449,12 @@
       (and
         (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)
         (= (.getType (.getClickedBlock evt)) Material/CAKE_BLOCK))
-      (let [ death-point (get @player-death-locations (.getDisplayName player))]
-        (if death-point
-          (do
-            (.getChunk death-point)
-            (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
-            (.teleport player death-point))
-          (.sendMessage player "You didn't die yet.")))
+      (if-let [death-point (get @player-death-locations (.getDisplayName player))]
+        (do
+          (.getChunk death-point)
+          (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
+          (.teleport player death-point))
+        (.sendMessage player "You didn't die yet."))
       (and
         (= (.. player (getItemInHand) (getType)) Material/GLASS_BOTTLE)
         (or
