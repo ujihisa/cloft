@@ -488,6 +488,28 @@
           (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
       (player-super-jump evt player))))
 
+(defn player-drop-item-event [evt]
+  (let [item (.getItemDrop evt)
+        itemstack (.getItemStack item)
+        table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
+               Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
+               Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
+               Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
+               Material/APPLE [Material/APPLE Material/GOLDEN_APPLE]
+               Material/ROTTEN_FLESH [Material/ROTTEN_FLESH Material/COAL]}]
+    (cond
+      (table (.getType itemstack))
+      (future-call #(let [pair (table (.getType itemstack))]
+                      (Thread/sleep 5000)
+                      (when (not (.isDead item))
+                        (let [new-item-material
+                              (if (#{Material/FURNACE Material/BURNING_FURNACE}
+                                      (.getType (.getBlock (.add (.getLocation item) 0 -1 0))))
+                                (last pair)
+                                (first pair))]
+                          (.dropItem (.getWorld item) (.getLocation item) (ItemStack. new-item-material (.getAmount itemstack))))
+                        (.remove item)))))))
+
 (defn player-interact-entity-event [evt]
   (let [target (.getRightClicked evt)]
     (letfn [(d [n]
