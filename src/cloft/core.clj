@@ -670,6 +670,7 @@
                (when (= Material/AIR (.getType (.getBlock loc)))
                  (.setType (.getBlock loc) Material/FIRE)))
             #(.spawn (.getWorld entity) (.getLocation entity) Villager)
+            #(.spawn (.getWorld entity) (.getLocation entity) Silverfish)
             #(.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/IRON_SWORD))])))
       (when (instance? Giant entity)
         (.setDroppedExp evt 1000))
