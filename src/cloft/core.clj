@@ -570,7 +570,6 @@
 
         (and (instance? Zombie target) (not (instance? PigZombie target)))
         (let [player (.getPlayer evt)]
-          (prn [player target])
           (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
             (do
               (when (= 0 (rand-int 20))
