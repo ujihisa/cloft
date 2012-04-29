@@ -567,8 +567,20 @@
         (instance? Villager target) (d 92)
         ; right-click creeper -> gunpowder
         (instance? Creeper target) (d 289)
-        ; right-click zombie -> zombeef
-        (and (instance? Zombie target) (not (instance? PigZombie target))) (d 367)
+
+        (and (instance? Zombie target) (not (instance? PigZombie target)))
+        (let [player (.getPlayer evt)]
+          (prn [player target])
+          (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
+            (do
+              (when (= 0 (rand-int 20))
+                (.spawn (.getWorld target) (.getLocation target) Giant)
+                (c/broadcast "Giant!"))
+              (c/consume-item player)
+              (.remove target))
+            ; right-click zombie -> zombeef
+            (d 367)))
+
         ; right-click skelton -> arrow
         (instance? Skeleton target) (d 262)
         ; right-click spider -> string
