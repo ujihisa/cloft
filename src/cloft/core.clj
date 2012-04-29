@@ -657,8 +657,8 @@
 (defn player-respawn-event [evt]
   (let [player (.getPlayer evt)]
     (future-call #(do
-                    (.setHealth player (/ (.getMaxHealth player) 2))
-                    (.setFoodLevel player 10)))))
+                    (.setHealth player (/ (.getMaxHealth player) 3))
+                    (.setFoodLevel player 5)))))
 
 (defn entity-murder-event [evt entity]
   (let [killer (.getKiller entity)]
