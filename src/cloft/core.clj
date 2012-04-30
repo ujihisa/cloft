@@ -265,7 +265,17 @@
                         (Thread/sleep 100) (.shootArrow (.getEntity evt))
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
-                        )))))))
+                        ))))
+      (when (= 'shotgun (get @jobs (.getDisplayName shooter)))
+        (doseq [_ (range 1 80)]
+          (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
+                arrow (.launchProjectile shooter Arrow)]
+            (c/consume-itemstack (.getInventory shooter) Material/ARROW)
+            (.setVelocity arrow (.getVelocity (.getProjectile evt)))
+            (c/add-velocity arrow (rand1) (rand1) (rand1))
+            (future-call #(do
+                            (Thread/sleep 10000)
+                            (.remove arrow)))))))))
 
 (defn entity-target-event [evt]
   (let [entity (.getEntity evt)]
@@ -313,6 +323,7 @@
                  Material/SAPLING [arrow-skill-tree "TREE"]
                  Material/WORKBENCH [arrow-skill-ore "ORE"]
                  Material/BROWN_MUSHROOM ['fly "FLY"]
+                 Material/CACTUS ['shotgun "SHOTGUN"]
                  Material/RAILS ['cart "CART"]
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
