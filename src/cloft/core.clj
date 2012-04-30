@@ -1112,11 +1112,18 @@
     (.addIngredient x 3 Material/STRING)
     x))
 
+(def recipe-gravel-flint
+  (let [x (org.bukkit.inventory.ShapelessRecipe.
+            (ItemStack. Material/FLINT 1))]
+    (.addIngredient x 3 Material/GRAVEL)
+    x))
+
 (defonce swank* nil)
 (defn on-enable [plugin]
   (when (nil? swank*)
     (def swank* (swank.swank/start-repl 4005)))
   (Bukkit/addRecipe recipe-string-web)
+  (Bukkit/addRecipe recipe-gravel-flint)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (periodically)) 50 50)
   (comment (proxy [java.lang.Object CommandExecuter] []
     (onCommand [this ^CommandSender sender ^Command command ^String label ^String[] args]
