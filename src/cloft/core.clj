@@ -806,7 +806,8 @@
                   (.setType block Material/GLASS))))
             (future-call #(do
                             (Thread/sleep 1000)
-                            (.teleport target (.add (.clone loc) 0.5 0.0 0.5))))
+                            (when (not (.isDead target))
+                              (.teleport target (.add (.clone loc) 0.5 0.0 0.5)))))
             (future-call #(do
                             (Thread/sleep 20000)
                             (doseq [y [0 1]]
