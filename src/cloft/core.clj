@@ -247,7 +247,7 @@
       (.dropItem (.getWorld loc-above) loc-above (ItemStack. Material/ARROW))))
   (.remove entity))
 
-(def jobs (atom {}))
+(def arrow-skill (atom {}))
 
 (def bowgun-players (atom #{"ujm"}))
 (defn add-bowgun-player [name]
@@ -257,19 +257,19 @@
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
       (when (or (.isSneaking shooter)
-                (= 'strong (get @jobs (.getDisplayName shooter))))
+                (= 'strong (get @arrow-skill (.getDisplayName shooter))))
         (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 3)))
       (comment (.setCancelled evt true))
       (comment (.setVelocity shooter (.multiply (.getVelocity (.getProjectile evt)) 2)))
       (comment (when (and
               (get @bowgun-players (.getDisplayName shooter))
-              (not= arrow-skill-teleport (get @jobs (.getDisplayName shooter))))
+              (not= arrow-skill-teleport (get @arrow-skill (.getDisplayName shooter))))
         (future-call #(do
                         (Thread/sleep 100) (.shootArrow (.getEntity evt))
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
                         ))))
-      (when (= 'shotgun (get @jobs (.getDisplayName shooter)))
+      (when (= 'shotgun (get @arrow-skill (.getDisplayName shooter)))
         (doseq [_ (range 1 80)]
           (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
                 arrow (.launchProjectile shooter Arrow)]
@@ -333,7 +333,7 @@
       (if-let [skill-name (table (.getType block))]
         (when
           (c/broadcast (.getDisplayName player) " changed arrow skill to " (last skill-name))
-          (swap! jobs assoc (.getDisplayName player) (first skill-name)))))))
+          (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)))))))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
@@ -790,9 +790,9 @@
         (do
           (chain-entity target shooter)
           (c/consume-itemstack (.getInventory shooter) Material/WEB))
-        (= arrow-skill-explosion (get @jobs (.getDisplayName shooter)))
+        (= arrow-skill-explosion (get @arrow-skill (.getDisplayName shooter)))
         (.damage target 10 shooter)
-        (= arrow-skill-ice (get @jobs (.getDisplayName shooter)))
+        (= arrow-skill-ice (get @arrow-skill (.getDisplayName shooter)))
         (when (not (.isDead target))
           (let [loc (.getLocation (.getBlock (.getLocation target)))]
             (doseq [y [0 1]]
@@ -819,9 +819,9 @@
                               (let [block (.getBlock (.add (.clone loc) 0 y 0))]
                                 (when (= (.getType block) Material/GLASS)
                                   (.setType block Material/AIR))))))))
-        (= 'fly (get @jobs (.getDisplayName shooter)))
+        (= 'fly (get @arrow-skill (.getDisplayName shooter)))
         (future-call #(c/add-velocity target 0 1 0))
-        (= 'mobchange (get @jobs (.getDisplayName shooter)))
+        (= 'mobchange (get @arrow-skill (.getDisplayName shooter)))
         (do
           (let [change-to (rand-nth [Blaze Boat CaveSpider Chicken Chicken
                                      Chicken Cow Cow Cow Creeper Enderman
@@ -833,11 +833,11 @@
                                      TNTPrimed Villager Wolf Ocelot Zombie])]
             (.spawn (.getWorld target) (.getLocation target) change-to))
           (.remove target))
-        (= arrow-skill-pull (get @jobs (.getDisplayName shooter)))
+        (= arrow-skill-pull (get @arrow-skill (.getDisplayName shooter)))
         (.teleport target shooter)
-        (= arrow-skill-fire (get @jobs (.getDisplayName shooter)))
+        (= arrow-skill-fire (get @arrow-skill (.getDisplayName shooter)))
         (.setFireTicks target 400)
-        (= 'cart (get @jobs (.getDisplayName shooter)))
+        (= 'cart (get @arrow-skill (.getDisplayName shooter)))
         (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
           (.setPassenger cart target))))))
 
@@ -959,7 +959,7 @@
             (player-attacks-pig-event evt attacker target))
           (when (instance? Chicken target)
             (player-attacks-chicken-event evt attacker target))
-          (when (= 'fly (get @jobs (.getDisplayName attacker)))
+          (when (= 'fly (get @arrow-skill (.getDisplayName attacker)))
             (future-call #(c/add-velocity target 0 1 0))))
         (comment
           (when (and (instance? Player target) (= EntityDamageEvent$DamageCause/FALL (.getCause evt))))
@@ -987,7 +987,7 @@
 (defn arrow-hit-event [evt entity]
   (cond
     (instance? Player (.getShooter entity))
-    (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
+    (let [skill (get @arrow-skill (.getDisplayName (.getShooter entity)))]
       (cond
         (fn? skill) (skill entity)
         (symbol? skill) nil
