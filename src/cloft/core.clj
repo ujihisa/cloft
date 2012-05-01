@@ -319,7 +319,7 @@
                                 Material/STONE)
                              [-1 1 0 0] [-1 1 0 0])))
     (let [table {Material/GLOWSTONE ['strong "STRONG"]
-                 Material/TNT [arrow-skill-explosion "EXPLOTION"]
+                 Material/TNT [arrow-skill-explosion "EXPLOSION"]
                  Material/TORCH [arrow-skill-torch "TORCH"]
                  Material/REDSTONE_TORCH_ON [arrow-skill-pull "PULL"]
                  Material/YELLOW_FLOWER [arrow-skill-teleport "TELEPORT"]
