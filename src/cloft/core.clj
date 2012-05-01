@@ -981,15 +981,17 @@
       (.damage player (rand-int 5)))))
 
 (defn arrow-hit-event [evt entity]
-  (when (instance? Player (.getShooter entity))
+  (cond
+    (instance? Player (.getShooter entity))
     (let [skill (get @jobs (.getDisplayName (.getShooter entity)))]
       (cond
         (fn? skill) (skill entity)
         (symbol? skill) nil
-        :else (.sendMessage (.getShooter entity) "You don't have a skill yet."))))
-  (when (instance? Skeleton (.getShooter entity))
-    (.createExplosion (.getWorld entity) (.getLocation entity) 1)
-    (.remove entity)))
+        :else (.sendMessage (.getShooter entity) "You don't have a skill yet.")))
+    (instance? Skeleton (.getShooter entity))
+    (do
+      (.createExplosion (.getWorld entity) (.getLocation entity) 1)
+      (.remove entity))))
         ;(do
         ;  (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
         ;             (let [location (.getLocation entity)
