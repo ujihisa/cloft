@@ -989,7 +989,7 @@
         (symbol? skill) nil
         :else (.sendMessage (.getShooter entity) "You don't have a skill yet.")))
     (instance? Skeleton (.getShooter entity))
-    (do
+    (when (= 0 (rand-int 2))
       (.createExplosion (.getWorld entity) (.getLocation entity) 1)
       (.remove entity))))
         ;(do
