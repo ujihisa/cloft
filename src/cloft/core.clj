@@ -237,9 +237,12 @@
   (if (.isLiquid (.getBlock (.getLocation entity)))
     (.setType (.getBlock (.getLocation entity)) Material/ICE)
     (let [block (block-of-arrow entity)
-          loc-above (.add (.getLocation block) 0 1 0)]
+          loc (.getLocation block)
+          loc-above (.add (.clone loc) 0 1 0)]
       (when
-        (= Material/AIR (.getType (.getBlock loc-above)))
+        (and
+          (= Material/AIR (.getType (.getBlock loc-above)))
+          (not= Material/AIR (.getType (.getBlock loc))))
         (.setType (.getBlock loc-above) Material/SNOW))
       (.dropItem (.getWorld loc-above) loc-above (ItemStack. Material/ARROW))))
   (.remove entity))
