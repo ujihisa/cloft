@@ -334,7 +334,7 @@
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
       (if-let [skill-name (table (.getType block))]
         (when
-          (c/broadcast (.getDisplayName player) " changed arrow skill to " (last skill-name))
+          (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
           (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)))))))
 
 (defn block-place-event [evt]
