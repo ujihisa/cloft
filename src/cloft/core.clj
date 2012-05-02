@@ -492,10 +492,10 @@
                 (.dropItem (.getWorld target)
                 (.getLocation target)
                 (ItemStack. n 1)))
-              ([n m]
+              ([n ^Byte m]
                 (.dropItem (.getWorld target)
                 (.getLocation target)
-                (ItemStack. n m))))]
+                (ItemStack. (int n) (int 1) (short 0) (Byte. m)))))]
       (cond
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
         (let [player (.getPlayer evt)]
