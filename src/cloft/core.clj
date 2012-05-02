@@ -527,11 +527,8 @@
 
 (defn player-interact-entity-event [evt]
   (let [target (.getRightClicked evt)]
-    (letfn [(d 
-              ([n]
-                (.dropItem (.getWorld target)
-                (.getLocation target)
-                (ItemStack. n 1)))
+    (letfn [(d
+              ([n] (d n 1))
               ([n ^Byte m]
                 (.dropItem (.getWorld target)
                 (.getLocation target)
