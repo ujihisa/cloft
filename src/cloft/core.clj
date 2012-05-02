@@ -527,10 +527,15 @@
 
 (defn player-interact-entity-event [evt]
   (let [target (.getRightClicked evt)]
-    (letfn [(d [n]
-              (.dropItem (.getWorld target)
-                         (.getLocation target)
-                         (ItemStack. n 1)))]
+    (letfn [(d 
+              ([n]
+                (.dropItem (.getWorld target)
+                (.getLocation target)
+                (ItemStack. n 1)))
+              ([n ^Byte m]
+                (.dropItem (.getWorld target)
+                (.getLocation target)
+                (ItemStack. (int n) (int 1) (short 0) (Byte. m)))))]
       (cond
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
         (let [player (.getPlayer evt)]
@@ -576,6 +581,8 @@
           (c/consume-item (.getPlayer evt)))
         ; right-click chicken -> rail
         (instance? Chicken target) (d 66)
+        ; right-click pig -> cocoa
+        (instance? Pig target) (d 351 3)
         ; right-click cow -> charcoal
         (instance? Cow target) (d 263)
         ; right-click villager -> cake
