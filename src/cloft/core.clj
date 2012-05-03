@@ -20,6 +20,7 @@
   (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
   (:import [org.bukkit.inventory ItemStack]))
 
+
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
    "sbwhitecap" "http://www.gravatar.com/avatar/198149c17c72f7db3a15e432b454067e.jpg?s=28\n"
@@ -66,6 +67,8 @@
 (def anotherbed (org.bukkit.Location.  world -237.8704284429714 72.5625 -53.82154923217098 19.349966 -180.45361))
 
 (def player-death-locations (atom {}))
+(def last-vertical-shots (atom {}))
+
 (defn player-teleport-machine [evt player]
   (when (and
           (= (.getWorld player) world)
@@ -258,6 +261,47 @@
 (defn add-bowgun-player [name]
   (swap! bowgun-players conj name))
 
+(defn arrow-velocity-vertical? [arrow]
+  (let [v (.getVelocity arrow)]
+    ;(prn 'arrow-velocity-vertical? v)
+    (and (> 0.1 (Math/abs (.getX v)))
+         (> 0.1 (Math/abs (.getZ v))))))
+
+(defn thunder-mobs-around [player amount]
+  (prn thunder-mobs-around 'by player)
+  (prn (.getNearbyEntities player 20 20 20))
+  (prn (filter #(instance? LivingEntity %) 
+        (.getNearbyEntities player 20 20 20)))
+  (doseq
+    [x (filter #(instance? LivingEntity %) (.getNearbyEntities player 20 20 20))]
+           (prn 'thundering x)
+           (.strikeLightningEffect (.getWorld x) (.getLocation x))
+           (.damage x amount)))
+
+(defn enough-previous-shots-by-players? [triggered-by threshold]
+  (let [locations (vals last-vertical-shots)]
+    (< threshold ; shooter is not in last-vertical-shots
+      (count (filter 
+               (fn [loc] (> 10.0 ; radius of 10.0
+                            (.distance 
+                              (.getLocation triggered-by)
+                              loc)))
+               locations)))))
+
+(defn check-and-thunder [triggered-by]
+  (prn check-and-thunder)
+  (thunder-mobs-around triggered-by 20) )
+  ;(if (enough-previous-shots-by-players? triggered-by 1)
+  ;  (thunder-mobs-around triggered-by 20)))
+    ; possiblly we need to flush last-vertical-shots, not clear.
+    ; i.e. 3 shooters p1, p2, p3 shoot arrows into mid air consecutively, how often thuders(tn)?
+    ; A.
+    ; p1, p2, p3, p1, p2, p3,
+    ;         t1          t2
+    ; B.
+    ; p1, p2, p3, p1, p2, p3,
+    ;         t1, t2, t3, t4
+
 (defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
@@ -274,6 +318,16 @@
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
                         ))))
+      ;(when (arrow-velocity-vertical? (.getProjectile evt))
+      (when true 
+        (prn last-vertical-shots)
+        (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter)) 
+        (prn last-vertical-shots)
+        (future-call #(do
+                        (check-and-thunder shooter)
+                        ;may be we need to defn right outside of future-call to have localvals.
+                        (Thread/sleep 1000)
+                        (swap! last-vertical-shots dissoc (.getDisplayName shooter)))))
       (when (= arrow-skill-shotgun (arrow-skill-of shooter))
         (doseq [_ (range 1 80)]
           (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
