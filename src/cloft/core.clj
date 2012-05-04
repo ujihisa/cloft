@@ -268,11 +268,13 @@
          (> 0.1 (Math/abs (.getZ v))))))
 
 (defn thunder-mobs-around [player amount]
-  (doseq [x (filter
-              #(instance? Monster %)
-              (.getNearbyEntities player 20 20 20))]
-    (.strikeLightningEffect (.getWorld x) (.getLocation x))
-    (.damage x amount)))
+  (future-call (fn []
+                 (doseq [x (filter
+                             #(instance? Monster %)
+                             (.getNearbyEntities player 20 20 20))]
+                   (Thread/sleep (rand-int 1000))
+                   (.strikeLightningEffect (.getWorld x) (.getLocation x))
+                   (.damage x amount)))))
 
 (defn enough-previous-shots-by-players? [triggered-by threshold]
   (let [locs (vals @last-vertical-shots) ]
@@ -285,9 +287,6 @@
                locs)))))
 
 (defn check-and-thunder [triggered-by]
-  (prn check-and-thunder)
-  ;(thunder-mobs-around triggered-by 20) )
-  (prn (enough-previous-shots-by-players? triggered-by 0))
   (when (enough-previous-shots-by-players? triggered-by 0)
     (thunder-mobs-around triggered-by 20)))
     ; possiblly we need to flush last-vertical-shots, not clear.
@@ -315,14 +314,12 @@
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
                         ))))
-      ;(when (arrow-velocity-vertical? (.getProjectile evt))
-      (when true
+      (when (arrow-velocity-vertical? (.getProjectile evt))
         (prn last-vertical-shots)
         (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter))
         (prn last-vertical-shots)
         (future-call #(let [shooter-name (.getDisplayName shooter)]
                         (check-and-thunder shooter)
-                        ;may be we need to defn right outside of future-call to have localvals.
                         (Thread/sleep 1000)
                         (swap! last-vertical-shots dissoc shooter-name))))
       (when (= arrow-skill-shotgun (arrow-skill-of shooter))
