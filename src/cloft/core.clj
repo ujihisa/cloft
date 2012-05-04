@@ -279,14 +279,14 @@
   (let [locs (vals @last-vertical-shots) ]
     ;(prn enough-previous-shots-by-players?)
     ;(prn locs)
-    (< threshold
+    (<= threshold
       (count (filter
                #(> 10.0 ; radius of 10.0
                    (.distance (.getLocation triggered-by) %))
                locs)))))
 
 (defn check-and-thunder [triggered-by]
-  (when (enough-previous-shots-by-players? triggered-by 0)
+  (when (enough-previous-shots-by-players? triggered-by 3)
     (future-call #(thunder-mobs-around triggered-by 20))))
     ; possiblly we need to flush last-vertical-shots, not clear.
     ; i.e. 3 shooters p1, p2, p3 shoot arrows into mid air consecutively, how often thuders(tn)?
