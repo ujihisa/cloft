@@ -361,7 +361,15 @@
 ;          (when (= (.getType newblock) Material/AIR)
 ;            (.setType newblock (.getType block)))))))))
 ;
-(defn skillchange [player block block-against]
+
+(defn make-arrow-skill-alchemy [skill-name]
+  (fn [player]
+    (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
+    (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)) 
+    ))
+
+
+(defn invoke-alchemy [player block block-against]
   (when (and
           (every? identity (map
                              #(=
@@ -373,29 +381,33 @@
                                 (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
                                 Material/STONE)
                              [-1 1 0 0] [-1 1 0 0])))
-    (let [table {Material/GLOWSTONE ['strong "STRONG"]
-                 Material/TNT [arrow-skill-explosion "EXPLOSION"]
-                 Material/TORCH [arrow-skill-torch "TORCH"]
-                 Material/REDSTONE_TORCH_ON [arrow-skill-pull "PULL"]
-                 Material/YELLOW_FLOWER [arrow-skill-teleport "TELEPORT"]
-                 Material/RED_ROSE [arrow-skill-fire "FIRE"]
-                 Material/SAPLING [arrow-skill-tree "TREE"]
-                 Material/WORKBENCH [arrow-skill-ore "ORE"]
-                 Material/BROWN_MUSHROOM ['fly "FLY"]
-                 Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
-                 Material/RAILS ['cart "CART"]
-                 Material/BOOKSHELF ['mobchange "MOBCHANGE"]
-                 Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
-      (if-let [skill-name (table (.getType block))]
-        (when
-          (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
-          (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)))))))
+    (let [table {Material/GLOWSTONE (make-arrow-skill-alchemy ['strong "STRONG"])
+                 Material/TNT (make-arrow-skill-alchemy [arrow-skill-explosion "EXPLOSION"])
+                 Material/TORCH (make-arrow-skill-alchemy [arrow-skill-torch "TORCH"])
+                 Material/REDSTONE_TORCH_ON (make-arrow-skill-alchemy [arrow-skill-pull "PULL"])
+                 Material/YELLOW_FLOWER (make-arrow-skill-alchemy [arrow-skill-teleport "TELEPORT"])
+                 Material/RED_ROSE (make-arrow-skill-alchemy [arrow-skill-fire "FIRE"])
+                 Material/SAPLING (make-arrow-skill-alchemy  [arrow-skill-tree "TREE"])
+                 Material/WORKBENCH (make-arrow-skill-alchemy [arrow-skill-ore "ORE"])
+                 Material/BROWN_MUSHROOM (make-arrow-skill-alchemy ['fly "FLY"])
+                 Material/CACTUS (make-arrow-skill-alchemy [arrow-skill-shotgun "SHOTGUN"])
+                 Material/RAILS (make-arrow-skill-alchemy ['cart "CART"])
+                 Material/BOOKSHELF (make-arrow-skill-alchemy ['mobchange "MOBCHANGE"])
+                 Material/STONE (make-arrow-skill-alchemy ['sniping "SNIPING"])
+                 Material/SNOW_BLOCK (make-arrow-skill-alchemy [arrow-skill-ice "ICE"])}]
+      (prn table)
+      (if-let [alchemy (table (.getType block))]
+              ;then
+              (alchemy player)
+              ;else
+              (prn "no effect is defined for " block)))))
+
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
     (let [player (.getPlayer evt)]
-      (skillchange player block (.getBlockAgainst evt))
+      (invoke-alchemy player block (.getBlockAgainst evt))
       (comment (prn (vector-from-to block player))
                (.setVelocity player (vector-from-to player block))
                (doseq [entity (.getNearbyEntities player 4 4 4)]
