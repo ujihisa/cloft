@@ -324,11 +324,11 @@
         (prn last-vertical-shots)
         (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter))
         (prn last-vertical-shots)
-        (future-call #(do
+        (future-call #(let [shooter-name (.getDisplayName shooter)]
                         (check-and-thunder shooter)
                         ;may be we need to defn right outside of future-call to have localvals.
                         (Thread/sleep 1000)
-                        (swap! last-vertical-shots dissoc (.getDisplayName shooter)))))
+                        (swap! last-vertical-shots dissoc shooter-name))))
       (when (= arrow-skill-shotgun (arrow-skill-of shooter))
         (doseq [_ (range 1 80)]
           (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
