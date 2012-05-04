@@ -292,7 +292,7 @@
   (prn check-and-thunder)
   ;(thunder-mobs-around triggered-by 20) )
   (prn (enough-previous-shots-by-players? triggered-by 0))
-  (if (enough-previous-shots-by-players? triggered-by 0)
+  (when (enough-previous-shots-by-players? triggered-by 0)
     (thunder-mobs-around triggered-by 20)))
     ; possiblly we need to flush last-vertical-shots, not clear.
     ; i.e. 3 shooters p1, p2, p3 shoot arrows into mid air consecutively, how often thuders(tn)?
