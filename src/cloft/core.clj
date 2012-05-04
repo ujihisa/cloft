@@ -284,15 +284,9 @@
     ;(prn locs)
     (< threshold
       (count (filter
-               (fn [loc]
-                  ;(prn triggered-by )
-                  ;(prn loc)
-                  (> 10.0 ; radius of 10.0
-                    (.distance
-                      (.getLocation triggered-by)
-                      loc)))
-               locs))))
-  )
+               #(> 10.0 ; radius of 10.0
+                   (.distance (.getLocation triggered-by) %))
+               locs)))))
 
 (defn check-and-thunder [triggered-by]
   (prn check-and-thunder)
