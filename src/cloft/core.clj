@@ -253,9 +253,14 @@
       (.dropItem (.getWorld loc-above) loc-above (ItemStack. Material/ARROW))))
   (.remove entity))
 
+(defn arrow-skill-sniping [entity]
+  nil
+  )
+
 (def arrow-skill (atom {}))
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
+
 
 (def bowgun-players (atom #{"ujm"}))
 (defn add-bowgun-player [name]
@@ -319,8 +324,19 @@
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
                         ))))
-      ;(when (arrow-velocity-vertical? (.getProjectile evt))
-      (when true
+      (when (= 'sniping (arrow-skill-of shooter))
+         let [
+              arrow (.getProjectile evt)
+              direction (.getDirection (.getLocation shooter))
+              ]
+         prn
+          "shooter location " (.getLocation shooter)
+          "shooter direction " direction
+          "arrow loc: "(.getLocation arrow)
+          "arrow v: "(.getVelocity arrow)
+          "arrow v/|v|: " (.multiply (.getVelocity arrow) (/ 1 (.length (.getVelocity arrow)))) 
+
+      (when (arrow-velocity-vertical? (.getProjectile evt))
         (prn last-vertical-shots)
         (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter))
         (prn last-vertical-shots)
@@ -385,6 +401,7 @@
                  Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
                  Material/RAILS ['cart "CART"]
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
+                 Material/STONE ['sniping "SNIPING"]
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
       (if-let [skill-name (table (.getType block))]
         (when
@@ -580,6 +597,15 @@
                           (.dropItem (.getWorld item) (.getLocation item) (ItemStack. new-item-material (.getAmount itemstack))))
                         (.remove item)))))))
 
+
+(defn player-chat-event [evt]
+  (prn (.getEventName evt) (.getPlayer evt))
+  )
+
+(defn player-toggle-sneak-event [evt]
+  (prn (.getEventName evt) (.getPlayer evt))
+  )
+
 (defn player-interact-entity-event [evt]
   (let [target (.getRightClicked evt)]
     (letfn [(d
@@ -589,6 +615,14 @@
                 (.getLocation target)
                 (ItemStack. (int n) (int 1) (short 0) (Byte. m)))))]
       (cond
+        ; right-click air and bow in hand -> aiming?
+        (and 
+            true
+            ;(instance? nil target); maybe wrong...
+            (= Material/BOW (.getType(.getItemInHand (.getPlayer evt))))
+          )
+        (prn 'aiming', target)
+
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
         (let [player (.getPlayer evt)]
           (c/consume-item player)
