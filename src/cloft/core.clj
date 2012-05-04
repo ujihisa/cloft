@@ -274,25 +274,32 @@
         (.getNearbyEntities player 20 20 20)))
   (doseq
     [x (filter #(instance? LivingEntity %) (.getNearbyEntities player 20 20 20))]
-           (prn 'thundering x)
+           (prn "thundering " x "," (.getLocation x))
            (.strikeLightningEffect (.getWorld x) (.getLocation x))
            (.damage x amount)))
 
 (defn enough-previous-shots-by-players? [triggered-by threshold]
-  (let [locations (vals last-vertical-shots)]
-    (< threshold ; shooter is not in last-vertical-shots
+  (let [locs (vals @last-vertical-shots) ]
+    ;(prn enough-previous-shots-by-players?)
+    ;(prn locs)
+    (< threshold 
       (count (filter 
-               (fn [loc] (> 10.0 ; radius of 10.0
-                            (.distance 
-                              (.getLocation triggered-by)
-                              loc)))
-               locations)))))
+               (fn [loc] 
+                  ;(prn triggered-by )
+                  ;(prn loc)
+                  (> 10.0 ; radius of 10.0
+                    (.distance 
+                      (.getLocation triggered-by)
+                      loc)))
+               locs)))) 
+  )
 
 (defn check-and-thunder [triggered-by]
   (prn check-and-thunder)
-  (thunder-mobs-around triggered-by 20) )
-  ;(if (enough-previous-shots-by-players? triggered-by 1)
-  ;  (thunder-mobs-around triggered-by 20)))
+  ;(thunder-mobs-around triggered-by 20) )
+  (prn (enough-previous-shots-by-players? triggered-by 0))
+  (if (enough-previous-shots-by-players? triggered-by 0)
+    (thunder-mobs-around triggered-by 20)))
     ; possiblly we need to flush last-vertical-shots, not clear.
     ; i.e. 3 shooters p1, p2, p3 shoot arrows into mid air consecutively, how often thuders(tn)?
     ; A.
