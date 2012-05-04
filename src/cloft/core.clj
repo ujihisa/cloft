@@ -268,15 +268,11 @@
          (> 0.1 (Math/abs (.getZ v))))))
 
 (defn thunder-mobs-around [player amount]
-  (prn thunder-mobs-around 'by player)
-  (prn (.getNearbyEntities player 20 20 20))
-  (prn (filter #(instance? LivingEntity %)
-        (.getNearbyEntities player 20 20 20)))
-  (doseq
-    [x (filter #(instance? LivingEntity %) (.getNearbyEntities player 20 20 20))]
-           (prn "thundering " x "," (.getLocation x))
-           (.strikeLightningEffect (.getWorld x) (.getLocation x))
-           (.damage x amount)))
+  (doseq [x (filter
+              #(instance? Monster %)
+              (.getNearbyEntities player 20 20 20))]
+    (.strikeLightningEffect (.getWorld x) (.getLocation x))
+    (.damage x amount)))
 
 (defn enough-previous-shots-by-players? [triggered-by threshold]
   (let [locs (vals @last-vertical-shots) ]
