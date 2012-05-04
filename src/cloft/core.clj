@@ -268,13 +268,12 @@
          (> 0.1 (Math/abs (.getZ v))))))
 
 (defn thunder-mobs-around [player amount]
-  (future-call (fn []
-                 (doseq [x (filter
-                             #(instance? Monster %)
-                             (.getNearbyEntities player 20 20 20))]
-                   (Thread/sleep (rand-int 1000))
-                   (.strikeLightningEffect (.getWorld x) (.getLocation x))
-                   (.damage x amount)))))
+  (doseq [x (filter
+              #(instance? Monster %)
+              (.getNearbyEntities player 20 20 20))]
+    (Thread/sleep (rand-int 1000))
+    (.strikeLightningEffect (.getWorld x) (.getLocation x))
+    (.damage x amount)))
 
 (defn enough-previous-shots-by-players? [triggered-by threshold]
   (let [locs (vals @last-vertical-shots) ]
@@ -288,7 +287,7 @@
 
 (defn check-and-thunder [triggered-by]
   (when (enough-previous-shots-by-players? triggered-by 0)
-    (thunder-mobs-around triggered-by 20)))
+    (future-call #(thunder-mobs-around triggered-by 20))))
     ; possiblly we need to flush last-vertical-shots, not clear.
     ; i.e. 3 shooters p1, p2, p3 shoot arrows into mid air consecutively, how often thuders(tn)?
     ; A.
