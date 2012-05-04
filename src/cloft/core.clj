@@ -270,7 +270,7 @@
 (defn thunder-mobs-around [player amount]
   (prn thunder-mobs-around 'by player)
   (prn (.getNearbyEntities player 20 20 20))
-  (prn (filter #(instance? LivingEntity %) 
+  (prn (filter #(instance? LivingEntity %)
         (.getNearbyEntities player 20 20 20)))
   (doseq
     [x (filter #(instance? LivingEntity %) (.getNearbyEntities player 20 20 20))]
@@ -282,16 +282,16 @@
   (let [locs (vals @last-vertical-shots) ]
     ;(prn enough-previous-shots-by-players?)
     ;(prn locs)
-    (< threshold 
-      (count (filter 
-               (fn [loc] 
+    (< threshold
+      (count (filter
+               (fn [loc]
                   ;(prn triggered-by )
                   ;(prn loc)
                   (> 10.0 ; radius of 10.0
-                    (.distance 
+                    (.distance
                       (.getLocation triggered-by)
                       loc)))
-               locs)))) 
+               locs))))
   )
 
 (defn check-and-thunder [triggered-by]
@@ -326,9 +326,9 @@
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
                         ))))
       ;(when (arrow-velocity-vertical? (.getProjectile evt))
-      (when true 
+      (when true
         (prn last-vertical-shots)
-        (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter)) 
+        (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter))
         (prn last-vertical-shots)
         (future-call #(do
                         (check-and-thunder shooter)
