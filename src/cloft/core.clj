@@ -322,17 +322,16 @@
                         (Thread/sleep 500) (.shootArrow (.getEntity evt))
                         ))))
       (when (= 'sniping (arrow-skill-of shooter))
-         let [
+        (let [
               arrow (.getProjectile evt)
               direction (.getDirection (.getLocation shooter))
               ]
-         prn
+         (prn
           "shooter location " (.getLocation shooter)
           "shooter direction " direction
           "arrow loc: "(.getLocation arrow)
           "arrow v: "(.getVelocity arrow)
-          "arrow v/|v|: " (.multiply (.getVelocity arrow) (/ 1 (.length (.getVelocity arrow)))) 
-
+          "arrow v/|v|: " (.multiply (.getVelocity arrow) (/ 1 (.length (.getVelocity arrow)))))))
       (when (arrow-velocity-vertical? (.getProjectile evt))
         (prn last-vertical-shots)
         (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter))
