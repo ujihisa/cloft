@@ -18,7 +18,9 @@
   (:import [org.bukkit.event.entity EntityDamageByEntityEvent
             EntityDamageEvent$DamageCause])
   (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
-  (:import [org.bukkit.inventory ItemStack]))
+  (:import [org.bukkit.inventory ItemStack])
+  (:import [org.bukkit.util Vector])
+  (:import [org.bukkit.event.block Action]))
 
 
 (def NAME-ICON
@@ -108,14 +110,12 @@
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
     (when (= (.getType (.getItemInHand player)) Material/FEATHER)
-        (let [amount (.getAmount (.getItemInHand player))
-              x (if (.isSprinting player) (* amount 2) amount)
-              x2 (/ (java.lang.Math/log x) 2) ]
-          (c/lingr (str name " is super jumping with level " x))
-          (c/consume-itemstack (.getInventory player) Material/FEATHER)
-          (.setVelocity
-            player
-            (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player)))))))
+      (let [amount (.getAmount (.getItemInHand player))
+            x (if (.isSprinting player) (* amount 2) amount)
+            x2 (/ (java.lang.Math/log x) 2) ]
+        (c/lingr (str name " is super jumping with level " x))
+        (c/consume-itemstack (.getInventory player) Material/FEATHER)
+        (c/add-velocity player 0 x2 0)))))
 
 (def sanctuary [(org.bukkit.Location. world 45 30 -75)
                 (org.bukkit.Location. world 84 90 -44)])
@@ -261,6 +261,9 @@
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
 
+(def counter-skill (atom {}))
+(defn counter-skill-of [player]
+  (get @counter-skill (.getDisplayName player)))
 
 (def bowgun-players (atom #{"ujm"}))
 (defn add-bowgun-player [name]
@@ -273,32 +276,26 @@
          (> 0.1 (Math/abs (.getZ v))))))
 
 (defn thunder-mobs-around [player amount]
-  (prn thunder-mobs-around 'by player)
-  (prn (.getNearbyEntities player 20 20 20))
-  (prn (filter #(instance? LivingEntity %)
-        (.getNearbyEntities player 20 20 20)))
-  (doseq
-    [x (filter #(instance? LivingEntity %) (.getNearbyEntities player 20 20 20))]
-           (prn "thundering " x "," (.getLocation x))
-           (.strikeLightningEffect (.getWorld x) (.getLocation x))
-           (.damage x amount)))
+  (doseq [x (filter
+              #(instance? Monster %)
+              (.getNearbyEntities player 20 20 20))]
+    (Thread/sleep (rand-int 1000))
+    (.strikeLightningEffect (.getWorld x) (.getLocation x))
+    (.damage x amount)))
 
 (defn enough-previous-shots-by-players? [triggered-by threshold]
   (let [locs (vals @last-vertical-shots) ]
     ;(prn enough-previous-shots-by-players?)
     ;(prn locs)
-    (< threshold
+    (<= threshold
       (count (filter
                #(> 10.0 ; radius of 10.0
                    (.distance (.getLocation triggered-by) %))
                locs)))))
 
 (defn check-and-thunder [triggered-by]
-  (prn check-and-thunder)
-  ;(thunder-mobs-around triggered-by 20) )
-  (prn (enough-previous-shots-by-players? triggered-by 0))
-  (when (enough-previous-shots-by-players? triggered-by 0)
-    (thunder-mobs-around triggered-by 20)))
+  (when (enough-previous-shots-by-players? triggered-by 3)
+    (future-call #(thunder-mobs-around triggered-by 20))))
     ; possiblly we need to flush last-vertical-shots, not clear.
     ; i.e. 3 shooters p1, p2, p3 shoot arrows into mid air consecutively, how often thuders(tn)?
     ; A.
@@ -342,7 +339,6 @@
         (prn last-vertical-shots)
         (future-call #(let [shooter-name (.getDisplayName shooter)]
                         (check-and-thunder shooter)
-                        ;may be we need to defn right outside of future-call to have localvals.
                         (Thread/sleep 1000)
                         (swap! last-vertical-shots dissoc shooter-name))))
       (when (= arrow-skill-shotgun (arrow-skill-of shooter))
@@ -365,6 +361,14 @@
 (defn entity-explosion-prime-event [evt]
   nil)
 
+(defn counter-skill-ice [you by]
+  (.sendMessage you "(not implemented yet)")
+  (comment (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by)))))
+
+(defn counter-skill-fire [you by]
+  (.setFireTicks by 100)
+  (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by))))
+
 ;(defn build-long [block block-against]
 ;  (comment (when (= (.getType block) (.getType block-against))
 ;    (let [world (.getWorld block)
@@ -376,19 +380,26 @@
 ;                         (.add (.clone loc) (.multiply (.clone diff) (double m))))]
 ;          (when (= (.getType newblock) Material/AIR)
 ;            (.setType newblock (.getType block)))))))))
-;
-(defn skillchange [player block block-against]
-  (when (and
-          (every? identity (map
-                             #(=
-                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-                                Material/STONE)
-                             [0 0 -1 1] [-1 1 0 0]))
-          (every? identity (map
-                             #(not=
-                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-                                Material/STONE)
-                             [-1 1 0 0] [-1 1 0 0])))
+
+(defn blazon? [block-type block-against]
+  (and (every? #(= % block-type)
+               (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                    [0 0 -1 1] [-1 1 0 0]))
+       (every? #(not= % block-type)
+               (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                    [-1 1 0 0] [-1 1 0 0]))))
+
+(defn counter-skillchange [player block block-against]
+  (when (blazon? Material/LOG block-against)
+    (let [table {Material/RED_ROSE [counter-skill-fire "FIRE"]
+                 Material/SNOW_BLOCK [counter-skill-ice "ICE"]}]
+      (if-let [skill-name (table (.getType block))]
+        (do
+          (c/broadcast (.getDisplayName player) " changed counter-skill to " (last skill-name))
+          (swap! counter-skill assoc (.getDisplayName player) (first skill-name)))))))
+
+(defn arrow-skillchange [player block block-against]
+  (when (blazon? Material/STONE block-against)
     (let [table {Material/GLOWSTONE ['strong "STRONG"]
                  Material/TNT [arrow-skill-explosion "EXPLOSION"]
                  Material/TORCH [arrow-skill-torch "TORCH"]
@@ -404,7 +415,7 @@
                  Material/STONE ['sniping "SNIPING"]
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
       (if-let [skill-name (table (.getType block))]
-        (when
+        (do
           (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
           (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)))))))
 
@@ -412,7 +423,8 @@
   (let [block (.getBlock evt)]
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
     (let [player (.getPlayer evt)]
-      (skillchange player block (.getBlockAgainst evt))
+      (arrow-skillchange player block (.getBlockAgainst evt))
+      (counter-skillchange player block (.getBlockAgainst evt))
       (comment (prn (vector-from-to block player))
                (.setVelocity player (vector-from-to player block))
                (doseq [entity (.getNearbyEntities player 4 4 4)]
@@ -478,11 +490,9 @@
           (.sendMessage entity "teleport up!"))
         (future-call #(let [newloc (.add (.getLocation entity) 0 30 0)]
                         (Thread/sleep 10)
-                        (cond
-                          (= (.getType block) Material/STONE_PLATE)
-                          (.teleport entity newloc)
-                          (= (.getType block) Material/WOOD_PLATE)
-                          (c/add-velocity entity 0 1.5 0))
+                        (condp = (.getType block)
+                          Material/STONE_PLATE (.teleport entity newloc)
+                          Material/WOOD_PLATE (c/add-velocity entity 0 1.5 0))
                         (.playEffect (.getWorld entity-loc) (.add entity-loc 0 1 0) org.bukkit.Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld entity-loc) entity-loc org.bukkit.Effect/ENDER_SIGNAL nil)
@@ -526,15 +536,15 @@
     (cond
       #_(
         (and
-          (= org.bukkit.event.block.Action/LEFT_CLICK_BLOCK (.getAction evt))
+          (= Action/LEFT_CLICK_BLOCK (.getAction evt))
           (= Material/WOODEN_DOOR (.getType (.getClickedBlock evt))))
         (elevator player (.getClickedBlock evt))
       )
 
-      (= (.getAction evt) org.bukkit.event.block.Action/PHYSICAL)
+      (= (.getAction evt) Action/PHYSICAL)
       (teleport-up player (.getClickedBlock evt))
       (and
-        (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)
+        (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)
         (= (.getType (.getClickedBlock evt)) Material/CAKE_BLOCK))
       (if-let [death-point (get @player-death-locations (.getDisplayName player))]
         (do
@@ -545,15 +555,15 @@
       (and
         (= (.. player (getItemInHand) (getType)) Material/GLASS_BOTTLE)
         (or
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
+          (= (.getAction evt) Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       (.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
       (and
         (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
         (= (.getHealth player) (.getMaxHealth player))
         (or
-          (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_AIR)
-          (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_BLOCK)))
+          (= (.getAction evt) Action/LEFT_CLICK_AIR)
+          (= (.getAction evt) Action/LEFT_CLICK_BLOCK)))
       (if (empty? (.getEnchantments (.getItemInHand player)))
         (let [snowball (.launchProjectile player Snowball)]
           (swap! special-snowball-set conj snowball)
@@ -563,16 +573,16 @@
       (and
         (= (.. evt (getMaterial)) Material/MILK_BUCKET)
         (or
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
+          (= (.getAction evt) Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       (do
         (.damage player 8)
         (.sendMessage player "you drunk milk"))
       (and
         (= (.. evt (getMaterial)) Material/FEATHER)
         (or
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
+          (= (.getAction evt) Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       (player-super-jump evt player))))
 
 (defn player-drop-item-event [evt]
@@ -652,7 +662,7 @@
                 new-z (* 2 (/ z r2))]
             (future-call #(do
                             (Thread/sleep 100)
-                            (.setVelocity target (org.bukkit.util.Vector. new-x (.getY v) new-z))))))
+                            (.setVelocity target (Vector. new-x (.getY v) new-z))))))
         ; give wheat to zombie pigman -> pig
         (and (instance? PigZombie target)
              (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296))
@@ -811,9 +821,9 @@
           z (- 5 (.getZ v))]
       (when (instance? Player e)
         (.sendMessage e "Air Explosion"))
-      (.setVelocity e (org.bukkit.util.Vector. x 1.5 z))))
+      (.setVelocity e (Vector. x 1.5 z))))
   (comment (let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
-             (.setVelocity another (org.bukkit.util.Vector. 0 1 0)))))
+             (.setVelocity another (Vector. 0 1 0)))))
 
 (defn creeper-explosion-2 [evt entity]
   (.setCancelled evt true)
@@ -877,7 +887,7 @@
     (Bukkit/getPlayer name))))
 
 (defn arrow-damages-entity-event [_ arrow target]
-  (let [shooter (.getShooter arrow)]
+  (if-let [shooter (.getShooter arrow)]
     (when (instance? Player shooter)
       (cond
         (.contains (.getInventory shooter) Material/WEB)
@@ -1063,6 +1073,10 @@
               (c/consume-item target))
         )
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
+          (if-let [skill (counter-skill-of target)]
+            (skill target (if (instance? Projectile attacker)
+                            (.getShooter attacker)
+                            attacker)))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
               (.setCancelled evt true)
@@ -1132,11 +1146,11 @@
 
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
-        (cond
-          #_((instance? Fish entity) (fish-hit-event evt entity))
-          (instance? Fireball entity) (.setYield entity 0.0)
-          (instance? Arrow entity) (arrow-hit-event evt entity)
-          (instance? Snowball entity) (snowball-hit-event evt entity)
+        (condp instance? entity
+          #_(Fish (fish-hit-event evt entity))
+          Fireball (.setYield entity 0.0)
+          Arrow (arrow-hit-event evt entity)
+          Snowball (snowball-hit-event evt entity)
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
           )))
 
@@ -1162,10 +1176,10 @@
 ;            (= (.getType block-under) Material/LAPIS_BLOCK))
 ;      (let [direction (.getDirection (.getNewData (.getType rail) (.getData rail)))
 ;            diff (cond
-;                   (= org.bukkit.block.BlockFace/SOUTH direction) (org.bukkit.util.Vector. -1 0 0)
-;                   (= org.bukkit.block.BlockFace/NORTH direction) (org.bukkit.util.Vector. 1 0 0)
-;                   (= org.bukkit.block.BlockFace/WEST direction) (org.bukkit.util.Vector. 0 0 1)
-;                   (= org.bukkit.block.BlockFace/EAST direction) (org.bukkit.util.Vector. 0 0 -1))
+;                   (= org.bukkit.block.BlockFace/SOUTH direction) (Vector. -1 0 0)
+;                   (= org.bukkit.block.BlockFace/NORTH direction) (Vector. 1 0 0)
+;                   (= org.bukkit.block.BlockFace/WEST direction) (Vector. 0 0 1)
+;                   (= org.bukkit.block.BlockFace/EAST direction) (Vector. 0 0 -1))
 ;            destination (first (filter
 ;                                 #(= (.getType %) Material/LAPIS_BLOCK)
 ;                                 (map
