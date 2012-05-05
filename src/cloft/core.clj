@@ -110,14 +110,14 @@
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
     (when (= (.getType (.getItemInHand player)) Material/FEATHER)
-        (let [amount (.getAmount (.getItemInHand player))
-              x (if (.isSprinting player) (* amount 2) amount)
-              x2 (/ (java.lang.Math/log x) 2) ]
-          (c/lingr (str name " is super jumping with level " x))
-          (c/consume-itemstack (.getInventory player) Material/FEATHER)
-          (.setVelocity
-            player
-            (.add (Vector. 0.0 x2 0.0) (.getVelocity player)))))))
+      (let [amount (.getAmount (.getItemInHand player))
+            x (if (.isSprinting player) (* amount 2) amount)
+            x2 (/ (java.lang.Math/log x) 2) ]
+        (c/lingr (str name " is super jumping with level " x))
+        (c/consume-itemstack (.getInventory player) Material/FEATHER)
+        (.setVelocity
+          player
+          (.add (Vector. 0.0 x2 0.0) (.getVelocity player)))))))
 
 (def sanctuary [(org.bukkit.Location. world 45 30 -75)
                 (org.bukkit.Location. world 84 90 -44)])
