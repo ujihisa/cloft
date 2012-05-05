@@ -1113,7 +1113,8 @@
                  Spider Material/REDSTONE
                  Sheep Material/BED
                  Villager Material/LEATHER_LEGGINGS
-                 Silverfish Material/DIAMOND_PICKAXE}]
+                 Silverfish Material/DIAMOND_PICKAXE
+                 IronGolem Material/FISHING_ROD}]
       (if-let [m (last (first (filter #(instance? (first %) target) table)))]
         (.dropItem (.getWorld target) (.getLocation target) (ItemStack. m 1))
         (cond
