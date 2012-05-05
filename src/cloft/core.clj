@@ -378,6 +378,36 @@
   (.setFireTicks by 100)
   (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by))))
 
+(defn reaction-skill-wolf [you by]
+  (let [wolf (.spawn (.getWorld by) (.getLocation by) Wolf)]
+    (.setTamed wolf true)
+    (.setOwner wolf you)
+    (.setTarget wolf by)
+    (future-call #(do
+                    (Thread/sleep 10000)
+                    (.remove wolf))))
+  (.sendMessage you "a wolf helps you!"))
+
+(defn reaction-skill-teleport [you by]
+  (letfn [(find-place [from range]
+            (let [candidates
+                  (for [x range y range z range]
+                    (.add (.clone (.getLocation from)) x y z))
+                  good-candidates
+                  (filter
+                    #(and
+                       (> y 5)
+                       (not= Material/AIR
+                             (.getType (.getBlock (.add (.clone %) 0 -1 0))))
+                       (= Material/AIR (.getType (.getBlock %)))
+                       (= Material/AIR
+                          (.getType (.getBlock (.add (.clone %) 0 1 0)))))
+                    candidates)]
+              (rand-nth good-candidates)))]
+    (.sendMessage you
+      (str "You got damage by " (c/entity2name by) " and escaped."))
+    (.teleport you (find-place you (range -10 10)))))
+
 ;(defn build-long [block block-against]
 ;  (comment (when (= (.getType block) (.getType block-against))
 ;    (let [world (.getWorld block)
@@ -401,7 +431,9 @@
 (defn reaction-skillchange [player block block-against]
   (when (blazon? Material/LOG block-against)
     (let [table {Material/RED_ROSE [reaction-skill-fire "FIRE"]
-                 Material/YELLOW_FLOWER [reaction-skill-knockback "KNOCKBACK"]
+                 Material/YELLOW_FLOWER [reaction-skill-teleport "TELEPORT"]
+                 Material/IRON_ORE [reaction-skill-knockback "KNOCKBACK"]
+                 Material/DIRT [reaction-skill-wolf "WOLF"]
                  Material/SNOW_BLOCK [reaction-skill-ice "ICE"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed reaction-skill to " (last skill-name))
