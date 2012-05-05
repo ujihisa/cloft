@@ -216,7 +216,9 @@
 (defn arrow-skill-fire [entity]
   (let [location (.getLocation entity)
         world (.getWorld location)]
-    (doseq [target (filter #(instance? LivingEntity %) (.getNearbyEntities entity 1 1 1))]
+    (doseq [target (filter
+                     #(instance? LivingEntity %)
+                     (.getNearbyEntities entity 1 1 1))]
       (.setFireTicks target 200))))
 
 (defn arrow-skill-tree [entity]
