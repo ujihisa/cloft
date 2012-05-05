@@ -115,9 +115,7 @@
             x2 (/ (java.lang.Math/log x) 2) ]
         (c/lingr (str name " is super jumping with level " x))
         (c/consume-itemstack (.getInventory player) Material/FEATHER)
-        (.setVelocity
-          player
-          (.add (Vector. 0.0 x2 0.0) (.getVelocity player)))))))
+        (c/add-velocity player 0 x2 0)))))
 
 (def sanctuary [(org.bukkit.Location. world 45 30 -75)
                 (org.bukkit.Location. world 84 90 -44)])
