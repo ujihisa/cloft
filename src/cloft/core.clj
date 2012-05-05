@@ -19,7 +19,8 @@
             EntityDamageEvent$DamageCause])
   (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
   (:import [org.bukkit.inventory ItemStack])
-  (:import [org.bukkit.util Vector]))
+  (:import [org.bukkit.util Vector])
+  (:import [org.bukkit.event.block Action]))
 
 
 (def NAME-ICON
@@ -503,15 +504,15 @@
     (cond
       #_(
         (and
-          (= org.bukkit.event.block.Action/LEFT_CLICK_BLOCK (.getAction evt))
+          (= Action/LEFT_CLICK_BLOCK (.getAction evt))
           (= Material/WOODEN_DOOR (.getType (.getClickedBlock evt))))
         (elevator player (.getClickedBlock evt))
       )
 
-      (= (.getAction evt) org.bukkit.event.block.Action/PHYSICAL)
+      (= (.getAction evt) Action/PHYSICAL)
       (teleport-up player (.getClickedBlock evt))
       (and
-        (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)
+        (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)
         (= (.getType (.getClickedBlock evt)) Material/CAKE_BLOCK))
       (if-let [death-point (get @player-death-locations (.getDisplayName player))]
         (do
@@ -522,15 +523,15 @@
       (and
         (= (.. player (getItemInHand) (getType)) Material/GLASS_BOTTLE)
         (or
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
+          (= (.getAction evt) Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       (.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
       (and
         (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
         (= (.getHealth player) (.getMaxHealth player))
         (or
-          (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_AIR)
-          (= (.getAction evt) org.bukkit.event.block.Action/LEFT_CLICK_BLOCK)))
+          (= (.getAction evt) Action/LEFT_CLICK_AIR)
+          (= (.getAction evt) Action/LEFT_CLICK_BLOCK)))
       (if (empty? (.getEnchantments (.getItemInHand player)))
         (let [snowball (.launchProjectile player Snowball)]
           (swap! special-snowball-set conj snowball)
@@ -540,16 +541,16 @@
       (and
         (= (.. evt (getMaterial)) Material/MILK_BUCKET)
         (or
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
+          (= (.getAction evt) Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       (do
         (.damage player 8)
         (.sendMessage player "you drunk milk"))
       (and
         (= (.. evt (getMaterial)) Material/FEATHER)
         (or
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_AIR)
-          (= (.getAction evt) org.bukkit.event.block.Action/RIGHT_CLICK_BLOCK)))
+          (= (.getAction evt) Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       (player-super-jump evt player))))
 
 (defn player-drop-item-event [evt]
