@@ -257,6 +257,10 @@
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
 
+(def counter-skill (atom {}))
+(defn counter-skill-of [player]
+  (get @counter-skill (.getDisplayName player)))
+
 (def bowgun-players (atom #{"ujm"}))
 (defn add-bowgun-player [name]
   (swap! bowgun-players conj name))
@@ -353,7 +357,7 @@
 ;          (when (= (.getType newblock) Material/AIR)
 ;            (.setType newblock (.getType block)))))))))
 ;
-(defn skillchange [player block block-against]
+(defn arrow-skillchange [player block block-against]
   (when (and
           (every? identity (map
                              #(=
@@ -386,7 +390,7 @@
   (let [block (.getBlock evt)]
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
     (let [player (.getPlayer evt)]
-      (skillchange player block (.getBlockAgainst evt))
+      (arrow-skillchange player block (.getBlockAgainst evt))
       (comment (prn (vector-from-to block player))
                (.setVelocity player (vector-from-to player block))
                (doseq [entity (.getNearbyEntities player 4 4 4)]
