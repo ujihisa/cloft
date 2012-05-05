@@ -217,7 +217,7 @@
   (let [location (.getLocation entity)
         world (.getWorld location)]
     (doseq [target (filter
-                     #(instance? LivingEntity %)
+                     #(and (instance? LivingEntity %) (not= (.getShooter entity) %))
                      (.getNearbyEntities entity 1 1 1))]
       (.setFireTicks target 200))))
 
