@@ -635,9 +635,6 @@
                         (.remove item)))))))
 
 
-(defn player-chat-event [evt]
-  (prn (.getEventName evt) (.getPlayer evt))
-  )
 
 (defn player-toggle-sneak-event [evt]
   (prn (.getEventName evt) (.getPlayer evt))
