@@ -1088,7 +1088,7 @@
 
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
-        (cond instance? entity
+        (condp instance? entity
           #_(Fish (fish-hit-event evt entity))
           Fireball (.setYield entity 0.0)
           Arrow (arrow-hit-event evt entity)
