@@ -257,6 +257,8 @@
   nil
   )
 
+
+
 (def arrow-skill (atom {}))
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
@@ -418,12 +420,24 @@
           (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
           (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)))))))
 
+
+(defn invoke-alchemy [player block block-against]
+  (when (blazon? Material/STONE block-against)
+    (let [table {Material/STONE (fn [p] (prn p Material/STONE))}]
+      (prn table)
+      (if-let [alchemy (table (.getType block))]
+              ;then
+              (alchemy player)
+              ;else
+              (prn "no effect is defined for " block)))))
+
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
     (let [player (.getPlayer evt)]
       (arrow-skillchange player block (.getBlockAgainst evt))
       (counter-skillchange player block (.getBlockAgainst evt))
+      (invoke-alchemy player block (.getBlockAgainst evt))
       (comment (prn (vector-from-to block player))
                (.setVelocity player (vector-from-to player block))
                (doseq [entity (.getNearbyEntities player 4 4 4)]
