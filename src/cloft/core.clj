@@ -396,10 +396,9 @@
   (when (blazon? Material/LOG block-against)
     (let [table {Material/RED_ROSE [counter-skill-fire "FIRE"]
                  Material/SNOW_BLOCK [counter-skill-ice "ICE"]}]
-      (if-let [skill-name (table (.getType block))]
-        (do
-          (c/broadcast (.getDisplayName player) " changed counter-skill to " (last skill-name))
-          (swap! counter-skill assoc (.getDisplayName player) (first skill-name)))))))
+      (when-let [skill-name (table (.getType block))]
+        (c/broadcast (.getDisplayName player) " changed counter-skill to " (last skill-name))
+        (swap! counter-skill assoc (.getDisplayName player) (first skill-name))))))
 
 (defn arrow-skillchange [player block block-against]
   (when (blazon? Material/STONE block-against)
@@ -417,10 +416,9 @@
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
                  Material/STONE ['sniping "SNIPING"]
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
-      (if-let [skill-name (table (.getType block))]
-        (do
-          (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
-          (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)))))))
+      (when-let [skill-name (table (.getType block))]
+        (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
+        (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
 
 
 
@@ -1120,11 +1118,10 @@
         (cond
           (instance? Player target)
           (do
-            (if-let [item (.getItemInHand target)]
-              (do
-                (.setItemInHand target (ItemStack. Material/AIR))
-                (.setItemInHand shooter item)
-                (c/lingr (str (.getDisplayName shooter) " fished " (.getDisplayName target))))))
+            (when-let [item (.getItemInHand target)]
+              (.setItemInHand target (ItemStack. Material/AIR))
+              (.setItemInHand shooter item)
+              (c/lingr (str (.getDisplayName shooter) " fished " (.getDisplayName target)))))
 
           :else
           (.teleport target shooter))))))
