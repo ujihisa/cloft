@@ -359,10 +359,10 @@
 
 (defn blazon? [block-type block-against]
   (and (every? #(= % block-type)
-               (map (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+               (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
                     [0 0 -1 1] [-1 1 0 0]))
        (every? #(not= % block-type)
-               (map (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+               (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
                     [-1 1 0 0] [-1 1 0 0]))))
 
 (defn arrow-skillchange [player block block-against]
@@ -381,8 +381,9 @@
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
       (if-let [skill-name (table (.getType block))]
-        (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
-        (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
+        (do
+          (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
+          (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)))))))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
