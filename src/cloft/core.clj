@@ -854,8 +854,7 @@
 
 (defn arrow-damages-entity-event [_ arrow target]
   (if-let [shooter (.getShooter arrow)]
-    (condp instance? shooter
-      Player
+    (when (instance? Player shooter)
       (cond
         (.contains (.getInventory shooter) Material/WEB)
         (do
