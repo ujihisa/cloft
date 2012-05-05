@@ -494,7 +494,7 @@
   (let [world (.getWorld player)
         loc (.toVector (.getLocation player))
         bottom (player-coordinate-to-world player 15.0 0.0 0.0)
-        top (player-coordinate-to-world player 15.0 5.0 0.0)
+        top (player-coordinate-to-world player 15.0 6.0 0.0)
         f (fn [v]
               (Thread/sleep 300)
               (when (= Material/AIR (.getType v))
@@ -503,11 +503,13 @@
     (future-call #(do
                     (.strikeLightningEffect world (.toLocation bottom world))
                     (line-effect-helper world bottom top f)
-                    (if-let [[eb et] (active-fusion-wall-of player)]
+                    (if-let [prev (active-fusion-wall-of player)]
                             ;then
-                            (line-effect-helper eb bottom) 
+                            (let [[eb et] prev]
+                              (line-effect-helper eb bottom f) 
+                              (line-effect-helper et top f) )
                             ;else
-                            '()
+                            (prn "nothing to connect.")
                             )  
                     (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top])
                     ))))
