@@ -267,9 +267,9 @@
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
 
-(def counter-skill (atom {}))
-(defn counter-skill-of [player]
-  (get @counter-skill (.getDisplayName player)))
+(def reaction-skill (atom {}))
+(defn reaction-skill-of [player]
+  (get @reaction-skill (.getDisplayName player)))
 
 (def bowgun-players (atom #{"ujm"}))
 (defn add-bowgun-player [name]
@@ -366,15 +366,15 @@
 (defn entity-explosion-prime-event [evt]
   nil)
 
-(defn counter-skill-ice [you by]
+(defn reaction-skill-ice [you by]
   (.sendMessage you "(not implemented yet)")
   (comment (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by)))))
 
-(defn counter-skill-knockback [you by]
+(defn reaction-skill-knockback [you by]
   (let [direction (.multiply (.normalize (.toVector (.subtract (.getLocation by) (.getLocation you)))) 2)]
     (c/add-velocity by (.getX direction) (.getY direction) (.getZ direction))))
 
-(defn counter-skill-fire [you by]
+(defn reaction-skill-fire [you by]
   (.setFireTicks by 100)
   (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by))))
 
@@ -398,14 +398,14 @@
                (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
                     [-1 1 0 0] [-1 1 0 0]))))
 
-(defn counter-skillchange [player block block-against]
+(defn reaction-skillchange [player block block-against]
   (when (blazon? Material/LOG block-against)
-    (let [table {Material/RED_ROSE [counter-skill-fire "FIRE"]
-                 Material/YELLOW_FLOWER [counter-skill-knockback "KNOCKBACK"]
-                 Material/SNOW_BLOCK [counter-skill-ice "ICE"]}]
+    (let [table {Material/RED_ROSE [reaction-skill-fire "FIRE"]
+                 Material/YELLOW_FLOWER [reaction-skill-knockback "KNOCKBACK"]
+                 Material/SNOW_BLOCK [reaction-skill-ice "ICE"]}]
       (when-let [skill-name (table (.getType block))]
-        (c/broadcast (.getDisplayName player) " changed counter-skill to " (last skill-name))
-        (swap! counter-skill assoc (.getDisplayName player) (first skill-name))))))
+        (c/broadcast (.getDisplayName player) " changed reaction-skill to " (last skill-name))
+        (swap! reaction-skill assoc (.getDisplayName player) (first skill-name))))))
 
 (defn arrow-skillchange [player block block-against]
   (when (blazon? Material/STONE block-against)
@@ -540,7 +540,7 @@
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
     (let [player (.getPlayer evt)]
       (arrow-skillchange player block (.getBlockAgainst evt))
-      (counter-skillchange player block (.getBlockAgainst evt))
+      (reaction-skillchange player block (.getBlockAgainst evt))
       (invoke-alchemy player block (.getBlockAgainst evt))
       (comment (prn (vector-from-to block player))
                (.setVelocity player (vector-from-to player block))
@@ -1187,7 +1187,7 @@
               (c/consume-item target))
         )
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
-          (if-let [skill (counter-skill-of target)]
+          (if-let [skill (reaction-skill-of target)]
             (skill target (if (instance? Projectile attacker)
                             (.getShooter attacker)
                             attacker)))
