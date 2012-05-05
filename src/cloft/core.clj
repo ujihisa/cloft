@@ -910,7 +910,7 @@
         (.setFireTicks target 400)
         (= 'cart (arrow-skill-of shooter))
         (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
-          (.setPassenger cart target)))))))
+          (.setPassenger cart target))))))
 
 (comment (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
            (future-call #(let [b (.getBlock (.getLocation target))]
