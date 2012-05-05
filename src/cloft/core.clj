@@ -422,9 +422,10 @@
           (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
           (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)))))))
 
+
+
 (defn xz-normalized-vector [v]
   (.normalize (Vector. (.getX v) 0.0 (.getZ v))))
-
 
 (defn player-coordinate [player]
   (let [world (.getWorld player)
@@ -435,12 +436,9 @@
    [depth, height, right-hand]))
 
 (defn player-coordinate-to-world [player dx hx rx]
-  (let [[d h r] (player-coordinate player) 
+  (let [[d h r] (player-coordinate player)
         loc (.toVector (.getLocation player))]
-    (prn loc)
-    (.add 
-           loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx))  
-           )))
+    (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
 
 (defn line-effect-helper [world start end f]
   (prn start end)
@@ -457,35 +455,40 @@
 (defn summon-giant [player block]
   (let [world (.getWorld player)
         spawn-at  (player-coordinate-to-world player 10.0 0.0 0.0)]
-    (.strikeLightningEffect world spawn-at)
-    (.spawn world spawn-at Giant)
+    (.strikeLightningEffect world (.toLocation spawn-at world))
+    (.spawn world (.toLocation spawn-at world) Giant)
     (c/broadcast (.getDisplayName player) " has summoned Giant!!")))
 
 (defn summon-residents-of-nether [player block]
   (let [world (.getWorld player)
-        loc (.toVector (.getLocation player)) 
-        pos1 (player-coordinate-to-world player 14.0 1.0 -3.0) 
-        pos2 (player-coordinate-to-world player 14.0 1.0 0.0) 
+        loc (.toVector (.getLocation player))
+        pos1 (player-coordinate-to-world player 14.0 1.0 -3.0)
+        pos2 (player-coordinate-to-world player 14.0 1.0 0.0)
         pos3 (player-coordinate-to-world player 14.0 1.0 3.0)
         fire-effect (fn [v]
-                        (prn v)
+                        (Thread/sleep 300)
                         (when (= Material/AIR (.getType v))
                           (.setType v Material/FIRE)) )
         ]
-    (line-effect-helper world loc pos1 fire-effect)
-    (.spawn world (.toLocation pos1 world) Creeper)
-    (line-effect-helper world loc pos2 fire-effect)
-    (.spawn world (.toLocation pos2 world) Creeper)
-    (line-effect-helper world loc pos3 fire-effect)
-    (.spawn world (.toLocation pos3 world) Creeper)
+    (future-call #(do
+                    (line-effect-helper world loc pos1 fire-effect)
+                    (.spawn world (.toLocation pos1 world) Creeper)))
+    (future-call #(do
+                     (line-effect-helper world loc pos2 fire-effect)
+                     (.spawn world (.toLocation pos2 world) Creeper)))
+    (future-call #(do
+                    (line-effect-helper world loc pos3 fire-effect)
+                    (.spawn world (.toLocation pos3 world) Creeper)))
     (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, Zompig and Ghast!!")
     ))
+
+
 
 (defn fusion-wall [player block]
   (let [world (.getWorld player)
         loc (.getLocation player)
         [depth, height, right-hand] (player-coordinate player)]
-   
+ 
     ))
 
 
@@ -708,7 +711,7 @@
                 (ItemStack. (int n) (int 1) (short 0) (Byte. m)))))]
       (cond
         ; right-click air and bow in hand -> aiming?
-        (and 
+        (and
             true
             ;(instance? nil target); maybe wrong...
             (= Material/BOW (.getType(.getItemInHand (.getPlayer evt))))
