@@ -345,6 +345,14 @@
 (defn entity-explosion-prime-event [evt]
   nil)
 
+(defn counter-skill-ice [you by]
+  (.sendMessage you "(not implemented yet)")
+  (comment (c/lingr "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by))))
+
+(defn counter-skill-fire [you by]
+  (.setFireTicks by 100)
+  (c/lingr "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by)))
+
 ;(defn build-long [block block-against]
 ;  (comment (when (= (.getType block) (.getType block-against))
 ;    (let [world (.getWorld block)
@@ -364,6 +372,15 @@
        (every? #(not= % block-type)
                (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
                     [-1 1 0 0] [-1 1 0 0]))))
+
+(defn counter-skillchange [player block block-against]
+  (when (blazon? Material/LOG block-against)
+    (let [table {Material/RED_ROSE [counter-skill-fire "FIRE"]
+                 Material/SNOW_BLOCK [counter-skill-ice "ICE"]}]
+      (if-let [skill-name (table (.getType block))]
+        (do
+          (c/broadcast (.getDisplayName player) " changed counter-skill to " (last skill-name))
+          (swap! counter-skill assoc (.getDisplayName player) (first skill-name)))))))
 
 (defn arrow-skillchange [player block block-against]
   (when (blazon? Material/STONE block-against)
@@ -390,6 +407,7 @@
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
     (let [player (.getPlayer evt)]
       (arrow-skillchange player block (.getBlockAgainst evt))
+      (counter-skillchange player block (.getBlockAgainst evt))
       (comment (prn (vector-from-to block player))
                (.setVelocity player (vector-from-to player block))
                (doseq [entity (.getNearbyEntities player 4 4 4)]
@@ -1021,6 +1039,8 @@
               (c/consume-item target))
         )
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
+          (if-let [skill (counter-skill-of target)]
+            (skill target attacker))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
               (.setCancelled evt true)
