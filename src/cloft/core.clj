@@ -391,12 +391,11 @@
 (defn reaction-skill-teleport [you by]
   (letfn [(find-place [from range]
             (let [candidates
-                  (for [x range y range z range]
+                  (for [x range y range z range :when (> y 5)]
                     (.add (.clone (.getLocation from)) x y z))
                   good-candidates
                   (filter
                     #(and
-                       (> y 5)
                        (not= Material/AIR
                              (.getType (.getBlock (.add (.clone %) 0 -1 0))))
                        (= Material/AIR (.getType (.getBlock %)))
