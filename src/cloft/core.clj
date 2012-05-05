@@ -853,7 +853,7 @@
     (Bukkit/getPlayer name))))
 
 (defn arrow-damages-entity-event [_ arrow target]
-  (let [shooter (.getShooter arrow)]
+  (if-let [shooter (.getShooter arrow)]
     (when (instance? Player shooter)
       (cond
         (.contains (.getInventory shooter) Material/WEB)
