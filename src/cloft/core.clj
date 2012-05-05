@@ -440,17 +440,19 @@
         loc (.toVector (.getLocation player))]
     (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
 
-(defn line-effect-helper [world start end f]
-  (prn start end)
-  (let [m (Math/ceil (.distance start end))
-        unit (.normalize (.add (.clone end) (.multiply (.clone start ) -1.0)))
-        iter (BlockIterator. world (.add start (.multiply (.clone unit) 2)) unit 0.0 m) ;  need yoffest
-        ]
-    (loop [done (.hasNext iter)]
-          (f (.next iter))
-          (when (.hasNext iter)
-            (recur (.hasNext iter))
-            ))))
+(defn line-effect-helper 
+  ([world start end f ]
+   (line-effect-helper world start end f 0))
+  ([world start end f offset-count]
+   (let [m (Math/ceil (.distance start end))
+         unit (.normalize (.add (.clone end) (.multiply (.clone start ) -1.0)))
+         iter (BlockIterator. world (.add start (.multiply (.clone unit) offset-count)) unit 0.0 m) ;  need yoffest
+         ]
+     (loop [done (.hasNext iter)]
+           (f (.next iter))
+           (when (.hasNext iter)
+             (recur (.hasNext iter))
+             )))))
 
 (defn summon-giant [player block]
   (let [world (.getWorld player)
@@ -462,31 +464,35 @@
 (defn summon-residents-of-nether [player block]
   (let [world (.getWorld player)
         loc (.toVector (.getLocation player))
-        pos1 (player-coordinate-to-world player 14.0 1.0 -3.0)
-        pos2 (player-coordinate-to-world player 14.0 1.0 0.0)
-        pos3 (player-coordinate-to-world player 14.0 1.0 3.0)
+        pos1 (player-coordinate-to-world player 15.0 1.0 -5.0)
+        pos2 (player-coordinate-to-world player 15.0 1.0 0.0)
+        pos3 (player-coordinate-to-world player 15.0 1.0 5.0)
         fire-effect (fn [v]
                         (Thread/sleep 300)
                         (when (= Material/AIR (.getType v))
                           (.setType v Material/FIRE)) )
         ]
     (future-call #(do
-                    (line-effect-helper world loc pos1 fire-effect)
+                    (line-effect-helper world loc pos1 fire-effect 2)
                     (.spawn world (.toLocation pos1 world) Creeper)))
     (future-call #(do
-                     (line-effect-helper world loc pos2 fire-effect)
+                     (line-effect-helper world loc pos2 fire-effect 2)
                      (.spawn world (.toLocation pos2 world) Creeper)))
     (future-call #(do
-                    (line-effect-helper world loc pos3 fire-effect)
+                    (line-effect-helper world loc pos3 fire-effect 2)
                     (.spawn world (.toLocation pos3 world) Creeper)))
     (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, Zompig and Ghast!!")
     ))
 
 
+(def active-fusion-wall(atom {}))
+(defn active-fusion-wall-of[player]
+  (get @active-fusion-wall (.getDisplayName player)))
+
 
 (defn fusion-wall [player block]
   (let [world (.getWorld player)
-        loc (.getLocation player)
+        loc (.toVector (.getLocation player))
         [depth, height, right-hand] (player-coordinate player)]
  
     ))
