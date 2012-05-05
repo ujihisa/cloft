@@ -18,7 +18,8 @@
   (:import [org.bukkit.event.entity EntityDamageByEntityEvent
             EntityDamageEvent$DamageCause])
   (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
-  (:import [org.bukkit.inventory ItemStack]))
+  (:import [org.bukkit.inventory ItemStack])
+  (:import [org.bukkit.util Vector]))
 
 
 (def NAME-ICON
@@ -115,7 +116,7 @@
           (c/consume-itemstack (.getInventory player) Material/FEATHER)
           (.setVelocity
             player
-            (.add (org.bukkit.util.Vector. 0.0 x2 0.0) (.getVelocity player)))))))
+            (.add (Vector. 0.0 x2 0.0) (.getVelocity player)))))))
 
 (def sanctuary [(org.bukkit.Location. world 45 30 -75)
                 (org.bukkit.Location. world 84 90 -44)])
@@ -611,7 +612,7 @@
                 new-z (* 2 (/ z r2))]
             (future-call #(do
                             (Thread/sleep 100)
-                            (.setVelocity target (org.bukkit.util.Vector. new-x (.getY v) new-z))))))
+                            (.setVelocity target (Vector. new-x (.getY v) new-z))))))
         ; give wheat to zombie pigman -> pig
         (and (instance? PigZombie target)
              (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296))
@@ -770,9 +771,9 @@
           z (- 5 (.getZ v))]
       (when (instance? Player e)
         (.sendMessage e "Air Explosion"))
-      (.setVelocity e (org.bukkit.util.Vector. x 1.5 z))))
+      (.setVelocity e (Vector. x 1.5 z))))
   (comment (let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
-             (.setVelocity another (org.bukkit.util.Vector. 0 1 0)))))
+             (.setVelocity another (Vector. 0 1 0)))))
 
 (defn creeper-explosion-2 [evt entity]
   (.setCancelled evt true)
@@ -1121,10 +1122,10 @@
 ;            (= (.getType block-under) Material/LAPIS_BLOCK))
 ;      (let [direction (.getDirection (.getNewData (.getType rail) (.getData rail)))
 ;            diff (cond
-;                   (= org.bukkit.block.BlockFace/SOUTH direction) (org.bukkit.util.Vector. -1 0 0)
-;                   (= org.bukkit.block.BlockFace/NORTH direction) (org.bukkit.util.Vector. 1 0 0)
-;                   (= org.bukkit.block.BlockFace/WEST direction) (org.bukkit.util.Vector. 0 0 1)
-;                   (= org.bukkit.block.BlockFace/EAST direction) (org.bukkit.util.Vector. 0 0 -1))
+;                   (= org.bukkit.block.BlockFace/SOUTH direction) (Vector. -1 0 0)
+;                   (= org.bukkit.block.BlockFace/NORTH direction) (Vector. 1 0 0)
+;                   (= org.bukkit.block.BlockFace/WEST direction) (Vector. 0 0 1)
+;                   (= org.bukkit.block.BlockFace/EAST direction) (Vector. 0 0 -1))
 ;            destination (first (filter
 ;                                 #(= (.getType %) Material/LAPIS_BLOCK)
 ;                                 (map
