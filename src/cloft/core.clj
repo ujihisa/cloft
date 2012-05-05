@@ -453,11 +453,9 @@
           (.sendMessage entity "teleport up!"))
         (future-call #(let [newloc (.add (.getLocation entity) 0 30 0)]
                         (Thread/sleep 10)
-                        (cond
-                          (= (.getType block) Material/STONE_PLATE)
-                          (.teleport entity newloc)
-                          (= (.getType block) Material/WOOD_PLATE)
-                          (c/add-velocity entity 0 1.5 0))
+                        (condp = (.getType block)
+                          Material/STONE_PLATE (.teleport entity newloc)
+                          Material/WOOD_PLATE (c/add-velocity entity 0 1.5 0))
                         (.playEffect (.getWorld entity-loc) (.add entity-loc 0 1 0) org.bukkit.Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld entity-loc) entity-loc org.bukkit.Effect/ENDER_SIGNAL nil)
@@ -1090,11 +1088,11 @@
 
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
-        (cond
-          #_((instance? Fish entity) (fish-hit-event evt entity))
-          (instance? Fireball entity) (.setYield entity 0.0)
-          (instance? Arrow entity) (arrow-hit-event evt entity)
-          (instance? Snowball entity) (snowball-hit-event evt entity)
+        (cond instance? entity
+          #_(Fish (fish-hit-event evt entity))
+          Fireball (.setYield entity 0.0)
+          Arrow (arrow-hit-event evt entity)
+          Snowball (snowball-hit-event evt entity)
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
           )))
 
