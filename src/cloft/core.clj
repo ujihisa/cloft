@@ -420,14 +420,28 @@
           (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
           (swap! arrow-skill assoc (.getDisplayName player) (first skill-name)))))))
 
+(defn xz-normalized-vector [v]
+  (.normalize (Vector. (.getX v) 0.0 (.getZ v))))
+
+(defn summon-giant [player block]
+  (let [world (.getWorld player)
+        loc (.getLocation player)
+        depth (xz-normalized-vector (.getDirection loc))
+        spawn-at  (.add loc (.multiply depth 10))]
+    (.strikeLightningEffect world spawn-at)
+    (.spawn world spawn-at Giant)
+    (c/broadcast (.getDisplayName player) "summoned Giant!!")
+    ))
 
 (defn invoke-alchemy [player block block-against]
-  (when (blazon? Material/STONE block-against)
-    (let [table {Material/STONE (fn [p] (prn p Material/STONE))}]
+  (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
+    (let [table {Material/STONE (fn [p, b] (prn p (.getType b)))
+                 Material/DIRT summon-giant
+          }]
       (prn table)
       (if-let [alchemy (table (.getType block))]
               ;then
-              (alchemy player)
+              (alchemy player block)
               ;else
               (prn "no effect is defined for " block)))))
 
