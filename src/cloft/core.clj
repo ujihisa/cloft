@@ -356,19 +356,21 @@
 ;                         (.add (.clone loc) (.multiply (.clone diff) (double m))))]
 ;          (when (= (.getType newblock) Material/AIR)
 ;            (.setType newblock (.getType block)))))))))
-;
+
+(defn blazon? [block-type block-against]
+  (and (every? identity (map
+                          #(=
+                             (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                             block-type)
+                          [0 0 -1 1] [-1 1 0 0]))
+       (every? identity (map
+                          #(not=
+                             (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                             block-type)
+                          [-1 1 0 0] [-1 1 0 0]))))
+
 (defn arrow-skillchange [player block block-against]
-  (when (and
-          (every? identity (map
-                             #(=
-                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-                                Material/STONE)
-                             [0 0 -1 1] [-1 1 0 0]))
-          (every? identity (map
-                             #(not=
-                                (.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-                                Material/STONE)
-                             [-1 1 0 0] [-1 1 0 0])))
+  (when (blazon? Material/STONE block-against)
     (let [table {Material/GLOWSTONE ['strong "STRONG"]
                  Material/TNT [arrow-skill-explosion "EXPLOSION"]
                  Material/TORCH [arrow-skill-torch "TORCH"]
