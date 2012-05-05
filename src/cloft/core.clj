@@ -440,7 +440,7 @@
         loc (.toVector (.getLocation player))]
     (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
 
-(defn line-effect-helper 
+(defn line-effect-helper
   ([world start end f ]
    (line-effect-helper world start end f 0))
   ([world start end f offset-count]
@@ -493,14 +493,30 @@
 (defn fusion-wall [player block]
   (let [world (.getWorld player)
         loc (.toVector (.getLocation player))
-        [depth, height, right-hand] (player-coordinate player)]
- 
-    ))
+        bottom (player-coordinate-to-world player 15.0 0.0 0.0)
+        top (player-coordinate-to-world player 15.0 5.0 0.0)
+        f (fn [v]
+              (Thread/sleep 300)
+              (when (= Material/AIR (.getType v))
+                (.setType v Material/COBBLESTONE)))
+        ]
+    (future-call #(do
+                    (.strikeLightningEffect world (.toLocation bottom world))
+                    (line-effect-helper world bottom top f)
+                    (if-let [[eb et] (active-fusion-wall-of player)]
+                            ;then
+                            (line-effect-helper eb bottom) 
+                            ;else
+                            '()
+                            )  
+                    (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top])
+                    ))))
 
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
     (let [table {Material/STONE (fn [p, b] (prn p (.getType b)))
+                 Material/COBBLESTONE fusion-wall 
                  Material/DIRT summon-giant
                  Material/GLOWSTONE summon-residents-of-nether
                  Material/OBSIDIAN (fn [p, b] (prn 'not 'implemented)); create-portal
