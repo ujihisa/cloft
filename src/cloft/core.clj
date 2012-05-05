@@ -20,6 +20,8 @@
   (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
   (:import [org.bukkit.inventory ItemStack])
   (:import [org.bukkit.util Vector])
+  (:import [org.bukkit Location])
+  (:import [org.bukkit.util BlockIterator])
   (:import [org.bukkit.event.block Action]))
 
 
@@ -423,20 +425,76 @@
 (defn xz-normalized-vector [v]
   (.normalize (Vector. (.getX v) 0.0 (.getZ v))))
 
-(defn summon-giant [player block]
+
+(defn player-coordinate [player]
   (let [world (.getWorld player)
         loc (.getLocation player)
+        height (Vector. 0.0 1.0 0.0)
         depth (xz-normalized-vector (.getDirection loc))
-        spawn-at  (.add loc (.multiply depth 10))]
+        right-hand (.crossProduct (.clone depth) height)]
+   [depth, height, right-hand]))
+
+(defn player-coordinate-to-world [player dx hx rx]
+  (let [[d h r] (player-coordinate player) 
+        loc (.toVector (.getLocation player))]
+    (prn loc)
+    (.add 
+           loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx))  
+           )))
+
+(defn line-effect-helper [world start end f]
+  (prn start end)
+  (let [m (Math/ceil (.distance start end))
+        unit (.normalize (.add (.clone end) (.multiply (.clone start ) -1.0)))
+        iter (BlockIterator. world (.add start (.multiply (.clone unit) 2)) unit 0.0 m) ;  need yoffest
+        ]
+    (loop [done (.hasNext iter)]
+          (f (.next iter))
+          (when (.hasNext iter)
+            (recur (.hasNext iter))
+            ))))
+
+(defn summon-giant [player block]
+  (let [world (.getWorld player)
+        spawn-at  (player-coordinate-to-world player 10.0 0.0 0.0)]
     (.strikeLightningEffect world spawn-at)
     (.spawn world spawn-at Giant)
-    (c/broadcast (.getDisplayName player) "summoned Giant!!")
+    (c/broadcast (.getDisplayName player) " has summoned Giant!!")))
+
+(defn summon-residents-of-nether [player block]
+  (let [world (.getWorld player)
+        loc (.toVector (.getLocation player)) 
+        pos1 (player-coordinate-to-world player 14.0 1.0 -3.0) 
+        pos2 (player-coordinate-to-world player 14.0 1.0 0.0) 
+        pos3 (player-coordinate-to-world player 14.0 1.0 3.0)
+        fire-effect (fn [v]
+                        (prn v)
+                        (when (= Material/AIR (.getType v))
+                          (.setType v Material/FIRE)) )
+        ]
+    (line-effect-helper world loc pos1 fire-effect)
+    (.spawn world (.toLocation pos1 world) Creeper)
+    (line-effect-helper world loc pos2 fire-effect)
+    (.spawn world (.toLocation pos2 world) Creeper)
+    (line-effect-helper world loc pos3 fire-effect)
+    (.spawn world (.toLocation pos3 world) Creeper)
+    (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, Zompig and Ghast!!")
     ))
+
+(defn fusion-wall [player block]
+  (let [world (.getWorld player)
+        loc (.getLocation player)
+        [depth, height, right-hand] (player-coordinate player)]
+   
+    ))
+
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
     (let [table {Material/STONE (fn [p, b] (prn p (.getType b)))
                  Material/DIRT summon-giant
+                 Material/GLOWSTONE summon-residents-of-nether
+                 Material/OBSIDIAN (fn [p, b] (prn 'not 'implemented)); create-portal
           }]
       (prn table)
       (if-let [alchemy (table (.getType block))]
