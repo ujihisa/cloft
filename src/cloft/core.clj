@@ -347,11 +347,11 @@
 
 (defn counter-skill-ice [you by]
   (.sendMessage you "(not implemented yet)")
-  (comment (c/lingr "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by))))
+  (comment (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by)))))
 
 (defn counter-skill-fire [you by]
   (.setFireTicks by 100)
-  (c/lingr "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by)))
+  (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by))))
 
 ;(defn build-long [block block-against]
 ;  (comment (when (= (.getType block) (.getType block-against))
@@ -1040,7 +1040,9 @@
         )
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (if-let [skill (counter-skill-of target)]
-            (skill target attacker))
+            (skill target (if (instance? Projectile attacker)
+                            (.getShooter attacker)
+                            attacker)))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
               (.setCancelled evt true)
