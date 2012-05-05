@@ -370,6 +370,10 @@
   (.sendMessage you "(not implemented yet)")
   (comment (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by)))))
 
+(defn counter-skill-knockback [you by]
+  (let [direction (.multiply (.normalize (.toVector (.subtract (.getLocation by) (.getLocation you)))) 2)]
+    (c/add-velocity by (.getX direction) (.getY direction) (.getZ direction))))
+
 (defn counter-skill-fire [you by]
   (.setFireTicks by 100)
   (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by))))
@@ -397,6 +401,7 @@
 (defn counter-skillchange [player block block-against]
   (when (blazon? Material/LOG block-against)
     (let [table {Material/RED_ROSE [counter-skill-fire "FIRE"]
+                 Material/YELLOW_FLOWER [counter-skill-knockback "KNOCKBACK"]
                  Material/SNOW_BLOCK [counter-skill-ice "ICE"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed counter-skill to " (last skill-name))
