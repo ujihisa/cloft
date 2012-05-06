@@ -476,16 +476,16 @@
         loc (.toVector (.getLocation player))]
     (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
 
-(defn line-effect-helper
-  ([world start end f ]
-   (line-effect-helper world start end f 0))
-  ([world start end f offset-count]
+(defn place-blocks-in-line
+  ([world start end place-fn ]
+   (place-blocks-in-line world start end place-fn 0))
+  ([world start end place-fn offset-count]
    (let [m (Math/ceil (.distance start end))
          unit (.normalize (.add (.clone end) (.multiply (.clone start ) -1.0)))
          iter (BlockIterator. world (.add start (.multiply (.clone unit) offset-count)) unit 0.0 m) ;  need yoffest
          ]
      (loop [done (.hasNext iter)]
-           (f (.next iter))
+           (place-fn (.next iter))
            (when (.hasNext iter)
              (recur (.hasNext iter))
              )))))
@@ -509,13 +509,13 @@
                           (.setType v Material/FIRE)) )
         ]
     (future-call #(do
-                    (line-effect-helper world loc pos1 fire-effect 2)
+                    (place-blocks-in-line world loc pos1 fire-effect 2)
                     (.spawn world (.toLocation pos1 world) Creeper)))
     (future-call #(do
-                     (line-effect-helper world loc pos2 fire-effect 2)
+                     (place-blocks-in-line world loc pos2 fire-effect 2)
                      (.spawn world (.toLocation pos2 world) Creeper)))
     (future-call #(do
-                    (line-effect-helper world loc pos3 fire-effect 2)
+                    (place-blocks-in-line world loc pos3 fire-effect 2)
                     (.spawn world (.toLocation pos3 world) Creeper)))
     (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, Zompig and Ghast!!")
     ))
@@ -531,22 +531,22 @@
         loc (.toVector (.getLocation player))
         bottom (player-coordinate-to-world player 15.0 0.0 0.0)
         top (player-coordinate-to-world player 15.0 6.0 0.0)
-        f (fn [v]
+        place-cobblestones (fn [v]
               (Thread/sleep 300)
               (when (= Material/AIR (.getType v))
                 (.setType v Material/COBBLESTONE)))
         ]
     (future-call #(do
                     (.strikeLightningEffect world (.toLocation bottom world))
-                    (line-effect-helper world bottom top f)
+                    (place-blocks-in-line world bottom top place-cobblestones)
                     (if-let [prev (active-fusion-wall-of player)]
                             ;then
                             (let [[eb et] prev]
-                              (line-effect-helper eb bottom f) 
-                              (line-effect-helper et top f) )
+                              (place-blocks-in-line eb bottom place-cobblestones)
+                              (place-blocks-in-line et top place-cobblestones) )
                             ;else
                             (prn "nothing to connect.")
-                            )  
+                            ) 
                     (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top])
                     ))))
 
@@ -554,7 +554,7 @@
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
     (let [table {Material/STONE (fn [p, b] (prn p (.getType b)))
-                 Material/COBBLESTONE fusion-wall 
+                 Material/COBBLESTONE fusion-wall
                  Material/DIRT summon-giant
                  Material/GLOWSTONE summon-residents-of-nether
                  Material/OBSIDIAN (fn [p, b] (prn 'not 'implemented)); create-portal
