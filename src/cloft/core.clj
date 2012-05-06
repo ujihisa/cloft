@@ -546,16 +546,16 @@
         fire-effect (fn [v i] (cloft-schedule-settimer (* 4 i) (fn []
                         (when (= Material/AIR (.getType v))
                           (.playEffect (.getWorld v) (.getLocation v) org.bukkit.Effect/BLAZE_SHOOT nil)
-                          (.setType v Material/FIRE))  
+                          (.setType v Material/FIRE))
                         )))]
-    (letfn [(sure-explosion-at 
+    (letfn [(sure-explosion-at
               ([pos wolrd] (sure-explosion-at pos world 1))
-              ([pos world delay] 
+              ([pos world delay]
                (cloft-schedule-settimer 1  (fn []
                                                (when (not (.createExplosion world (.toLocation pos world) 0.0 true))
                                                  (sure-explosion-at pos world)) ; retry 1 tick later
                                                ))))
-            (summon-set-of-evils-at [pos loc world] 
+            (summon-set-of-evils-at [pos loc world]
                                     (cloft-schedule-settimer 1 (fn []
                         (place-blocks-in-line world (.clone loc) (.clone pos) fire-effect 2)
                         (sure-explosion-at (.clone pos) world 60)
@@ -583,25 +583,25 @@
         loc (.toVector (.getLocation player))
         bottom (player-coordinate-to-world player 15.0 0.0 0.0)
         top (player-coordinate-to-world player 15.0 6.0 0.0)
-        place-cobblestones (fn [v]
-              (Thread/sleep 300)
-              (when (= Material/AIR (.getType v))
-                (.setType v Material/COBBLESTONE)))
         ]
-    (future-call #(do
-                    (.strikeLightningEffect world (.toLocation bottom world))
-                    (place-blocks-in-line world bottom top place-cobblestones)
-                    (if-let [prev (active-fusion-wall-of player)]
-                            ;then
-                            (let [[eb et] prev]
-                              (place-blocks-in-line eb bottom place-cobblestones)
-                              (place-blocks-in-line et top place-cobblestones) )
-                            ;else
-                            (prn "nothing to connect.")
-                            )
-                    (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top])
-                    ))))
-
+    (letfn [(place-cobblestones [v i]
+              (cloft-schedule-settimer (* 4 i)
+                                       (fn []
+                                           (when (= Material/AIR (.getType v))
+                                             (.setType v Material/COBBLESTONE))
+                                           )))]
+           (.strikeLightningEffect world (.toLocation bottom world))
+           (place-blocks-in-line world bottom top place-cobblestones)
+           (if-let [prev (active-fusion-wall-of player)]
+                   ;then
+                   (let [[eb et] prev]
+                     (place-blocks-in-line world eb bottom place-cobblestones)
+                     (place-blocks-in-line world et top place-cobblestones) )
+                   ;else
+                   (prn "nothing to connect.")
+                   )
+           (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top])
+                    )))
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
