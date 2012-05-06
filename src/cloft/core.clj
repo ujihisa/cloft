@@ -78,7 +78,7 @@
   ;(prn (count @cloft-schedule-table))
   (dosync
    (let [wake-up (+ @cloft-schedule-currenct-tick after)]
-     (swap! cloft-schedule-table assoc wake-up 
+     (swap! cloft-schedule-table assoc wake-up
             (cons f (@cloft-schedule-table wake-up []))
       )))
   ;(prn (count @cloft-schedule-table))
@@ -86,15 +86,15 @@
 
 (defn cloft-scheduler []
   (dosync
-    (let [table @cloft-schedule-table 
+    (let [table @cloft-schedule-table
           now @cloft-schedule-currenct-tick
           r (table now false)  ]
       (when r
         ;(prn r table now)
         (doseq [f r] (f)))
-      (swap! cloft-schedule-table dissoc @cloft-schedule-currenct-tick) 
+      (swap! cloft-schedule-table dissoc @cloft-schedule-currenct-tick)
       )
-    (swap! cloft-schedule-currenct-tick inc) 
+    (swap! cloft-schedule-currenct-tick inc)
     ))
 
 (def player-death-locations (atom {}))
@@ -511,10 +511,11 @@
          unit (.normalize (.add (.clone end) (.multiply (.clone start ) -1.0)))
          iter (BlockIterator. world (.add start (.multiply (.clone unit) offset-count)) unit 0.0 m) ;  need yoffest
          ]
-     (loop [done (.hasNext iter)]
-           (place-fn (.next iter))
+     (loop [done (.hasNext iter)
+            i 0]
+           (place-fn (.next iter) i)
            (when (.hasNext iter)
-             (recur (.hasNext iter))
+             (recur (.hasNext iter) (inc i))
              )))))
 
 (defn summon-x
@@ -522,9 +523,9 @@
   (summon-x pos world creature 1))
   ([pos world creature after]
    ;(prn summon-x pos creature after)
-   (cloft-schedule-settimer after 
+   (cloft-schedule-settimer after
                             (fn []
-                                (.spawn world (.toLocation pos world) creature) 
+                                (.spawn world (.toLocation pos world) creature)
                    ))))
 
 (defn summon-giant [player block]
@@ -542,38 +543,35 @@
         pos1 (player-coordinate-to-world player 15.0 1.0 -5.0)
         pos2 (player-coordinate-to-world player 15.0 1.0 0.0)
         pos3 (player-coordinate-to-world player 15.0 1.0 5.0)
-        fire-effect (fn [v]
-                        (Thread/sleep 200)
+        fire-effect (fn [v i] (cloft-schedule-settimer (* 4 i) (fn []
                         (when (= Material/AIR (.getType v))
                           (.playEffect (.getWorld v) (.getLocation v) org.bukkit.Effect/BLAZE_SHOOT nil)
-                          (Thread/sleep 10)
-                          (.setType v Material/FIRE)) )
-        sure-explosion-at (fn [pos world]
-                              (loop [dummy true]; retry to make explosion
-                                    (when (not (.createExplosion world (.toLocation pos world) 0.0 true))
-                                      (Thread/sleep 10)
-                                      (recur true))))
-        summon-set-of-evils-at (fn [pos loc world]
-                   (future-call #(do
-                                   (Thread/sleep 10)
-                                   (place-blocks-in-line world (.clone loc) (.clone pos) fire-effect 2)
-                                   (sure-explosion-at (.clone pos) world)
-                                   (summon-x pos world Blaze)
-                                   ;(summon-x loc world PigZombie)
-                                   (let [ghast-pos (.add (.clone pos ) (Vector. 0.0 7.0 0.0 )) ]
-                                     (sure-explosion-at (.toLocation ghast-pos) world)
-                                     (summon-x ghast-pos world Ghast 500)
-                                     )
-                                   )))
-       
-        ]
-    (summon-set-of-evils-at pos1 loc world)
-    (summon-set-of-evils-at pos2 loc world)
-    (summon-set-of-evils-at pos3 loc world)
-    (summon-x (player-coordinate-to-world player -5.0 0.5 0.0) world Creeper 2000) ;hehehe
-    (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, PigZombie and Ghast!!")
-    ))
-
+                          (.setType v Material/FIRE))  
+                        )))]
+    (letfn [(sure-explosion-at 
+              ([pos wolrd] (sure-explosion-at pos world 1))
+              ([pos world delay] 
+               (cloft-schedule-settimer 1  (fn []
+                                               (when (not (.createExplosion world (.toLocation pos world) 0.0 true))
+                                                 (sure-explosion-at pos world)) ; retry 1 tick later
+                                               ))))
+            (summon-set-of-evils-at [pos loc world] 
+                                    (cloft-schedule-settimer 1 (fn []
+                        (place-blocks-in-line world (.clone loc) (.clone pos) fire-effect 2)
+                        (sure-explosion-at (.clone pos) world 60)
+                        (summon-x pos world Blaze 65)
+                        (summon-x loc world PigZombie 65)
+                        (let [ghast-pos (.add (.clone pos ) (Vector. 0.0 7.0 0.0 )) ]
+                          (sure-explosion-at ghast-pos world)
+                          (summon-x ghast-pos world Ghast 65)
+                          )))
+              )]
+            (summon-set-of-evils-at pos1 loc world)
+            (summon-set-of-evils-at pos2 loc world)
+            (summon-set-of-evils-at pos3 loc world)
+            (summon-x (player-coordinate-to-world player -5.0 0.5 0.0) world Creeper 80) ;hehehe
+            (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, PigZombie and Ghast!!")
+    )))
 
 (def active-fusion-wall(atom {}))
 (defn active-fusion-wall-of[player]
