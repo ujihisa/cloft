@@ -70,6 +70,33 @@
 (def place-main (org.bukkit.Location. world 4.294394438259979 67.0 0.6542090982205075 -7.5000114 -40.35013))
 (def anotherbed (org.bukkit.Location.  world -237.8704284429714 72.5625 -53.82154923217098 19.349966 -180.45361))
 
+
+(def cloft-schedule-table (atom {}))
+(def cloft-schedule-currenct-tick (atom 0))
+(defn cloft-schedule-settimer [after f]
+  ;(prn cloft-schedule-settimer after f)
+  ;(prn (count @cloft-schedule-table))
+  (dosync
+   (let [wake-up (+ @cloft-schedule-currenct-tick after)]
+     (swap! cloft-schedule-table assoc wake-up 
+            (cons f (@cloft-schedule-table wake-up []))
+      )))
+  ;(prn (count @cloft-schedule-table))
+  )
+
+(defn cloft-scheduler []
+  (dosync
+    (let [table @cloft-schedule-table 
+          now @cloft-schedule-currenct-tick
+          r (table now false)  ]
+      (when r
+        ;(prn r table now)
+        (doseq [f r] (f)))
+      (swap! cloft-schedule-table dissoc @cloft-schedule-currenct-tick) 
+      )
+    (swap! cloft-schedule-currenct-tick inc) 
+    ))
+
 (def player-death-locations (atom {}))
 (def last-vertical-shots (atom {}))
 
@@ -492,12 +519,12 @@
 
 (defn summon-x
   ([pos world creature]
-   (summon-x pos world creature 10))
+  (summon-x pos world creature 1))
   ([pos world creature after]
-   (future-call #(do
-                   (Thread/sleep after)
-                   (.spawn world (.toLocation pos world) creature) 
-                   (Thread/sleep 10)
+   ;(prn summon-x pos creature after)
+   (cloft-schedule-settimer after 
+                            (fn []
+                                (.spawn world (.toLocation pos world) creature) 
                    ))))
 
 (defn summon-giant [player block]
@@ -937,6 +964,9 @@
   (seq (map zombie-player-periodically
             (filter zombie-player? (Bukkit/getOnlinePlayers))))
   nil)
+
+
+
 
 (defn pig-death-event [entity]
   (when-let [killer (.getKiller entity)]
@@ -1404,6 +1434,8 @@
     (.addIngredient x 3 Material/GRAVEL)
     x))
 
+
+
 (defonce swank* nil)
 (defn on-enable [plugin]
   (when (nil? swank*)
@@ -1411,6 +1443,7 @@
   (Bukkit/addRecipe recipe-string-web)
   (Bukkit/addRecipe recipe-gravel-flint)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (periodically)) 50 50)
+  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (cloft-scheduler)) 0 1)
   (comment (proxy [java.lang.Object CommandExecuter] []
     (onCommand [this ^CommandSender sender ^Command command ^String label ^String[] args]
       (prn command))))
