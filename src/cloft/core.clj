@@ -477,7 +477,7 @@
     (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
 
 (defn place-blocks-in-line
-  ([world start end place-fn ]
+  ([world start end place-fn]
    (place-blocks-in-line world start end place-fn 0))
   ([world start end place-fn offset-count]
    (let [m (Math/ceil (.distance start end))
@@ -490,12 +490,24 @@
              (recur (.hasNext iter))
              )))))
 
+(defn summon-x
+  ([pos world creature]
+   (summon-x pos world creature 10))
+  ([pos world creature after]
+   (future-call #(do
+                   (Thread/sleep after)
+                   (.spawn world (.toLocation pos world) creature) 
+                   (Thread/sleep 10)
+                   ))))
+
 (defn summon-giant [player block]
   (let [world (.getWorld player)
         spawn-at  (player-coordinate-to-world player 10.0 0.0 0.0)]
     (.strikeLightningEffect world (.toLocation spawn-at world))
-    (.spawn world (.toLocation spawn-at world) Giant)
+    (summon-x spawn-at world Giant)
+    ;(.spawn world (.toLocation spawn-at world) Giant)
     (c/broadcast (.getDisplayName player) " has summoned Giant!!")))
+
 
 (defn summon-residents-of-nether [player block]
   (let [world (.getWorld player)
@@ -504,20 +516,35 @@
         pos2 (player-coordinate-to-world player 15.0 1.0 0.0)
         pos3 (player-coordinate-to-world player 15.0 1.0 5.0)
         fire-effect (fn [v]
-                        (Thread/sleep 300)
+                        (Thread/sleep 200)
                         (when (= Material/AIR (.getType v))
+                          (.playEffect (.getWorld v) (.getLocation v) org.bukkit.Effect/BLAZE_SHOOT nil)
+                          (Thread/sleep 10)
                           (.setType v Material/FIRE)) )
+        sure-explosion-at (fn [pos world]
+                              (loop [dummy true]; retry to make explosion
+                                    (when (not (.createExplosion world (.toLocation pos world) 0.0 true))
+                                      (Thread/sleep 10)
+                                      (recur true))))
+        summon-set-of-evils-at (fn [pos loc world]
+                   (future-call #(do
+                                   (Thread/sleep 10)
+                                   (place-blocks-in-line world (.clone loc) (.clone pos) fire-effect 2)
+                                   (sure-explosion-at (.clone pos) world)
+                                   (summon-x pos world Blaze)
+                                   ;(summon-x loc world PigZombie)
+                                   (let [ghast-pos (.add (.clone pos ) (Vector. 0.0 7.0 0.0 )) ]
+                                     (sure-explosion-at (.toLocation ghast-pos) world)
+                                     (summon-x ghast-pos world Ghast 500)
+                                     )
+                                   )))
+       
         ]
-    (future-call #(do
-                    (place-blocks-in-line world loc pos1 fire-effect 2)
-                    (.spawn world (.toLocation pos1 world) Creeper)))
-    (future-call #(do
-                     (place-blocks-in-line world loc pos2 fire-effect 2)
-                     (.spawn world (.toLocation pos2 world) Creeper)))
-    (future-call #(do
-                    (place-blocks-in-line world loc pos3 fire-effect 2)
-                    (.spawn world (.toLocation pos3 world) Creeper)))
-    (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, Zompig and Ghast!!")
+    (summon-set-of-evils-at pos1 loc world)
+    (summon-set-of-evils-at pos2 loc world)
+    (summon-set-of-evils-at pos3 loc world)
+    (summon-x (player-coordinate-to-world player -5.0 0.5 0.0) world Creeper 2000) ;hehehe
+    (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, PigZombie and Ghast!!")
     ))
 
 
@@ -546,7 +573,7 @@
                               (place-blocks-in-line et top place-cobblestones) )
                             ;else
                             (prn "nothing to connect.")
-                            ) 
+                            )
                     (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top])
                     ))))
 
