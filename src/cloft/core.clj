@@ -135,7 +135,7 @@
     (when (= (.getType (.getItemInHand player)) Material/FEATHER)
       (let [amount (.getAmount (.getItemInHand player))
             x (if (.isSprinting player) (* amount 2) amount)
-            x2 (/ (java.lang.Math/log x) 2) ]
+            x2 (/ (java.lang.Math/log x) 2)]
         (c/lingr (str name " is super jumping with level " x))
         (c/consume-itemstack (.getInventory player) Material/FEATHER)
         (c/add-velocity player 0 x2 0)))))
@@ -279,8 +279,7 @@
   (.remove entity))
 
 (defn arrow-skill-sniping [entity]
-  nil
-  )
+  nil)
 
 
 
@@ -311,7 +310,7 @@
     (.damage x amount)))
 
 (defn enough-previous-shots-by-players? [triggered-by threshold]
-  (let [locs (vals @last-vertical-shots) ]
+  (let [locs (vals @last-vertical-shots)]
     ;(prn enough-previous-shots-by-players?)
     ;(prn locs)
     (<= threshold
@@ -346,13 +345,10 @@
         (future-call #(do
                         (Thread/sleep 100) (.shootArrow (.getEntity evt))
                         (Thread/sleep 300) (.shootArrow (.getEntity evt))
-                        (Thread/sleep 500) (.shootArrow (.getEntity evt))
-                        ))))
+                        (Thread/sleep 500) (.shootArrow (.getEntity evt))))))
       (when (= 'sniping (arrow-skill-of shooter))
-        (let [
-              arrow (.getProjectile evt)
-              direction (.getDirection (.getLocation shooter))
-              ]
+        (let [arrow (.getProjectile evt)
+              direction (.getDirection (.getLocation shooter))]
          (prn
           "shooter location " (.getLocation shooter)
           "shooter direction " direction
@@ -502,9 +498,9 @@
    (place-blocks-in-line world start end place-fn 0))
   ([world start end place-fn offset-count]
    (let [m (Math/ceil (.distance start end))
-         unit (.normalize (.add (.clone end) (.multiply (.clone start ) -1.0)))
-         iter (BlockIterator. world (.add start (.multiply (.clone unit) offset-count)) unit 0.0 m) ;  need yoffest
-         ]
+         unit (.normalize (.add (.clone end) (.multiply (.clone start) -1.0)))
+         ; need yoffest
+         iter (BlockIterator. world (.add start (.multiply (.clone unit) offset-count)) unit 0.0 m)]
      (loop [done (.hasNext iter)
             i 0]
        (place-fn (.next iter) i)
@@ -534,11 +530,13 @@
         pos1 (player-coordinate-to-world player 15.0 1.0 -5.0)
         pos2 (player-coordinate-to-world player 15.0 1.0 0.0)
         pos3 (player-coordinate-to-world player 15.0 1.0 5.0)
-        fire-effect (fn [v i] (cloft-schedule-settimer (* 4 i) (fn []
-                        (when (= Material/AIR (.getType v))
-                          (.playEffect (.getWorld v) (.getLocation v) org.bukkit.Effect/BLAZE_SHOOT nil)
-                          (.setType v Material/FIRE))
-                        )))]
+        fire-effect (fn [v i]
+                      (cloft-schedule-settimer
+                        (* 4 i)
+                        (fn []
+                          (when (= Material/AIR (.getType v))
+                            (.playEffect (.getWorld v) (.getLocation v) org.bukkit.Effect/BLAZE_SHOOT nil)
+                            (.setType v Material/FIRE)))))]
     (letfn [(sure-explosion-at
               ([pos wolrd] (sure-explosion-at pos world 1))
               ([pos world delay]
@@ -555,7 +553,7 @@
                   (sure-explosion-at (.clone pos) world 60)
                   (summon-x pos world Blaze 65)
                   (summon-x loc world PigZombie 65)
-                  (let [ghast-pos (.add (.clone pos ) (Vector. 0.0 7.0 0.0 ))]
+                  (let [ghast-pos (.add (.clone pos) (Vector. 0.0 7.0 0.0))]
                     (sure-explosion-at ghast-pos world)
                     (summon-x ghast-pos world Ghast 65)))))]
             (summon-set-of-evils-at pos1 loc world)
@@ -714,8 +712,7 @@
       (doseq [x [-1 0 1] z [-1 0 1]]
         (.setType (.getBlock (.add (.clone loc) x 12 z)) Material/COBBLESTONE))
       (.setType (.getBlock (.getLocation door)) Material/AIR)
-      (.setType (.getBlock (.add (.getLocation door) 0 10 0)) Material/IRON_DOOR)
-      ))))
+      (.setType (.getBlock (.add (.getLocation door) 0 10 0)) Material/IRON_DOOR)))))
 
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)]
@@ -724,8 +721,7 @@
         (and
           (= Action/LEFT_CLICK_BLOCK (.getAction evt))
           (= Material/WOODEN_DOOR (.getType (.getClickedBlock evt))))
-        (elevator player (.getClickedBlock evt))
-      )
+        (elevator player (.getClickedBlock evt)))
 
       (= (.getAction evt) Action/PHYSICAL)
       (teleport-up player (.getClickedBlock evt))
@@ -796,8 +792,7 @@
 
 
 (defn player-toggle-sneak-event [evt]
-  (prn (.getEventName evt) (.getPlayer evt))
-  )
+  (prn (.getEventName evt) (.getPlayer evt)))
 
 (defn player-interact-entity-event [evt]
   (let [target (.getRightClicked evt)]
@@ -812,8 +807,7 @@
         (and
             true
             ;(instance? nil target); maybe wrong...
-            (= Material/BOW (.getType(.getItemInHand (.getPlayer evt))))
-          )
+            (= Material/BOW (.getType(.getItemInHand (.getPlayer evt)))))
         (prn 'aiming', target)
 
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
@@ -1027,8 +1021,7 @@
 
 (defn creeper-explosion-3 [evt entity]
   (.setCancelled evt true)
-  (.createExplosion (.getWorld entity) (.getLocation entity) 0)
-  )
+  (.createExplosion (.getWorld entity) (.getLocation entity) 0))
 
 (def creeper-explosion-idx (atom 0))
 (defn current-creeper-explosion []
@@ -1256,8 +1249,7 @@
             (when (= Material/SLIME_BALL (.getType (.getItemInHand target)))
               (.setCancelled evt true)
               (c/add-velocity target 0 1 0)
-              (c/consume-item target))
-        )
+              (c/consume-item target)))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (if-let [skill (reaction-skill-of target)]
             (skill target (if (instance? Projectile attacker)
