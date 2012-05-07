@@ -79,23 +79,18 @@
   (dosync
    (let [wake-up (+ @cloft-schedule-currenct-tick after)]
      (swap! cloft-schedule-table assoc wake-up
-            (cons f (@cloft-schedule-table wake-up []))
-      )))
-  ;(prn (count @cloft-schedule-table))
-  )
+            (cons f (@cloft-schedule-table wake-up []))))))
 
 (defn cloft-scheduler []
   (dosync
     (let [table @cloft-schedule-table
           now @cloft-schedule-currenct-tick
-          r (table now false)  ]
+          r (table now false)]
       (when r
         ;(prn r table now)
         (doseq [f r] (f)))
-      (swap! cloft-schedule-table dissoc @cloft-schedule-currenct-tick)
-      )
-    (swap! cloft-schedule-currenct-tick inc)
-    ))
+      (swap! cloft-schedule-table dissoc @cloft-schedule-currenct-tick))
+    (swap! cloft-schedule-currenct-tick inc)))
 
 (def player-death-locations (atom {}))
 (def last-vertical-shots (atom {}))
@@ -134,7 +129,6 @@
         (.isLoaded (.getChunk death-point)) ; for side-effect
         (c/lingr (str (.getDisplayName player) " is teleporting to the last death place..."))
         (.setTo evt death-point)))))
-
 
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
@@ -513,10 +507,9 @@
          ]
      (loop [done (.hasNext iter)
             i 0]
-           (place-fn (.next iter) i)
-           (when (.hasNext iter)
-             (recur (.hasNext iter) (inc i))
-             )))))
+       (place-fn (.next iter) i)
+       (when (.hasNext iter)
+         (recur (.hasNext iter) (inc i)))))))
 
 (defn summon-x
   ([pos world creature]
@@ -524,9 +517,7 @@
   ([pos world creature after]
    ;(prn summon-x pos creature after)
    (cloft-schedule-settimer after
-                            (fn []
-                                (.spawn world (.toLocation pos world) creature)
-                   ))))
+                            #(.spawn world (.toLocation pos world) creature))))
 
 (defn summon-giant [player block]
   (let [world (.getWorld player)
@@ -552,56 +543,50 @@
               ([pos wolrd] (sure-explosion-at pos world 1))
               ([pos world delay]
                (cloft-schedule-settimer 1  (fn []
-                                               (when (not (.createExplosion world (.toLocation pos world) 0.0 true))
-                                                 (sure-explosion-at pos world)) ; retry 1 tick later
-                                               ))))
-            (summon-set-of-evils-at [pos loc world]
-                                    (cloft-schedule-settimer 1 (fn []
-                        (place-blocks-in-line world (.clone loc) (.clone pos) fire-effect 2)
-                        (sure-explosion-at (.clone pos) world 60)
-                        (summon-x pos world Blaze 65)
-                        (summon-x loc world PigZombie 65)
-                        (let [ghast-pos (.add (.clone pos ) (Vector. 0.0 7.0 0.0 )) ]
-                          (sure-explosion-at ghast-pos world)
-                          (summon-x ghast-pos world Ghast 65)
-                          )))
-              )]
+                                             (when (not (.createExplosion world (.toLocation pos world) 0.0 true))
+                                               ; retry 1 tick later
+                                               (sure-explosion-at pos world))))))
+            (summon-set-of-evils-at
+              [pos loc world]
+              (cloft-schedule-settimer
+                1
+                (fn []
+                  (place-blocks-in-line world (.clone loc) (.clone pos) fire-effect 2)
+                  (sure-explosion-at (.clone pos) world 60)
+                  (summon-x pos world Blaze 65)
+                  (summon-x loc world PigZombie 65)
+                  (let [ghast-pos (.add (.clone pos ) (Vector. 0.0 7.0 0.0 ))]
+                    (sure-explosion-at ghast-pos world)
+                    (summon-x ghast-pos world Ghast 65)))))]
             (summon-set-of-evils-at pos1 loc world)
             (summon-set-of-evils-at pos2 loc world)
             (summon-set-of-evils-at pos3 loc world)
             (summon-x (player-coordinate-to-world player -5.0 0.5 0.0) world Creeper 80) ;hehehe
-            (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, PigZombie and Ghast!!")
-    )))
+            (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, PigZombie and Ghast!!"))))
 
 (def active-fusion-wall(atom {}))
 (defn active-fusion-wall-of[player]
   (get @active-fusion-wall (.getDisplayName player)))
 
-
 (defn fusion-wall [player block]
   (let [world (.getWorld player)
         loc (.toVector (.getLocation player))
         bottom (player-coordinate-to-world player 15.0 0.0 0.0)
-        top (player-coordinate-to-world player 15.0 6.0 0.0)
-        ]
+        top (player-coordinate-to-world player 15.0 6.0 0.0)]
     (letfn [(place-cobblestones [v i]
               (cloft-schedule-settimer (* 4 i)
-                                       (fn []
-                                           (when (= Material/AIR (.getType v))
-                                             (.setType v Material/COBBLESTONE))
-                                           )))]
+                                       #(when (= Material/AIR (.getType v))
+                                          (.setType v Material/COBBLESTONE))))]
            (.strikeLightningEffect world (.toLocation bottom world))
            (place-blocks-in-line world bottom top place-cobblestones)
            (if-let [prev (active-fusion-wall-of player)]
                    ;then
                    (let [[eb et] prev]
                      (place-blocks-in-line world eb bottom place-cobblestones)
-                     (place-blocks-in-line world et top place-cobblestones) )
+                     (place-blocks-in-line world et top place-cobblestones))
                    ;else
-                   (prn "nothing to connect.")
-                   )
-           (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top])
-                    )))
+                   (prn "nothing to connect."))
+           (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top]))))
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
@@ -609,8 +594,9 @@
                  Material/COBBLESTONE fusion-wall
                  Material/DIRT summon-giant
                  Material/GLOWSTONE summon-residents-of-nether
-                 Material/OBSIDIAN (fn [p, b] (prn 'not 'implemented)); create-portal
-          }]
+                 Material/OBSIDIAN (fn [p, b]
+                                     "create-portal"
+                                     (prn 'not 'implemented))}]
       (prn table)
       (if-let [alchemy (table (.getType block))]
               ;then
