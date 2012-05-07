@@ -408,8 +408,8 @@
                             (.setType block Material/AIR)))))))))
 
 (defn reaction-skill-ice [you by]
-  (.sendMessage you "(not implemented yet)")
-  (comment (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by)))))
+  (freeze-for-20-sec by)
+  (c/lingr (str "counter attack with ice by " (.getDisplayName you) " to " (c/entity2name by))))
 
 (defn reaction-skill-knockback [you by]
   (let [direction (.multiply (.normalize (.toVector (.subtract (.getLocation by) (.getLocation you)))) 2)]
