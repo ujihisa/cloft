@@ -697,7 +697,8 @@
                         (Thread/sleep 10)
                         (condp = (.getType block)
                           Material/STONE_PLATE (.teleport entity newloc)
-                          Material/WOOD_PLATE (c/add-velocity entity 0 1.5 0))
+                          Material/WOOD_PLATE (c/add-velocity entity 0 1.5 0)
+                          nil)
                         (.playEffect (.getWorld entity-loc) (.add entity-loc 0 1 0) org.bukkit.Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld entity-loc) entity-loc org.bukkit.Effect/ENDER_SIGNAL nil)
@@ -1321,7 +1322,7 @@
           Arrow (arrow-hit-event evt entity)
           Snowball (snowball-hit-event evt entity)
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
-          )))
+          nil)))
 
 (defn player-bed-enter-event [evt]
   (c/broadcast (.. evt (getPlayer) (getDisplayName)) " is sleeping.")
