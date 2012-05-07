@@ -24,7 +24,6 @@
   (:import [org.bukkit.util BlockIterator])
   (:import [org.bukkit.event.block Action]))
 
-
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
    "sbwhitecap" "http://www.gravatar.com/avatar/198149c17c72f7db3a15e432b454067e.jpg?s=28\n"
@@ -69,7 +68,6 @@
 (def place10 (org.bukkit.Location. world 317.4375 72.0 112.5)) ; from dessert village
 (def place-main (org.bukkit.Location. world 4.294394438259979 67.0 0.6542090982205075 -7.5000114 -40.35013))
 (def anotherbed (org.bukkit.Location.  world -237.8704284429714 72.5625 -53.82154923217098 19.349966 -180.45361))
-
 
 (def cloft-schedule-table (atom {}))
 (def cloft-schedule-currenct-tick (atom 0))
@@ -281,8 +279,6 @@
 (defn arrow-skill-sniping [entity]
   nil)
 
-
-
 (def arrow-skill (atom {}))
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
@@ -475,8 +471,6 @@
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
 
-
-
 (defn xz-normalized-vector [v]
   (.normalize (Vector. (.getX v) 0.0 (.getZ v))))
 
@@ -522,7 +516,6 @@
     (summon-x spawn-at world Giant)
     ;(.spawn world (.toLocation spawn-at world) Giant)
     (c/broadcast (.getDisplayName player) " has summoned Giant!!")))
-
 
 (defn summon-residents-of-nether [player block]
   (let [world (.getWorld player)
@@ -789,8 +782,6 @@
                           (.dropItem (.getWorld item) (.getLocation item) (ItemStack. new-item-material (.getAmount itemstack))))
                         (.remove item)))))))
 
-
-
 (defn player-toggle-sneak-event [evt]
   (prn (.getEventName evt) (.getPlayer evt)))
 
@@ -942,9 +933,6 @@
   (seq (map zombie-player-periodically
             (filter zombie-player? (Bukkit/getOnlinePlayers))))
   nil)
-
-
-
 
 (defn pig-death-event [entity]
   (when-let [killer (.getKiller entity)]
@@ -1409,8 +1397,6 @@
             (ItemStack. Material/FLINT 1))]
     (.addIngredient x 3 Material/GRAVEL)
     x))
-
-
 
 (defonce swank* nil)
 (defn on-enable [plugin]
