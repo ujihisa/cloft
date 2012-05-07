@@ -379,6 +379,34 @@
 (defn entity-explosion-prime-event [evt]
   nil)
 
+(def freeze-for-20-sec [target]
+  (when (not (.isDead target))
+    (let [loc (.getLocation (.getBlock (.getLocation target)))]
+      (doseq [y [0 1]]
+        (doseq [[x z] [[-1 0] [1 0] [0 -1] [0 1]]]
+          (let [block (.getBlock (.add (.clone loc) x y z))]
+            (when (#{Material/AIR Material/SNOW} (.getType block))
+              (.setType block Material/GLASS)))))
+      (doseq [y [-1 2]]
+        (let [block (.getBlock (.add (.clone loc) 0 y 0))]
+          (when (#{Material/AIR Material/SNOW} (.getType block))
+            (.setType block Material/GLASS))))
+      (future-call #(do
+                      (Thread/sleep 1000)
+                      (when (not (.isDead target))
+                        (.teleport target (.add (.clone loc) 0.5 0.0 0.5)))))
+      (future-call #(do
+                      (Thread/sleep 20000)
+                      (doseq [y [0 1]]
+                        (doseq [[x z] [[-1 0] [1 0] [0 -1] [0 1]]]
+                          (let [block (.getBlock (.add (.clone loc) x y z))]
+                            (when (= (.getType block) Material/GLASS)
+                              (.setType block Material/AIR)))))
+                      (doseq [y [-1 2]]
+                        (let [block (.getBlock (.add (.clone loc) 0 y 0))]
+                          (when (= (.getType block) Material/GLASS)
+                            (.setType block Material/AIR)))))))))
+
 (defn reaction-skill-ice [you by]
   (.sendMessage you "(not implemented yet)")
   (comment (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by)))))
@@ -1064,32 +1092,7 @@
         (= arrow-skill-explosion (arrow-skill-of shooter))
         (.damage target 10 shooter)
         (= arrow-skill-ice (arrow-skill-of shooter))
-        (when (not (.isDead target))
-          (let [loc (.getLocation (.getBlock (.getLocation target)))]
-            (doseq [y [0 1]]
-              (doseq [[x z] [[-1 0] [1 0] [0 -1] [0 1]]]
-                (let [block (.getBlock (.add (.clone loc) x y z))]
-                  (when (#{Material/AIR Material/SNOW} (.getType block))
-                    (.setType block Material/GLASS)))))
-            (doseq [y [-1 2]]
-              (let [block (.getBlock (.add (.clone loc) 0 y 0))]
-                (when (#{Material/AIR Material/SNOW} (.getType block))
-                  (.setType block Material/GLASS))))
-            (future-call #(do
-                            (Thread/sleep 1000)
-                            (when (not (.isDead target))
-                              (.teleport target (.add (.clone loc) 0.5 0.0 0.5)))))
-            (future-call #(do
-                            (Thread/sleep 20000)
-                            (doseq [y [0 1]]
-                              (doseq [[x z] [[-1 0] [1 0] [0 -1] [0 1]]]
-                                (let [block (.getBlock (.add (.clone loc) x y z))]
-                                  (when (= (.getType block) Material/GLASS)
-                                    (.setType block Material/AIR)))))
-                            (doseq [y [-1 2]]
-                              (let [block (.getBlock (.add (.clone loc) 0 y 0))]
-                                (when (= (.getType block) Material/GLASS)
-                                  (.setType block Material/AIR))))))))
+        (freeze-for-20-sec target)
         (= 'fly (arrow-skill-of shooter))
         (future-call #(c/add-velocity target 0 1 0))
         (= 'mobchange (arrow-skill-of shooter))
