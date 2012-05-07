@@ -379,7 +379,7 @@
 (defn entity-explosion-prime-event [evt]
   nil)
 
-(def freeze-for-20-sec [target]
+(defn freeze-for-20-sec [target]
   (when (not (.isDead target))
     (let [loc (.getLocation (.getBlock (.getLocation target)))]
       (doseq [y [0 1]]
