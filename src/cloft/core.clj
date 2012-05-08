@@ -607,11 +607,21 @@
                    (prn "nothing to connect."))
            (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top]))))
 
+(defn make-redstone-for-livings [player block]
+  (let [world (.getWorld player)]
+    (doseq [e (filter #(instance? LivingEntity %) (.getNearbyEntities player 10 10 10))]
+           (let [loc (.getLocation e)]
+             (.remove e)
+             (.strikeLightningEffect world loc)
+             (.dropItem world loc (ItemStack. Material/REDSTONE))
+             ))))
+
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
     (let [table {Material/STONE (fn [p, b] (prn p (.getType b)))
                  Material/COBBLESTONE fusion-wall
                  Material/DIRT summon-giant
+                 Material/LOG make-redstone-for-livings
                  Material/GLOWSTONE summon-residents-of-nether
                  Material/OBSIDIAN (fn [p, b]
                                      "create-portal"
