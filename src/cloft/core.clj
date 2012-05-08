@@ -13,8 +13,8 @@
             MagmaCube Minecart Monster MushroomCow NPC Painting Pig PigZombie
             Player PoweredMinecart Projectile Sheep Silverfish Skeleton Slime
             SmallFireball Snowball Snowman Spider Squid StorageMinecart
-            ThrownPotion TNTPrimed Vehicle Villager WaterMob Weather Wolf
-            Zombie Ocelot])
+            ThrownPotion TNTPrimed Vehicle Villager Villager$Profession
+            WaterMob Weather Wolf Zombie Ocelot])
   (:import [org.bukkit.event.entity EntityDamageByEntityEvent
             EntityDamageEvent$DamageCause])
   (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
@@ -879,7 +879,27 @@
         ; right-click cow -> charcoal
         (instance? Cow target) (d 263)
         ; right-click villager -> cake
-        (instance? Villager target) (d 92)
+        (instance? Villager target)
+        (let [player (.getPlayer evt)]
+          (if-let [item (.getItemInHand player)]
+            (condp = (.getType item)
+              Material/BROWN_MUSHROOM (do
+                                        (.setProfession target Villager$Profession/LIBRARIAN)
+                                        (c/consume-item player))
+              Material/RED_MUSHROOM (do
+                                      (.setProfession target Villager$Profession/PRIEST)
+                                      (c/consume-item player))
+              Material/YELLOW_FLOWER (do
+                                       (.setProfession target Villager$Profession/BLACKSMITH )
+                                       (c/consume-item player))
+              Material/RED_ROSE (do
+                                  (.setProfession target Villager$Profession/BUTCHER)
+                                  (c/consume-item player))
+              Material/REDSTONE (do
+                                   (.setProfession target Villager$Profession/FARMER)
+                                   (c/consume-item player))
+              nil)
+            (d 92)))
         ; right-click creeper -> gunpowder
         (instance? Creeper target) (d 289)
 
