@@ -893,7 +893,7 @@
                                       (.setProfession target Villager$Profession/PRIEST)
                                       (c/consume-item player))
               Material/YELLOW_FLOWER (do
-                                       (.setProfession target Villager$Profession/BLACKSMITH )
+                                       (.setProfession target Villager$Profession/BLACKSMITH)
                                        (c/consume-item player))
               Material/RED_ROSE (do
                                   (.setProfession target Villager$Profession/BUTCHER)
