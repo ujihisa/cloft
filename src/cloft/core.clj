@@ -676,12 +676,6 @@
   (let [name (.getDisplayName (.getPlayer evt))]
     (c/lingr (str (name2icon name) (.getMessage evt)))))
 
-(defn player-drop-item-event [evt]
-  (let [player (.getPlayer evt)]
-    (when false
-      (.sendMessage player "feather jump!")
-      (c/add-velocity player 0 0.5 0))))
-
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
 
