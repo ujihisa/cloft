@@ -472,7 +472,7 @@
   (when (blazon? Material/LOG block-against)
     (let [table {Material/RED_ROSE [reaction-skill-fire "FIRE"]
                  Material/YELLOW_FLOWER [reaction-skill-teleport "TELEPORT"]
-                 Material/IRON_ORE [reaction-skill-knockback "KNOCKBACK"]
+                 Material/COBBLESTONE [reaction-skill-knockback "KNOCKBACK"]
                  Material/DIRT [reaction-skill-wolf "WOLF"]
                  Material/SNOW_BLOCK [reaction-skill-ice "ICE"]}]
       (when-let [skill-name (table (.getType block))]
