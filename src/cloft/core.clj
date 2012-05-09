@@ -613,8 +613,7 @@
            (let [loc (.getLocation e)]
              (.remove e)
              (.strikeLightningEffect world loc)
-             (.dropItem world loc (ItemStack. Material/REDSTONE))
-             ))))
+             (.dropItem world loc (ItemStack. Material/REDSTONE))))))
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
