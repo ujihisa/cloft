@@ -901,7 +901,7 @@
               Material/REDSTONE (do
                                    (.setProfession target Villager$Profession/FARMER)
                                    (c/consume-item player))
-              nil)
+              (d 92))
             (d 92)))
         ; right-click creeper -> gunpowder
         (instance? Creeper target) (d 289)
