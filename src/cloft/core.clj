@@ -1267,9 +1267,13 @@
               (c/consume-item target)))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (if-let [skill (reaction-skill-of target)]
-            (skill target (if (instance? Projectile attacker)
-                            (.getShooter attacker)
-                            attacker)))
+            (let [actual-attacker
+                  (if (instance? Projectile attacker)
+                    (.getShooter attacker)
+                    attacker)]
+              (when (and (not= actual-attacker target)
+                         (not (instance? Wolf actual-attacker)))
+                (skill target))))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
               (.setCancelled evt true)
