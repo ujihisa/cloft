@@ -493,7 +493,7 @@
                  Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
                  Material/RAILS ['cart "CART"]
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
-                 Material/STONE ['sniping "SNIPING"]
+                 #_( Material/STONE ['sniping "SNIPING"])
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
