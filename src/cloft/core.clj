@@ -607,6 +607,40 @@
                    (prn "nothing to connect."))
            (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top]))))
 
+(defn safe-to-place? [block]
+  (let [t (.getType block)]
+    (or
+      (= Material/AIR t)
+      (= Material/STATIONARY_WATER t)
+      (= Material/WATER t)
+      (= Material/LAVA t)
+      (= Material/STATIONARY_LAVA t)
+      (= Material/LEAVES t)
+      (= Material/WEB t)
+      (= Material/BROWN_MUSHROOM t)
+      (= Material/RED_MUSHROOM t)
+      (= Material/RED_ROSE t)
+      (= Material/YELLOW_FLOWER t)
+      (= Material/FIRE t)
+      )))
+
+(defn fusion-floor [player block]
+  (let [world (.getWorld player)
+        loc (.toVector (.getLocation player))
+        distance (min (+ 10.0 (* 3 2)) 60.0) 
+        dest (player-coordinate-to-world player distance 0.0 0.0)
+        block-floor(fn [v i]
+                       (cloft-schedule-settimer
+                         (* 4 i)
+                         (fn []
+                             (when (safe-to-place? v)
+                               (.strikeLightningEffect world (.getLocation v))
+                               (.setType v Material/COBBLESTONE)))))
+        ]
+    (place-blocks-in-line world loc dest block-floor)
+    ))
+
+
 (defn make-redstone-for-livings [player block]
   (let [world (.getWorld player)]
     (doseq [e (filter #(instance? LivingEntity %) (.getNearbyEntities player 10 10 10))]
@@ -620,6 +654,7 @@
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
     (let [table {Material/STONE (fn [p, b] (prn p (.getType b)))
                  Material/COBBLESTONE fusion-wall
+                 Material/SAND fusion-floor
                  Material/DIRT summon-giant
                  Material/LOG make-redstone-for-livings
                  Material/GLOWSTONE summon-residents-of-nether
