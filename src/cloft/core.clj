@@ -613,21 +613,11 @@
            (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top]))))
 
 (defn safe-to-place? [block]
-  (let [t (.getType block)]
-    (or
-      (= Material/AIR t)
-      (= Material/STATIONARY_WATER t)
-      (= Material/WATER t)
-      (= Material/LAVA t)
-      (= Material/STATIONARY_LAVA t)
-      (= Material/LEAVES t)
-      (= Material/WEB t)
-      (= Material/BROWN_MUSHROOM t)
-      (= Material/RED_MUSHROOM t)
-      (= Material/RED_ROSE t)
-      (= Material/YELLOW_FLOWER t)
-      (= Material/FIRE t)
-      )))
+  (boolean
+    (#{Material/AIR Material/STATIONARY_WATER Material/WATER Material/LAVA
+       Material/STATIONARY_LAVA Material/LEAVES Material/WEB
+       Material/BROWN_MUSHROOM Material/RED_MUSHROOM Material/RED_ROSE
+       Material/YELLOW_FLOWER Material/FIRE } (.getType block))))
 
 (defn fusion-floor [player block]
   (let [world (.getWorld player)
