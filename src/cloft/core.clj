@@ -626,9 +626,13 @@
 
 (defn fusion-floor [player block]
   (let [world (.getWorld player)
-        loc (.toVector (.getLocation player))
-        distance (min (+ 10.0 (* 3 2)) 60.0) 
-        dest (player-coordinate-to-world player distance 0.0 0.0)
+        start-left (player-coordinate-to-world player 0.0 0.0 -1.0)
+        start-center (.toVector (.getLocation player))
+        start-right (player-coordinate-to-world player 0.0 0.0 1.0)
+        distance (min (+ 10.0 (* 2 (.getLevel player))) 60.0) 
+        end-left (player-coordinate-to-world player distance 0.0 -1.0)
+        end-center (player-coordinate-to-world player distance 0.0 0.0)
+        end-right (player-coordinate-to-world player distance 0.0 1.0)
         block-floor(fn [v i]
                        (cloft-schedule-settimer
                          (* 4 i)
@@ -637,7 +641,9 @@
                                (.strikeLightningEffect world (.getLocation v))
                                (.setType v Material/COBBLESTONE)))))
         ]
-    (place-blocks-in-line world loc dest block-floor)
+    (place-blocks-in-line world start-left end-left block-floor 2)
+    (place-blocks-in-line world start-center end-center block-floor 2)
+    (place-blocks-in-line world start-right end-right block-floor 2)
     ))
 
 
