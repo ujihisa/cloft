@@ -627,10 +627,9 @@
         block-floor (fn [v i]
                       (cloft-schedule-settimer
                         (* 4 i)
-                        (fn []
-                          (when (safe-to-place? v)
-                            (.strikeLightningEffect world (.getLocation v))
-                            (.setType v Material/COBBLESTONE)))))]
+                        #(when (safe-to-place? v)
+                           (.strikeLightningEffect world (.getLocation v))
+                           (.setType v Material/COBBLESTONE))))]
     (place-blocks-in-line world loc dest block-floor)))
 
 (defn make-redstone-for-livings [player block]
