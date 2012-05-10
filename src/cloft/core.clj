@@ -630,11 +630,8 @@
                          (fn []
                              (when (safe-to-place? v)
                                (.strikeLightningEffect world (.getLocation v))
-                               (.setType v Material/COBBLESTONE)))))
-        ]
-    (place-blocks-in-line world loc dest block-floor)
-    ))
-
+                               (.setType v Material/COBBLESTONE)))))]
+    (place-blocks-in-line world loc dest block-floor)))
 
 (defn make-redstone-for-livings [player block]
   (let [world (.getWorld player)]
