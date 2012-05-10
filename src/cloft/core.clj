@@ -472,7 +472,7 @@
   (when (blazon? Material/LOG block-against)
     (let [table {Material/RED_ROSE [reaction-skill-fire "FIRE"]
                  Material/YELLOW_FLOWER [reaction-skill-teleport "TELEPORT"]
-                 Material/IRON_ORE [reaction-skill-knockback "KNOCKBACK"]
+                 Material/COBBLESTONE [reaction-skill-knockback "KNOCKBACK"]
                  Material/DIRT [reaction-skill-wolf "WOLF"]
                  Material/SNOW_BLOCK [reaction-skill-ice "ICE"]}]
       (when-let [skill-name (table (.getType block))]
@@ -493,7 +493,7 @@
                  Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
                  Material/RAILS ['cart "CART"]
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
-                 Material/STONE ['sniping "SNIPING"]
+                 #_( Material/STONE ['sniping "SNIPING"])
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
@@ -647,8 +647,7 @@
            (let [loc (.getLocation e)]
              (.remove e)
              (.strikeLightningEffect world loc)
-             (.dropItem world loc (ItemStack. Material/REDSTONE))
-             ))))
+             (.dropItem world loc (ItemStack. Material/REDSTONE))))))
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
@@ -711,12 +710,6 @@
 (defn player-chat-event [evt]
   (let [name (.getDisplayName (.getPlayer evt))]
     (c/lingr (str (name2icon name) (.getMessage evt)))))
-
-(defn player-drop-item-event [evt]
-  (let [player (.getPlayer evt)]
-    (when false
-      (.sendMessage player "feather jump!")
-      (c/add-velocity player 0 0.5 0))))
 
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
@@ -935,7 +928,7 @@
                                       (.setProfession target Villager$Profession/PRIEST)
                                       (c/consume-item player))
               Material/YELLOW_FLOWER (do
-                                       (.setProfession target Villager$Profession/BLACKSMITH )
+                                       (.setProfession target Villager$Profession/BLACKSMITH)
                                        (c/consume-item player))
               Material/RED_ROSE (do
                                   (.setProfession target Villager$Profession/BUTCHER)
@@ -943,7 +936,7 @@
               Material/REDSTONE (do
                                    (.setProfession target Villager$Profession/FARMER)
                                    (c/consume-item player))
-              nil)
+              (d 92))
             (d 92)))
         ; right-click creeper -> gunpowder
         (instance? Creeper target) (d 289)
@@ -1309,9 +1302,13 @@
               (c/consume-item target)))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (if-let [skill (reaction-skill-of target)]
-            (skill target (if (instance? Projectile attacker)
-                            (.getShooter attacker)
-                            attacker)))
+            (let [actual-attacker
+                  (if (instance? Projectile attacker)
+                    (.getShooter attacker)
+                    attacker)]
+              (when (and (not= actual-attacker target)
+                         (not (instance? Wolf actual-attacker)))
+                (skill target))))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
               (.setCancelled evt true)
