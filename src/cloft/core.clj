@@ -214,9 +214,7 @@
 
 (defn arrow-skill-pull [entity]
   (let [block (block-of-arrow entity)]
-    (if (and
-            (nil? (#{Material/AIR Material/CHEST Material/FURNACE Material/BURNING_FURNACE} (.getType block)))
-            (not (.isLiquid block)))
+    (if (c/removable-block? block)
       (let [shooter-loc (.getLocation (.getShooter entity))]
         (.setType (.getBlock shooter-loc) (.getType block))
         (.setType block Material/AIR)
