@@ -275,9 +275,14 @@
   (.remove entity))
 
 (defn arrow-skill-pumpkin [entity]
-  (let [block (.getBlock (.getLocation entity))]
-    (when (= Material/AIR (.getType block))
-      (.setType block (rand-nth [Material/PUMPKIN Material/JACK_O_LANTERN])))))
+  (future-call
+    #(do
+       (Thread/sleep 10)
+       (when (not (.isDead entity))
+         (let [block (.getBlock (.getLocation entity))]
+           (when (= Material/AIR (.getType block))
+             (.setType block (rand-nth [Material/PUMPKIN Material/JACK_O_LANTERN]))))
+         (.remove entity)))))
 
 (defn arrow-skill-sniping [entity]
   nil)
@@ -1162,11 +1167,13 @@
             (.remove arrow)
             (.setType block Material/PUMPKIN)
             (future-call #(do
-                            (Thread/sleep 2000)
-                            (when (= Material/PUMPKIN (.getType block))
-                              (let [newmob (.spawn (.getWorld loc) loc klass)]
-                                (.setHealth newmob health))
-                              (.setType block block-type))))))
+                            (Thread/sleep 3000)
+                            (let [newmob (.spawn (.getWorld loc) loc klass)]
+                              (if (= Material/PUMPKIN (.getType block))
+                                (do
+                                  (.setHealth newmob health)
+                                  (.setType block block-type))
+                                (.damage newmob (.getMaxHealth newmob))))))))
         (= 'fly (arrow-skill-of shooter))
         (future-call #(c/add-velocity target 0 1 0))
         (= 'mobchange (arrow-skill-of shooter))
