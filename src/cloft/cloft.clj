@@ -90,6 +90,11 @@
 (defn add-velocity [entity x y z]
   (.setVelocity entity (.add (.getVelocity entity) (org.bukkit.util.Vector. (double x) (double y) (double z)))))
 
+(defn removable-block? [block]
+  (and
+    (nil? (#{Material/AIR Material/CHEST Material/FURNACE Material/BURNING_FURNACE Material/BEDROCK} (.getType block)))
+    (not (.isLiquid block))))
+
 (defn entity2name [entity]
   (cond (instance? Blaze entity) "Blaze"
         (instance? CaveSpider entity) "CaveSpider"
