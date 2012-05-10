@@ -624,7 +624,7 @@
         start-left (player-coordinate-to-world player 0.0 0.0 -1.0)
         start-center (.toVector (.getLocation player))
         start-right (player-coordinate-to-world player 0.0 0.0 1.0)
-        distance (min (+ 10.0 (* 2 (.getLevel player))) 60.0) 
+        distance (min (+ 10.0 (* 2 (.getLevel player))) 60.0)
         end-left (player-coordinate-to-world player distance 0.0 -1.0)
         end-center (player-coordinate-to-world player distance 0.0 0.0)
         end-right (player-coordinate-to-world player distance 0.0 1.0)
@@ -639,7 +639,6 @@
     (place-blocks-in-line world start-left end-left block-floor 2)
     (place-blocks-in-line world start-center end-center block-floor 2)
     (place-blocks-in-line world start-right end-right block-floor 2)))
-   
 
 (defn make-redstone-for-livings [player block]
   (let [world (.getWorld player)]
