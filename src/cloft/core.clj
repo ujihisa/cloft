@@ -274,6 +274,11 @@
       (.dropItem (.getWorld loc-above) loc-above (ItemStack. Material/ARROW))))
   (.remove entity))
 
+(defn arrow-skill-pumpkin [entity]
+  (let [block (.getBlock (.getLocation entity))]
+    (when (= Material/AIR (.getType block))
+      (.setType block (rand-nth [Material/PUMPKIN Material/JACK_O_LANTERN])))))
+
 (defn arrow-skill-sniping [entity]
   nil)
 
@@ -492,7 +497,9 @@
                  Material/RAILS ['cart "CART"]
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
                  #_( Material/STONE ['sniping "SNIPING"])
-                 Material/SNOW_BLOCK [arrow-skill-ice "ICE"]}]
+                 Material/SNOW_BLOCK [arrow-skill-ice "ICE"]
+                 Material/JACK_O_LANTERN [arrow-skill-pumpkin "PUMPKIN"]
+                 Material/PUMPKIN [arrow-skill-pumpkin "PUMPKIN"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
@@ -1150,6 +1157,22 @@
         (.damage target 10 shooter)
         (= arrow-skill-ice (arrow-skill-of shooter))
         (freeze-for-20-sec target)
+        (= arrow-skill-pumpkin (arrow-skill-of shooter))
+        (when (instance? LivingEntity target)
+          (let [klass (.getEntityClass (.getType target))
+                health (.getHealth target)
+                loc (.getLocation target)
+                block (.getBlock loc)
+                block-type (.getType block)]
+            (.remove target)
+            (.remove arrow)
+            (.setType block Material/PUMPKIN)
+            (future-call #(do
+                            (Thread/sleep 2000)
+                            (when (= Material/PUMPKIN (.getType block))
+                              (let [newmob (.spawn (.getWorld loc) loc klass)]
+                                (.setHealth newmob health))
+                              (.setType block block-type))))))
         (= 'fly (arrow-skill-of shooter))
         (future-call #(c/add-velocity target 0 1 0))
         (= 'mobchange (arrow-skill-of shooter))
