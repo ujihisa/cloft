@@ -633,12 +633,13 @@
                          (* 4 i)
                          (fn []
                              (when (safe-to-place? v)
-                               (.strikeLightningEffect world (.getLocation v))
+                               (when (= 0 (rand-int 6))
+                                 (.strikeLightningEffect world (.getLocation v)))
                                (.setType v Material/COBBLESTONE)))))]
     (place-blocks-in-line world start-left end-left block-floor 2)
     (place-blocks-in-line world start-center end-center block-floor 2)
-    (place-blocks-in-line world start-right end-right block-floor 2)
-    ))
+    (place-blocks-in-line world start-right end-right block-floor 2)))
+   
 
 (defn make-redstone-for-livings [player block]
   (let [world (.getWorld player)]
