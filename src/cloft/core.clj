@@ -1308,7 +1308,7 @@
                     attacker)]
               (when (and (not= actual-attacker target)
                          (not (instance? Wolf actual-attacker)))
-                (skill target))))
+                (skill target actual-attacker))))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
               (.setCancelled evt true)
