@@ -3,6 +3,7 @@
   ;(:require [clojure.core.match :as m])
   (:require [swank.swank])
   (:require [clojure.string :as s])
+  (:require [clojure.set])
   (comment (:import [org.bukkit.command CommandExecuter CommandSender Command]))
   (:import [org.bukkit Bukkit Material])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
@@ -529,6 +530,41 @@
         loc (.toVector (.getLocation player))]
     (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
 
+(defn block-categoly
+     ;FIXME, stupid implementation.
+     ;available options:
+     ; :vacant :enterable :combustible
+     ;usage:
+     ; (block-categoly :vacant :enterable) => #{} of vacant and enterable
+     ; (block-categoly :enterable :vacant) => #{} of vacant and enterable
+     ;
+     [ & ks]
+     (let [c (set ks)
+           data {Material/AIR #{:vacant :enterable}
+            Material/WATER #{:vacant :enterable} ;flowing
+            Material/LAVA #{:vacant :enterable} ;flowing
+            Material/FIRE #{:vacant :enterable}
+            Material/STATIONARY_WATER #{:enterable} ; not vacant, we can have it.
+            Material/STATIONARY_LAVA  #{:enterable} ; may be we need "obtainable" instead of "vacant" or unobtainable.
+            Material/WEB #{:combustible :enterable}
+            Material/BROWN_MUSHROOM  #{:combustible :enterable}
+            Material/RED_MUSHROOM #{:combustible :enterable}
+            Material/RED_ROSE #{:combustible :enterable}
+            Material/YELLOW_FLOWER #{:combustible :enterable}
+            Material/WHEAT #{:combustible :enterable}
+            Material/PUMPKIN_STEM #{:combustible :enterable}
+            Material/MELON_STEM #{:combustible :enterable}
+            Material/VINE #{:combustible :enterable}
+            Material/GRASS #{:combustible :enterable}
+            Material/DEAD_BUSH #{:combustible :enterable}
+            Material/SUGAR_CANE #{:combustible :enterable}
+            Material/LEAVES  #{:combustible}
+            Material/MELON_BLOCK #{:combustible}
+            Material/PUMPKIN #{:combustible}
+            Material/WATER_LILY  #{}
+            Material/CACTUS #{}}]
+       (into {} (filter #(clojure.set/subset? c (last %)) data))))
+
 (defn place-blocks-in-line
   ([world start end place-fn]
    (place-blocks-in-line world start end place-fn 0))
@@ -550,7 +586,6 @@
    ;(prn summon-x pos creature after)
    (cloft-schedule-settimer after
                             #(.spawn world (.toLocation pos world) creature))))
-
 (defn summon-giant [player block]
   (let [world (.getWorld player)
         spawn-at  (player-coordinate-to-world player 10.0 0.0 0.0)]
@@ -621,12 +656,6 @@
                    (prn "nothing to connect."))
            (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top]))))
 
-(defn safe-to-place? [block]
-  (boolean
-    (#{Material/AIR Material/STATIONARY_WATER Material/WATER Material/LAVA
-       Material/STATIONARY_LAVA Material/LEAVES Material/WEB
-       Material/BROWN_MUSHROOM Material/RED_MUSHROOM Material/RED_ROSE
-       Material/YELLOW_FLOWER Material/FIRE } (.getType block))))
 
 (defn fusion-floor [player block]
   (let [world (.getWorld player)
@@ -641,7 +670,7 @@
                        (cloft-schedule-settimer
                          (* 4 i)
                          (fn []
-                             (when (safe-to-place? v)
+                             (when (boolean ((block-categoly :enterable) (.getType v)))
                                (when (= 0 (rand-int 6))
                                  (.strikeLightningEffect world (.getLocation v)))
                                (.setType v Material/COBBLESTONE)))))]
@@ -668,7 +697,6 @@
                  Material/OBSIDIAN (fn [p, b]
                                      "create-portal"
                                      (prn 'not 'implemented))}]
-      (prn table)
       (if-let [alchemy (table (.getType block))]
               ;then
               (alchemy player block)
