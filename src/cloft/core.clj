@@ -1161,7 +1161,13 @@
         (= arrow-skill-ice (arrow-skill-of shooter))
         (freeze-for-20-sec target)
         (= arrow-skill-pumpkin (arrow-skill-of shooter))
-        (when (instance? LivingEntity target)
+        (condp instance? target
+          Player
+          (let [helmet (.getHelmet (.getInventory target))]
+            (.setHelmet (.getInventory target) (ItemStack. Material/PUMPKIN))
+            (when helmet
+              (.dropItemNaturally (.getWorld target) (.getLocation target) helmet)))
+          LivingEntity
           (let [klass (.getEntityClass (.getType target))
                 health (.getHealth target)
                 loc (.getLocation target)
@@ -1177,7 +1183,8 @@
                                 (do
                                   (.setHealth newmob health)
                                   (.setType block block-type))
-                                (.damage newmob (.getMaxHealth newmob))))))))
+                                (.damage newmob (.getMaxHealth newmob)))))))
+          nil)
         (= 'fly (arrow-skill-of shooter))
         (future-call #(c/add-velocity target 0 1 0))
         (= 'mobchange (arrow-skill-of shooter))
