@@ -624,13 +624,13 @@
         loc (.toVector (.getLocation player))
         distance (min (+ 10.0 (* 3 2)) 60.0) 
         dest (player-coordinate-to-world player distance 0.0 0.0)
-        block-floor(fn [v i]
-                       (cloft-schedule-settimer
-                         (* 4 i)
-                         (fn []
-                             (when (safe-to-place? v)
-                               (.strikeLightningEffect world (.getLocation v))
-                               (.setType v Material/COBBLESTONE)))))]
+        block-floor (fn [v i]
+                      (cloft-schedule-settimer
+                        (* 4 i)
+                        (fn []
+                          (when (safe-to-place? v)
+                            (.strikeLightningEffect world (.getLocation v))
+                            (.setType v Material/COBBLESTONE)))))]
     (place-blocks-in-line world loc dest block-floor)))
 
 (defn make-redstone-for-livings [player block]
