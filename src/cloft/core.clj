@@ -517,7 +517,7 @@
 (defn xz-normalized-vector [v]
   (.normalize (Vector. (.getX v) 0.0 (.getZ v))))
 
-(defn player-coordinate [player]
+(defn player-direction [player]
   (let [world (.getWorld player)
         loc (.getLocation player)
         height (Vector. 0.0 1.0 0.0)
@@ -525,10 +525,11 @@
         right-hand (.crossProduct (.clone depth) height)]
    [depth, height, right-hand]))
 
-(defn player-coordinate-to-world [player dx hx rx]
-  (let [[d h r] (player-coordinate player)
-        loc (.toVector (.getLocation player))]
-    (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
+(defn local-coordinate-to-world [player origin-block dx hx rx]
+  (let [[d h r] (player-direction player)
+        loc (.toVector (.getLocation origin-block))]
+    (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))) 
+  )
 
 (defn block-categoly
      ;FIXME, stupid implementation.
@@ -588,7 +589,7 @@
                             #(.spawn world (.toLocation pos world) creature))))
 (defn summon-giant [player block]
   (let [world (.getWorld player)
-        spawn-at  (player-coordinate-to-world player 10.0 0.0 0.0)]
+        spawn-at  (local-coordinate-to-world player block 10.0 0.0 0.0)]
     (.strikeLightningEffect world (.toLocation spawn-at world))
     (summon-x spawn-at world Giant)
     ;(.spawn world (.toLocation spawn-at world) Giant)
@@ -597,9 +598,9 @@
 (defn summon-residents-of-nether [player block]
   (let [world (.getWorld player)
         loc (.toVector (.getLocation player))
-        pos1 (player-coordinate-to-world player 15.0 1.0 -5.0)
-        pos2 (player-coordinate-to-world player 15.0 1.0 0.0)
-        pos3 (player-coordinate-to-world player 15.0 1.0 5.0)
+        pos1 (local-coordinate-to-world player block 15.0 1.0 -5.0)
+        pos2 (local-coordinate-to-world player block 15.0 1.0 0.0)
+        pos3 (local-coordinate-to-world player block 15.0 1.0 5.0)
         fire-effect (fn [v i]
                       (cloft-schedule-settimer
                         (* 4 i)
@@ -629,7 +630,7 @@
             (summon-set-of-evils-at pos1 loc world)
             (summon-set-of-evils-at pos2 loc world)
             (summon-set-of-evils-at pos3 loc world)
-            (summon-x (player-coordinate-to-world player -5.0 0.5 0.0) world Creeper 80) ;hehehe
+            (summon-x (local-coordinate-to-world player block -5.0 0.5 0.0) world Creeper 80) ;hehehe
             (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, PigZombie and Ghast!!"))))
 
 (def active-fusion-wall(atom {}))
@@ -639,8 +640,8 @@
 (defn fusion-wall [player block]
   (let [world (.getWorld player)
         loc (.toVector (.getLocation player))
-        bottom (player-coordinate-to-world player 15.0 0.0 0.0)
-        top (player-coordinate-to-world player 15.0 6.0 0.0)]
+        bottom (local-coordinate-to-world player block 15.0 0.0 0.0)
+        top (local-coordinate-to-world player block 15.0 6.0 0.0)]
     (letfn [(place-cobblestones [v i]
               (cloft-schedule-settimer (* 4 i)
                                        #(when (= Material/AIR (.getType v))
@@ -659,13 +660,13 @@
 
 (defn fusion-floor [player block]
   (let [world (.getWorld player)
-        start-left (player-coordinate-to-world player 0.0 0.0 -1.0)
+        start-left (local-coordinate-to-world player block 0.0 0.0 -1.0)
         start-center (.toVector (.getLocation player))
-        start-right (player-coordinate-to-world player 0.0 0.0 1.0)
+        start-right (local-coordinate-to-world player block 0.0 0.0 1.0)
         distance (min (+ 10.0 (* 2 (.getLevel player))) 60.0)
-        end-left (player-coordinate-to-world player distance 0.0 -1.0)
-        end-center (player-coordinate-to-world player distance 0.0 0.0)
-        end-right (player-coordinate-to-world player distance 0.0 1.0)
+        end-left (local-coordinate-to-world player block distance 0.0 -1.0)
+        end-center (local-coordinate-to-world player block distance 0.0 0.0)
+        end-right (local-coordinate-to-world player block distance 0.0 1.0)
         block-floor(fn [v i]
                        (cloft-schedule-settimer
                          (* 4 i)
