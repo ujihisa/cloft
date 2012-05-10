@@ -280,9 +280,13 @@
        (Thread/sleep 10)
        (when (not (.isDead entity))
          (let [block (.getBlock (.getLocation entity))]
-           (when (= Material/AIR (.getType block))
-             (.setType block (rand-nth [Material/PUMPKIN Material/JACK_O_LANTERN]))))
-         (.remove entity)))))
+           (if (and
+                   (= 0 (rand-int 3))
+                   (= Material/AIR (.getType block)))
+             (do
+               (.setType block (rand-nth [Material/PUMPKIN Material/JACK_O_LANTERN]))
+               (.remove entity))
+             (.sendMessage (.getShooter entity) "PUMPKIN failed")))))))
 
 (defn arrow-skill-sniping [entity]
   nil)
