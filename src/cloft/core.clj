@@ -1369,7 +1369,8 @@
                     (.getShooter attacker)
                     attacker)]
               (when (and (not= actual-attacker target)
-                         (not (instance? Wolf actual-attacker)))
+                         (not (instance? Wolf actual-attacker))
+                         (not (instance? TNTPrimed actual-attacker)))
                 (skill target actual-attacker))))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
