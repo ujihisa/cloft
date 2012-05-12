@@ -493,7 +493,7 @@
         (swap! reaction-skill assoc (.getDisplayName player) (first skill-name))))))
 
 (defn arrow-skillchange [player block block-against]
-  (when (blazon? Material/STONE block-against)
+  (when (blazon? Material/STONE (.getBlock (.add (.getLocation block) 0 -1 0)))
     (let [table {Material/GLOWSTONE ['strong "STRONG"]
                  Material/TNT [arrow-skill-explosion "EXPLOSION"]
                  Material/TORCH [arrow-skill-torch "TORCH"]
@@ -503,6 +503,7 @@
                  Material/SAPLING [arrow-skill-tree "TREE"]
                  Material/WORKBENCH [arrow-skill-ore "ORE"]
                  Material/BROWN_MUSHROOM ['fly "FLY"]
+                 Material/TRAP_DOOR ['digg "DIGG"]
                  Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
                  Material/RAILS ['cart "CART"]
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
@@ -1189,6 +1190,16 @@
         (.damage target 10 shooter)
         (= arrow-skill-ice (arrow-skill-of shooter))
         (freeze-for-20-sec target)
+        (= 'digg (arrow-skill-of shooter))
+        (loop [depth -1]
+          (when (> depth -3)
+            (let [block (.getBlock (.add (.clone (.getLocation target)) 0 depth 0))]
+              (when (#{Material/GRASS Material/DIRT Material/STONE Material/GRAVEL Material/SAND Material/COBBLESTONE}
+                        (.getType block))
+                #_(.setType block Material/AIR)
+                (.breakNaturally block (ItemStack. Material/DIAMOND_PICKAXE))
+                (c/move-entity target 0 -1 0)
+                (recur (dec depth))))))
         (= arrow-skill-pumpkin (arrow-skill-of shooter))
         (condp instance? target
           Player

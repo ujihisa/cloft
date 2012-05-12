@@ -130,6 +130,11 @@
         (instance? TNTPrimed entity) "TNT"
         :else (str (class entity))))
 
+(defn move-entity [entity x y z]
+  (let [loc (.getLocation entity)]
+    (.add loc x y z)
+    (.teleport entity loc)))
+
 (def potion-types [PotionType/FIRE_RESISTANCE PotionType/INSTANT_DAMAGE
                    PotionType/INSTANT_HEAL PotionType/POISON PotionType/REGEN
                    PotionType/SLOWNESS PotionType/SPEED PotionType/STRENGTH
