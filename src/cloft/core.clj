@@ -524,13 +524,12 @@
         height (Vector. 0.0 1.0 0.0)
         depth (xz-normalized-vector (.getDirection loc))
         right-hand (.crossProduct (.clone depth) height)]
-   [depth, height, right-hand]))
+   [depth height right-hand]))
 
 (defn local-coordinate-to-world [player origin-block dx hx rx]
   (let [[d h r] (player-direction player)
         loc (.toVector (.getLocation origin-block))]
-    (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))) 
-  )
+    (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
 
 (defn block-categoly
      ;FIXME, stupid implementation.
@@ -656,7 +655,7 @@
                      (place-blocks-in-line world et top place-cobblestones))
                    ;else
                    (prn "nothing to connect."))
-           (swap! active-fusion-wall assoc (.getDisplayName player) [bottom, top]))))
+           (swap! active-fusion-wall assoc (.getDisplayName player) [bottom top]))))
 
 
 (defn fusion-floor [player block]
@@ -690,13 +689,13 @@
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
-    (let [table {Material/STONE (fn [p, b] (prn p (.getType b)))
+    (let [table {Material/STONE (fn [p b] (prn p (.getType b)))
                  Material/COBBLESTONE fusion-wall
                  Material/SAND fusion-floor
                  Material/DIRT summon-giant
                  Material/LOG make-redstone-for-livings
                  Material/GLOWSTONE summon-residents-of-nether
-                 Material/OBSIDIAN (fn [p, b]
+                 Material/OBSIDIAN (fn [p b]
                                      "create-portal"
                                      (prn 'not 'implemented))}]
       (if-let [alchemy (table (.getType block))]
@@ -904,7 +903,7 @@
             true
             ;(instance? nil target); maybe wrong...
             (= Material/BOW (.getType(.getItemInHand (.getPlayer evt)))))
-        (prn 'aiming', target)
+        (prn 'aiming' target)
 
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
         (let [player (.getPlayer evt)]
@@ -1193,13 +1192,17 @@
         (= 'digg (arrow-skill-of shooter))
         (loop [depth -1]
           (when (> depth -3)
-            (let [block (.getBlock (.add (.clone (.getLocation target)) 0 depth 0))]
+            (let [loc (.add (.clone (.getLocation target)) 0 depth 0)
+                  block (.getBlock loc)]
               (when (#{Material/GRASS Material/DIRT Material/STONE
                        Material/GRAVEL Material/SAND Material/SANDSTONE
                        Material/COBBLESTONE Material/SOUL_SAND
-                       Material/NETHERRACK} (.getType block))
+                       Material/NETHERRACK Material/AIR} (.getType block))
                 (.breakNaturally block (ItemStack. Material/DIAMOND_PICKAXE))
-                (c/move-entity target 0 -1 0)
+                (let [block-loc (.getLocation block)]
+                  (.setYaw block-loc (.getYaw loc))
+                  (.setPitch block-loc (.getPitch loc))
+                  (.teleport target (.add block-loc 0.5 1 0.5)))
                 (recur (dec depth))))))
         (= arrow-skill-pumpkin (arrow-skill-of shooter))
         (condp instance? target
