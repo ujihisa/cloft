@@ -1194,9 +1194,10 @@
         (loop [depth -1]
           (when (> depth -3)
             (let [block (.getBlock (.add (.clone (.getLocation target)) 0 depth 0))]
-              (when (#{Material/GRASS Material/DIRT Material/STONE Material/GRAVEL Material/SAND Material/COBBLESTONE}
-                        (.getType block))
-                #_(.setType block Material/AIR)
+              (when (#{Material/GRASS Material/DIRT Material/STONE
+                       Material/GRAVEL Material/SAND Material/SANDSTONE
+                       Material/COBBLESTONE Material/SOUL_SAND
+                       Material/NETHERRACK} (.getType block))
                 (.breakNaturally block (ItemStack. Material/DIAMOND_PICKAXE))
                 (c/move-entity target 0 -1 0)
                 (recur (dec depth))))))
