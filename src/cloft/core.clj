@@ -504,6 +504,7 @@
                  Material/WORKBENCH [arrow-skill-ore "ORE"]
                  Material/BROWN_MUSHROOM ['fly "FLY"]
                  Material/TRAP_DOOR ['digg "DIGG"]
+                 Material/LADDER ['trap "TRAP"]
                  Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
                  Material/RAILS ['cart "CART"]
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
@@ -1177,6 +1178,22 @@
     (org.bukkit.potion.PotionEffect. org.bukkit.potion.PotionEffectType/WEAKNESS 500 1)
     (Bukkit/getPlayer name))))
 
+(defn digg-entity [target shooter]
+  (loop [depth -1]
+    (when (> depth -3)
+      (let [loc (.add (.clone (.getLocation target)) 0 depth 0)
+            block (.getBlock loc)]
+        (when (#{Material/GRASS Material/DIRT Material/STONE
+                 Material/GRAVEL Material/SAND Material/SANDSTONE
+                 Material/COBBLESTONE Material/SOUL_SAND
+                 Material/NETHERRACK Material/AIR} (.getType block))
+          (.breakNaturally block (ItemStack. Material/DIAMOND_PICKAXE))
+          (let [block-loc (.getLocation block)]
+            (.setYaw block-loc (.getYaw loc))
+            (.setPitch block-loc (.getPitch loc))
+            (.teleport target (.add block-loc 0.5 1 0.5)))
+          (recur (dec depth)))))))
+
 (defn arrow-damages-entity-event [_ arrow target]
   (if-let [shooter (.getShooter arrow)]
     (when (instance? Player shooter)
@@ -1189,21 +1206,11 @@
         (.damage target 10 shooter)
         (= arrow-skill-ice (arrow-skill-of shooter))
         (freeze-for-20-sec target)
+        (= 'trap (arrow-skill-of shooter))
+        ((rand-nth [chain-entity digg-entity])
+           target shooter)
         (= 'digg (arrow-skill-of shooter))
-        (loop [depth -1]
-          (when (> depth -3)
-            (let [loc (.add (.clone (.getLocation target)) 0 depth 0)
-                  block (.getBlock loc)]
-              (when (#{Material/GRASS Material/DIRT Material/STONE
-                       Material/GRAVEL Material/SAND Material/SANDSTONE
-                       Material/COBBLESTONE Material/SOUL_SAND
-                       Material/NETHERRACK Material/AIR} (.getType block))
-                (.breakNaturally block (ItemStack. Material/DIAMOND_PICKAXE))
-                (let [block-loc (.getLocation block)]
-                  (.setYaw block-loc (.getYaw loc))
-                  (.setPitch block-loc (.getPitch loc))
-                  (.teleport target (.add block-loc 0.5 1 0.5)))
-                (recur (dec depth))))))
+        (digg-entity target shooter)
         (= arrow-skill-pumpkin (arrow-skill-of shooter))
         (condp instance? target
           Player
