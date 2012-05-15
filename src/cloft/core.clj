@@ -166,7 +166,7 @@
       (.setVelocity player (.setY (.clone (.getVelocity player)) -0.1))))
     #_(let [name (.getDisplayName player)]
       (if (get @sanctuary-players name)
-        (when (not (c/location-bound? (.getLocation player) (first sanctuary) (second sanctuary)))
+        (when-not (c/location-bound? (.getLocation player) (first sanctuary) (second sanctuary))
           (swap! sanctuary-players disj name))
         (when (c/location-bound? (.getLocation player) (first sanctuary) (second sanctuary))
           (c/broadcast name " entered the sanctuary.")
@@ -279,7 +279,7 @@
   (future-call
     #(do
        (Thread/sleep 10)
-       (when (not (.isDead entity))
+       (when-not (.isDead entity)
          (let [block (.getBlock (.getLocation entity))]
            (if (and
                    (= 0 (rand-int 3))
@@ -393,7 +393,7 @@
   nil)
 
 (defn freeze-for-20-sec [target]
-  (when (not (.isDead target))
+  (when-not (.isDead target)
     (let [loc (.getLocation (.getBlock (.getLocation target)))]
       (doseq [y [0 1]]
         (doseq [[x z] [[-1 0] [1 0] [0 -1] [0 1]]]
@@ -406,7 +406,7 @@
             (.setType block Material/GLASS))))
       (future-call #(do
                       (Thread/sleep 1000)
-                      (when (not (.isDead target))
+                      (when-not (.isDead target)
                         (.teleport target (.add (.clone loc) 0.5 0.0 0.5)))))
       (future-call #(do
                       (Thread/sleep 20000)
@@ -613,7 +613,7 @@
               ([pos wolrd] (sure-explosion-at pos world 1))
               ([pos world delay]
                (cloft-schedule-settimer 1  (fn []
-                                             (when (not (.createExplosion world (.toLocation pos world) 0.0 true))
+                                             (when-not (.createExplosion world (.toLocation pos world) 0.0 true)
                                                ; retry 1 tick later
                                                (sure-explosion-at pos world))))))
             (summon-set-of-evils-at
@@ -878,7 +878,7 @@
       (table (.getType itemstack))
       (future-call #(let [pair (table (.getType itemstack))]
                       (Thread/sleep 5000)
-                      (when (not (.isDead item))
+                      (when-not (.isDead item)
                         (let [new-item-material
                               (if (#{Material/FURNACE Material/BURNING_FURNACE}
                                       (.getType (.getBlock (.add (.getLocation item) 0 -1 0))))
@@ -1018,7 +1018,7 @@
 (defn chain-entity [entity shooter]
   (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
   (let [block (.getBlock (.getLocation entity))]
-    (when (not (.isLiquid block))
+    (when-not (.isLiquid block)
       (let [msg (str (.getDisplayName shooter) " chained " (c/entity2name entity))]
         (.sendMessage shooter msg)
         (c/lingr msg))
@@ -1280,7 +1280,7 @@
   (when (= 0 (rand-int 2))
     (future-call #(let [another-pig (.spawn (.getWorld pig) (.getLocation pig) Pig)]
                     (Thread/sleep 3000)
-                    (when (not (.isDead another-pig))
+                    (when-not (.isDead another-pig)
                       (.remove another-pig))))))
 
 (defn player-attacks-chicken-event [_ player chicken]
