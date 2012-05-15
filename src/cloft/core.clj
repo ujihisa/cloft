@@ -1207,7 +1207,9 @@
         (= arrow-skill-ice (arrow-skill-of shooter))
         (freeze-for-20-sec target)
         (= 'trap (arrow-skill-of shooter))
-        ((rand-nth [chain-entity digg-entity])
+        ((rand-nth [chain-entity
+                    (comp freeze-for-20-sec first list)
+                    digg-entity])
            target shooter)
         (= 'digg (arrow-skill-of shooter))
         (digg-entity target shooter)
