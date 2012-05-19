@@ -1411,6 +1411,15 @@
       (.sendMessage player "Your hand hurts!")
       (.damage player (rand-int 5)))))
 
+(defn block-grow-event [evt]
+  (let [newstate (.getNewState evt)]
+    (when (and
+            (= Material/PUMPKIN (.getType newstate))
+            (= 0 (rand-int 2))
+            #_(not-empty (.getNearbyEntities)))
+      (.spawn (.getWorld newstate) (.getLocation newstate) Squid)
+      (.setCancelled evt true))))
+
 (defn arrow-hit-event [evt entity]
   (cond
     (instance? Player (.getShooter entity))
