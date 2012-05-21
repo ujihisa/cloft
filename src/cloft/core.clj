@@ -1380,12 +1380,22 @@
             (player-attacks-chicken-event evt attacker target))
           (when (= 'fly (arrow-skill-of attacker))
             (future-call #(c/add-velocity target 0 1 0))))
-        (comment
-          (when (and (instance? Player target) (= EntityDamageEvent$DamageCause/FALL (.getCause evt))))
-            (when (= Material/SLIME_BALL (.getType (.getItemInHand target)))
-              (.setCancelled evt true)
-              (c/add-velocity target 0 1 0)
-              (c/consume-item target)))
+        (when (= EntityDamageEvent$DamageCause/FALL (.getCause evt))
+          (let [loc (.add (.getLocation target) 0 -1 0)]
+            (when (= Material/FENCE (.getType (.getBlock loc)))
+              (when (every? #(not= Material/FENCE %)
+                            (map (fn [[x z]]
+                                   (.getType (.getBlock (.add (.clone loc) x 0 z))))
+                                 [[-1 0] [1 0] [0 -1] [0 1]]))
+                (when (instance? Player target)
+                  (let [msg (str "Oh trap! " (.getDisplayName target) " was on a needle.")]
+                    (c/lingr msg)
+                    (.sendMessage target msg)))
+                (.damage target 20))))
+          #_(when (= Material/SLIME_BALL (.getType (.getItemInHand target)))
+            (.setCancelled evt true)
+            (c/add-velocity target 0 1 0)
+            (c/consume-item target)))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (if-let [skill (reaction-skill-of target)]
             (let [actual-attacker
