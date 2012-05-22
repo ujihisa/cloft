@@ -510,6 +510,8 @@
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
                  #_( Material/STONE ['sniping "SNIPING"])
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]
+                 Material/POWERED_RAIL ['exp "EXP"]
+                 Material/PISTON_BASE ['super-knockback "SUPER-KNOCKBACK"]
                  Material/JACK_O_LANTERN [arrow-skill-pumpkin "PUMPKIN"]
                  Material/PUMPKIN [arrow-skill-pumpkin "PUMPKIN"]}]
       (when-let [skill-name (table (.getType block))]
@@ -1091,12 +1093,14 @@
       (when (instance? Giant entity)
         (.setDroppedExp evt 1000))
       (when (instance? Creeper entity)
-        (.setDroppedExp evt 20))
+        (.setDroppedExp evt 10))
       (when (and
               (= 0 (rand-int 2))
               (instance? CaveSpider entity))
         (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/GOLD_SWORD)))
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
+      (when (= 'exp (arrow-skill-of killer))
+        (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
       (c/broadcast (.getDisplayName killer) " killed " (c/entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
 
 (defn player-death-event [evt player]
@@ -1245,6 +1249,17 @@
           nil)
         (= 'fly (arrow-skill-of shooter))
         (future-call #(c/add-velocity target 0 1 0))
+        (= 'exp (arrow-skill-of shooter))
+        (.damage shooter 2)
+        (= 'super-knockback (arrow-skill-of shooter))
+        (let [direction (.subtract (.getLocation shooter)
+                                   (.getLocation target))
+              vector (.multiply (.normalize (.toVector direction)) 3)]
+          (c/add-velocity shooter (.getX vector) (+ (.getY vector) 1.0) (.getY vector))
+          (future-call
+            (let [vector (.multiply vector -1)]
+              (Thread/sleep 1)
+              (c/add-velocity target (.getX vector) (+ (.getY vector) 1.0) (.getY vector)))))
         (= 'mobchange (arrow-skill-of shooter))
         (do
           (let [change-to (rand-nth [Blaze Boat CaveSpider Chicken Chicken
@@ -1384,7 +1399,13 @@
           (when (instance? Chicken target)
             (player-attacks-chicken-event evt attacker target))
           (when (= 'fly (arrow-skill-of attacker))
-            (future-call #(c/add-velocity target 0 1 0))))
+            (future-call #(do
+                            (prn 0)
+                            (c/add-velocity target 0 1 0)
+                            (prn 1)
+                            (Thread/sleep 5000)
+                            (prn 2)
+                            (c/add-velocity target 0 1 0)))))
         (when (= EntityDamageEvent$DamageCause/FALL (.getCause evt))
           (let [loc (.add (.getLocation target) 0 -1 0)]
             (when (= Material/FENCE (.getType (.getBlock loc)))
