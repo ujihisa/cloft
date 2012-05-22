@@ -899,12 +899,13 @@
                 (.getLocation target)
                 (ItemStack. (int n) (int 1) (short 0) (Byte. m)))))]
       (cond
-        ; right-click air and bow in hand -> aiming?
-        (and
-            true
-            ;(instance? nil target); maybe wrong...
-            (= Material/BOW (.getType(.getItemInHand (.getPlayer evt)))))
-        (prn 'aiming' target)
+        #_("right-click air and bow in hand -> aiming?")
+        #_((and
+              #_(
+                 (instance? nil target)
+                 "maybe wrong...")
+              (= Material/BOW (.getType(.getItemInHand (.getPlayer evt)))))
+          (prn 'aiming' target))
 
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
         (let [player (.getPlayer evt)]
