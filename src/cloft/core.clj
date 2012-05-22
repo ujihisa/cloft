@@ -894,14 +894,10 @@
   (c/consume-item player)
   (.setPassenger player target)
   (.setCancelled evt true)
-  (cond
-    (instance? Pig target)
-    (.setAllowFlight player true)
-
-    (instance? Chicken target)
-    (.setAllowFlight player true)
-
-    (instance? Player target)
+  (condp instance? target
+    Pig (.setAllowFlight player true)
+    Chicken (.setAllowFlight player true)
+    Player
     (future-call #(do
                     (Thread/sleep 10000)
                     (when (= player (.getPassenger player))
