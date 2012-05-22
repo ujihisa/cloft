@@ -897,6 +897,10 @@
   (condp instance? target
     Pig (.setAllowFlight player true)
     Chicken (.setAllowFlight player true)
+    Squid (do
+            (c/lingr (str (.getDisplayName player) " is flying with squid!"))
+            (.setAllowFlight player true)
+            (.setFoodLevel player 20))
     Player
     (future-call #(do
                     (Thread/sleep 10000)
