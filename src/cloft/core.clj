@@ -895,9 +895,10 @@
   (.setPassenger player target)
   (.setCancelled evt true)
   (cond
-    (or
-      (instance? Pig target)
-      (instance? Chicken target))
+    (instance? Pig target)
+    (.setAllowFlight player true)
+
+    (instance? Chicken target)
     (.setAllowFlight player true)
 
     (instance? Player target)
