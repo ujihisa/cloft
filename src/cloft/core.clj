@@ -890,6 +890,22 @@
 (defn player-toggle-sneak-event [evt]
   (prn (.getEventName evt) (.getPlayer evt)))
 
+(defn player-entity-with-string-event [evt player target]
+  (c/consume-item player)
+  (.setPassenger player target)
+  (.setCancelled evt true)
+  (cond
+    (or
+      (instance? Pig target)
+      (instance? Chicken target))
+    (.setAllowFlight player true)
+
+    (instance? Player target)
+    (future-call #(do
+                    (Thread/sleep 10000)
+                    (when (= player (.getPassenger player))
+                      (.setPassenger player nil))))))
+
 (defn player-interact-entity-event [evt]
   (let [target (.getRightClicked evt)]
     (letfn [(d
@@ -909,20 +925,7 @@
 
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
         (let [player (.getPlayer evt)]
-          (c/consume-item player)
-          (.setPassenger player target)
-          (.setCancelled evt true)
-          (cond
-            (or
-              (instance? Pig target)
-              (instance? Chicken target))
-            (.setAllowFlight player true)
-
-            (instance? Player target)
-            (future-call #(do
-              (Thread/sleep 10000)
-              (when (= player (.getPassenger player))
-                (.setPassenger player nil))))))
+          (player-entity-with-string-event evt player target))
 
         (and (= (.getType (.getItemInHand (.getPlayer evt))) Material/COAL)
              (instance? PoweredMinecart target))
