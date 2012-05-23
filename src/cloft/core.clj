@@ -1382,12 +1382,15 @@
           (fish-damages-entity-event evt attacker target))
         (when (instance? Snowball attacker)
           (if-let [shooter (.getShooter attacker)]
-            (when (or
+            (if (or
                     (@special-snowball-set attacker)
                     (instance? Snowman shooter))
               (do
                 (.setFireTicks target 50)
-                (.damage target 2 (.getShooter attacker))))))
+                (.damage target 2 (.getShooter attacker)))
+              (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
+                    vector (.multiply (.normalize (.toVector direction)) 3)]
+                (c/add-velocity target (.getX vector) (+ (.getY vector) 2.0) (.getZ vector))))))
         (when (instance? Arrow attacker)
           (arrow-damages-entity-event evt attacker target))
         (when (instance? Player attacker)
