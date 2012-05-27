@@ -594,7 +594,8 @@
 
 (defn place-blocks-in-circle
    [world center radius place-fn]
-   ;; center is location, but no respect to Yaw etc, it is in x-z plane.
+   ;; center is location, but no respect to Yaw etc.
+   ;; so resulting circle is in x-z plane.
    ;;
    ;; http://en.wikipedia.org/wiki/Midpoint_circle_algorithm
    ;; http://dencha.ojaru.jp/programs_07/pg_graphic_09a1.html
@@ -603,14 +604,13 @@
    (let [c (.toVector center)
          ux (Vector. 1.0 0.0 0.0)
          uy (Vector. 0.0 1.0 0.0)
-         uz (Vector. 0.0 0.0 1.0)
-         ]
+         uz (Vector. 0.0 0.0 1.0)]
      (defn helper [dx dz]
        (place-fn
-         (.getBlockAt world (.toLocation
-                              (.add (.add (.clone c)
-                                          (.multiply (.clone ux) dx))
-                                    (.multiply (.clone uz) dz)) world)) 0))
+         (.getBlockAt
+           world
+           (.toLocation (.add (.add (.clone c)(.multiply (.clone ux) dx))(.multiply (.clone uz) dz)) world))
+         0))
      (helper 0 radius)
      (helper radius 0)
      (helper 0 (- radius))
@@ -628,13 +628,8 @@
            (helper (+ cy) (- cx))
            (if (<= cx cy)
              (recur (inc cx)
-                    (if (< d 0)
-                      (+ d 6 (* 4 cx))
-                      (+ d 10 (* 4 cx) (* -4 cy)))
-                    (if (< d 0)
-                      cy
-                      (dec cy)
-                      ))))))
+                    (if (< d 0) (+ d 6 (* 4 cx)) (+ d 10 (* 4 cx) (* -4 cy)))
+                    (if (< d 0) cy (dec cy)))))))
 
 (defn summon-x
   ([pos world creature]
@@ -753,18 +748,16 @@
     (place-blocks-in-circle
       world crator-location 10
       (fn [v i]
-          (.setType v Material/COBBLESTONE)
-          ))))
+          (.setType v Material/COBBLESTONE)))))
 
 (defn earthen-pipe [player block]
   (let [world (.getWorld player)
         center-vector (local-coordinate-to-world player block 10.0 0.0 0.0)
         center-location (.toLocation center-vector world)
-        uy (Vector. 0 1 0)
-        ]
+        uy (Vector. 0 1 0)]
     (loop [h 0 r 5]
-          (place-blocks-in-circle 
-            world 
+          (place-blocks-in-circle
+            world
             (.toLocation (.add (.clone center-vector) (.multiply (.clone uy) h)) world)
             r
             (fn [v i]
@@ -772,9 +765,8 @@
                 (.setData v (Byte. (byte 5)))))
           (if (< h 20)
             (recur (inc h) 5)
-            (if (< h 24)
-              (recur (inc h) 6)
-              )))))
+            (if (< h 24) ;; making "lip"
+              (recur (inc h) 6))))))
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
