@@ -592,6 +592,84 @@
        (when (.hasNext iter)
          (recur (.hasNext iter) (inc i)))))))
 
+(defn place-blocks-in-circle
+   [world center radius place-fn]
+   ;; center is location, but no respect to Yaw etc, it is in x-z plane.
+   ;;
+   ;; http://en.wikipedia.org/wiki/Midpoint_circle_algorithm
+   ;; http://dencha.ojaru.jp/programs_07/pg_graphic_09a1.html
+   ;;
+   ;; Michener.
+   (let [c (.toVector center)
+         ux (Vector. 1.0 0.0 0.0)
+         uy (Vector. 0.0 1.0 0.0)
+         uz (Vector. 0.0 0.0 1.0)
+         ]
+     (place-fn
+       (.getBlockAt world (.toLocation (.add (.clone c) (.multiply (.clone uz) radius)) world))
+       0)
+     (place-fn
+       (.getBlockAt world (.toLocation (.add (.clone c) (.multiply (.clone ux) radius)) world))
+       0)
+     (place-fn
+       (.getBlockAt world  (.toLocation (.add (.clone c) (.multiply (.clone uz) (- radius))) world))
+       0)
+     (place-fn
+       (.getBlockAt world (.toLocation (.add (.clone c) (.multiply (.clone ux) (- radius))) world))
+       0)
+     (loop [cx 0
+            d (- 3 (* 2 radius))
+            cy radius]
+           (place-fn
+            (.getBlockAt world (.toLocation 
+                                 (.add (.add (.clone c)
+                                             (.multiply (.clone ux) cy)) 
+                                             (.multiply (.clone uz) cx)) world)) 0)
+           (place-fn
+            (.getBlockAt world (.toLocation 
+                                 (.add(.add (.clone c)
+                                                  (.multiply (.clone ux) cx))
+                                                  (.multiply (.clone uz) cy)) world)) 0)
+           (place-fn
+            (.getBlockAt world (.toLocation 
+                                 (.add(.add (.clone c)
+                                                  (.multiply (.clone ux) (- cx)))
+                                                  (.multiply (.clone uz) cy)) world)) 0)
+           (place-fn
+            (.getBlockAt world (.toLocation 
+                                 (.add(.add (.clone c)
+                                                  (.multiply (.clone ux) (- cy)))
+                                                  (.multiply (.clone uz) cx)) world)) 0)
+           (place-fn
+            (.getBlockAt world (.toLocation 
+                                 (.add(.add (.clone c)
+                                                  (.multiply (.clone ux) (- cy)))
+                                                  (.multiply (.clone uz) (- cx))) world)) 0)
+           (place-fn
+            (.getBlockAt world (.toLocation 
+                                 (.add(.add (.clone c)
+                                                  (.multiply (.clone ux) (- cx)))
+                                                  (.multiply (.clone uz) (- cy))) world)) 0)
+           (place-fn
+            (.getBlockAt world (.toLocation 
+                                 (.add(.add (.clone c)
+                                                  (.multiply (.clone ux) (+ cx)))
+                                                  (.multiply (.clone uz) (- cy))) world)) 0)
+           (place-fn
+            (.getBlockAt world (.toLocation 
+                                 (.add(.add (.clone c)
+                                                  (.multiply (.clone ux) (+ cy)))
+                                                  (.multiply (.clone uz) (- cx))) world)) 0)
+           (if (<= cx cy)
+             (recur (inc cx)
+                    (if (< d 0)
+                      (+ d 6 (* 4 cx))
+                      (+ d 10 (* 4 cx) (* -4 cy)))
+                    (if (< d 0)
+                      cy
+                      (dec cy)
+                      ))))))
+
 (defn summon-x
   ([pos world creature]
   (summon-x pos world creature 1))
@@ -699,12 +777,27 @@
              (.strikeLightningEffect world loc)
              (.dropItem world loc (ItemStack. Material/REDSTONE))))))
 
+(defn erupt-volcano [player block]
+  (let [world (.getWorld player)
+        crator-vector (local-coordinate-to-world player block 40.0 20.0 0.0)
+        crator-location (.toLocation crator-vector world)
+        ]
+    (.strikeLightningEffect world crator-location)
+    (.setType (.getBlockAt world crator-location) Material/LAVA)
+    (place-blocks-in-circle
+      world crator-location 10
+      (fn [v i]
+          (.setType v Material/COBBLESTONE)
+          ))))
+
+
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
     (let [table {Material/STONE (fn [p b] (prn p (.getType b)))
                  Material/COBBLESTONE fusion-wall
                  Material/SAND fusion-floor
                  Material/DIRT summon-giant
+                 Material/NETHERRACK erupt-volcano
                  Material/LOG make-redstone-for-livings
                  Material/GLOWSTONE summon-residents-of-nether
                  Material/OBSIDIAN (fn [p b]
