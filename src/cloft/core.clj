@@ -756,6 +756,22 @@
           (.setType v Material/COBBLESTONE)
           ))))
 
+(defn earthen-pipe [player block]
+  (let [world (.getWorld player)
+        center-vector (local-coordinate-to-world player block 10.0 0.0 0.0)
+        center-location (.toLocation center-vector world)
+        uy (Vector. 0 1 0)
+        ]
+    (loop [h 0]
+          (place-blocks-in-circle 
+            world 
+            (.toLocation (.add (.clone center-vector) (.multiply (.clone uy) h)) world)
+            5
+            (fn [v i]
+                (.setType v Material/WOOL)
+                (.setData v (Byte. (byte 2)))))
+          (if (< h 20)
+            (recur (inc h))))))
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
@@ -764,6 +780,7 @@
                  Material/SAND fusion-floor
                  Material/DIRT summon-giant
                  Material/NETHERRACK erupt-volcano
+                 Material/RED_MUSHROOM earthen-pipe
                  Material/LOG make-redstone-for-livings
                  Material/GLOWSTONE summon-residents-of-nether
                  Material/OBSIDIAN (fn [p b]
