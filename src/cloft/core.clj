@@ -605,61 +605,27 @@
          uy (Vector. 0.0 1.0 0.0)
          uz (Vector. 0.0 0.0 1.0)
          ]
-     (place-fn
-       (.getBlockAt world (.toLocation (.add (.clone c) (.multiply (.clone uz) radius)) world))
-       0)
-     (place-fn
-       (.getBlockAt world (.toLocation (.add (.clone c) (.multiply (.clone ux) radius)) world))
-       0)
-     (place-fn
-       (.getBlockAt world  (.toLocation (.add (.clone c) (.multiply (.clone uz) (- radius))) world))
-       0)
-     (place-fn
-       (.getBlockAt world (.toLocation (.add (.clone c) (.multiply (.clone ux) (- radius))) world))
-       0)
+     (defn helper [dx dz]
+       (place-fn
+         (.getBlockAt world (.toLocation
+                              (.add (.add (.clone c)
+                                          (.multiply (.clone ux) dx))
+                                    (.multiply (.clone uz) dz)) world)) 0))
+     (helper 0 radius)
+     (helper radius 0)
+     (helper 0 (- radius))
+     (helper (- radius) 0)
      (loop [cx 0
             d (- 3 (* 2 radius))
             cy radius]
-           (place-fn
-            (.getBlockAt world (.toLocation 
-                                 (.add (.add (.clone c)
-                                             (.multiply (.clone ux) cy)) 
-                                             (.multiply (.clone uz) cx)) world)) 0)
-           (place-fn
-            (.getBlockAt world (.toLocation 
-                                 (.add(.add (.clone c)
-                                                  (.multiply (.clone ux) cx))
-                                                  (.multiply (.clone uz) cy)) world)) 0)
-           (place-fn
-            (.getBlockAt world (.toLocation 
-                                 (.add(.add (.clone c)
-                                                  (.multiply (.clone ux) (- cx)))
-                                                  (.multiply (.clone uz) cy)) world)) 0)
-           (place-fn
-            (.getBlockAt world (.toLocation 
-                                 (.add(.add (.clone c)
-                                                  (.multiply (.clone ux) (- cy)))
-                                                  (.multiply (.clone uz) cx)) world)) 0)
-           (place-fn
-            (.getBlockAt world (.toLocation 
-                                 (.add(.add (.clone c)
-                                                  (.multiply (.clone ux) (- cy)))
-                                                  (.multiply (.clone uz) (- cx))) world)) 0)
-           (place-fn
-            (.getBlockAt world (.toLocation 
-                                 (.add(.add (.clone c)
-                                                  (.multiply (.clone ux) (- cx)))
-                                                  (.multiply (.clone uz) (- cy))) world)) 0)
-           (place-fn
-            (.getBlockAt world (.toLocation 
-                                 (.add(.add (.clone c)
-                                                  (.multiply (.clone ux) (+ cx)))
-                                                  (.multiply (.clone uz) (- cy))) world)) 0)
-           (place-fn
-            (.getBlockAt world (.toLocation 
-                                 (.add(.add (.clone c)
-                                                  (.multiply (.clone ux) (+ cy)))
-                                                  (.multiply (.clone uz) (- cx))) world)) 0)
+           (helper cy cx)
+           (helper cx cy)
+           (helper (- cx) (+ cy))
+           (helper (- cy) (+ cx))
+           (helper (- cy) (- cx))
+           (helper (- cx) (- cy))
+           (helper (+ cx) (- cy))
+           (helper (+ cy) (- cx))
            (if (<= cx cy)
              (recur (inc cx)
                     (if (< d 0)
