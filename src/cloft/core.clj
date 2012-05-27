@@ -432,6 +432,14 @@
   (.setFireTicks by 100)
   (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by))))
 
+(defn reaction-skill-golem [you by]
+  (let [golem (.spawn (.getWorld by) (.getLocation by) IronGolem)]
+    (.setTarget golem by)
+    (future-call #(do
+                    (Thread/sleep 10000)
+                    (.remove golem))))
+  (.sendMessage you "a golem helps you!"))
+
 (defn reaction-skill-wolf [you by]
   (let [wolf (.spawn (.getWorld by) (.getLocation by) Wolf)]
     (.setTamed wolf true)
@@ -487,6 +495,7 @@
                  Material/YELLOW_FLOWER [reaction-skill-teleport "TELEPORT"]
                  Material/COBBLESTONE [reaction-skill-knockback "KNOCKBACK"]
                  Material/DIRT [reaction-skill-wolf "WOLF"]
+                 Material/IRON_BLOCK [reaction-skill-golem "GOLEM"]
                  Material/SNOW_BLOCK [reaction-skill-ice "ICE"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed reaction-skill to " (last skill-name))
