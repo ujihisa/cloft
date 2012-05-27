@@ -762,16 +762,19 @@
         center-location (.toLocation center-vector world)
         uy (Vector. 0 1 0)
         ]
-    (loop [h 0]
+    (loop [h 0 r 5]
           (place-blocks-in-circle 
             world 
             (.toLocation (.add (.clone center-vector) (.multiply (.clone uy) h)) world)
-            5
+            r
             (fn [v i]
                 (.setType v Material/WOOL)
-                (.setData v (Byte. (byte 2)))))
+                (.setData v (Byte. (byte 5)))))
           (if (< h 20)
-            (recur (inc h))))))
+            (recur (inc h) 5)
+            (if (< h 24)
+              (recur (inc h) 6)
+              )))))
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
