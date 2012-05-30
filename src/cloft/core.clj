@@ -711,10 +711,8 @@
                                      "create-portal"
                                      (prn 'not 'implemented))}]
       (if-let [alchemy (table (.getType block))]
-              ;then
-              (alchemy player block)
-              ;else
-              (prn "no effect is defined for " block)))))
+        (alchemy player block)
+        (prn "no effect is defined for " block)))))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
