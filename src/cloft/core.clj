@@ -714,6 +714,10 @@
         (alchemy player block)
         (prn "no effect is defined for " block)))))
 
+(defn block-piston-extend-event [evt]
+  "just for development"
+  (prn ['block-piston-extend-event (.getBlocks evt) (.getBlock evt) (.getLength evt) (.getDirection evt)]))
+
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))

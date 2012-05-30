@@ -162,6 +162,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onBlockPistonExtendEvent(BlockPistonExtendEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "block-piston-extend-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onBlockRedstone(BlockRedstoneEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "block-redstone-event");
         if (f.isBound()) f.invoke(event);
