@@ -715,8 +715,14 @@
         (prn "no effect is defined for " block)))))
 
 (defn block-piston-extend-event [evt]
-  "just for development"
-  (prn ['block-piston-extend-event (.getBlocks evt) (.getBlock evt) (.getLength evt) (.getDirection evt)]))
+  "pushes the player strongly"
+  (let [direction (.getDirection evt)
+        block (.getBlock
+                (.add (.getLocation (.getBlock evt)) (.getModX direction) (.getModY direction) (.getModZ direction)))
+        players (filter #(= block (.getBlock (.getLocation %))) (Bukkit/getOnlinePlayers))]
+    (doseq [player players]
+      (.teleport player (.add (.getLocation player) (.getModX direction) (.getModY direction) (.getModZ direction)))
+      (c/add-velocity player (* (.getModX direction) 4) (* (.getModY direction) 1.5) (* (.getModZ direction) 4)))))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
