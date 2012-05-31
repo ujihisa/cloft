@@ -90,6 +90,12 @@
 (defn add-velocity [entity x y z]
   (.setVelocity entity (.add (.getVelocity entity) (org.bukkit.util.Vector. (double x) (double y) (double z)))))
 
+(defn entities-nearby-from [location radius]
+  "location -> set of entities"
+  (let [players
+        (filter #(> radius (.distance (.getLocation %) (.getLocation block))) (Bukkit/getOnlinePlayers))]
+    (apply clojure.set/union (map #(set (cons % (.getNearbyEntities % radius radius radius))) players))))
+
 (defn removable-block? [block]
   (and
     (nil? (#{Material/AIR Material/CHEST Material/FURNACE Material/BURNING_FURNACE Material/BEDROCK} (.getType block)))

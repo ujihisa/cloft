@@ -719,8 +719,7 @@
   (let [direction (.getDirection evt)
         block (.getBlock
                 (.add (.getLocation (.getBlock evt)) (.getModX direction) (.getModY direction) (.getModZ direction)))
-        players (filter #(> 10 (.distance (.getLocation %) (.getLocation block))) (Bukkit/getOnlinePlayers))
-        entities (apply clojure.set/union (map #(set (cons % (.getNearbyEntities % 10 10 10))) players))
+        entities (c/entities-nearby-from (.getLocation block) 10)
         entities-pushed (filter #(= block (.getBlock (.getLocation %))) entities)]
     (doseq [e entities-pushed]
       (.teleport e (.add (.getLocation e) (.getModX direction) (.getModY direction) (.getModZ direction)))
