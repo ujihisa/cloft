@@ -715,14 +715,16 @@
         (prn "no effect is defined for " block)))))
 
 (defn block-piston-extend-event [evt]
-  "pushes the player strongly"
+  "pushes the entity strongly"
   (let [direction (.getDirection evt)
         block (.getBlock
                 (.add (.getLocation (.getBlock evt)) (.getModX direction) (.getModY direction) (.getModZ direction)))
-        players (filter #(= block (.getBlock (.getLocation %))) (Bukkit/getOnlinePlayers))]
-    (doseq [player players]
-      (.teleport player (.add (.getLocation player) (.getModX direction) (.getModY direction) (.getModZ direction)))
-      (c/add-velocity player (* (.getModX direction) 4) (* (.getModY direction) 1.5) (* (.getModZ direction) 4)))))
+        players (filter #(> 10 (.distance (.getLocation %) (.getLocation block))) (Bukkit/getOnlinePlayers))
+        entities (apply clojure.set/union (map #(set (cons % (.getNearbyEntities % 10 10 10))) players))
+        entities-pushed (filter #(= block (.getBlock (.getLocation %))) entities)]
+    (doseq [e entities-pushed]
+      (.teleport e (.add (.getLocation e) (.getModX direction) (.getModY direction) (.getModZ direction)))
+      (c/add-velocity e (* (.getModX direction) 4) (* (.getModY direction) 1.5) (* (.getModZ direction) 4)))))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
