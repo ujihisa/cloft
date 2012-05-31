@@ -21,7 +21,7 @@
   (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
   (:import [org.bukkit.inventory ItemStack])
   (:import [org.bukkit.util Vector])
-  (:import [org.bukkit Location])
+  (:import [org.bukkit Location Effect])
   (:import [org.bukkit.util BlockIterator])
   (:import [org.bukkit.event.block Action]))
 
@@ -618,7 +618,7 @@
                         (* 4 i)
                         (fn []
                           (when (= Material/AIR (.getType v))
-                            (.playEffect (.getWorld v) (.getLocation v) org.bukkit.Effect/BLAZE_SHOOT nil)
+                            (.playEffect (.getWorld v) (.getLocation v) Effect/BLAZE_SHOOT nil)
                             (.setType v Material/FIRE)))))]
     (letfn [(sure-explosion-at
               ([pos wolrd] (sure-explosion-at pos world 1))
@@ -794,10 +794,10 @@
                           Material/STONE_PLATE (.teleport entity newloc)
                           Material/WOOD_PLATE (c/add-velocity entity 0 1.5 0)
                           nil)
-                        (.playEffect (.getWorld entity-loc) (.add entity-loc 0 1 0) org.bukkit.Effect/BOW_FIRE nil)
-                        (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/BOW_FIRE nil)
-                        (.playEffect (.getWorld entity-loc) entity-loc org.bukkit.Effect/ENDER_SIGNAL nil)
-                        (.playEffect (.getWorld newloc) newloc org.bukkit.Effect/ENDER_SIGNAL nil)))))))
+                        (.playEffect (.getWorld entity-loc) (.add entity-loc 0 1 0) Effect/BOW_FIRE nil)
+                        (.playEffect (.getWorld newloc) newloc Effect/BOW_FIRE nil)
+                        (.playEffect (.getWorld entity-loc) entity-loc Effect/ENDER_SIGNAL nil)
+                        (.playEffect (.getWorld newloc) newloc Effect/ENDER_SIGNAL nil)))))))
 
 (defn entity-interact-physical-event [evt entity]
   (teleport-up entity (.getBlock evt)))
