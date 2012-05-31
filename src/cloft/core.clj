@@ -592,7 +592,7 @@
        (when (.hasNext iter)
          (recur (.hasNext iter) (inc i)))))))
 
-(defn place-blocks-in-circle
+(defn place-blocks-in-a-circle
    [world center radius place-fn]
    ;; center is location, but no respect to Yaw etc.
    ;; so resulting circle is in x-z plane.
@@ -630,6 +630,14 @@
              (recur (inc cx)
                     (if (< d 0) (+ d 6 (* 4 cx)) (+ d 10 (* 4 cx) (* -4 cy)))
                     (if (< d 0) cy (dec cy)))))))
+
+(defn place-blocks-in-circle
+   [world center inner outer place-fn]
+   (loop [r inner]
+         (place-blocks-in-a-circle world center r place-fn)
+         (if (<= r outer)
+           (recur (+ r 0.25)))))
+
 
 (defn summon-x
   ([pos world creature]
@@ -746,7 +754,7 @@
     (.strikeLightningEffect world crator-location)
     (.setType (.getBlockAt world crator-location) Material/LAVA)
     (place-blocks-in-circle
-      world crator-location 10
+      world crator-location 10 14
       (fn [v i]
           (.setType v Material/COBBLESTONE)))))
 
@@ -755,18 +763,18 @@
         center-vector (local-coordinate-to-world player block 10.0 0.0 0.0)
         center-location (.toLocation center-vector world)
         uy (Vector. 0 1 0)]
-    (loop [h 0 r 5]
+    (loop [h 0 inner 5 outer 7]
           (place-blocks-in-circle
             world
             (.toLocation (.add (.clone center-vector) (.multiply (.clone uy) h)) world)
-            r
+            inner outer
             (fn [v i]
                 (.setType v Material/WOOL)
                 (.setData v (Byte. (byte 5)))))
           (if (< h 20)
-            (recur (inc h) 5)
+            (recur (inc h) inner outer)
             (if (< h 24) ;; making "lip"
-              (recur (inc h) 6))))))
+              (recur (inc h) inner 9))))))
 
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
