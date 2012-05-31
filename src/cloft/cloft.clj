@@ -1,6 +1,7 @@
 (ns cloft.cloft
   (:require [swank.swank])
   (:require [clojure.string :as s])
+  (:require [clojure.set])
   (:import [org.bukkit Bukkit Material])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
@@ -93,7 +94,7 @@
 (defn entities-nearby-from [location radius]
   "location -> set of entities"
   (let [players
-        (filter #(> radius (.distance (.getLocation %) (.getLocation block))) (Bukkit/getOnlinePlayers))]
+        (filter #(> radius (.distance (.getLocation %) location)) (Bukkit/getOnlinePlayers))]
     (apply clojure.set/union (map #(set (cons % (.getNearbyEntities % radius radius radius))) players))))
 
 (defn removable-block? [block]
