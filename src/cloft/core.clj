@@ -759,6 +759,20 @@
                     (.playEffect (.getWorld (c/ujm)) (.getLocation (c/ujm)) Effect/RECORD_PLAY (rand-nth c/records))))
     (c/lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
+(defn paperlot [player]
+  (letfn [(unlucky [player]
+            (.sendMessage player "unlucky!")
+            (future-call
+              #(do
+                 "wait less than 5min"
+                 (Thread/sleep (rand-int 300000))
+                 (doseq [x [-2 2] z [-2 2]]
+                   (let [loc (.add (.getLocation player) x 2 z)]
+                     (.sendMessage player "!!!")
+                     (when (= Material/AIR (.getType (.getBlock loc)))
+                       (.spawn (.getWorld loc) loc Creeper)))))))]
+    (-> player (rand-nth [unlucky]))))
+
 ;(defn c/get-player-quit-listener []
 ;  (c/auto-proxy
 ;    [Listener] []
