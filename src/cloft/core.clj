@@ -544,38 +544,82 @@
     (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
 
 (defn block-categoly
-     ;FIXME, stupid implementation.
      ;available options:
-     ; :vacant :enterable :combustible
+     ; :vacant ; cannot have any material from that block
+     ; :enterable  ; can step in.
+     ; :combustible ; can be set fire.
+     ; :crafted ; something crafted by player
      ;usage:
      ; (block-categoly :vacant :enterable) => #{} of vacant and enterable
-     ; (block-categoly :enterable :vacant) => #{} of vacant and enterable
+     ; (block-categoly :vacant) => #{} of enterable
+     ;
+     ; http://jd.bukkit.org/apidocs/org/bukkit/Material.html
      ;
      [ & ks]
      (let [c (set ks)
-           data {Material/AIR #{:vacant :enterable}
-            Material/WATER #{:vacant :enterable} ;flowing
-            Material/LAVA #{:vacant :enterable} ;flowing
-            Material/FIRE #{:vacant :enterable}
-            Material/STATIONARY_WATER #{:enterable} ; not vacant, we can have it.
-            Material/STATIONARY_LAVA  #{:enterable} ; may be we need "obtainable" instead of "vacant" or unobtainable.
-            Material/WEB #{:combustible :enterable}
-            Material/BROWN_MUSHROOM  #{:combustible :enterable}
-            Material/RED_MUSHROOM #{:combustible :enterable}
-            Material/RED_ROSE #{:combustible :enterable}
-            Material/YELLOW_FLOWER #{:combustible :enterable}
-            Material/WHEAT #{:combustible :enterable}
-            Material/PUMPKIN_STEM #{:combustible :enterable}
-            Material/MELON_STEM #{:combustible :enterable}
-            Material/VINE #{:combustible :enterable}
-            Material/GRASS #{:combustible :enterable}
-            Material/DEAD_BUSH #{:combustible :enterable}
-            Material/SUGAR_CANE #{:combustible :enterable}
-            Material/LEAVES  #{:combustible}
-            Material/MELON_BLOCK #{:combustible}
-            Material/PUMPKIN #{:combustible}
-            Material/WATER_LILY  #{}
-            Material/CACTUS #{}}]
+           data {
+           Material/AIR #{:vacant :enterable}
+           Material/WATER #{:vacant :enterable} ;flowing can not have it.
+           Material/LAVA #{:vacant :enterable} ;flowing can not have it
+           Material/FIRE #{:vacant :enterable}
+           Material/STATIONARY_WATER #{:enterable} ; not vacant, we can have it.
+           Material/STATIONARY_LAVA  #{:enterable} ; may be we need "obtainable" instead of "vacant" or unobtainable.
+           Material/WEB #{:combustible :enterable}
+           Material/BROWN_MUSHROOM  #{:combustible :enterable}
+           Material/RED_MUSHROOM #{:combustible :enterable}
+           Material/RED_ROSE #{:combustible :enterable}
+           Material/YELLOW_FLOWER #{:combustible :enterable}
+           Material/WHEAT #{:combustible :enterable}
+           Material/PUMPKIN_STEM #{:combustible :enterable}
+           Material/MELON_STEM #{:combustible :enterable}
+           Material/VINE #{:combustible :enterable}
+           Material/GRASS #{:combustible :enterable}
+           Material/DEAD_BUSH #{:combustible :enterable}
+           Material/SUGAR_CANE #{:combustible :enterable}
+           Material/LEAVES  #{:combustible}
+           Material/MELON_BLOCK #{:combustible}
+           Material/PUMPKIN #{:combustible}
+           Material/WATER_LILY  #{:enterable}
+           Material/BED_BLOCK #{:combustible :enterable}
+           Material/CACTUS #{:combustible}
+           Material/SAND #{}
+           Material/SANDSTONE #{}
+           Material/STONE #{}
+           Material/SOUL_SAND #{}
+           Material/STEP #{:crafted :enterable}
+           Material/STONE_BUTTON #{:crafted :enterable}
+           Material/TNT #{:crafted}
+           Material/WALL_SIGN #{:crafted :enterable}
+           Material/SOIL #{:crafted }
+           Material/TORCH #{:crafted :enterable}
+           Material/TRAP_DOOR #{:crafted :enterable}
+           Material/SNOW_BLOCK #{:crafted}
+           Material/SNOW #{:enterable}
+           Material/WOOD #{:combustible}
+           Material/WORKBENCH #{:combustible :crafted}
+           Material/REDSTONE_TORCH_ON #{:enterable :crafted}
+           Material/REDSTONE_TORCH_OFF #{:enterable :crafted}
+           Material/SMOOTH_BRICK #{:crafted}
+           Material/SMOOTH_STAIRS #{:crafted :enterable}
+           Material/PORTAL #{:crafted :enterable :vacant}
+           Material/NETHER_BRICK #{:crafted}
+           Material/NETHER_BRICK_STAIRS #{:crafted}
+           Material/NETHER_FENCE #{:crafted}
+           Material/NETHER_WARTS #{}
+           Material/MOB_SPAWNER #{:crafted}
+           Material/LEVER #{:crafted :enterable}
+           Material/JUKEBOX #{:crafted}
+           Material/LADDER #{:crafted :enterable}
+           Material/FENCE #{:crafted :enterable}
+           Material/FENCE_GATE #{:crafted :enterable}
+           Material/CAULDRON #{:crafted }
+           Material/PISTON_BASE #{:crafted}
+           Material/PISTON_EXTENSION #{:crafted}
+           Material/PISTON_MOVING_PIECE #{:crafted}
+           Material/PISTON_STICKY_BASE #{:crafted}
+           Material/RAILS #{:crafted}
+           Material/SIGN #{:crafted :enterable}
+           Material/WOOD_STAIRS #{:crafted :enterable :combustible}}]
        (into {} (filter #(clojure.set/subset? c (last %)) data))))
 
 (defn place-blocks-in-line
