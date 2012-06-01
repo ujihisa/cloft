@@ -755,7 +755,8 @@
                         (do
                           (.setOp player true)
                           (prn [player 'is 'op]))
-                        (.setOp player false)))))
+                        (.setOp player false)))
+                    (.playEffect (.getWorld (c/ujm)) (.getLocation (c/ujm)) Effect/RECORD_PLAY (rand-nth c/records))))
     (c/lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
 ;(defn c/get-player-quit-listener []

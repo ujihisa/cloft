@@ -137,6 +137,11 @@
         (instance? TNTPrimed entity) "TNT"
         :else (str (class entity))))
 
+(def records
+  [Material/GOLD_RECORD Material/GREEN_RECORD Material/RECORD_10
+   Material/RECORD_11 Material/RECORD_3 Material/RECORD_4 Material/RECORD_5
+   Material/RECORD_6 Material/RECORD_7 Material/RECORD_8 Material/RECORD_9])
+
 (defn move-entity [entity x y z]
   (let [loc (.getLocation entity)]
     (.add loc x y z)
