@@ -97,6 +97,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "player-toggle-sneak-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onEntityCombust(EntityCombustEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-combust-event");
         if (f.isBound()) f.invoke(event);

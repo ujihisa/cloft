@@ -1565,6 +1565,22 @@
                         (.setTime world 0)
                         (c/broadcast "good morning everyone!")))))))
 
+(defn player-toggle-sneak-event [evt]
+  "recovery spa"
+  (let [player (.getPlayer evt)
+        loc (.add (.getLocation player) 0 1 0)]
+    (when (= Material/STATIONARY_WATER (.getType (.getBlock loc)))
+      (let [blocks-around (for [[x z] [[-1 0] [1 0] [0 -1] [0 1]]]
+                            (.getBlock (.add (.clone loc) x 0 z)))]
+        (when (every? #(= Material/STONE (.getType %)) blocks-around)
+          (when (= 0 (rand-int 10))
+            (.setType (.getBlock loc) Material/AIR))
+          (c/broadcast (.getDisplayName player) ": recovery spa!")
+          (.setHealth player 20)
+          (.setFoodLevel player 20)
+          (.teleport player loc)
+          (c/add-velocity player 0 1 0))))))
+
 ;(defn vehicle-enter-event* [evt]
 ;  (let [vehicle (.getVehicle evt)
 ;        entity (.getEntered evt)
