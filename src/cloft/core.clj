@@ -650,15 +650,13 @@
         outer-diameter (* 2 outer-radius)
         width outer-diameter
         corner (.add (.add (.clone grided-cetner-vector) (.multiply (.clone ux) (- outer-radius)))
-                    (.multiply (.clone uz) (- outer-radius)))
-        ]
+                    (.multiply (.clone uz) (- outer-radius)))]
     (for [dx (range 0 width)
           dz (range 0 width)
           :let [v (.add (.add (.clone corner) (.multiply (.clone ux) dx)) (.multiply (.clone uz) dz))]
           :when (and 
                   (< (.distance grided-cetner-vector v) (Math/ceil outer))
-                  (> (.distance grided-cetner-vector v) (Math/floor inner)))  
-          ]
+                  (> (.distance grided-cetner-vector v) (Math/floor inner)))]
          (.getBlockAt world (.toLocation v world)))))
 
 (defn place-blocks-in-circle
@@ -780,8 +778,7 @@
 (defn erupt-volcano [player block]
   (let [world (.getWorld player)
         crator-vector (local-coordinate-to-world player block 40.0 20.0 0.0)
-        crator-location (.toLocation crator-vector world)
-        ]
+        crator-location (.toLocation crator-vector world)]
     (.strikeLightningEffect world crator-location)
     (.setType (.getBlockAt world crator-location) Material/LAVA)
     (place-blocks-in-circle
