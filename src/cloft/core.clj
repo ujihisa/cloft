@@ -636,52 +636,38 @@
        (when (.hasNext iter)
          (recur (.hasNext iter) (inc i)))))))
 
-(defn place-blocks-in-a-circle
-   [world center radius place-fn]
-   ;; center is location, but no respect to Yaw etc.
-   ;; so resulting circle is in x-z plane.
-   ;;
-   ;; http://en.wikipedia.org/wiki/Midpoint_circle_algorithm
-   ;; http://dencha.ojaru.jp/programs_07/pg_graphic_09a1.html
-   ;;
-   ;; Michener.
-   (let [c (.toVector center)
-         ux (Vector. 1.0 0.0 0.0)
-         uy (Vector. 0.0 1.0 0.0)
-         uz (Vector. 0.0 0.0 1.0)]
-     (defn helper [dx dz]
-       (place-fn
-         (.getBlockAt
-           world
-           (.toLocation (.add (.add (.clone c)(.multiply (.clone ux) dx))(.multiply (.clone uz) dz)) world))
-         0))
-     (helper 0 radius)
-     (helper radius 0)
-     (helper 0 (- radius))
-     (helper (- radius) 0)
-     (loop [cx 0
-            d (- 3 (* 2 radius))
-            cy radius]
-           (helper cy cx)
-           (helper cx cy)
-           (helper (- cx) (+ cy))
-           (helper (- cy) (+ cx))
-           (helper (- cy) (- cx))
-           (helper (- cx) (- cy))
-           (helper (+ cx) (- cy))
-           (helper (+ cy) (- cx))
-           (if (<= cx cy)
-             (recur (inc cx)
-                    (if (< d 0) (+ d 6 (* 4 cx)) (+ d 10 (* 4 cx) (* -4 cy)))
-                    (if (< d 0) cy (dec cy)))))))
+(defn blocks-in-radiaus-xz 
+  [world center inner outer]
+  (let [center-block (.getBlockAt world center)
+        grided-cetner-location (.getLocation center-block)
+        grided-cetner-vector (.toVector grided-cetner-location)
+        ux (Vector. 1.0 0.0 0.0)
+        uy (Vector. 0.0 1.0 0.0)
+        uz (Vector. 0.0 0.0 1.0) 
+        inner-radius (Math/floor inner)
+        outer-radius (Math/ceil outer)
+        inner-diameter (* 2 inner-radius)
+        outer-diameter (* 2 outer-radius)
+        width outer-diameter
+        corner (.add (.add (.clone grided-cetner-vector) (.multiply (.clone ux) (- outer-radius)))
+                    (.multiply (.clone uz) (- outer-radius)))
+        ]
+    (for [dx (range 0 width)
+          dz (range 0 width)
+          :let [v (.add (.add (.clone corner) (.multiply (.clone ux) dx)) (.multiply (.clone uz) dz))]
+          :when (and 
+                  (< (.distance grided-cetner-vector v) (Math/ceil outer))
+                  (> (.distance grided-cetner-vector v) (Math/floor inner)))  
+          ]
+         (.getBlockAt world (.toLocation v world)))))
 
 (defn place-blocks-in-circle
    [world center inner outer place-fn]
-   (loop [r inner]
-         (place-blocks-in-a-circle world center r place-fn)
-         (if (<= r outer)
-           (recur (+ r 0.25)))))
-
+   ; with fill. naive way.
+   (let [vs (blocks-in-radiaus-xz world center inner outer)]
+     (doall (map 
+        (fn [d](place-fn d 0))
+        vs))))
 
 (defn summon-x
   ([pos world creature]
@@ -690,6 +676,7 @@
    ;(prn summon-x pos creature after)
    (cloft-schedule-settimer after
                             #(.spawn world (.toLocation pos world) creature))))
+
 (defn summon-giant [player block]
   (let [world (.getWorld player)
         spawn-at  (local-coordinate-to-world player block 10.0 0.0 0.0)]
@@ -807,7 +794,7 @@
         center-vector (local-coordinate-to-world player block 10.0 0.0 0.0)
         center-location (.toLocation center-vector world)
         uy (Vector. 0 1 0)]
-    (loop [h 0 inner 5 outer 7]
+    (loop [h 0 inner 5.0 outer 7.0]
           (place-blocks-in-circle
             world
             (.toLocation (.add (.clone center-vector) (.multiply (.clone uy) h)) world)
