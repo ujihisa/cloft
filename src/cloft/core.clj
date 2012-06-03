@@ -545,81 +545,81 @@
 
 (defn block-categoly
      ;available options:
-     ; :vacant ; cannot have any material from that block
+     ; :gettable ; may have material from that block with proper tool
      ; :enterable  ; can step in.
      ; :combustible ; can be set fire.
      ; :crafted ; something crafted by player
      ;usage:
-     ; (block-categoly :vacant :enterable) => #{} of vacant and enterable
-     ; (block-categoly :vacant) => #{} of enterable
+     ; (block-categoly :gettable :enterable) => #{} of gettable and enterable
+     ; (block-categoly :gettable ) => #{} of enterable
      ;
      ; http://jd.bukkit.org/apidocs/org/bukkit/Material.html
      ;
      [ & ks]
      (let [c (set ks)
            data {
-           Material/AIR #{:vacant :enterable}
-           Material/WATER #{:vacant :enterable} ;flowing can not have it.
-           Material/LAVA #{:vacant :enterable} ;flowing can not have it
-           Material/FIRE #{:vacant :enterable}
-           Material/STATIONARY_WATER #{:enterable} ; not vacant, we can have it.
-           Material/STATIONARY_LAVA  #{:enterable} ; may be we need "obtainable" instead of "vacant" or unobtainable.
-           Material/WEB #{:combustible :enterable}
-           Material/BROWN_MUSHROOM  #{:combustible :enterable}
-           Material/RED_MUSHROOM #{:combustible :enterable}
-           Material/RED_ROSE #{:combustible :enterable}
-           Material/YELLOW_FLOWER #{:combustible :enterable}
-           Material/WHEAT #{:combustible :enterable}
-           Material/PUMPKIN_STEM #{:combustible :enterable}
-           Material/MELON_STEM #{:combustible :enterable}
+           Material/AIR #{:enterable}
+           Material/WATER #{:enterable} ;flowing can not have it.
+           Material/LAVA #{:enterable} ;flowing can not have it
+           Material/FIRE #{:enterable}
+           Material/STATIONARY_WATER #{:gettable :enterable}
+           Material/STATIONARY_LAVA  #{:gettable :enterable}
+           Material/WEB #{:gettable :combustible :enterable}
+           Material/BROWN_MUSHROOM  #{:gettable :combustible :enterable}
+           Material/RED_MUSHROOM #{:gettable :combustible :enterable}
+           Material/RED_ROSE #{:gettable :combustible :enterable}
+           Material/YELLOW_FLOWER #{:gettable :combustible :enterable}
+           Material/WHEAT #{:gettable :combustible :enterable}
+           Material/PUMPKIN_STEM #{:gettable :combustible :enterable}
+           Material/MELON_STEM #{:gettable :combustible :enterable}
            Material/VINE #{:combustible :enterable}
            Material/GRASS #{:combustible :enterable}
-           Material/DEAD_BUSH #{:combustible :enterable}
-           Material/SUGAR_CANE #{:combustible :enterable}
-           Material/LEAVES  #{:combustible}
-           Material/MELON_BLOCK #{:combustible}
-           Material/PUMPKIN #{:combustible}
-           Material/WATER_LILY  #{:enterable}
-           Material/BED_BLOCK #{:combustible :enterable}
-           Material/CACTUS #{:combustible}
-           Material/SAND #{}
-           Material/SANDSTONE #{}
-           Material/STONE #{}
-           Material/SOUL_SAND #{}
-           Material/STEP #{:crafted :enterable}
-           Material/STONE_BUTTON #{:crafted :enterable}
-           Material/TNT #{:crafted}
+           Material/DEAD_BUSH #{:combustible :enterable} ; FIXME check document for :gettable
+           Material/SUGAR_CANE #{:gettable :combustible :enterable}
+           Material/LEAVES  #{:gettable :combustible} ; need tool, though.
+           Material/MELON_BLOCK #{:gettable :combustible}
+           Material/PUMPKIN #{:gettable :combustible}
+           Material/WATER_LILY  #{:gettable :enterable}
+           Material/BED_BLOCK #{:gettable :combustible :enterable}
+           Material/CACTUS #{:gettable :combustible}
+           Material/SAND #{:gettable }
+           Material/SANDSTONE #{:gettable}
+           Material/STONE #{:gettable }
+           Material/SOUL_SAND #{:gettable }
+           Material/STEP #{:gettable :crafted :enterable}
+           Material/STONE_BUTTON #{:gettable :crafted :enterable}
+           Material/TNT #{:crafted :gettable }
            Material/WALL_SIGN #{:crafted :enterable}
-           Material/SOIL #{:crafted }
-           Material/TORCH #{:crafted :enterable}
-           Material/TRAP_DOOR #{:crafted :enterable}
-           Material/SNOW_BLOCK #{:crafted}
-           Material/SNOW #{:enterable}
-           Material/WOOD #{:combustible}
-           Material/WORKBENCH #{:combustible :crafted}
-           Material/REDSTONE_TORCH_ON #{:enterable :crafted}
-           Material/REDSTONE_TORCH_OFF #{:enterable :crafted}
-           Material/SMOOTH_BRICK #{:crafted}
-           Material/SMOOTH_STAIRS #{:crafted :enterable}
-           Material/PORTAL #{:crafted :enterable :vacant}
-           Material/NETHER_BRICK #{:crafted}
-           Material/NETHER_BRICK_STAIRS #{:crafted}
-           Material/NETHER_FENCE #{:crafted}
-           Material/NETHER_WARTS #{}
+           Material/SOIL #{:crafted :gettable } ; gettable as dirt
+           Material/TORCH #{:crafted :enterable :gettable}
+           Material/TRAP_DOOR #{:crafted :enterable :gettable}
+           Material/SNOW_BLOCK #{:crafted :gettable}
+           Material/SNOW #{:enterable :gettable}
+           Material/WOOD #{:combustible :gettable}
+           Material/WORKBENCH #{:combustible :crafted :gettable}
+           Material/REDSTONE_TORCH_ON #{:enterable :crafted :gettable}
+           Material/REDSTONE_TORCH_OFF #{:enterable :crafted :gettable}
+           Material/SMOOTH_BRICK #{:crafted :gettable}
+           Material/SMOOTH_STAIRS #{:crafted :enterable :gettable}
+           Material/PORTAL #{:crafted :enterable}
+           Material/NETHER_BRICK #{:crafted :gettable}
+           Material/NETHER_BRICK_STAIRS #{:crafted :gettable}
+           Material/NETHER_FENCE #{:crafted :gettable}
+           Material/NETHER_WARTS #{:gettable}
            Material/MOB_SPAWNER #{:crafted}
-           Material/LEVER #{:crafted :enterable}
-           Material/JUKEBOX #{:crafted}
-           Material/LADDER #{:crafted :enterable}
-           Material/FENCE #{:crafted :enterable}
-           Material/FENCE_GATE #{:crafted :enterable}
-           Material/CAULDRON #{:crafted }
-           Material/PISTON_BASE #{:crafted}
+           Material/LEVER #{:crafted :enterable :gettable}
+           Material/JUKEBOX #{:crafted :gettable}
+           Material/LADDER #{:crafted :enterable :gettable}
+           Material/FENCE #{:crafted :enterable :gettable}
+           Material/FENCE_GATE #{:crafted :enterable :gettable}
+           Material/CAULDRON #{:crafted  :gettable}
+           Material/PISTON_BASE #{:crafted :gettable} ; as piston
            Material/PISTON_EXTENSION #{:crafted}
            Material/PISTON_MOVING_PIECE #{:crafted}
-           Material/PISTON_STICKY_BASE #{:crafted}
-           Material/RAILS #{:crafted}
-           Material/SIGN #{:crafted :enterable}
-           Material/WOOD_STAIRS #{:crafted :enterable :combustible}}]
+           Material/PISTON_STICKY_BASE #{:crafted :gettable} ; as sticky piston
+           Material/RAILS #{:crafted :gettable}
+           Material/SIGN #{:crafted :enterable :gettable}
+           Material/WOOD_STAIRS #{:crafted :enterable :combustible :gettable}}]
        (into {} (filter #(clojure.set/subset? c (last %)) data))))
 
 (defn place-blocks-in-line
@@ -636,14 +636,14 @@
        (when (.hasNext iter)
          (recur (.hasNext iter) (inc i)))))))
 
-(defn blocks-in-radiaus-xz 
+(defn blocks-in-radiaus-xz
   [world center inner outer]
   (let [center-block (.getBlockAt world center)
         grided-cetner-location (.getLocation center-block)
         grided-cetner-vector (.toVector grided-cetner-location)
         ux (Vector. 1.0 0.0 0.0)
         uy (Vector. 0.0 1.0 0.0)
-        uz (Vector. 0.0 0.0 1.0) 
+        uz (Vector. 0.0 0.0 1.0)
         inner-radius (Math/floor inner)
         outer-radius (Math/ceil outer)
         inner-diameter (* 2 inner-radius)
@@ -654,18 +654,16 @@
     (for [dx (range 0 width)
           dz (range 0 width)
           :let [v (.add (.add (.clone corner) (.multiply (.clone ux) dx)) (.multiply (.clone uz) dz))]
-          :when (and 
+          :when (and
                   (< (.distance grided-cetner-vector v) (Math/ceil outer))
                   (> (.distance grided-cetner-vector v) (Math/floor inner)))]
          (.getBlockAt world (.toLocation v world)))))
 
 (defn place-blocks-in-circle
-   [world center inner outer place-fn]
+   [world inner outer center place-fn]
    ; with fill. naive way.
-   (let [vs (blocks-in-radiaus-xz world center inner outer)]
-     (doall (map 
-        (fn [d](place-fn d 0))
-        vs))))
+   (doseq [v (blocks-in-radiaus-xz world center inner outer)]
+          (place-fn v 0)))
 
 (defn summon-x
   ([pos world creature]
@@ -782,7 +780,8 @@
     (.strikeLightningEffect world crator-location)
     (.setType (.getBlockAt world crator-location) Material/LAVA)
     (place-blocks-in-circle
-      world crator-location 10 14
+      world 10 14
+      crator-location
       (fn [v i]
           (.setType v Material/COBBLESTONE)))))
 
@@ -793,9 +792,8 @@
         uy (Vector. 0 1 0)]
     (loop [h 0 inner 5.0 outer 7.0]
           (place-blocks-in-circle
-            world
+            world inner outer
             (.toLocation (.add (.clone center-vector) (.multiply (.clone uy) h)) world)
-            inner outer
             (fn [v i]
                 (.setType v Material/WOOL)
                 (.setData v (Byte. (byte 5)))))
