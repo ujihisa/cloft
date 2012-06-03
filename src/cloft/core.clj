@@ -785,6 +785,14 @@
       (fn [v i]
           (.setType v Material/COBBLESTONE)))))
 
+(defn close-air-support [player block]
+  (let [world (.getWorld player)
+        center-vector (local-coordinate-to-world player block 00.0 70.0 0.0)
+        center-location (.toLocation center-vector world)]
+    (doseq [v (blocks-in-radiaus-xz world center-location 20 70)]
+           (when (= (rand-int 50) 1)
+             (.spawn world (.getLocation v) TNTPrimed))))) ; check empty.
+
 (defn earthen-pipe [player block]
   (let [world (.getWorld player)
         center-vector (local-coordinate-to-world player block 10.0 0.0 0.0)
@@ -808,6 +816,7 @@
                  Material/COBBLESTONE fusion-wall
                  Material/SAND fusion-floor
                  Material/DIRT summon-giant
+                 Material/TNT close-air-support
                  Material/NETHERRACK erupt-volcano
                  Material/RED_MUSHROOM earthen-pipe
                  Material/LOG make-redstone-for-livings
