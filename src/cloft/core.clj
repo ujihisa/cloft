@@ -340,6 +340,12 @@
     ; p1, p2, p3, p1, p2, p3,
     ;         t1, t2, t3, t4
 
+(defn fly-with-check [projectile fn]
+  (cloft-schedule-settimer
+    1
+    #(when (fn projectile)
+       (fly-with-check projectile fn))))
+
 (defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
@@ -374,17 +380,23 @@
                         (swap! last-vertical-shots dissoc shooter-name))))
       (when (= 'arrow-skill-tntmissile (arrow-skill-of shooter))
         (let [inventory (.getInventory shooter)
-              ]
+              arrow (.getProjectile evt)]
           (if (.contains inventory Material/TNT)
-            (cloft-schedule-settimer
-              1
-              #(let [arrow (.getProjectile evt)
-                     original-velocity (.getVelocity arrow)
-                     original-location (.getLocation arrow)
-                     primed-tnt (.spawn world original-location TNTPrimed)]
-                 (.setVelocity primed-tnt original-velocity)
-                 (c/consume-itemstack inventory Material/TNT)
-                 (.remove arrow)))
+            (fly-with-check
+              arrow
+              #(let [velocity (.getVelocity %1)
+                     location (.getLocation %1)]
+                 (if (> (.getY (.toVector location))
+                          (+ 5.0 (.getY (.toVector (.getLocation shooter)))))
+                   (if (.contains inventory Material/TNT)
+                     (let [primed-tnt (.spawn world location TNTPrimed) ]
+                       (.setVelocity primed-tnt velocity)
+                       (c/consume-itemstack inventory Material/TNT)
+                       (.remove arrow)
+                       false)
+                     ((c/broadcast (.getDisplayName shooter) " has no TNT.")
+                     false))
+                   true)))
             (c/broadcast (.getDisplayName shooter) " has no TNT."))))
       (when (= arrow-skill-shotgun (arrow-skill-of shooter))
         (doseq [_ (range 1 80)]
