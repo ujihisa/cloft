@@ -527,6 +527,9 @@
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
 
+
+(def max-altitude 255)
+
 (defn xz-normalized-vector [v]
   (.normalize (Vector. (.getX v) 0.0 (.getZ v))))
 
@@ -787,11 +790,18 @@
 
 (defn close-air-support [player block]
   (let [world (.getWorld player)
-        center-vector (local-coordinate-to-world player block 00.0 70.0 0.0)
+        xz (local-coordinate-to-world player block 0.0 0.0 0.0)
+        center-vector (.setY  (.clone xz) max-altitude)
         center-location (.toLocation center-vector world)]
     (doseq [v (blocks-in-radiaus-xz world center-location 20 70)]
-           (when (= (rand-int 50) 1)
-             (.spawn world (.getLocation v) TNTPrimed))))) ; check empty.
+           (when (= (rand-int 30) 1)
+             (cloft-schedule-settimer
+               (rand-int 300)
+               (fn []
+                   (let [tnt (.spawn world (.getLocation v) TNTPrimed)
+                         uy (Vector. 0.0 -10.0 0.0)
+                         y (.multiply uy (rand))]
+                     (.setVelocity tnt y))))))))
 
 (defn earthen-pipe [player block]
   (let [world (.getWorld player)
