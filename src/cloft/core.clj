@@ -1675,6 +1675,8 @@
 
     :else
     (do
+      (let [shooter (.getShooter snowball)]
+        (.setFoodLevel shooter (dec (.getFoodLevel shooter))))
       (.createExplosion (.getWorld snowball) (.getLocation snowball) 0)
       (.remove snowball))))
 
