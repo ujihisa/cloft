@@ -372,6 +372,15 @@
                         (check-and-thunder shooter)
                         (Thread/sleep 1000)
                         (swap! last-vertical-shots dissoc shooter-name))))
+      (when (= 'arrow-skill-tntmissle (arrow-skill-of shooter))
+        (cloft-schedule-settimer 1
+                                 (fn []
+                                     (let [arrow (.getProjectile evt)
+                                          original-velocity (.getVelocity arrow)
+                                          original-location (.getLocation arrow)
+                                          primed-tnt (.spawn world original-location TNTPrimed)]
+                                     (.setVelocity primed-tnt original-velocity)
+                                     (.remove arrow)))))
       (when (= arrow-skill-shotgun (arrow-skill-of shooter))
         (doseq [_ (range 1 80)]
           (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
@@ -517,6 +526,7 @@
                  Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
                  Material/RAILS ['cart "CART"]
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
+                 Material/SANDSTONE ['arrow-skill-tntmissle "TNTMissle"]
                  #_( Material/STONE ['sniping "SNIPING"])
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]
                  Material/POWERED_RAIL ['exp "EXP"]
