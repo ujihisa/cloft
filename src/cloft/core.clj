@@ -1715,7 +1715,7 @@
           (.setHealth player 20)
           (.setFoodLevel player 20)
           (.teleport player loc)
-          (c/add-velocity player 0 1 0))))))
+          (c/add-velocity player 0 0.6 0))))))
 
 ;(defn vehicle-enter-event* [evt]
 ;  (let [vehicle (.getVehicle evt)
