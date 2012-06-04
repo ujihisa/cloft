@@ -68,7 +68,7 @@
 (def place9 (org.bukkit.Location. world -456.6875 64.0 25.53125)) ; from goboh3 village
 (def place10 (org.bukkit.Location. world 317.4375 72.0 112.5)) ; from dessert village
 (def place-main (org.bukkit.Location. world 4.294394438259979 67.0 0.6542090982205075 -7.5000114 -40.35013))
-(def anotherbed (org.bukkit.Location.  world -237.8704284429714 72.5625 -53.82154923217098 19.349966 -180.45361))
+(def anotherbed (org.bukkit.Location. world -237.8704284429714 72.5625 -53.82154923217098 19.349966 -180.45361))
 
 (def cloft-schedule-table (atom {}))
 (def cloft-schedule-currenct-tick (atom 0))
@@ -373,14 +373,14 @@
                         (Thread/sleep 1000)
                         (swap! last-vertical-shots dissoc shooter-name))))
       (when (= 'arrow-skill-tntmissle (arrow-skill-of shooter))
-        (cloft-schedule-settimer 1
-                                 (fn []
-                                     (let [arrow (.getProjectile evt)
-                                          original-velocity (.getVelocity arrow)
-                                          original-location (.getLocation arrow)
-                                          primed-tnt (.spawn world original-location TNTPrimed)]
-                                     (.setVelocity primed-tnt original-velocity)
-                                     (.remove arrow)))))
+        (cloft-schedule-settimer
+          1
+          #(let [arrow (.getProjectile evt)
+                 original-velocity (.getVelocity arrow)
+                 original-location (.getLocation arrow)
+                 primed-tnt (.spawn world original-location TNTPrimed)]
+             (.setVelocity primed-tnt original-velocity)
+             (.remove arrow))))
       (when (= arrow-skill-shotgun (arrow-skill-of shooter))
         (doseq [_ (range 1 80)]
           (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
@@ -625,7 +625,7 @@
            Material/LADDER #{:crafted :enterable :gettable}
            Material/FENCE #{:crafted :enterable :gettable}
            Material/FENCE_GATE #{:crafted :enterable :gettable}
-           Material/CAULDRON #{:crafted  :gettable}
+           Material/CAULDRON #{:crafted :gettable}
            Material/PISTON_BASE #{:crafted :gettable} ; as piston
            Material/PISTON_EXTENSION #{:crafted}
            Material/PISTON_MOVING_PIECE #{:crafted}
