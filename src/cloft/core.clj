@@ -696,19 +696,17 @@
           (place-fn v 0)))
 
 (defn summon-x
-  ([pos world creature]
-  (summon-x pos world creature 1))
+  ([pos world creature] (summon-x pos world creature 1))
   ([pos world creature after]
-   ;(prn summon-x pos creature after)
-   (cloft-schedule-settimer after
-                            #(.spawn world (.toLocation pos world) creature))))
+   (cloft-schedule-settimer after #(.spawn world (.toLocation pos world) creature))))
 
 (defn summon-giant [player block]
+  (.damage player (/ (.getHealth player) 2))
+  (.setFoodLevel player 0)
   (let [world (.getWorld player)
         spawn-at  (local-coordinate-to-world player block 10.0 0.0 0.0)]
     (.strikeLightningEffect world (.toLocation spawn-at world))
     (summon-x spawn-at world Giant)
-    ;(.spawn world (.toLocation spawn-at world) Giant)
     (c/broadcast (.getDisplayName player) " has summoned Giant!!")))
 
 (defn summon-residents-of-nether [player block]
