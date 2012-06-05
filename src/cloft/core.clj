@@ -882,9 +882,9 @@
                (.setVelocity player (vector-from-to player block))
                (doseq [entity (.getNearbyEntities player 4 4 4)]
                  (.setVelocity entity (vector-from-to entity block)))))
-    ;(build-long block (.getBlockAgainst evt))
-    (comment (when (c/location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
-      (.setCancelled evt true)))))
+    #_(build-long block (.getBlockAgainst evt))
+    #_(when (c/location-bound? (.getLocation block) (first sanctuary) (second sanctuary))
+        (.setCancelled evt true))))
 
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
