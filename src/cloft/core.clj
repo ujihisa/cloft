@@ -760,14 +760,14 @@
               (cloft-schedule-settimer (* 4 i)
                                        #(when (= Material/AIR (.getType v))
                                           (.setType v Material/COBBLESTONE))))]
-           (.strikeLightningEffect world (.toLocation bottom world))
-           (place-blocks-in-line world bottom top place-cobblestones)
-           (if-let [prev (active-fusion-wall-of player)]
-                   (let [[eb et] prev]
-                     (place-blocks-in-line world eb bottom place-cobblestones)
-                     (place-blocks-in-line world et top place-cobblestones))
-                   (prn "nothing to connect."))
-           (swap! active-fusion-wall assoc (.getDisplayName player) [bottom top]))))
+      (.strikeLightningEffect world (.toLocation bottom world))
+      (place-blocks-in-line world bottom top place-cobblestones)
+      (if-let [prev (active-fusion-wall-of player)]
+        (let [[eb et] prev]
+          (place-blocks-in-line world eb bottom place-cobblestones)
+          (place-blocks-in-line world et top place-cobblestones))
+        (prn "nothing to connect."))
+      (swap! active-fusion-wall assoc (.getDisplayName player) [bottom top]))))
 
 
 (defn fusion-floor [player block]
