@@ -779,14 +779,14 @@
         end-left (local-coordinate-to-world player block distance 0.0 -1.0)
         end-center (local-coordinate-to-world player block distance 0.0 0.0)
         end-right (local-coordinate-to-world player block distance 0.0 1.0)
-        block-floor(fn [v i]
-                       (cloft-schedule-settimer
-                         (* 4 i)
-                         (fn []
-                             (when (boolean ((block-categoly :enterable) (.getType v)))
-                               (when (= 0 (rand-int 6))
-                                 (.strikeLightningEffect world (.getLocation v)))
-                               (.setType v Material/COBBLESTONE)))))]
+        block-floor (fn [v i]
+                      (cloft-schedule-settimer
+                        (* 4 i)
+                        (fn []
+                          (when (boolean ((block-categoly :enterable) (.getType v)))
+                            (when (= 0 (rand-int 6))
+                              (.strikeLightningEffect world (.getLocation v)))
+                            (.setType v Material/COBBLESTONE)))))]
     (place-blocks-in-line world start-left end-left block-floor 2)
     (place-blocks-in-line world start-center end-center block-floor 2)
     (place-blocks-in-line world start-right end-right block-floor 2)))
