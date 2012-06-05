@@ -819,11 +819,10 @@
       (when (= (rand-int 30) 1)
         (cloft-schedule-settimer
           (rand-int 300)
-          (fn []
-            (let [tnt (.spawn world (.getLocation v) TNTPrimed)
-                  uy (Vector. 0.0 -10.0 0.0)
-                  y (.multiply uy (rand))]
-              (.setVelocity tnt y))))))))
+          #(let [tnt (.spawn world (.getLocation v) TNTPrimed)
+                 uy (Vector. 0.0 -10.0 0.0)
+                 y (.multiply uy (rand))]
+             (.setVelocity tnt y)))))))
 
 (defn earthen-pipe [player block]
   (let [world (.getWorld player)
