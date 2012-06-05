@@ -782,11 +782,10 @@
         block-floor (fn [v i]
                       (cloft-schedule-settimer
                         (* 4 i)
-                        (fn []
-                          (when (boolean ((block-categoly :enterable) (.getType v)))
-                            (when (= 0 (rand-int 6))
-                              (.strikeLightningEffect world (.getLocation v)))
-                            (.setType v Material/COBBLESTONE)))))]
+                        #(when (boolean ((block-categoly :enterable) (.getType v)))
+                           (when (= 0 (rand-int 6))
+                             (.strikeLightningEffect world (.getLocation v)))
+                           (.setType v Material/COBBLESTONE))))]
     (place-blocks-in-line world start-left end-left block-floor 2)
     (place-blocks-in-line world start-center end-center block-floor 2)
     (place-blocks-in-line world start-right end-right block-floor 2)))
