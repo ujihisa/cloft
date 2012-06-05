@@ -838,7 +838,8 @@
           (.setData v (Byte. (byte 5)))))
       (if (< h 20)
         (recur (inc h) inner outer)
-        (if (< h 24) ;; making "lip"
+        (when (< h 24)
+          "making lip"
           (recur (inc h) inner 9))))))
 
 (defn invoke-alchemy [player block block-against]
