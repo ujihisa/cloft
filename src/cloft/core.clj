@@ -816,14 +816,14 @@
         center-vector (.setY  (.clone xz) max-altitude)
         center-location (.toLocation center-vector world)]
     (doseq [v (blocks-in-radiaus-xz world center-location 20 70)]
-           (when (= (rand-int 30) 1)
-             (cloft-schedule-settimer
-               (rand-int 300)
-               (fn []
-                   (let [tnt (.spawn world (.getLocation v) TNTPrimed)
-                         uy (Vector. 0.0 -10.0 0.0)
-                         y (.multiply uy (rand))]
-                     (.setVelocity tnt y))))))))
+      (when (= (rand-int 30) 1)
+        (cloft-schedule-settimer
+          (rand-int 300)
+          (fn []
+            (let [tnt (.spawn world (.getLocation v) TNTPrimed)
+                  uy (Vector. 0.0 -10.0 0.0)
+                  y (.multiply uy (rand))]
+              (.setVelocity tnt y))))))))
 
 (defn earthen-pipe [player block]
   (let [world (.getWorld player)
