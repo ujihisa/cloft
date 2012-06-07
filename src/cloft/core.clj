@@ -289,6 +289,17 @@
                (.remove entity))
              (.sendMessage (.getShooter entity) "PUMPKIN failed")))))))
 
+(defn arrow-skill-plant [entity]
+  (let [inventory (.getInventory (.getShooter entity))]
+    (.remove entity)
+    (doseq [x (range -3 4) z (range -3 4)]
+      (let [loc (.add (.getLocation entity) x 0 z)]
+        (when (and (.contains inventory Material/SEEDS)
+                   (= Material/AIR (.getType (.getBlock loc)))
+                   (= Material/SOIL (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))
+          (c/consume-itemstack inventory Material/SEEDS)
+          (.setType (.getBlock loc) Material/CROPS))))))
+
 (defn arrow-skill-sniping [entity]
   nil)
 
@@ -549,7 +560,8 @@
                  Material/POWERED_RAIL ['exp "EXP"]
                  Material/PISTON_BASE ['super-knockback "SUPER-KNOCKBACK"]
                  Material/JACK_O_LANTERN [arrow-skill-pumpkin "PUMPKIN"]
-                 Material/PUMPKIN [arrow-skill-pumpkin "PUMPKIN"]}]
+                 Material/PUMPKIN [arrow-skill-pumpkin "PUMPKIN"]
+                 Material/CROPS [arrow-skill-plant "PLANT"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
