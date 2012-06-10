@@ -1714,6 +1714,13 @@
           ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
           nil)))
 
+(defn block-can-build-event [evt]
+  (when (and
+          (#{Material/YELLOW_FLOWER Material/RED_ROSE} (.getMaterial evt))
+          (= Material/FENCE (.getType
+                              (.getBlock (.add (.getLocation (.getBlock evt)) 0 -1 0)))))
+    (.setBuildable evt true)))
+
 (defn player-bed-enter-event [evt]
   (c/broadcast (.. evt (getPlayer) (getDisplayName)) " is sleeping.")
   (future-call #(do

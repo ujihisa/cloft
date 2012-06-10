@@ -147,6 +147,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onBlockCanBuild(BlockCanBuildEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "block-can-build-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "block-break-event");
         if (f.isBound()) f.invoke(event);
