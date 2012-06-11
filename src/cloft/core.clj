@@ -300,6 +300,27 @@
           (c/consume-itemstack inventory Material/SEEDS)
           (.setType (.getBlock loc) Material/CROPS))))))
 
+(defn arrow-skill-diamond [entity]
+  (let [block (.getBlock (.getLocation entity))]
+    (condp = (.getType block)
+      Material/CROPS
+      (.setData block 7)
+      nil))
+  (let [block (block-of-arrow entity)]
+    (condp = (.getType block)
+      Material/COBBLESTONE
+      (.setType block Material/STONE)
+      Material/WOOL
+      (do
+        (.setType block Material/AIR)
+        (if (= 0 (rand-int 2))
+          (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/WOOL))
+          (.spawn (.getWorld entity) (.getLocation entity) Sheep)))
+      nil))
+  (.remove entity)
+  (let [loc (.getLocation entity)]
+    (.dropItem (.getWorld loc) loc (ItemStack. Material/ARROW))))
+
 (defn arrow-skill-sniping [entity]
   nil)
 
@@ -561,7 +582,8 @@
                  Material/PISTON_BASE ['super-knockback "SUPER-KNOCKBACK"]
                  Material/JACK_O_LANTERN [arrow-skill-pumpkin "PUMPKIN"]
                  Material/PUMPKIN [arrow-skill-pumpkin "PUMPKIN"]
-                 Material/CROPS [arrow-skill-plant "PLANT"]}]
+                 Material/CROPS [arrow-skill-plant "PLANT"]
+                 Material/DIAMOND_BLOCK [arrow-skill-diamond "CRAZY DIAMOND"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
@@ -1394,7 +1416,7 @@
             (.teleport target (.add block-loc 0.5 1 0.5)))
           (recur (dec depth)))))))
 
-(defn arrow-damages-entity-event [_ arrow target]
+(defn arrow-damages-entity-event [evt arrow target]
   (if-let [shooter (.getShooter arrow)]
     (when (instance? Player shooter)
       (cond
@@ -1438,6 +1460,25 @@
                                   (.setType block block-type))
                                 (.damage newmob (.getMaxHealth newmob)))))))
           nil)
+        (= arrow-skill-diamond (arrow-skill-of shooter))
+        (cond
+          (some #(instance? % target) [Zombie Skeleton])
+          (do
+            (.spawn (.getWorld target) (.getLocation target) Villager)
+            (.remove target))
+          :else
+          (do
+            (.setHealth target (.getMaxHealth target))
+            (.damage target 1 shooter)
+            (.setHealth target (.getMaxHealth target))
+            (when (instance? Player target)
+              (.setFoodLevel target 20))
+            (.setCancelled evt true)
+            (c/broadcast
+               "Crazy diamond recovers "
+               (if (instance? Player target)
+                 (.getDisplayName target)
+                 (c/entity2name target)))))
         (= 'fly (arrow-skill-of shooter))
         (future-call #(c/add-velocity target 0 1 0))
         (= 'exp (arrow-skill-of shooter))
@@ -1624,7 +1665,8 @@
                     attacker)]
               (when (and (not= actual-attacker target)
                          (not (instance? Wolf actual-attacker))
-                         (not (instance? TNTPrimed actual-attacker)))
+                         (not (instance? TNTPrimed actual-attacker))
+                         (not= arrow-skill-diamond (arrow-skill-of actual-attacker)))
                 (skill target actual-attacker))))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
