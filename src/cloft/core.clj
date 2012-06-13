@@ -441,9 +441,10 @@
   (let [entity (.getEntity evt)]
     (when (instance? Creeper entity)
       (when-let [target (.getTarget evt)]
-        (let [block (.getBlock (.getLocation entity))]
+        #_(let [block (.getBlock (.getLocation entity))]
           (when (= Material/AIR (.getType block))
             (.setType block Material/FIRE)))
+        (.setFireTicks entity 40)
         (when (instance? Player target)
           (c/broadcast "Takumi is watching " (.getDisplayName target)))))))
 
