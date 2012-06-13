@@ -1355,7 +1355,11 @@
                       (c/broadcast "zawa...")
                       (Thread/sleep 1000)
                       (when (= (.getType (.getBlock loc)) Material/PUMPKIN)
-                        (.createExplosion (.getWorld loc) loc 6 true)))))))
+                        (.setType (.getBlock loc) Material/AIR)
+                        (let [tnt (.spawn (.getWorld loc) loc TNTPrimed)]
+                          (Thread/sleep 1000)
+                          (.remove tnt)
+                          (.createExplosion (.getWorld loc) loc 6 true))))))))
 
 (defn creeper-explosion-3 [evt entity]
   (.setCancelled evt true)
