@@ -1169,6 +1169,8 @@
         (do
           (c/swap-entity target PigZombie)
           (c/consume-item (.getPlayer evt)))
+        ; right-click sheep -> wool
+        (instance? Sheep target) (d 35 (rand-int 16))
         ; right-click chicken -> rail
         (instance? Chicken target) (d 66)
         ; right-click pig -> cocoa
