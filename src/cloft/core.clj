@@ -320,6 +320,17 @@
   (let [loc (.getLocation entity)]
     (.dropItem (.getWorld loc) loc (ItemStack. Material/ARROW))))
 
+(defn arrow-skill-quake [entity]
+  (let [targets (.getNearbyEntities entity 5 3 5)
+        loc (.getLocation entity)]
+    (future-call #(do
+                    (doseq [_ [1 2 3]]
+                      (.createExplosion (.getWorld loc) loc 0)
+                      (doseq [target targets]
+                        (c/add-velocity target (- (rand) 0.5) 1 (- (rand) 0.5)))
+                      (Thread/sleep 1500))
+                    (.remove entity)))))
+
 (defn arrow-skill-sniping [entity]
   nil)
 
@@ -569,7 +580,6 @@
                  Material/RED_ROSE [arrow-skill-fire "FIRE"]
                  Material/SAPLING [arrow-skill-tree "TREE"]
                  Material/WORKBENCH [arrow-skill-ore "ORE"]
-                 Material/BROWN_MUSHROOM ['fly "FLY"]
                  Material/TRAP_DOOR ['digg "DIGG"]
                  Material/LADDER ['trap "TRAP"]
                  Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
@@ -583,7 +593,8 @@
                  Material/JACK_O_LANTERN [arrow-skill-pumpkin "PUMPKIN"]
                  Material/PUMPKIN [arrow-skill-pumpkin "PUMPKIN"]
                  Material/CROPS [arrow-skill-plant "PLANT"]
-                 Material/DIAMOND_BLOCK [arrow-skill-diamond "CRAZY DIAMOND"]}]
+                 Material/DIAMOND_BLOCK [arrow-skill-diamond "CRAZY DIAMOND"]
+                 Material/BROWN_MUSHROOM [arrow-skill-quake "QUAKE"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
@@ -1482,8 +1493,6 @@
                (if (instance? Player target)
                  (.getDisplayName target)
                  (c/entity2name target)))))
-        (= 'fly (arrow-skill-of shooter))
-        (future-call #(c/add-velocity target 0 1 0))
         (= 'exp (arrow-skill-of shooter))
         (.damage shooter 2)
         (= 'super-knockback (arrow-skill-of shooter))
@@ -1636,7 +1645,7 @@
             (player-attacks-pig-event evt attacker target))
           (when (instance? Chicken target)
             (player-attacks-chicken-event evt attacker target))
-          (when (= 'fly (arrow-skill-of attacker))
+          #_(when (= 'fly (arrow-skill-of attacker))
             (future-call #(do
                             (prn 0)
                             (c/add-velocity target 0 1 0)
