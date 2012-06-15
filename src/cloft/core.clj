@@ -179,8 +179,8 @@
           (do
             (.sendMessage player "You can't leave")
             (.setTo evt (.add (.getFrom evt) 0 0.5 0))))))
-    (when (c/jumping? evt)
-      (player-teleport-machine evt player))
+    (comment (when (c/jumping? evt)
+      (player-teleport-machine evt player)))
     (comment (when (walking? evt)
       (let [l (.getLocation player)
             b-up (.getBlock l)
