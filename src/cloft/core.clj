@@ -1769,6 +1769,7 @@
 (defn player-bed-enter-event [evt]
   (let [player (.getPlayer evt)]
     (c/broadcast (.getDisplayName player) " is sleeping.")
+    (.setHealth player 20)
     (future-call #(do
                     (Thread/sleep 3000)
                     (when (.isSleeping player)
