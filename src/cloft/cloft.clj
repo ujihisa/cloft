@@ -135,7 +135,7 @@
         (instance? Wolf entity) "Wolf"
         (instance? Zombie entity) "Zombie"
         (instance? TNTPrimed entity) "TNT"
-        :else (str (class entity))))
+        :else (last (clojure.string/split (str (class entity)) #"\."))))
 
 (def records
   [Material/GOLD_RECORD Material/GREEN_RECORD Material/RECORD_10
