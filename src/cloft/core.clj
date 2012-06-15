@@ -1767,15 +1767,16 @@
     (.setBuildable evt true)))
 
 (defn player-bed-enter-event [evt]
-  (c/broadcast (.. evt (getPlayer) (getDisplayName)) " is sleeping.")
-  (future-call #(do
-                  (Thread/sleep 3000)
-                  (when (.. evt (getPlayer) (isSleeping))
-                    (let [all-players (Bukkit/getOnlinePlayers)
-                          bed-players (filter (memfn isSleeping) all-players)]
-                      (when (< (count all-players) (inc (* (count bed-players) 2)))
-                        (.setTime world 0)
-                        (c/broadcast "good morning everyone!")))))))
+  (let [player (.getPlayer evt)]
+    (c/broadcast (.getDisplayName player) " is sleeping.")
+    (future-call #(do
+                    (Thread/sleep 3000)
+                    (when (.isSleeping player)
+                      (let [all-players (Bukkit/getOnlinePlayers)
+                            bed-players (filter (memfn isSleeping) all-players)]
+                        (when (< (count all-players) (inc (* (count bed-players) 2)))
+                          (.setTime world 0)
+                          (c/broadcast "good morning everyone!"))))))))
 
 (defn player-toggle-sneak-event [evt]
   "recovery spa"
