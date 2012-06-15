@@ -1378,11 +1378,8 @@
     (let [ename (c/entity2name entity)
           entities-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
       (cond
-        (c/location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
-        (.setCancelled evt true)
-
-        (instance? TNTPrimed entity)
-        (prn ['TNT entity])
+        #_((c/location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
+          (.setCancelled evt true))
 
         (instance? Creeper entity)
         (do
