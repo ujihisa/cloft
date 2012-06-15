@@ -931,12 +931,13 @@
                             (= "10.0" (apply str (take 4 ip)))
                             (= "127.0.0.1" ip)
                             (= "219.111.70.24" ip)
-                            (= "113.151.154.229" ip))
+                            (= "113.151.154.229" ip)
+                            (= "0:0:0:0:0:0:0:1" ip))
                         (do
                           (.setOp player true)
                           (prn [player 'is 'op]))
                         (.setOp player false)))
-                    (.playEffect (.getWorld (c/ujm)) (.getLocation (c/ujm)) Effect/RECORD_PLAY (rand-nth c/records))))
+                    (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))))
     (c/lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
