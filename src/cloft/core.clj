@@ -1382,18 +1382,18 @@
           (c/location-bound? (.getLocation entity) (first sanctuary) (second sanctuary))
           (.setCancelled evt true)
 
-        (instance? TNTPrimed entity)
-        (prn ['TNT entity])
+          (instance? TNTPrimed entity)
+          (prn ['TNT entity])
 
-        (instance? Creeper entity)
-        (do
-          ((current-creeper-explosion) evt entity)
-          (swap! creeper-explosion-idx inc))
+          (instance? Creeper entity)
+          (do
+            ((current-creeper-explosion) evt entity)
+            (swap! creeper-explosion-idx inc))
 
-        (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
-        (letfn [(join [xs x]
-                  (apply str (interpose x xs)))]
-          (c/lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))))
+          (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
+          (letfn [(join [xs x]
+                    (apply str (interpose x xs)))]
+            (c/lingr (str ename " is exploding near " (join (map #(.getDisplayName %) entities-nearby) ", ")))))))))
 
 (defn zombieze [entity]
   (swap! zombie-players conj (.getDisplayName entity))
