@@ -226,9 +226,7 @@
   (let [location (.getLocation entity)
         world (.getWorld location)
         shooter (.getShooter entity)]
-    (.setYaw location (.getYaw (.getLocation shooter)))
-    (.setPitch location (.getPitch (.getLocation shooter)))
-    (.teleport shooter location)))
+    (c/teleport-without-angle shooter location)))
 
 (defn arrow-skill-fire [entity]
   (let [location (.getLocation entity)

@@ -147,6 +147,11 @@
     (.add loc x y z)
     (.teleport entity loc)))
 
+(defn teleport-without-angle [entity location]
+  (.setYaw location (.getYaw (.getLocation entity)))
+  (.setPitch location (.getPitch (.getLocation entity)))
+  (.teleport entity location))
+
 (def potion-types [PotionType/FIRE_RESISTANCE PotionType/INSTANT_DAMAGE
                    PotionType/INSTANT_HEAL PotionType/POISON PotionType/REGEN
                    PotionType/SLOWNESS PotionType/SPEED PotionType/STRENGTH
