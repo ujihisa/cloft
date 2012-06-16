@@ -236,6 +236,12 @@
                      (.getNearbyEntities entity 1 1 1))]
       (.setFireTicks target 200))))
 
+(defn arrow-skill-flame [entity]
+  (doseq [x [-1 0 1] y [-1 0 1] z [-1 0 1]
+          :let [block (.getBlock (.add (.clone (.getLocation entity)) x y z))]
+          :when (= Material/AIR (.getType block))]
+    (.setType block Material/FIRE)))
+
 (defn arrow-skill-tree [entity]
   (let [location (.getLocation entity)
         world (.getWorld location)]
@@ -318,16 +324,34 @@
   (let [loc (.getLocation entity)]
     (.dropItem (.getWorld loc) loc (ItemStack. Material/ARROW))))
 
+(defn something-like-quake [entity klass f]
+  (let [targets (.getNearbyEntities entity 5 3 5)]
+    (future-call
+      #(do
+         (doseq [_ [1 2 3]]
+           (doseq [target targets :when (instance? klass target)]
+             (Thread/sleep (rand-int 300))
+             (.playEffect (.getWorld target) (.getLocation target) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
+             (c/add-velocity target (- (rand) 0.5) 0.9 (- (rand) 0.5))
+             (f target))
+           (Thread/sleep 1500))
+         (.remove entity)))))
+
 (defn arrow-skill-quake [entity]
-  (let [targets (.getNearbyEntities entity 5 3 5)
-        loc (.getLocation entity)]
-    (future-call #(do
-                    (doseq [_ [1 2 3]]
-                      (.createExplosion (.getWorld loc) loc 0)
-                      (doseq [target targets]
-                        (c/add-velocity target (- (rand) 0.5) 1 (- (rand) 0.5)))
-                      (Thread/sleep 1500))
-                    (.remove entity)))))
+  (something-like-quake
+    entity
+    LivingEntity
+    (fn [_] nil)))
+
+(defn arrow-skill-popcorn [entity]
+  (something-like-quake
+    entity
+    Item
+    (fn [item]
+      (when (= 0 (rand-int 5))
+        (.dropItem (.getWorld item) (.getLocation item) (.getItemStack item)))
+      (when (= 0 (rand-int 5))
+        (.remove item)))))
 
 (defn arrow-skill-sniping [entity]
   nil)
@@ -596,11 +620,21 @@
                  Material/PUMPKIN [arrow-skill-pumpkin "PUMPKIN"]
                  Material/CROPS [arrow-skill-plant "PLANT"]
                  Material/DIAMOND_BLOCK [arrow-skill-diamond "CRAZY DIAMOND"]
-                 Material/BROWN_MUSHROOM [arrow-skill-quake "QUAKE"]}]
+                 #_( Material/FIRE [arrow-skill-flame "FLAME"])
+                 Material/BROWN_MUSHROOM [arrow-skill-quake "QUAKE"]
+                 Material/RED_MUSHROOM ['arrow-skill-poison "POISON"]
+                 Material/FENCE_GATE [arrow-skill-popcorn "POPCORN"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
 
+(defn pickaxe-skillchange [player block block-against]
+  (when (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
+    (let [table {Material/YELLOW_FLOWER ['pickaxe-skill-teleport "TELEPORT"]
+                 Material/FENCE_GATE [arrow-skill-popcorn "POPCORN"]}]
+      (when-let [skill-name (table (.getType block))]
+        (c/broadcast (.getDisplayName player) " changed pickaxe-skill to " (last skill-name))
+        (swap! pickaxe-skill assoc (.getDisplayName player) (first skill-name))))))
 
 (def max-altitude 255)
 
@@ -1508,6 +1542,11 @@
                (if (instance? Player target)
                  (.getDisplayName target)
                  (c/entity2name target)))))
+        (= 'arrow-skill-poison (arrow-skill-of shooter))
+        (.addPotionEffect target (PotionEffect.
+                                    PotionEffectType/POISON
+                                    200
+                                    2))
         (= 'exp (arrow-skill-of shooter))
         (.damage shooter 2)
         (= 'super-knockback (arrow-skill-of shooter))
