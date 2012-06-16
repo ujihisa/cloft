@@ -336,6 +336,10 @@
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
 
+(def pickaxe-skill (atom {}))
+(defn pickaxe-skill-of [player]
+  (get @pickaxe-skill (.getDisplayName player)))
+
 (def reaction-skill (atom {}))
 (defn reaction-skill-of [player]
   (get @reaction-skill (.getDisplayName player)))
@@ -919,6 +923,7 @@
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
     (let [player (.getPlayer evt)]
       (arrow-skillchange player block (.getBlockAgainst evt))
+      (pickaxe-skillchange player block (.getBlockAgainst evt))
       (reaction-skillchange player block (.getBlockAgainst evt))
       (invoke-alchemy player block (.getBlockAgainst evt))
       (comment (prn (vector-from-to block player))
@@ -1098,7 +1103,10 @@
                Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
                Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
                Material/APPLE [Material/APPLE Material/GOLDEN_APPLE]
-               Material/ROTTEN_FLESH [Material/ROTTEN_FLESH Material/COAL]}]
+               Material/ROTTEN_FLESH [Material/ROTTEN_FLESH Material/COAL]}
+        player (.getPlayer evt)]
+    (when (.isSprinting player)
+      (.setVelocity item (.add (.multiply (.getVelocity item) 2.0) (Vector. 0.0 0.5 0.0))))
     (cond
       (table (.getType itemstack))
       (future-call #(let [pair (table (.getType itemstack))]
@@ -1110,7 +1118,16 @@
                                 (last pair)
                                 (first pair))]
                           (.dropItem (.getWorld item) (.getLocation item) (ItemStack. new-item-material (.getAmount itemstack))))
-                        (.remove item)))))))
+                        (.remove item))))
+      (and
+        (#{Material/DIAMOND_PICKAXE Material/GOLD_PICKAXE Material/IRON_PICKAXE
+           Material/STONE_PICKAXE Material/WOOD_PICKAXE} (.getType itemstack))
+        (= 'pickaxe-skill-teleport (pickaxe-skill-of player)))
+      (future-call
+        #(do
+           (Thread/sleep 2000)
+           (when-not (.isDead item)
+             (c/teleport-without-angle player (.getLocation item))))))))
 
 (defn player-toggle-sneak-event [evt]
   (prn (.getEventName evt) (.getPlayer evt)))
