@@ -1692,6 +1692,11 @@
         (when (instance? Arrow attacker)
           (arrow-damages-entity-event evt attacker target))
         (when (instance? Player attacker)
+          (when-let [item (.getItemInHand attacker)]
+            (when (#{Material/DIAMOND_PICKAXE Material/GOLD_PICKAXE Material/IRON_PICKAXE
+                     Material/STONE_PICKAXE Material/WOOD_PICKAXE} (.getType item))
+              (when (= 'pickaxe-skill-fire (pickaxe-skill-of attacker))
+                (.setFireTicks target 200))))
           (when (and (instance? Spider target)
                      (not (instance? CaveSpider target)))
             (player-attacks-spider-event evt attacker target))
