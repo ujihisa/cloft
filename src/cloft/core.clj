@@ -1749,10 +1749,13 @@
               (.sendMessage attacker "You made a friend"))))))))
 
 (defn block-break-event [evt]
-  (if-let [player (.getPlayer evt)]
-    (when (= (.getType (.getItemInHand player)) Material/AIR)
-      (.sendMessage player "Your hand hurts!")
-      (.damage player (rand-int 5)))))
+  (when-let [player (.getPlayer evt)]
+    (when-let [item (.getItemInHand player)]
+      (condp = (.getType item)
+        Material/AIR
+        (do
+          (.sendMessage player "Your hand hurts!")
+          (.damage player (rand-int 5)))))))
 
 (defn block-grow-event [evt]
   (let [newstate (.getNewState evt)]
