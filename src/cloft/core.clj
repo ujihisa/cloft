@@ -591,6 +591,7 @@
 
 (defn reaction-skillchange [player block block-against]
   (when (blazon? Material/LOG block-against)
+    (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
     (let [table {Material/RED_ROSE [reaction-skill-fire "FIRE"]
                  Material/YELLOW_FLOWER [reaction-skill-teleport "TELEPORT"]
                  Material/COBBLESTONE [reaction-skill-knockback "KNOCKBACK"]
@@ -603,6 +604,7 @@
 
 (defn arrow-skillchange [player block block-against]
   (when (blazon? Material/STONE (.getBlock (.add (.getLocation block) 0 -1 0)))
+    (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
     (let [table {Material/GLOWSTONE ['strong "STRONG"]
                  Material/TNT [arrow-skill-explosion "EXPLOSION"]
                  Material/TORCH [arrow-skill-torch "TORCH"]
@@ -635,8 +637,10 @@
 
 (defn pickaxe-skillchange [player block block-against]
   (when (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
+    (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
     (let [table {Material/YELLOW_FLOWER ['pickaxe-skill-teleport "TELEPORT"]
-                 Material/FENCE_GATE [arrow-skill-popcorn "POPCORN"]}]
+                 Material/RED_ROSE ['pickaxe-skill-fire "FIRE"]
+                 Material/WORKBENCH ['pickaxe-skill-ore "ORE"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed pickaxe-skill to " (last skill-name))
         (swap! pickaxe-skill assoc (.getDisplayName player) (first skill-name))))))
