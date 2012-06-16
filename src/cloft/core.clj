@@ -1000,7 +1000,7 @@
                      (.sendMessage player "!!!")
                      (when (= Material/AIR (.getType (.getBlock loc)))
                        (.spawn (.getWorld loc) loc Creeper)))))))]
-    (-> player (rand-nth [unlucky]))))
+    ((rand-nth [unlucky]) player)))
 
 ;(defn c/get-player-quit-listener []
 ;  (c/auto-proxy
