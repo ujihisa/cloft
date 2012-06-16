@@ -151,6 +151,11 @@
 (def bossbattle-player nil)
 (defn player-move-event [evt]
   (let [player (.getPlayer evt)]
+    (when (and
+            (.hasPotionEffect player PotionEffectType/SPEED)
+            (.isSprinting player)
+            (= 0 (rand-int 2)))
+      (.playEffect (.getWorld player) (.add (.getLocation player) 0 -1 0) Effect/MOBSPAWNER_FLAMES nil))
     (comment(let [before-y (.getY (.getFrom evt))
           after-y (.getY (.getTo evt))]
       (when (< (- after-y before-y) 0)
@@ -446,7 +451,7 @@
                         (check-and-thunder shooter)
                         (Thread/sleep 1000)
                         (swap! last-vertical-shots dissoc shooter-name))))
-      (when (= 'arrow-skill-tntmissile (arrow-skill-of shooter))
+      #_(when (= 'arrow-skill-tntmissile (arrow-skill-of shooter))
         (let [inventory (.getInventory shooter)
               arrow (.getProjectile evt)]
           (if (.contains inventory Material/TNT)
