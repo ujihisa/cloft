@@ -1758,13 +1758,37 @@
               (.sendMessage attacker "You made a friend"))))))))
 
 (defn block-break-event [evt]
-  (when-let [player (.getPlayer evt)]
-    (when-let [item (.getItemInHand player)]
-      (condp = (.getType item)
-        Material/AIR
-        (do
-          (.sendMessage player "Your hand hurts!")
-          (.damage player (rand-int 5)))))))
+  (let [block (.getBlock evt)]
+    (when-let [player (.getPlayer evt)]
+      (when-let [item (.getItemInHand player)]
+        (condp get (.getType item)
+          #{Material/AIR}
+          (do
+            (.sendMessage player "Your hand hurts!")
+            (.damage player (rand-int 5)))
+          #{Material/DIAMOND_PICKAXE Material/GOLD_PICKAXE Material/IRON_PICKAXE
+            Material/STONE_PICKAXE Material/WOOD_PICKAXE}
+          (when (and
+                  (= 'pickaxe-skill-ore (pickaxe-skill-of player))
+                  (= Material/STONE (.getType block)))
+            (letfn [(f [blocktype]
+                      (.setType block blocktype)
+                      (.setCancelled evt true)
+                      (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil))]
+              (cond
+                (= 0 (rand-int 10)) (f Material/COAL_ORE)
+                (= 0 (rand-int 20)) (f Material/IRON_ORE)
+                (= 0 (rand-int 30)) (f Material/REDSTONE_ORE)
+                (= 0 (rand-int 40)) (f Material/LAPIS_ORE)
+                (= 0 (rand-int 50)) (f Material/GOLD_ORE)
+                (= 0 (rand-int 1000)) (f Material/DIAMOND_ORE)
+                (= 0 (rand-int 300)) (f Material/GLOWSTONE)
+                (= 0 (rand-int 1000)) (f Material/LAPIS_BLOCK)
+                (= 0 (rand-int 1500)) (f Material/GOLD_BLOCK)
+                (= 0 (rand-int 2000)) (f Material/GOLD_BLOCK)
+                (= 0 (rand-int 50000)) (f Material/DIAMOND_BLOCK)
+                :else nil)))
+          nil)))))
 
 (defn block-grow-event [evt]
   (let [newstate (.getNewState evt)]
