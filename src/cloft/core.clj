@@ -640,7 +640,8 @@
     (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
     (let [table {Material/YELLOW_FLOWER ['pickaxe-skill-teleport "TELEPORT"]
                  Material/RED_ROSE ['pickaxe-skill-fire "FIRE"]
-                 Material/WORKBENCH ['pickaxe-skill-ore "ORE"]}]
+                 Material/WORKBENCH ['pickaxe-skill-ore "ORE"]
+                 Material/STONE ['pickaxe-skill-stone "STONE"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed pickaxe-skill to " (last skill-name))
         (swap! pickaxe-skill assoc (.getDisplayName player) (first skill-name))))))
@@ -950,6 +951,16 @@
         (alchemy player block)
         (prn "no effect is defined for " block)))))
 
+(defn block-damage-event [evt]
+  (let [player (.getPlayer evt)]
+    (when (and
+            (c/pickaxes (.getType (.getItemInHand player)))
+            (= 'pickaxe-skill-stone (pickaxe-skill-of player)))
+      (if (= Material/STONE (.getType (.getBlock evt)))
+        (.setInstaBreak evt true)
+        (when (not= 0 (rand-int 1000))
+          (.setCancelled evt true))))))
+
 (defn block-piston-extend-event [evt]
   "pushes the entity strongly"
   (let [direction (.getDirection evt)
@@ -1163,8 +1174,7 @@
                           (.dropItem (.getWorld item) (.getLocation item) (ItemStack. new-item-material (.getAmount itemstack))))
                         (.remove item))))
       (and
-        (#{Material/DIAMOND_PICKAXE Material/GOLD_PICKAXE Material/IRON_PICKAXE
-           Material/STONE_PICKAXE Material/WOOD_PICKAXE} (.getType itemstack))
+        (c/pickaxes (.getType itemstack))
         (= 'pickaxe-skill-teleport (pickaxe-skill-of player)))
       (future-call
         #(do
@@ -1702,8 +1712,7 @@
           (arrow-damages-entity-event evt attacker target))
         (when (instance? Player attacker)
           (when-let [item (.getItemInHand attacker)]
-            (when (#{Material/DIAMOND_PICKAXE Material/GOLD_PICKAXE Material/IRON_PICKAXE
-                     Material/STONE_PICKAXE Material/WOOD_PICKAXE} (.getType item))
+            (when (c/pickaxes (.getType item))
               (when (= 'pickaxe-skill-fire (pickaxe-skill-of attacker))
                 (.setFireTicks target 200))))
           (when (and (instance? Spider target)
@@ -1766,8 +1775,7 @@
           (do
             (.sendMessage player "Your hand hurts!")
             (.damage player (rand-int 5)))
-          #{Material/DIAMOND_PICKAXE Material/GOLD_PICKAXE Material/IRON_PICKAXE
-            Material/STONE_PICKAXE Material/WOOD_PICKAXE}
+          c/pickaxes
           (when (and
                   (= 'pickaxe-skill-ore (pickaxe-skill-of player))
                   (= Material/STONE (.getType block)))

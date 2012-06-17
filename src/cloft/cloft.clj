@@ -142,6 +142,10 @@
    Material/RECORD_11 Material/RECORD_3 Material/RECORD_4 Material/RECORD_5
    Material/RECORD_6 Material/RECORD_7 Material/RECORD_8 Material/RECORD_9])
 
+(def pickaxes
+  #{Material/DIAMOND_PICKAXE Material/GOLD_PICKAXE Material/IRON_PICKAXE
+    Material/STONE_PICKAXE Material/WOOD_PICKAXE})
+
 (defn move-entity [entity x y z]
   (let [loc (.getLocation entity)]
     (.add loc x y z)
