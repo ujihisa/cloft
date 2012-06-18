@@ -23,7 +23,8 @@
   (:import [org.bukkit.util Vector])
   (:import [org.bukkit Location Effect])
   (:import [org.bukkit.util BlockIterator])
-  (:import [org.bukkit.event.block Action]))
+  (:import [org.bukkit.event.block Action])
+  (:require [cloft.zhelpers :as mq]))
 
 (def NAME-ICON
   {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
@@ -1985,6 +1986,18 @@
   (comment (proxy [java.lang.Object CommandExecuter] []
     (onCommand [this ^CommandSender sender ^Command command ^String label ^String[] args]
       (prn command))))
+  (future-call #(do
+                  (let [ctx (mq/context 1)
+                        subscriber (mq/socket ctx mq/sub)]
+                    (mq/bind subscriber "tcp://*:1235")
+                    (mq/subscribe subscriber "")
+                    (while true
+                      (let [;; Read envelope with address
+                            ;address (mq/recv-str subscriber)
+                            ;; Read message contents
+                            contents (mq/recv-str subscriber)]
+                        (prn contents)
+                        (c/broadcast contents))))))
   (c/lingr "cloft plugin running..."))
 
 ;  (c/lingr "cloft plugin stopping...")

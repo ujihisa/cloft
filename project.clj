@@ -2,6 +2,7 @@
   :description "FIXME: write description"
   :dependencies [[clj-http "0.3.1"]
                  [swank-clojure/swank-clojure "1.3.3"]
+                 [org.zmq/jzmq "1.0.0"]
                  [org.clojure/clojure "1.4.0"]]
   :dev-dependencies [[org.bukkit/bukkit "1.2.5-R4.1-SNAPSHOT"]]
   ;:repl-options [:init nil :caught clj-stacktrace.repl/pst+]
