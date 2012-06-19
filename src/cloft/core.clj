@@ -307,6 +307,7 @@
                    (= Material/AIR (.getType (.getBlock loc)))
                    (= Material/SOIL (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))
           (c/consume-itemstack inventory Material/SEEDS)
+          (c/consume-itemstack inventory Material/SEEDS)
           (.setType (.getBlock loc) Material/CROPS))))))
 
 (defn arrow-skill-diamond [entity]
