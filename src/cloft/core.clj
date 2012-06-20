@@ -1033,7 +1033,7 @@
 
 (defn player-chat-event [evt]
   (let [name (.getDisplayName (.getPlayer evt))]
-    (c/lingr (str (name2icon name) (.getMessage evt)))))
+    (c/lingr "computer_science" (str (name2icon name) (.getMessage evt)))))
 
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target))))
@@ -1987,7 +1987,8 @@
   (comment (proxy [java.lang.Object CommandExecuter] []
     (onCommand [this ^CommandSender sender ^Command command ^String label ^String[] args]
       (prn command))))
-  (future-call #(do
+  (future-call (fn []
+                 (do
                   (let [ctx (mq/context 1)
                         subscriber (mq/socket ctx mq/sub)]
                     (mq/bind subscriber "tcp://*:1235")
@@ -1996,9 +1997,12 @@
                       (let [;; Read envelope with address
                             ;address (mq/recv-str subscriber)
                             ;; Read message contents
-                            contents (mq/recv-str subscriber)]
+                            contents (read-string (mq/recv-str subscriber))]
                         (prn contents)
-                        (c/broadcast contents))))))
+                        (if (= "/list" (:body contents))
+                          (c/lingr "computer_science"
+                             (seq (map #(.getDisplayName %) (Bukkit/getOnlinePlayers))))
+                          (c/broadcast (str (:user contents) ": " (:body contents))))))))))
   (c/lingr "cloft plugin running..."))
 
 ;  (c/lingr "cloft plugin stopping...")
