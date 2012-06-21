@@ -1994,14 +1994,13 @@
                     (mq/bind subscriber "tcp://*:1235")
                     (mq/subscribe subscriber "")
                     (while true
-                      (let [;; Read envelope with address
-                            ;address (mq/recv-str subscriber)
-                            ;; Read message contents
-                            contents (read-string (mq/recv-str subscriber))]
-                        (prn contents)
+                      (let [contents (read-string (mq/recv-str subscriber))]
                         (if (= "/list" (:body contents))
-                          (c/lingr "computer_science"
-                             (seq (map #(.getDisplayName %) (Bukkit/getOnlinePlayers))))
+                          (c/lingr
+                            "computer_science"
+                            (clojure.string/join
+                              ", "
+                              (map #(.getDisplayName %) (Bukkit/getOnlinePlayers))))
                           (c/broadcast (str (:user contents) ": " (:body contents))))))))))
   (c/lingr "cloft plugin running..."))
 
