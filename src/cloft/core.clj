@@ -1145,6 +1145,15 @@
         (.damage player 8)
         (.sendMessage player "you drunk milk"))
       (and
+        (= (.. evt (getMaterial)) Material/COAL)
+        (.getAllowFlight player)
+        (or
+          (= (.getAction evt) Action/RIGHT_CLICK_AIR)
+          (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
+      (do
+        (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
+        (c/consume-item player))
+      (and
         (= (.. evt (getMaterial)) Material/FEATHER)
         (or
           (= (.getAction evt) Action/RIGHT_CLICK_AIR)
