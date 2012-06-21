@@ -1986,8 +1986,9 @@
     x))
 
 (defn skill2name [skill]
-  (if (fn? skill)
-    (second (re-find #"\$(.*?)@" (str skill)))
+  (cond
+    (fn? skill) (second (re-find #"\$(.*?)@" (str skill)))
+    (nil? skill) "nil"
     (str skill)))
 
 (defn player-inspect [player]
