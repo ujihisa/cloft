@@ -1384,6 +1384,8 @@
                     (.setHealth player (/ (.getMaxHealth player) 3))
                     (.setFoodLevel player 5)))))
 
+(def murder-record (atom {}))
+
 (defn entity-murder-event [evt entity]
   (let [killer (.getKiller entity)]
     (when (instance? Player killer)
@@ -1407,7 +1409,12 @@
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
       (when (= 'exp (arrow-skill-of killer))
         (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
-      (c/broadcast (.getDisplayName killer) " killed " (c/entity2name entity) " (exp: " (.getDroppedExp evt) ")"))))
+      (let [name (.getDisplayName killer)
+            target-name (c/entity2name entity)]
+        (swap! murder-record
+               #(let [old-map (or (% name) {})]
+                  (assoc % name (assoc old-map target-name (inc (or (old-map target-name) 0))))))
+        (c/broadcast name " killed " target-name " (exp: " (.getDroppedExp evt) ")")))))
 
 (defn player-death-event [evt player]
   (swap! player-death-locations assoc (.getDisplayName player) (.getLocation player))
@@ -1992,12 +1999,13 @@
     :else (str skill)))
 
 (defn player-inspect [player]
-  (format "%s (HP: %d, MP: %d, AS: %s, RS: %s)"
+  (format "%s (HP: %d, MP: %d, AS: %s, RS: %s) %s"
           (.getDisplayName player)
           (.getHealth player)
           (.getFoodLevel player)
           (skill2name (arrow-skill-of player))
-          (skill2name (reaction-skill-of player))))
+          (skill2name (reaction-skill-of player))
+          (@murder-record (.getDisplayName player))))
 
 (defonce swank* nil)
 (defn on-enable [plugin]
@@ -2020,7 +2028,10 @@
                       (let [contents (read-string (mq/recv-str subscriber))
                             players (Bukkit/getOnlinePlayers)]
                         (if (= "/list" (:body contents))
-                          (c/lingr "computer_science" (clojure.string/join "\n" (map player-inspect players)))
+                          (c/lingr "computer_science"
+                             (if (empty? players)
+                               "(no players)"
+                               (clojure.string/join "\n" (map player-inspect players))))
                           (when-not (empty? players)
                             (c/broadcast (str (:user contents) ": " (:body contents)))))))))))
   (c/lingr "cloft plugin running..."))
