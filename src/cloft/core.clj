@@ -1985,6 +1985,19 @@
     (.addIngredient x 3 Material/GRAVEL)
     x))
 
+(defn skill2name [skill]
+  (if (fn? skill)
+    (second (re-find #"\$(.*?)@" (str skill)))
+    (str skill)))
+
+(defn player-inspect [player]
+  (format "%s (HP: %d, MP: %d, AS: %s, RS: %s)"
+          (.getDisplayName player)
+          (.getHealth player)
+          (.getFoodLevel player)
+          (skill2name (arrow-skill-of player))
+          (skill2name (reaction-skill-of player))))
+
 (defonce swank* nil)
 (defn on-enable [plugin]
   (when (nil? swank*)
@@ -2003,14 +2016,12 @@
                     (mq/bind subscriber "tcp://*:1235")
                     (mq/subscribe subscriber "")
                     (while true
-                      (let [contents (read-string (mq/recv-str subscriber))]
+                      (let [contents (read-string (mq/recv-str subscriber))
+                            players (Bukkit/getOnlinePlayers)]
                         (if (= "/list" (:body contents))
-                          (c/lingr
-                            "computer_science"
-                            (clojure.string/join
-                              ", "
-                              (map #(.getDisplayName %) (Bukkit/getOnlinePlayers))))
-                          (c/broadcast (str (:user contents) ": " (:body contents))))))))))
+                          (c/lingr "computer_science" (clojure.string/join "\n" (map player-inspect players)))
+                          (when-not (empty? players)
+                            (c/broadcast (str (:user contents) ": " (:body contents)))))))))))
   (c/lingr "cloft plugin running..."))
 
 ;  (c/lingr "cloft plugin stopping...")
