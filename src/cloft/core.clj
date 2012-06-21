@@ -1987,9 +1987,9 @@
 
 (defn skill2name [skill]
   (cond
-    (fn? skill) (second (re-find #"\$(.*?)@" (str skill)))
+    (fn? skill) (second (re-find #"\$.*?[_-]skill[_-](.*?)@" (str skill)))
     (nil? skill) "nil"
-    (str skill)))
+    :else (str skill)))
 
 (defn player-inspect [player]
   (format "%s (HP: %d, MP: %d, AS: %s, RS: %s)"
