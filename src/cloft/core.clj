@@ -1995,17 +1995,22 @@
 (defn skill2name [skill]
   (cond
     (fn? skill) (second (re-find #"\$.*?[_-]skill[_-](.*?)@" (str skill)))
-    (nil? skill) "nil"
+    (nil? skill) nil
     :else (str skill)))
 
 (defn player-inspect [player]
-  (format "%s (HP: %d, MP: %d, AS: %s, RS: %s) %s"
-          (.getDisplayName player)
-          (.getHealth player)
-          (.getFoodLevel player)
-          (skill2name (arrow-skill-of player))
-          (skill2name (reaction-skill-of player))
-          (@murder-record (.getDisplayName player))))
+  (format
+    "%s (%s)"
+    (.getDisplayName player)
+    (clojure.string/join
+      ", "
+      (map (partial clojure.string/join ": ")
+           (filter second
+                   {'HP (.getHealth player)
+                    'MP (.getFoodLevel player)
+                    'AS (skill2name (arrow-skill-of player))
+                    'RS (skill2name (reaction-skill-of player))
+                    'MR (@murder-record (.getDisplayName player))})))))
 
 (defonce swank* nil)
 (defn on-enable [plugin]
