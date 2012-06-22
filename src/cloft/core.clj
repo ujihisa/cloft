@@ -2042,10 +2042,11 @@
                             players (Bukkit/getOnlinePlayers)]
                         (case (:body contents)
                           "/list"
-                          (c/lingr "computer_science"
-                             (if (empty? players)
-                               "(no players)"
-                               (clojure.string/join "\n" (map player-inspect players))))
+                          (let [msg (if (empty? players)
+                                      "(no players)"
+                                      (clojure.string/join "\n" (map player-inspect players)))]
+                            (c/lingr "computer_science" msg)
+                            (c/broadcast msg))
                           (when-not (empty? players)
                             (c/broadcast (str (:user contents) ": " (:body contents)))))))))))
   (c/lingr "cloft plugin running..."))
