@@ -571,6 +571,9 @@
       (str "You got damage by " (c/entity2name by) " and escaped."))
     (.teleport you (find-place you (range -10 10)))))
 
+(defn reaction-skill-poison [you by]
+  (.addPotionEffect by (PotionEffect.  PotionEffectType/POISON 200 2)))
+
 ;(defn build-long [block block-against]
 ;  (comment (when (= (.getType block) (.getType block-against))
 ;    (let [world (.getWorld block)
@@ -599,7 +602,8 @@
                  Material/COBBLESTONE [reaction-skill-knockback "KNOCKBACK"]
                  Material/DIRT [reaction-skill-wolf "WOLF"]
                  Material/IRON_BLOCK [reaction-skill-golem "GOLEM"]
-                 Material/SNOW_BLOCK [reaction-skill-ice "ICE"]}]
+                 Material/SNOW_BLOCK [reaction-skill-ice "ICE"]
+                 Material/RED_MUSHROOM [reaction-skill-poison "POISON"]}]
       (when-let [skill-name (table (.getType block))]
         (c/broadcast (.getDisplayName player) " changed reaction-skill to " (last skill-name))
         (swap! reaction-skill assoc (.getDisplayName player) (first skill-name))))))
@@ -1580,10 +1584,7 @@
                  (.getDisplayName target)
                  (c/entity2name target)))))
         (= 'arrow-skill-poison (arrow-skill-of shooter))
-        (.addPotionEffect target (PotionEffect.
-                                    PotionEffectType/POISON
-                                    200
-                                    2))
+        (reaction-skill-poison target)
         (= 'exp (arrow-skill-of shooter))
         (.damage shooter 2)
         (= 'super-knockback (arrow-skill-of shooter))
