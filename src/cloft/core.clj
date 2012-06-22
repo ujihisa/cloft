@@ -2040,7 +2040,8 @@
                     (while true
                       (let [contents (read-string (mq/recv-str subscriber))
                             players (Bukkit/getOnlinePlayers)]
-                        (if (= "/list" (:body contents))
+                        (case (:body contents)
+                          "/list"
                           (c/lingr "computer_science"
                              (if (empty? players)
                                "(no players)"
