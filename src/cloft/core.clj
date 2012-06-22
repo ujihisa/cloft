@@ -572,7 +572,7 @@
     (.teleport you (find-place you (range -10 10)))))
 
 (defn reaction-skill-poison [you by]
-  (.addPotionEffect by (PotionEffect.  PotionEffectType/POISON 200 2)))
+  (.addPotionEffect by (PotionEffect. PotionEffectType/POISON 200 2)))
 
 ;(defn build-long [block block-against]
 ;  (comment (when (= (.getType block) (.getType block-against))
@@ -1584,7 +1584,7 @@
                  (.getDisplayName target)
                  (c/entity2name target)))))
         (= 'arrow-skill-poison (arrow-skill-of shooter))
-        (reaction-skill-poison target)
+        (reaction-skill-poison nil target)
         (= 'exp (arrow-skill-of shooter))
         (.damage shooter 2)
         (= 'super-knockback (arrow-skill-of shooter))
@@ -1774,7 +1774,9 @@
               (when (and (not= actual-attacker target)
                          (not (instance? Wolf actual-attacker))
                          (not (instance? TNTPrimed actual-attacker))
-                         (not= arrow-skill-diamond (arrow-skill-of actual-attacker)))
+                         (not (and
+                           (instance? Player actual-attacker)
+                           (= arrow-skill-diamond (arrow-skill-of actual-attacker)))))
                 (skill target actual-attacker))))
           (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
             (if (zombie-player? target)
