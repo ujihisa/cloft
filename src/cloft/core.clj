@@ -1314,8 +1314,12 @@
         (instance? Spider target) (d 287)
         ; right-click squid -> chat and hungry
         (instance? Squid target)
-        (let [player (.getPlayer evt)]
-          (.chat player "ikakawaiidesu")
+        (let [player (.getPlayer evt)
+              msg (clojure.string/join "" (map char [65394 65398 65398 65436
+                                                     65394 65394 65411 65438
+                                                     65405]))]
+          (c/lingr msg)
+          (c/broadcast (.getDisplayName player) ": " msg)
           (.setFoodLevel player 0))
         ; right-click player -> makes it hungry
         (instance? Player target) (touch-player target)))))
