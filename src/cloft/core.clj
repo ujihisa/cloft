@@ -1695,13 +1695,15 @@
                  Sheep Material/BED
                  Villager Material/LEATHER_LEGGINGS
                  Silverfish Material/DIAMOND_PICKAXE
-                 IronGolem Material/FISHING_ROD}]
+                 IronGolem Material/FISHING_ROD
+                 Squid Material/RAW_FISH}]
       (if-let [m (last (first (filter #(instance? (first %) target) table)))]
         (.dropItem (.getWorld target) (.getLocation target) (ItemStack. m 1))
         (cond
           (instance? Player target)
           (do
             (when-let [item (.getItemInHand target)]
+              (.damage target 1)
               (.setItemInHand target (ItemStack. Material/AIR))
               (.setItemInHand shooter item)
               (c/lingr (str (.getDisplayName shooter) " fished " (.getDisplayName target)))))
