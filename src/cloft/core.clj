@@ -1394,6 +1394,21 @@
 
 (def murder-record (atom {}))
 
+(defn spawn-block-generater [entity]
+  (let [loc (.getLocation entity)]
+    (and
+      (= Material/DIAMOND_BLOCK (.getType (.getBlock (.add (.clone loc) 0 -1 0))))
+      (every? identity
+        (for [x [-1 0 1] z [-1 0 1]]
+          (= Material/GOLD_BLOCK (.getType (.getBlock (.add (.clone loc) x -2 z))))))
+      (let [block (.getBlock (.add (.clone loc) 0 -1 0))]
+        (.setType block Material/MOB_SPAWNER)
+        (.setSpawnedType (.getState block) (.getType entity)))
+      (doseq [x [-1 0 1] z [-1 0 1]]
+        (.setType Material/MOSSY_COBBLESTONE (.getBlock (.add (.clone loc) x -2 z))))
+      (future-call #(.remove entity))
+      #_(.setCancelled evt true))))
+
 (defn entity-murder-event [evt entity]
   (let [killer (.getKiller entity)]
     (when (instance? Player killer)
@@ -1734,6 +1749,8 @@
         (when (instance? Arrow attacker)
           (arrow-damages-entity-event evt attacker target))
         (when (instance? Player attacker)
+          (when-not (instance? Player target)
+            (spawn-block-generater target))
           (when-let [item (.getItemInHand attacker)]
             (when (c/pickaxes (.getType item))
               (when (= 'pickaxe-skill-fire (pickaxe-skill-of attacker))
