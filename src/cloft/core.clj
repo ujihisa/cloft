@@ -1408,7 +1408,7 @@
         (.setType block Material/MOB_SPAWNER)
         (.setSpawnedType (.getState block) (.getType entity)))
       (doseq [x [-1 0 1] z [-1 0 1]]
-        (.setType Material/MOSSY_COBBLESTONE (.getBlock (.add (.clone loc) x -2 z))))
+        (.setType (.getBlock (.add (.clone loc) x -2 z)) Material/MOSSY_COBBLESTONE))
       (future-call #(.remove entity))
       #_(.setCancelled evt true))))
 
