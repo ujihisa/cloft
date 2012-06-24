@@ -978,6 +978,9 @@
       (.teleport e (.add (.getLocation e) (.getModX direction) (.getModY direction) (.getModZ direction)))
       (c/add-velocity e (* (.getModX direction) 4) (* (.getModY direction) 1.5) (* (.getModZ direction) 4)))))
 
+(defn vector-from-to [ent-from ent-to]
+  (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
+
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
     (comment (.spawn (.getWorld block) (.getLocation block) Pig))
@@ -1540,8 +1543,22 @@
           (recur (dec depth)))))))
 
 (defn arrow-damages-entity-event [evt arrow target]
-  (if false
-    'dummy
+  (if (and
+        (not= 0 (rand-int 10))
+        (instance? Player target))
+    (if-let [chestplate (.getChestplate (.getInventory target))]
+      (when (and
+              (= Material/LEATHER_CHESTPLATE (.getType chestplate))
+              (not-empty (.getEnchantments chestplate)))
+        (let [shooter (.getShooter arrow)]
+          (c/broadcast (.getDisplayName target) "'s enchanted leather chestplate reflects arrows!")
+          (.setCancelled evt true)
+          (.remove arrow)
+          (let [a (.launchProjectile target Arrow)]
+            (future-call #(do
+                            (Thread/sleep 100)
+                            (.setShooter a shooter)))
+            (.setVelocity a (.multiply (.getVelocity arrow) -1))))))
     (if-let [shooter (.getShooter arrow)]
       (when (instance? Player shooter)
         (cond
@@ -1642,9 +1659,6 @@
                            (.setType b Material/RAILS)))
            (.setPassenger cart target)
            (c/add-velocity cart 0 5 0)))
-
-(defn vector-from-to [ent-from ent-to]
-  (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
 
 (defn player-attacks-spider-event [evt player spider]
   (let [cave-spider (.spawn (.getWorld spider) (.getLocation spider) CaveSpider)]
