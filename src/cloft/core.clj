@@ -2007,7 +2007,7 @@
     (nil? skill) nil
     :else (str skill)))
 
-(defn player-inspect [player]
+(defn player-inspect [player verbose?]
   (format
     "%s (%s)"
     (.getDisplayName player)
@@ -2015,11 +2015,12 @@
       ", "
       (map (partial clojure.string/join ": ")
            (filter second
-                   {'HP (.getHealth player)
-                    'MP (.getFoodLevel player)
-                    'AS (skill2name (arrow-skill-of player))
-                    'RS (skill2name (reaction-skill-of player))
-                    'MR (@murder-record (.getDisplayName player))})))))
+                   (merge (when verbose?
+                            {'MR (@murder-record (.getDisplayName player))})
+                          {'HP (.getHealth player)
+                           'MP (.getFoodLevel player)
+                           'AS (skill2name (arrow-skill-of player))
+                           'RS (skill2name (reaction-skill-of player))}))))))
 
 (defonce swank* nil)
 (defn on-enable [plugin]
@@ -2042,11 +2043,11 @@
                     (while true
                       (let [contents (read-string (mq/recv-str subscriber))
                             players (Bukkit/getOnlinePlayers)]
-                        (case (:body contents)
+                        (condp #(.startsWith %2 %1) (:body contents)
                           "/list"
                           (let [msg (if (empty? players)
                                       "(no players)"
-                                      (clojure.string/join "\n" (map player-inspect players)))]
+                                      (clojure.string/join "\n" (map #(player-inspect % (= (:body contents) "/list -l")) players)))]
                             (c/lingr "computer_science" msg)
                             (c/broadcast msg))
                           "/chicken"
