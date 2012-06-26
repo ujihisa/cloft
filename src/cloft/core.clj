@@ -1419,11 +1419,12 @@
 
 (defn spawn-block-generater [entity]
   (let [loc (.getLocation entity)]
-    (and
-      (= Material/DIAMOND_BLOCK (.getType (.getBlock (.add (.clone loc) 0 -1 0))))
-      (every? identity
-        (for [x [-1 0 1] z [-1 0 1]]
-          (= Material/GOLD_BLOCK (.getType (.getBlock (.add (.clone loc) x -2 z))))))
+    (when
+      (and
+        (= Material/DIAMOND_BLOCK (.getType (.getBlock (.add (.clone loc) 0 -1 0))))
+        (every? identity
+                (for [x [-1 0 1] z [-1 0 1]]
+                  (= Material/GOLD_BLOCK (.getType (.getBlock (.add (.clone loc) x -2 z)))))))
       (let [block (.getBlock (.add (.clone loc) 0 -1 0))]
         (.setType block Material/MOB_SPAWNER)
         (.setSpawnedType (.getState block) (.getType entity)))
