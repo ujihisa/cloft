@@ -166,6 +166,13 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "block-damage-event");
         if (f.isBound()) f.invoke(event);
     }
+    /*
+    @EventHandler
+    public void onBlockPhysics(BlockPhysicsEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "block-place-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    */
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "block-place-event");
