@@ -1177,6 +1177,12 @@
                Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
                Material/APPLE [Material/APPLE Material/GOLDEN_APPLE]
                Material/ROTTEN_FLESH [Material/ROTTEN_FLESH Material/COAL]}
+        table-equip
+        {Material/WOOD_SWORD [Material/STICK Material/WOOD Material/WOOD]
+         Material/STONE_SWORD [Material/STICK Material/COBBLESTONE Material/COBBLESTONE]
+         Material/IRON_SWORD [Material/STICK Material/IRON_INGOT Material/IRON_INGOT]
+         Material/GOLD_SWORD [Material/STICK Material/GOLD_INGOT Material/GOLD_INGOT]
+         Material/DIAMOND_SWORD [Material/STICK Material/DIAMOND Material/DIAMOND]}
         player (.getPlayer evt)]
     (when (.isSprinting player)
       (.setVelocity item (.add (.multiply (.getVelocity item) 2.0) (Vector. 0.0 0.5 0.0))))
@@ -1191,6 +1197,19 @@
                                 (last pair)
                                 (first pair))]
                           (.dropItem (.getWorld item) (.getLocation item) (ItemStack. new-item-material (.getAmount itemstack))))
+                        (.remove item))))
+      (table-equip (.getType itemstack))
+      (future-call #(let [parts (table-equip (.getType itemstack))]
+                      (Thread/sleep 8000)
+                      (when (and
+                              (not (.isDead item))
+                              (#{Material/FURNACE Material/BURNING_FURNACE}
+                                  (.getType (.getBlock (.add (.getLocation item) 0 -1 0)))))
+                        (doseq [p parts]
+                          (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (if (not= 0 (rand-int 10)) p Material/COAL) (.getAmount itemstack))))
+                        (when (not-empty (.getEnchantments itemstack))
+                          (let [exp (.spawn (.getWorld item) (.getLocation item) ExperienceOrb)]
+                            (.setExperience exp (rand-nth (range 10 20)))))
                         (.remove item))))
       (and
         (c/pickaxes (.getType itemstack))
