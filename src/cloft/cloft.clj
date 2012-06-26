@@ -102,8 +102,7 @@
 (defn removable-block? [block]
   (and
     (nil? (#{Material/AIR Material/CHEST Material/FURNACE
-             Material/BURNING_FURNACE Material/BEDROCK
-             Material/MOB_SPAWNER} (.getType block)))
+             Material/BURNING_FURNACE Material/BEDROCK} (.getType block)))
     (not (.isLiquid block))))
 
 (defn entity2name [entity]

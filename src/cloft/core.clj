@@ -223,10 +223,12 @@
     (if (c/removable-block? block)
       (let [shooter-loc (.getLocation (.getShooter entity))]
         (.setType (.getBlock shooter-loc) (.getType block))
+        (when (= Material/MOB_SPAWNER (.getType block))
+          (.setSpawnedType (.getState (.getBlock shooter-loc)) (.getSpawnedType (.getState block))))
         (.setType block Material/AIR)
-        (.remove entity)
         (.teleport (.getShooter entity) (.add shooter-loc 0 1 0)))
-      (.sendMessage (.getShooter entity) "PULL failed"))))
+      (.sendMessage (.getShooter entity) "PULL failed")))
+  (.remove entity))
 
 (defn arrow-skill-teleport [entity]
   (let [location (.getLocation entity)
