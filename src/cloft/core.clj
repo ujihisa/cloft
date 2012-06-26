@@ -2061,6 +2061,12 @@
     (.addIngredient x 1 Material/FLINT)
     x))
 
+(def recipe-seed-coal
+  (let [x (org.bukkit.inventory.ShapelessRecipe.
+            (ItemStack. Material/COAL 1))]
+    (.addIngredient x 4 Material/SEEDS)
+    x))
+
 (defn skill2name [skill]
   (cond
     (fn? skill) (second (re-find #"\$.*?[_-]skill[_-](.*?)@" (str skill)))
@@ -2089,6 +2095,7 @@
   (Bukkit/addRecipe recipe-string-web)
   (Bukkit/addRecipe recipe-gravel-flint)
   (Bukkit/addRecipe recipe-flint-gravel)
+  (Bukkit/addRecipe recipe-seed-coal)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (periodically)) 50 50)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (cloft-scheduler)) 0 1)
   (comment (proxy [java.lang.Object CommandExecuter] []
