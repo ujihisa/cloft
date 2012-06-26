@@ -232,6 +232,7 @@
   (let [location (.getLocation entity)
         world (.getWorld location)
         shooter (.getShooter entity)]
+    (.setFallDistance shooter 0.0)
     (c/teleport-without-angle shooter location)))
 
 (defn arrow-skill-fire [entity]
@@ -1799,7 +1800,7 @@
                   (let [msg (str "Oh trap! " (.getDisplayName target) " was on a needle.")]
                     (c/lingr msg)
                     (.sendMessage target msg)))
-                (.damage target 20))))
+                (.damage target 100))))
           #_(when (= Material/SLIME_BALL (.getType (.getItemInHand target)))
             (.setCancelled evt true)
             (c/add-velocity target 0 1 0)
