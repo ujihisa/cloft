@@ -1171,7 +1171,7 @@
 (defn player-drop-item-event [evt]
   (let [item (.getItemDrop evt)
         itemstack (.getItemStack item)
-        table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
+        table-food {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
                Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
                Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
                Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
@@ -1181,8 +1181,8 @@
     (when (.isSprinting player)
       (.setVelocity item (.add (.multiply (.getVelocity item) 2.0) (Vector. 0.0 0.5 0.0))))
     (cond
-      (table (.getType itemstack))
-      (future-call #(let [pair (table (.getType itemstack))]
+      (table-food (.getType itemstack))
+      (future-call #(let [pair (table-food (.getType itemstack))]
                       (Thread/sleep 5000)
                       (when-not (.isDead item)
                         (let [new-item-material
