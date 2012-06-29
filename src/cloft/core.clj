@@ -608,9 +608,10 @@
       (when-let [skill-name (table (.getType block))]
         (if (= 0 (.getLevel player))
           (.sendMessage player "Your level is 0. You can't set reaction skill yet.")
-          (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
-          (c/broadcast (.getDisplayName player) " changed reaction-skill to " (last skill-name))
-          (swap! reaction-skill assoc (.getDisplayName player) (first skill-name)))))))
+          (do
+            (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
+            (c/broadcast (.getDisplayName player) " changed reaction-skill to " (last skill-name))
+            (swap! reaction-skill assoc (.getDisplayName player) (first skill-name))))))))
 
 (defn arrow-skillchange [player block block-against]
   (when (blazon? Material/STONE (.getBlock (.add (.getLocation block) 0 -1 0)))
