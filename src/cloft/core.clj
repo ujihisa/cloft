@@ -1282,14 +1282,6 @@
                 (.getLocation target)
                 (ItemStack. (int n) (int 1) (short 0) (Byte. m)))))]
       (cond
-        #_("right-click air and bow in hand -> aiming?")
-        #_((and
-              #_(
-                 (instance? nil target)
-                 "maybe wrong...")
-              (= Material/BOW (.getType(.getItemInHand (.getPlayer evt)))))
-          (prn 'aiming' target))
-
         (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
         (let [player (.getPlayer evt)]
           (player-entity-with-string-event evt player target))
