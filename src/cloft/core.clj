@@ -486,7 +486,7 @@
   (let [creature (.getEntity evt)]
     (when (and
             (= org.bukkit.event.entity.CreatureSpawnEvent$SpawnReason/NATURAL (.getSpawnReason evt))
-            (= 0 (rand-int 20))
+            (= 0 (rand-int 10))
             (= "world" (.getName (.getWorld creature)))
             (some #(instance? % creature) [Zombie Skeleton]))
       (.spawn (.getWorld creature) (.getLocation creature) Blaze)
@@ -1808,7 +1808,8 @@
                  Silverfish Material/DIAMOND_PICKAXE
                  IronGolem Material/FISHING_ROD
                  Squid Material/RAW_FISH
-                 Blaze Material/GLOWSTONE}]
+                 Blaze Material/GLOWSTONE_DUST
+                 MagmaCube Material/FLINT}]
       (if-let [m (last (first (filter #(instance? (first %) target) table)))]
         (.dropItem (.getWorld target) (.getLocation target) (ItemStack. m 1))
         (cond
