@@ -1169,13 +1169,14 @@
         (let [arrow (.launchProjectile player Arrow)]
           (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))
       (and
+        (zombie-player? player)
         (= (.. evt (getMaterial)) Material/MILK_BUCKET)
         (or
           (= (.getAction evt) Action/RIGHT_CLICK_AIR)
           (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       (do
-        (.damage player 8)
-        (.sendMessage player "you drunk milk"))
+        (rebirth-from-zombie player)
+        (c/broadcast (format "%s drunk milk to recover from zombie" player)))
       (and
         (= (.. evt (getMaterial)) Material/COAL)
         (.getAllowFlight player)
@@ -1735,8 +1736,7 @@
                           (Thread/sleep 10000)
                           (.remove chicken))))))))
 
-(defn rebirth-from-zombie [evt target]
-  (.setCancelled evt true)
+(defn rebirth-from-zombie [target]
   (.setMaximumAir target 300) ; default maximum value
   (.setRemainingAir target 300)
   (.setHealth target (.getMaxHealth target))
@@ -1781,7 +1781,8 @@
       (when (and
               (instance? Player target)
               (zombie-player? target))
-        (rebirth-from-zombie evt target))
+        (.setCancelled evt true)
+        (rebirth-from-zombie target))
 
       (= EntityDamageEvent$DamageCause/ENTITY_EXPLOSION (.getCause evt))
       (if (= (rem @creeper-explosion-idx 3) 0)
