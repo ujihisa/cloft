@@ -374,12 +374,18 @@
 (defn pickaxe-skill-of [player]
   (get @pickaxe-skill (.getDisplayName player)))
 
+(defn skill2name [skill]
+  (cond
+    (fn? skill) (second (re-find #"\$.*?[_-]skill[_-](.*?)@" (str skill)))
+    (nil? skill) nil
+    :else (str skill)))
+
 (def reaction-skill (atom {}))
 (defn reaction-skill-of [player]
   (let [[skill num-rest] (get @reaction-skill (.getDisplayName player))]
     (if (= 0 num-rest)
       (do
-        (c/broadcast (format "%s lost reactio-skill %s" (.getDisplayName player) skill))
+        (c/broadcast (format "%s lost reactio-skill %s" (.getDisplayName player) (skill2name skill)))
         (swap! reaction-skill assoc (.getDisplayName player) nil)
         nil)
       (do
@@ -2082,12 +2088,6 @@
             (ItemStack. Material/COAL 1))]
     (.addIngredient x 4 Material/SEEDS)
     x))
-
-(defn skill2name [skill]
-  (cond
-    (fn? skill) (second (re-find #"\$.*?[_-]skill[_-](.*?)@" (str skill)))
-    (nil? skill) nil
-    :else (str skill)))
 
 (defn player-inspect [player verbose?]
   (format
