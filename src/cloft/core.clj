@@ -489,7 +489,6 @@
             (= 0 (rand-int 20))
             (= "world" (.getName (.getWorld creature)))
             (some #(instance? % creature) [Zombie Skeleton]))
-      (c/broadcast "blaze2 spawned")
       (.spawn (.getWorld creature) (.getLocation creature) Blaze)
       (.setCancelled evt true))))
 
