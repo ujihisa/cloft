@@ -1135,6 +1135,11 @@
           (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       (.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
       (and
+        (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD)
+        (= (.getAction evt) Action/LEFT_CLICK_BLOCK))
+      (let [block (.getClickedBlock evt)]
+        (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block))))
+      (and
         (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
         (= (.getHealth player) (.getMaxHealth player))
         (or
