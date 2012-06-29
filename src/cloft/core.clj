@@ -385,6 +385,8 @@
       (do
         (swap! reaction-skill assoc (.getDisplayName player) [skill (dec num-rest)])
         skill))))
+(defn reaction-skill-of-without-consume [player]
+  (first (get @reaction-skill (.getDisplayName player))))
 
 (def bowgun-players (atom #{"ujm"}))
 (defn add-bowgun-player [name]
@@ -2100,7 +2102,7 @@
                           {'HP (.getHealth player)
                            'MP (.getFoodLevel player)
                            'AS (skill2name (arrow-skill-of player))
-                           'RS (skill2name (reaction-skill-of player))}))))))
+                           'RS (skill2name (reaction-skill-of-without-consume player))}))))))
 
 (defonce swank* nil)
 (defn on-enable [plugin]
