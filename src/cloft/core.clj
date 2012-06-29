@@ -440,6 +440,48 @@
     #(when (fn projectile)
        (fly-with-check projectile fn))))
 
+(defn blaze2-launch-fireball [blaze2 projectile]
+  (when (not= "world" (.getName (.getWorld blaze2))) (prn 'omg-assertion-failed))
+  (.remove projectile)
+  (if (= 0 (rand-int 5))
+    (let [loc (.getLocation blaze2)]
+      (.playEffect (.getWorld loc) loc Effect/MOBSPAWNER_FLAMES nil)
+      (.spawn (.getWorld blaze2)
+              (.add loc 0 2 0)
+              (rand-nth [Skeleton Zombie Spider MagmaCube MagmaCube Silverfish
+                         Enderman Villager Creeper])))
+    (.launchProjectile blaze2 Arrow)))
+
+(defn blaze2-arrow-hit [target]
+  (.setFireTicks target 200))
+
+(defn blaze2-get-damaged [evt blaze2]
+  (when (not= "world" (.getName (.getWorld blaze2))) (prn 'omg-assertion-failed))
+  (.setDamage evt (int (/ (.getDamage evt) 2))))
+
+(defn blaze2-murder-event [evt blaze2 player]
+  (when (not= "world" (.getName (.getWorld blaze2))) (prn 'omg-assertion-failed))
+  (doseq [[x y z] [[0 0 0] [-1 0 0] [0 -1 0] [0 0 -1] [1 0 0] [0 1 0] [0 0 1]]]
+    (let [loc (.getLocation blaze2)]
+      (when (and
+              (= Material/AIR (.getType (.getBlock loc)))
+              (= 0 (rand-int 2)))
+        (.setType
+          (.getBlock (.add (.clone loc) x y z))
+          (rand-nth [Material/NETHER_BRICK Material/NETHERRACK Material/SOUL_SAND
+                     Material/GLOWSTONE Material/GLOWSTONE])))))
+  (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
+  (c/lingr (format "%s beated a blaze2!" (.getDisplayName player))))
+
+(defn projectile-launch-event [evt]
+  (let [projectile (.getEntity evt)
+        shooter (.getShooter projectile)]
+    (condp instance? projectile
+      Fireball (when (= "world" (.getName (.getWorld projectile)))
+                 (blaze2-launch-fireball shooter projectile))
+      SmallFireball nil
+      nil)))
+
 (defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
@@ -1467,6 +1509,10 @@
             #(.spawn (.getWorld entity) (.getLocation entity) Villager)
             #(.spawn (.getWorld entity) (.getLocation entity) Silverfish)
             #(.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/IRON_SWORD))])))
+      (when (and
+              (instance? Blaze entity)
+              (= "world" (.getName (.getWorld entity))))
+        (blaze2-murder-event evt entity killer))
       (when (instance? Giant entity)
         (.setDroppedExp evt 1000))
       (when (instance? Creeper entity)
@@ -1602,7 +1648,7 @@
                             (Thread/sleep 100)
                             (.setShooter a shooter)))
             (.setVelocity a (.multiply (.getVelocity arrow) -1))))))
-    (if-let [shooter (.getShooter arrow)]
+    (when-let [shooter (.getShooter arrow)]
       (when (instance? Player shooter)
         (cond
           (.contains (.getInventory shooter) Material/WEB)
@@ -1695,7 +1741,10 @@
           (.setFireTicks target 400)
           (= 'cart (arrow-skill-of shooter))
           (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
-            (.setPassenger cart target)))))))
+            (.setPassenger cart target))))
+      (when (instance? Blaze shooter)
+        "arrow from blaze = always it's by blaze2"
+        (blaze2-arrow-hit target)))))
 
 (comment (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
            (future-call #(let [b (.getBlock (.getLocation target))]
@@ -1747,7 +1796,8 @@
                  Villager Material/LEATHER_LEGGINGS
                  Silverfish Material/DIAMOND_PICKAXE
                  IronGolem Material/FISHING_ROD
-                 Squid Material/RAW_FISH}]
+                 Squid Material/RAW_FISH
+                 Blaze Material/GLOWSTONE}]
       (if-let [m (last (first (filter #(instance? (first %) target) table)))]
         (.dropItem (.getWorld target) (.getLocation target) (ItemStack. m 1))
         (cond
@@ -1809,6 +1859,9 @@
             (when (c/pickaxes (.getType item))
               (when (= 'pickaxe-skill-fire (pickaxe-skill-of attacker))
                 (.setFireTicks target 200))))
+          (when (and (instance? Blaze target)
+                     (= "world" (.getName (.getWorld target))))
+            (blaze2-get-damaged evt target))
           (when (and (instance? Spider target)
                      (not (instance? CaveSpider target)))
             (player-attacks-spider-event evt attacker target))

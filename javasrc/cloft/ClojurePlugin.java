@@ -102,6 +102,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onProjectileLaunchEvent(ProjectileLaunchEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "projectile-launch-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onEntityCombust(EntityCombustEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-combust-event");
         if (f.isBound()) f.invoke(event);
