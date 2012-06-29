@@ -1125,6 +1125,13 @@
       (.setType (.getBlock (.getLocation door)) Material/AIR)
       (.setType (.getBlock (.add (.getLocation door) 0 10 0)) Material/IRON_DOOR)))))
 
+(defn rebirth-from-zombie [target]
+  (.setMaximumAir target 300) ; default maximum value
+  (.setRemainingAir target 300)
+  (.setHealth target (.getMaxHealth target))
+  (swap! zombie-players disj (.getDisplayName target))
+  (c/broadcast (.getDisplayName target) " rebirthed as a human."))
+
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)]
     (cond
@@ -1176,7 +1183,8 @@
           (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       (do
         (rebirth-from-zombie player)
-        (c/broadcast (format "%s drunk milk to recover from zombie" player)))
+        (when (= 0 (rand-int 3))
+          (.setType (.getItemInHand player) Material/BUCKET)))
       (and
         (= (.. evt (getMaterial)) Material/COAL)
         (.getAllowFlight player)
@@ -1735,13 +1743,6 @@
           (future-call #(do
                           (Thread/sleep 10000)
                           (.remove chicken))))))))
-
-(defn rebirth-from-zombie [target]
-  (.setMaximumAir target 300) ; default maximum value
-  (.setRemainingAir target 300)
-  (.setHealth target (.getMaxHealth target))
-  (swap! zombie-players disj (.getDisplayName target))
-  (.sendMessage target "You rebirthed as a human."))
 
 (defn fish-damages-entity-event [evt fish target]
   (if-let [shooter (.getShooter fish)]
