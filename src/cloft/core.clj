@@ -382,7 +382,7 @@
 
 (def reaction-skill (atom {}))
 (defn reaction-skill-of [player]
-  (let [[skill num-rest] (get @reaction-skill (.getDisplayName player))]
+  (when-let [[skill num-rest] (get @reaction-skill (.getDisplayName player))]
     (if (= 0 num-rest)
       (do
         (c/broadcast (format "%s lost reactio-skill %s" (.getDisplayName player) (skill2name skill)))
