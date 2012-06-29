@@ -376,7 +376,14 @@
 
 (def reaction-skill (atom {}))
 (defn reaction-skill-of [player]
-  (get @reaction-skill (.getDisplayName player)))
+  (let [[skill num-rest] (get @reaction-skill (.getDisplayName player))]
+    (if (= 0 num-rest)
+      (do
+        (swap! reaction-skill assoc (.getDisplayName player) nil)
+        nil)
+      (do
+        (swap! reaction-skill assoc (.getDisplayName player) [skill (dec num-rest)])
+        skill))))
 
 (def bowgun-players (atom #{"ujm"}))
 (defn add-bowgun-player [name]
@@ -608,10 +615,11 @@
       (when-let [skill-name (table (.getType block))]
         (if (= 0 (.getLevel player))
           (.sendMessage player "Your level is 0. You can't set reaction skill yet.")
-          (do
+          (let [l (.getLevel player)]
             (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
             (c/broadcast (.getDisplayName player) " changed reaction-skill to " (last skill-name))
-            (swap! reaction-skill assoc (.getDisplayName player) (first skill-name))))))))
+            (.sendMessage (format "You can use the reaction skill for %d times" l))
+            (swap! reaction-skill assoc (.getDisplayName player) [(first skill-name) l])))))))
 
 (defn arrow-skillchange [player block block-against]
   (when (blazon? Material/STONE (.getBlock (.add (.getLocation block) 0 -1 0)))
