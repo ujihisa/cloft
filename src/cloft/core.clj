@@ -534,8 +534,7 @@
     (c/add-velocity by (.getX direction) (.getY direction) (.getZ direction))))
 
 (defn reaction-skill-fire [you by]
-  (.setFireTicks by 100)
-  (c/lingr (str "counter attack with fire by " (.getDisplayName you) " to " (c/entity2name by))))
+  (.setFireTicks by 100))
 
 (defn reaction-skill-golem [you by]
   (let [golem (.spawn (.getWorld by) (.getLocation by) IronGolem)]
