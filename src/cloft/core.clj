@@ -850,7 +850,7 @@
 (defn active-fusion-wall-of[player]
   (get @active-fusion-wall (.getDisplayName player)))
 
-(defn fusion-wall [player block]
+(defn alchemy-fusion-wall [player block]
   (let [world (.getWorld player)
         loc (.toVector (.getLocation player))
         bottom (local-coordinate-to-world player block 15.0 0.0 0.0)
@@ -944,7 +944,7 @@
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against)
     "MEMO: to be changed to STONE BRICK"
-    (let [table {Material/COBBLESTONE fusion-wall
+    (let [table {Material/COBBLESTONE alchemy-fusion-wall
                  Material/SAND fusion-floor
                  Material/DIRT summon-giant
                  Material/LOG make-redstone-for-livings
