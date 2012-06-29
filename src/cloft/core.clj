@@ -482,6 +482,17 @@
       SmallFireball nil
       nil)))
 
+(defn creature-spawn-event [evt]
+  (let [creature (.getEntity evt)]
+    (when (and
+            (= org.bukkit.event.entity.CreatureSpawnEvent$SpawnReason/NATURAL (.getSpawnReason evt))
+            (= 0 (rand-int 20))
+            (= "world" (.getName (.getWorld creature)))
+            (some #(instance? % creature) [Zombie Skeleton]))
+      (c/broadcast "blaze2 spawned")
+      (.spawn (.getWorld creature) (.getLocation creature) Blaze)
+      (.setCancelled evt true))))
+
 (defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
@@ -1076,7 +1087,8 @@
                           (.setOp player true)
                           (prn [player 'is 'op]))
                         (.setOp player false)))
-                    (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))))
+                    (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
+                    (.sendMessage player "[NEWS] blazeが現世にも現れる。中身は全く別物。要注意!")))
     (c/lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
