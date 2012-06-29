@@ -618,7 +618,7 @@
           (let [l (.getLevel player)]
             (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
             (c/broadcast (.getDisplayName player) " changed reaction-skill to " (last skill-name))
-            (.sendMessage (format "You can use the reaction skill for %d times" l))
+            (.sendMessage player (format "You can use the reaction skill for %d times" l))
             (swap! reaction-skill assoc (.getDisplayName player) [(first skill-name) l])))))))
 
 (defn arrow-skillchange [player block block-against]
