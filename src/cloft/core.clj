@@ -944,6 +944,7 @@
 (defn invoke-alchemy [player block block-against]
   (when (blazon? Material/NETHERRACK block-against)
     "MEMO: to be changed to STONE BRICK"
+    "TODO: consistant naming"
     (let [table {Material/COBBLESTONE alchemy-fusion-wall
                  Material/SAND fusion-floor
                  Material/DIRT summon-giant
