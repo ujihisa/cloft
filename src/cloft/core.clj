@@ -379,6 +379,7 @@
   (let [[skill num-rest] (get @reaction-skill (.getDisplayName player))]
     (if (= 0 num-rest)
       (do
+        (c/broadcast (format "%s lost reactio-skill %s" (.getDisplayName player) skill))
         (swap! reaction-skill assoc (.getDisplayName player) nil)
         nil)
       (do
