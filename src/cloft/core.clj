@@ -948,14 +948,14 @@
                  Material/COBBLESTONE fusion-wall
                  Material/SAND fusion-floor
                  Material/DIRT summon-giant
-                 Material/TNT close-air-support
-                 Material/NETHERRACK erupt-volcano
-                 Material/RED_MUSHROOM earthen-pipe
                  Material/LOG make-redstone-for-livings
                  Material/GLOWSTONE summon-residents-of-nether
                  Material/OBSIDIAN (fn [p b]
                                      "create-portal"
-                                     (prn 'not 'implemented))}]
+                                     (prn 'not 'implemented))}
+          table2 {Material/TNT close-air-support
+                  Material/NETHERRACK erupt-volcano
+                  Material/RED_MUSHROOM earthen-pipe}]
       (if-let [alchemy (table (.getType block))]
         (alchemy player block)
         (prn "no effect is defined for " block)))))
