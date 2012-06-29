@@ -1274,7 +1274,8 @@
                       (.setPassenger player nil))))))
 
 (defn player-interact-entity-event [evt]
-  (let [target (.getRightClicked evt)]
+  (let [player (.getPlayer evt)
+        target (.getRightClicked evt)]
     (letfn [(d
               ([n] (d n 1))
               ([n ^Byte m]
@@ -1282,11 +1283,10 @@
                 (.getLocation target)
                 (ItemStack. (int n) (int 1) (short 0) (Byte. m)))))]
       (cond
-        (= Material/STRING (.getType (.getItemInHand (.getPlayer evt))))
-        (let [player (.getPlayer evt)]
-          (player-entity-with-string-event evt player target))
+        (= Material/STRING (.getType (.getItemInHand player)))
+        (player-entity-with-string-event evt player target)
 
-        (and (= (.getType (.getItemInHand (.getPlayer evt))) Material/COAL)
+        (and (= (.getType (.getItemInHand player)) Material/COAL)
              (instance? PoweredMinecart target))
         (do
           (.setMaxSpeed target 5.0)
@@ -1301,16 +1301,16 @@
                             (.setVelocity target (Vector. new-x (.getY v) new-z))))))
         ; give wheat to zombie pigman -> pig
         (and (instance? PigZombie target)
-             (= (.getTypeId (.getItemInHand (.getPlayer evt))) 296))
+             (= (.getTypeId (.getItemInHand player)) 296))
         (do
           (c/swap-entity target Pig)
-          (c/consume-item (.getPlayer evt)))
+          (c/consume-item player))
         ; give zombeef to pig -> zombie pigman
         (and (instance? Pig target)
-             (= (.getTypeId (.getItemInHand (.getPlayer evt))) 367))
+             (= (.getTypeId (.getItemInHand player)) 367))
         (do
           (c/swap-entity target PigZombie)
-          (c/consume-item (.getPlayer evt)))
+          (c/consume-item player))
         ; right-click sheep -> wool
         (instance? Sheep target) (d 35 (rand-int 16))
         ; right-click chicken -> rail
@@ -1321,40 +1321,38 @@
         (instance? Cow target) (d 263)
         ; right-click villager -> cake
         (instance? Villager target)
-        (let [player (.getPlayer evt)]
-          (if-let [item (.getItemInHand player)]
-            (condp = (.getType item)
-              Material/BROWN_MUSHROOM (do
-                                        (.setProfession target Villager$Profession/LIBRARIAN)
-                                        (c/consume-item player))
-              Material/RED_MUSHROOM (do
-                                      (.setProfession target Villager$Profession/PRIEST)
+        (if-let [item (.getItemInHand player)]
+          (condp = (.getType item)
+            Material/BROWN_MUSHROOM (do
+                                      (.setProfession target Villager$Profession/LIBRARIAN)
                                       (c/consume-item player))
-              Material/YELLOW_FLOWER (do
-                                       (.setProfession target Villager$Profession/BLACKSMITH)
-                                       (c/consume-item player))
-              Material/RED_ROSE (do
-                                  (.setProfession target Villager$Profession/BUTCHER)
-                                  (c/consume-item player))
-              Material/REDSTONE (do
-                                   (.setProfession target Villager$Profession/FARMER)
-                                   (c/consume-item player))
-              (d 92))
-            (d 92)))
+            Material/RED_MUSHROOM (do
+                                    (.setProfession target Villager$Profession/PRIEST)
+                                    (c/consume-item player))
+            Material/YELLOW_FLOWER (do
+                                     (.setProfession target Villager$Profession/BLACKSMITH)
+                                     (c/consume-item player))
+            Material/RED_ROSE (do
+                                (.setProfession target Villager$Profession/BUTCHER)
+                                (c/consume-item player))
+            Material/REDSTONE (do
+                                (.setProfession target Villager$Profession/FARMER)
+                                (c/consume-item player))
+            (d 92))
+          (d 92))
         ; right-click creeper -> gunpowder
         (instance? Creeper target) (d 289)
 
         (and (instance? Zombie target) (not (instance? PigZombie target)))
-        (let [player (.getPlayer evt)]
-          (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
-            (do
-              (when (= 0 (rand-int 20))
-                (.spawn (.getWorld target) (.getLocation target) Giant)
-                (c/broadcast "Giant!"))
-              (c/consume-item player)
-              (.remove target))
-            ; right-click zombie -> zombeef
-            (d 367)))
+        (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
+          (do
+            (when (= 0 (rand-int 20))
+              (.spawn (.getWorld target) (.getLocation target) Giant)
+              (c/broadcast "Giant!"))
+            (c/consume-item player)
+            (.remove target))
+          ; right-click zombie -> zombeef
+          (d 367))
 
         ; right-click skelton -> arrow
         (instance? Skeleton target) (d 262)
@@ -1362,8 +1360,7 @@
         (instance? Spider target) (d 287)
         ; right-click squid -> chat and hungry
         (instance? Squid target)
-        (let [player (.getPlayer evt)
-              msg (clojure.string/join "" (map char [65394 65398 65398 65436
+        (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
                                                      65394 65394 65411 65438
                                                      65405]))]
           (c/lingr msg)
