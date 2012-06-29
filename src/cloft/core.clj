@@ -943,7 +943,8 @@
           (recur (inc h) inner 9))))))
 
 (defn invoke-alchemy [player block block-against]
-  (when (blazon? Material/NETHERRACK block-against) ;to be changed to STONE BRICK
+  (when (blazon? Material/NETHERRACK block-against)
+    "MEMO: to be changed to STONE BRICK"
     (let [table {Material/STONE (fn [p b] (prn p (.getType b)))
                  Material/COBBLESTONE fusion-wall
                  Material/SAND fusion-floor
