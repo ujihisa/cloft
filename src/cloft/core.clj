@@ -363,9 +363,6 @@
       (when (= 0 (rand-int 5))
         (.remove item)))))
 
-(defn arrow-skill-sniping [entity]
-  nil)
-
 (def arrow-skill (atom {}))
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
