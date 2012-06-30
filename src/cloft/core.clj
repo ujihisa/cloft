@@ -2058,6 +2058,24 @@
                               (.getBlock (.add (.getLocation (.getBlock evt)) 0 -1 0)))))
     (.setBuildable evt true)))
 
+(defn block-dispense-event [evt]
+  (when (= Material/SEEDS (.getType (.getItem evt)))
+    (let [dispenser (.getBlock evt)
+          item (.dropItem (.getWorld dispenser) (.add (.getLocation dispenser) (.multiply (.getVelocity evt) 4)) (.getItem evt))]
+      (.playEffect (.getWorld dispenser) (.getLocation dispenser) Effect/MOBSPAWNER_FLAMES nil)
+      (.playEffect (.getWorld dispenser) (.getLocation dispenser) Effect/CLICK1 nil)
+      (.setVelocity item (.getVelocity evt))
+      (future-call #(do
+                      (Thread/sleep 1000)
+                      (let [soil (.getBlock (.add (.getLocation item) 0 -1 0))
+                            air (.getBlock (.getLocation item))]
+                        (when (and
+                                (= Material/SOIL (.getType soil))
+                                (= Material/AIR (.getType air)))
+                          (.setType air Material/CROPS)
+                          (.remove item))))))
+    (.setCancelled evt true)))
+
 (defn player-bed-enter-event [evt]
   (let [player (.getPlayer evt)]
     (c/broadcast (.getDisplayName player) " is sleeping.")
