@@ -1664,11 +1664,11 @@
 (defn arrow-damages-entity-event [evt arrow target]
   (if (and
         (not= 0 (rand-int 10))
-        (instance? Player target))
-    (if-let [chestplate (.getChestplate (.getInventory target))]
-      (when (and
-              (= Material/LEATHER_CHESTPLATE (.getType chestplate))
-              (not-empty (.getEnchantments chestplate)))
+        (instance? Player target)
+        (when-let [chestplate (.getChestplate (.getInventory target))]
+          (and
+            (= Material/LEATHER_CHESTPLATE (.getType chestplate))
+            (not-empty (.getEnchantments chestplate)))))
         (let [shooter (.getShooter arrow)]
           (c/broadcast (.getDisplayName target) "'s enchanted leather chestplate reflects arrows!")
           (.setCancelled evt true)
@@ -1677,7 +1677,7 @@
             (future-call #(do
                             (Thread/sleep 100)
                             (.setShooter a shooter)))
-            (.setVelocity a (.multiply (.getVelocity arrow) -1))))))
+            (.setVelocity a (.multiply (.getVelocity arrow) -1))))
     (when-let [shooter (.getShooter arrow)]
       (when (instance? Player shooter)
         (cond
