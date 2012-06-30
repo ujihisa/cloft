@@ -1669,15 +1669,15 @@
           (and
             (= Material/LEATHER_CHESTPLATE (.getType chestplate))
             (not-empty (.getEnchantments chestplate)))))
-        (let [shooter (.getShooter arrow)]
-          (c/broadcast (.getDisplayName target) "'s enchanted leather chestplate reflects arrows!")
-          (.setCancelled evt true)
-          (.remove arrow)
-          (let [a (.launchProjectile target Arrow)]
-            (future-call #(do
-                            (Thread/sleep 100)
-                            (.setShooter a shooter)))
-            (.setVelocity a (.multiply (.getVelocity arrow) -1))))
+    (let [shooter (.getShooter arrow)]
+      (c/broadcast (.getDisplayName target) "'s enchanted leather chestplate reflects arrows!")
+      (.setCancelled evt true)
+      (.remove arrow)
+      (let [a (.launchProjectile target Arrow)]
+        (future-call #(do
+                        (Thread/sleep 100)
+                        (.setShooter a shooter)))
+        (.setVelocity a (.multiply (.getVelocity arrow) -1))))
     (when-let [shooter (.getShooter arrow)]
       (when (instance? Player shooter)
         (cond
