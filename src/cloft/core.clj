@@ -363,6 +363,26 @@
       (when (= 0 (rand-int 5))
         (.remove item)))))
 
+(defn arrow-skill-liquid [material duration entity]
+  (let [block (.getBlock (.getLocation entity))]
+    (if (= Material/AIR (.getType block))
+      (do
+        (.setType block material)
+        (future-call #(do
+                        (Thread/sleep duration)
+                        (when (.isLiquid block)
+                          (.setType block Material/AIR)))))
+      (.sendMessage (.getShooter entity) "failed")))
+  (future-call #(do
+                  (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/ARROW))
+                  (.remove entity))))
+
+(defn arrow-skill-water [entity]
+  (arrow-skill-liquid Material/WATER 5000 entity))
+
+(defn arrow-skill-lava [entity]
+  (arrow-skill-liquid Material/LAVA 500 entity))
+
 (def arrow-skill (atom {}))
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
@@ -681,7 +701,6 @@
 
 (defn arrow-skillchange [player block block-against]
   (when (blazon? Material/STONE (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
     (let [table {Material/GLOWSTONE ['strong "STRONG"]
                  Material/TNT [arrow-skill-explosion "EXPLOSION"]
                  Material/TORCH [arrow-skill-torch "TORCH"]
@@ -707,19 +726,22 @@
                  #_( Material/FIRE [arrow-skill-flame "FLAME"])
                  Material/BROWN_MUSHROOM [arrow-skill-quake "QUAKE"]
                  Material/RED_MUSHROOM ['arrow-skill-poison "POISON"]
-                 Material/FENCE_GATE [arrow-skill-popcorn "POPCORN"]}]
+                 Material/FENCE_GATE [arrow-skill-popcorn "POPCORN"]
+                 Material/WATER [arrow-skill-water "WATER"]
+                 Material/LAVA [arrow-skill-lava "LAVA"]}]
       (when-let [skill-name (table (.getType block))]
+        (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
 
 (defn pickaxe-skillchange [player block block-against]
   (when (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
     (let [table {Material/YELLOW_FLOWER ['pickaxe-skill-teleport "TELEPORT"]
                  Material/RED_ROSE ['pickaxe-skill-fire "FIRE"]
                  Material/WORKBENCH ['pickaxe-skill-ore "ORE"]
                  Material/STONE ['pickaxe-skill-stone "STONE"]}]
       (when-let [skill-name (table (.getType block))]
+        (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed pickaxe-skill to " (last skill-name))
         (swap! pickaxe-skill assoc (.getDisplayName player) (first skill-name))))))
 
@@ -2048,6 +2070,11 @@
                         (when (< (count all-players) (inc (* (count bed-players) 2)))
                           (.setTime world 0)
                           (c/broadcast "good morning everyone!"))))))))
+
+(defn player-bucket-empty-event [evt]
+  (future-call
+    #(do
+       (arrow-skillchange (.getPlayer evt) (.getBlock (.add (.getLocation (.getBlockClicked evt)) 0 1 0)) nil))))
 
 (defn player-toggle-sneak-event [evt]
   "recovery spa"
