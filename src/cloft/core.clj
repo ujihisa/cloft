@@ -1248,12 +1248,12 @@
           (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
           (.teleport player death-point))
         (.sendMessage player "You didn't die yet."))
-      (and
+      #_(and
         (= (.. player (getItemInHand) (getType)) Material/GLASS_BOTTLE)
         (or
           (= (.getAction evt) Action/RIGHT_CLICK_AIR)
           (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
-      (.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
+      #_(.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
       (and
         (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD)
         (= (.getAction evt) Action/LEFT_CLICK_BLOCK))
@@ -1331,9 +1331,6 @@
            (Thread/sleep 2000)
            (when-not (.isDead item)
              (c/teleport-without-angle player (.getLocation item))))))))
-
-(defn player-toggle-sneak-event [evt]
-  (prn (.getEventName evt) (.getPlayer evt)))
 
 (defn player-entity-with-string-event [evt player target]
   (c/consume-item player)
