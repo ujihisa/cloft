@@ -856,7 +856,7 @@
            Material/LADDER #{:crafted :enterable :gettable}
            Material/FENCE #{:crafted :enterable :gettable}
            Material/FENCE_GATE #{:crafted :enterable :gettable}
-           Material/CAULDRON #{:crafted :gettable}
+           Material/CAULDRON #{:crafted :gettable :enterable}
            Material/PISTON_BASE #{:crafted :gettable} ; as piston
            Material/PISTON_EXTENSION #{:crafted}
            Material/PISTON_MOVING_PIECE #{:crafted}
@@ -2110,7 +2110,36 @@
           (.setHealth player 20)
           (.setFoodLevel player 20)
           (.teleport player loc)
-          (c/add-velocity player 0 0.6 0))))))
+          (c/add-velocity player 0 0.6 0))))
+    "cauldron teleport"
+    (let [center-cauldron (.getBlock (.getLocation player))
+          surround-type (.getType (.getBlock (.add (.clone (.getLocation player)) 1 0 1)))
+          cds (for [[x z] [[1 0] [0 1] [-1 0] [0 -1]]]
+           (let [loc (.add (.getLocation player) x 0 z)
+                 block (.getBlock loc)]
+             (when (= Material/CAULDRON (.getType block))
+               (.multiply (Vector. x 0 z) (* (Math/pow 2 (.getData block)) (Math/pow 2 (.getData center-cauldron)) 10)))))]
+      (when (and
+              (= Material/CAULDRON (.getType center-cauldron))
+              (every? identity cds))
+        (let [vect (Vector. 0 1 0)]
+          (reduce #(.add %1 %2) vect cds)
+          (let [newloc (.add (.getLocation player) vect)]
+            (if (and
+                  (let [btype (.getType (.getBlock newloc))]
+                    (and ((block-categoly :enterable) btype)
+                         (not= Material/LAVA btype)))
+                  (let [btype (.getType (.getBlock (.add (.clone newloc) 0 1 0)))]
+                    (and ((block-categoly :enterable) btype)
+                         (not= Material/LAVA btype))))
+              (do
+                (c/broadcast (format "%s teleports with cauldron!" (.getDisplayName player)))
+                (.teleport player newloc))
+              (if (= Material/PISTON_BASE surround-type)
+                (do
+                  (c/broadcast (format "%s teleports with cauldron with fly!" (.getDisplayName player)))
+                  (.teleport player (.add newloc 0 128 0)))
+                (.sendMessage player "the destination isn't safe")))))))))
 
 ;(defn vehicle-enter-event* [evt]
 ;  (let [vehicle (.getVehicle evt)
