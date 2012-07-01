@@ -2099,9 +2099,9 @@
        (arrow-skillchange (.getPlayer evt) (.getBlock (.add (.getLocation (.getBlockClicked evt)) 0 1 0)) nil))))
 
 (defn player-toggle-sneak-event [evt]
+  (let [player (.getPlayer evt)]
   "recovery spa"
-  (let [player (.getPlayer evt)
-        loc (.add (.getLocation player) 0 1 0)]
+  (let [loc (.add (.getLocation player) 0 1 0)]
     (when (= Material/STATIONARY_WATER (.getType (.getBlock loc)))
       (when (blazon? Material/STONE (.getBlock loc))
         (when (= 0 (rand-int 10))
@@ -2110,7 +2110,7 @@
         (.setHealth player 20)
         (.setFoodLevel player 20)
         (.teleport player loc)
-        (c/add-velocity player 0 0.6 0)))))
+        (c/add-velocity player 0 0.6 0))))))
 
 ;(defn vehicle-enter-event* [evt]
 ;  (let [vehicle (.getVehicle evt)
