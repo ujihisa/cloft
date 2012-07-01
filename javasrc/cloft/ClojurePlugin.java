@@ -137,6 +137,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onItemSpawn(ItemSpawnEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "item-spawn-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onEntityShootBow(EntityShootBowEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-shoot-bow-event");
         if (f.isBound()) f.invoke(event);
@@ -169,6 +174,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "block-break-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onBlockDispense(BlockDispenseEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "block-dispense-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler

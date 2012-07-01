@@ -509,6 +509,30 @@
       (.spawn (.getWorld creature) (.getLocation creature) Blaze)
       (.setCancelled evt true))))
 
+(defn item-spawn-event [evt]
+  (let [item (.getEntity evt)
+        table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
+               Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
+               Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
+               Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
+               Material/APPLE [Material/APPLE Material/GOLDEN_APPLE]
+               Material/ROTTEN_FLESH [Material/ROTTEN_FLESH Material/COAL]}
+        itemstack (.getItemStack item)]
+    (when (table (.getType itemstack))
+      (future-call #(let [pair (table (.getType itemstack))]
+                      (Thread/sleep 5000)
+                      (when-not (.isDead item)
+                        (if (#{Material/FURNACE Material/BURNING_FURNACE}
+                                      (.getType (.getBlock (.add (.getLocation item) 0 -1 0))))
+                          (do
+                            (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (last pair) (.getAmount itemstack)))
+                            (.remove item))
+                          (do
+                            (Thread/sleep 25000)
+                            (when-not (.isDead item)
+                              (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (first pair) (.getAmount itemstack)))
+                              (.remove item))))))))))
+
 (defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
@@ -1276,12 +1300,6 @@
 (defn player-drop-item-event [evt]
   (let [item (.getItemDrop evt)
         itemstack (.getItemStack item)
-        table-food {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
-               Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
-               Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
-               Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
-               Material/APPLE [Material/APPLE Material/GOLDEN_APPLE]
-               Material/ROTTEN_FLESH [Material/ROTTEN_FLESH Material/COAL]}
         table-equip
         {Material/WOOD_SWORD [Material/STICK Material/WOOD Material/WOOD]
          Material/STONE_SWORD [Material/STICK Material/COBBLESTONE Material/COBBLESTONE]
@@ -1292,17 +1310,6 @@
     (when (.isSprinting player)
       (.setVelocity item (.add (.multiply (.getVelocity item) 2.0) (Vector. 0.0 0.5 0.0))))
     (cond
-      (table-food (.getType itemstack))
-      (future-call #(let [pair (table-food (.getType itemstack))]
-                      (Thread/sleep 5000)
-                      (when-not (.isDead item)
-                        (let [new-item-material
-                              (if (#{Material/FURNACE Material/BURNING_FURNACE}
-                                      (.getType (.getBlock (.add (.getLocation item) 0 -1 0))))
-                                (last pair)
-                                (first pair))]
-                          (.dropItem (.getWorld item) (.getLocation item) (ItemStack. new-item-material (.getAmount itemstack))))
-                        (.remove item))))
       (table-equip (.getType itemstack))
       (future-call #(let [parts (table-equip (.getType itemstack))]
                       (Thread/sleep 8000)
