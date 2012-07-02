@@ -482,11 +482,12 @@
     (let [loc (.getLocation blaze2)]
       (when (and
               (= Material/AIR (.getType (.getBlock loc)))
-              (= 0 (rand-int 2)))
+              (not= 0 (rand-int 3)))
         (.setType
           (.getBlock (.add (.clone loc) x y z))
           (rand-nth [Material/NETHER_BRICK Material/NETHERRACK Material/SOUL_SAND
-                     Material/GLOWSTONE Material/GLOWSTONE])))))
+                     Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE])))))
+  (.setDroppedExp evt 200)
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
   (c/lingr (format "%s beated a blaze2!" (.getDisplayName player))))
 
