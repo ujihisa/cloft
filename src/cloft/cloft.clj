@@ -138,6 +138,7 @@
         (instance? Wolf entity) "Wolf"
         (instance? Zombie entity) "Zombie"
         (instance? TNTPrimed entity) "TNT"
+        (instance? Fireball entity) "Fireball"
         :else (last (clojure.string/split (str (class entity)) #"\."))))
 
 (def records
