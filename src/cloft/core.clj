@@ -1977,9 +1977,9 @@
                             (prn 2)
                             (c/add-velocity target 0 1 0)))))
         (when (= EntityDamageEvent$DamageCause/FALL (.getCause evt))
-          (if (when (and (instance? Cow target)
+          (if (and (instance? Cow target)
                          (@chimera-cows target))
-                (chimera-cow-fall-damage-event evt target))
+            (chimera-cow-fall-damage-event evt target)
             (let [loc (.add (.getLocation target) 0 -1 0)]
             (when (= Material/NETHER_FENCE (.getType (.getBlock loc)))
               (when (every? #(not= Material/NETHER_FENCE %)
