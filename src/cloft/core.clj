@@ -2000,7 +2000,7 @@
             (c/add-velocity target 0 1 0)
             (c/consume-item target)))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
-          (if-let [skill (reaction-skill-of target)]
+          (when-let [skill (reaction-skill-of target)]
             (let [actual-attacker
                   (if (instance? Projectile attacker)
                     (.getShooter attacker)
