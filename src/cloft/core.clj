@@ -2017,9 +2017,8 @@
               (.setCancelled evt true)
               (zombieze target)))
           (when (and (instance? Player attacker) (zombie-player? attacker))
-            (do
-              (zombieze target)
-              (.sendMessage attacker "You made a friend"))))
+            (zombieze target)
+            (.sendMessage attacker "You made a friend")))
         (when (and (instance? Cow target)
                    (@chimera-cows target))
           (chimera-cows-damage-event evt target attacker))))))
