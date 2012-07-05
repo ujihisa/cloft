@@ -1982,16 +1982,16 @@
             (chimera-cow-fall-damage-event evt target)
             (let [loc (.add (.getLocation target) 0 -1 0)]
               (doseq [fence [Material/FENCE Material/NETHER_FENCE]]
-              (when (= fence (.getType (.getBlock loc)))
-                (when (every? #(not= fence %)
-                              (map (fn [[x z]]
-                                     (.getType (.getBlock (.add (.clone loc) x 0 z))))
-                                   [[-1 0] [1 0] [0 -1] [0 1]]))
-                  (when (instance? Player target)
-                    (let [msg (str "Oh trap! " (.getDisplayName target) " was on a needle.")]
-                      (c/lingr msg)
-                      (.sendMessage target msg)))
-                  (.damage target 100))))))
+                (when (= fence (.getType (.getBlock loc)))
+                  (when (every? #(not= fence %)
+                                (map (fn [[x z]]
+                                       (.getType (.getBlock (.add (.clone loc) x 0 z))))
+                                     [[-1 0] [1 0] [0 -1] [0 1]]))
+                    (when (instance? Player target)
+                      (let [msg (str "Oh trap! " (.getDisplayName target) " was on a needle.")]
+                        (c/lingr msg)
+                        (.sendMessage target msg)))
+                    (.damage target 100))))))
           #_(when (= Material/SLIME_BALL (.getType (.getItemInHand target)))
             (.setCancelled evt true)
             (c/add-velocity target 0 1 0)
