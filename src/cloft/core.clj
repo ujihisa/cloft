@@ -2006,7 +2006,7 @@
             (c/consume-item target)))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (when (instance? Fireball attacker)
-            (when-let [shooter (.getShooter)]
+            (when-let [shooter (.getShooter attacker)]
               (when (instance? Cow shooter)
                 "no need for checking if it's chimera-cow -- cow doesn't shoot."
                 (chimera-cow-fireball-hit-player evt target shooter attacker))))
