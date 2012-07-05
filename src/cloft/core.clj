@@ -1903,6 +1903,7 @@
           (.teleport target shooter))))))
 
 (defn chimera-cows-damage-event [evt cow attacker]
+  (.setDamage evt (int (/ (.getDamage evt) 2)))
   (condp instance? attacker
     Fireball (.setCancelled evt true)
     Arrow (reflect-arrow evt attacker cow)
