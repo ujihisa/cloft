@@ -1912,6 +1912,10 @@
 (defn chimera-cow-fall-damage-event [evt cow]
   (.setCancelled evt true))
 
+(defn chimera-cow-fireball-hit-player [evt player cow fireball]
+  (.sendMessage player "Chimeracow's fireball hit!")
+  (prn (.getDamage evt)))
+
 (defn entity-damage-event [evt]
   (let [target (.getEntity evt)
         attacker (when (instance? EntityDamageByEntityEvent evt)
@@ -2001,6 +2005,11 @@
             (c/add-velocity target 0 1 0)
             (c/consume-item target)))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
+          (when (instance? Fireball attacker)
+            (when-let [shooter (.getShooter)]
+              (when (instance? Cow shooter)
+                "no need for checking if it's chimera-cow -- cow doesn't shoot."
+                (chimera-cow-fireball-hit-player evt target shooter attacker))))
           (when-let [skill (reaction-skill-of target)]
             (let [actual-attacker
                   (if (instance? Projectile attacker)
