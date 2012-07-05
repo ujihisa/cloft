@@ -1530,7 +1530,10 @@
                           dire (.subtract (.clone (.getLocation player))
                                           (.clone (.getLocation c)))
                           vect (.normalize (.toVector (.multiply (.clone dire) 2.0)))]
-                      (c/add-velocity c 0 (rand-nth [0.8 0.9 1.0]) 0)
+                      (c/add-velocity c
+                         (rand-nth [-0.3 0 0.3])
+                         (rand-nth [0.8 0.9 1.0])
+                         (rand-nth [-0.3 0 0.3]))
                         (Thread/sleep 500)
                         (let [fb (.launchProjectile c Fireball)]
                           (.setYield fb 0.0)
