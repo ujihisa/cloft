@@ -497,8 +497,8 @@
                   (doseq [_ (range 0 20)]
                     (Thread/sleep 1000)
                     (.dropItemNaturally world loc (if (= 0 (rand-int 10))
-                                                    (ItemStack. Material/APPLE)
-                                                    (ItemStack. Material/GOLDEN_APPLE))))))
+                                                    (ItemStack. Material/GOLDEN_APPLE)
+                                                    (ItemStack. Material/APPLE))))))
   (.setDroppedExp evt 200)
   (c/broadcast (format "%s beated a chimera cow!" (.getDisplayName player)))
   (c/lingr (format "%s beated a chimera cow!" (.getDisplayName player))))
