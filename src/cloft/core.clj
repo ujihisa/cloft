@@ -491,6 +491,18 @@
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
   (c/lingr (format "%s beated a blaze2!" (.getDisplayName player))))
 
+(defn chimera-cow-murder-event [evt cow player]
+  (future-call #(let [world (.getWorld cow)
+                      loc (.getLocation cow)]
+                  (doseq [_ (range 0 20)]
+                    (Thread/sleep 1000)
+                    (.dropItemNaturally world loc (if (= 0 (rand-int 10))
+                                                    (ItemStack. Material/APPLE)
+                                                    (ItemStack. Material/GOLDEN_APPLE))))))
+  (.setDroppedExp evt 200)
+  (c/broadcast (format "%s beated a chimera cow!" (.getDisplayName player)))
+  (c/lingr (format "%s beated a chimera cow!" (.getDisplayName player))))
+
 (defn projectile-launch-event [evt]
   (let [projectile (.getEntity evt)
         shooter (.getShooter projectile)]
@@ -1524,22 +1536,26 @@
             (fn []
               (do
                 (Thread/sleep (rand-int 2500))
-                (let [players (filter #(instance? Player %) (.getNearbyEntities c 50 50 50))]
+                (let [players (filter #(instance? Player %) (.getNearbyEntities c 50 50 50))
+                      player (rand-nth players)]
+                  (let [dire (.subtract (.clone (.getLocation player))
+                                        (.clone (.getLocation c)))]
+                    (.setVelocity c (Vector. (* (.getX dire) 0.1)
+                                             (rand-nth [0.3 0.5 0.7])
+                                             (* (.getZ dire) 0.1))))
+                  (Thread/sleep 800)
+                  (.setVelocity c (Vector. 0.0 0.5 0.0))
                   (when-not (empty? players)
-                    (let [player (rand-nth players)
-                          dire (.subtract (.clone (.getLocation player))
+                    (let [dire (.subtract (.clone (.getLocation player))
                                           (.clone (.getLocation c)))
-                          vect (.normalize (.toVector (.multiply (.clone dire) 2.0)))]
-                      (c/add-velocity c
-                         (rand-nth [-0.3 0 0.3])
-                         (rand-nth [0.8 0.9 1.0])
-                         (rand-nth [-0.3 0 0.3]))
-                        (Thread/sleep 500)
-                        (let [fb (.launchProjectile c Fireball)]
-                          (.setYield fb 0.0)
-                          (.teleport fb (.add (.clone (.getLocation c)) vect))
-                          (.setVelocity fb vect)
-                          #_(prn 'complete)))))))))))))
+                          vect (.normalize (.toVector dire))]
+                      (let [fb (.launchProjectile c Fireball)]
+                        (.setShooter fb c)
+                        (.setYield fb 0.0)
+                        (.teleport fb (.add (.clone (.getLocation c)) vect))
+                        (.setDirection fb vect)
+                        (.setVelocity fb vect)
+                        #_(prn 'complete)))))))))))))
 
 (defn periodically []
   (periodically-terminate-nonchicken-flighter)
@@ -1597,6 +1613,10 @@
               (instance? Blaze entity)
               (= "world" (.getName (.getWorld entity))))
         (blaze2-murder-event evt entity killer))
+      (when (and
+              (instance? Cow entity)
+              (@chimera-cows entity))
+        (chimera-cow-murder-event evt entity killer))
       (when (instance? Giant entity)
         (.setDroppedExp evt 1000))
       (when (instance? Creeper entity)
@@ -1681,6 +1701,10 @@
         (do
           ((current-creeper-explosion) evt entity)
           (swap! creeper-explosion-idx inc))
+
+        (instance? Fireball entity)
+        (when (instance? Cow (.getShooter entity))
+          (.setCancelled evt true))
 
         (and ename (not-empty entities-nearby) (not (instance? EnderDragon entity)))
         (letfn [(join [xs x]
@@ -1903,7 +1927,7 @@
           (.teleport target shooter))))))
 
 (defn chimera-cows-damage-event [evt cow attacker]
-  (.setDamage evt (int (/ (.getDamage evt) 2)))
+  (.setDamage evt (min (.getDamage evt) 2))
   (condp instance? attacker
     Fireball (.setCancelled evt true)
     Arrow (reflect-arrow evt attacker cow)
@@ -1913,8 +1937,13 @@
   (.setCancelled evt true))
 
 (defn chimera-cow-fireball-hit-player [evt player cow fireball]
-  (.sendMessage player "Chimeracow's fireball hit!")
-  (prn (.getDamage evt)))
+  #_(.sendMessage player "Chimeracow's fireball hit!")
+  (case (rand-int 3)
+    0 (let [cart (.spawn (.getWorld player) (.getLocation player) Minecart)]
+        (.setPassenger cart player))
+    1 (.setFireTicks player 200)
+    2 nil
+    3 nil))
 
 (defn entity-damage-event [evt]
   (let [target (.getEntity evt)
