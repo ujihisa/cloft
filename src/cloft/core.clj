@@ -2347,6 +2347,12 @@
     (.addIngredient x 4 Material/SEEDS)
     x))
 
+(def recipe-door-wood
+  (let [x (org.bukkit.inventory.ShapelessRecipe.
+            (ItemStack. Material/WOOD 2))]
+    (.addIngredient x 1 Material/WOODEN_DOOR)
+    x))
+
 (defn player-inspect [player verbose?]
   (format
     "%s (%s)"
@@ -2370,6 +2376,7 @@
   (Bukkit/addRecipe recipe-gravel-flint)
   (Bukkit/addRecipe recipe-flint-gravel)
   (Bukkit/addRecipe recipe-seed-coal)
+  (Bukkit/addRecipe recipe-door-wood)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (periodically)) 50 50)
   #_(.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (cloft-scheduler)) 0 1)
   (comment (proxy [java.lang.Object CommandExecuter] []
