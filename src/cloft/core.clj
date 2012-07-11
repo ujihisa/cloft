@@ -1145,7 +1145,7 @@
                           (prn [player 'is 'op]))
                         (.setOp player false)))
                     (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
-                    (.sendMessage player "[NEWS] blazeが現世にも現れる。中身は全く別物。要注意!")))
+                    #_(.sendMessage player "[NEWS] blazeが現世にも現れる。中身は全く別物。要注意!")))
     (c/lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
@@ -1243,6 +1243,7 @@
   (swap! zombie-players disj (.getDisplayName target))
   (c/broadcast (.getDisplayName target) " rebirthed as a human."))
 
+
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)]
     (cond
@@ -1259,7 +1260,7 @@
         (= (.getType (.getClickedBlock evt)) Material/CAKE_BLOCK))
       (if-let [death-point (get @player-death-locations (.getDisplayName player))]
         (do
-          (.getChunk death-point)
+          (.loadChunk death-point)
           (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
           (.teleport player death-point))
         (.sendMessage player "You didn't die yet."))
@@ -1271,9 +1272,10 @@
       #_(.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
       (and
         (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD)
-        (= (.getAction evt) Action/LEFT_CLICK_BLOCK))
+        (= (.getAction evt) Action/RIGHT_CLICK_BLOCK))
       (let [block (.getClickedBlock evt)]
-        (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block))))
+        (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
+        (.sendMessage player (format "biome: %s" (.getBiome block))))
       (and
         (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
         (= (.getHealth player) (.getMaxHealth player))
