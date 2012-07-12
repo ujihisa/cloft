@@ -383,6 +383,30 @@
 (defn arrow-skill-lava [entity]
   (arrow-skill-liquid Material/LAVA 500 entity))
 
+(defn arrow-skill-woodbreak [entity]
+  (let [block (block-of-arrow entity)
+        table {Material/WOODEN_DOOR (repeat 6 (ItemStack. Material/WOOD))
+               Material/FENCE (repeat 6 (ItemStack. Material/STICK))
+               Material/WALL_SIGN (cons (ItemStack. Material/STICK)
+                                        (repeat 6 (ItemStack. Material/WOOD)))
+               Material/SIGN_POST (cons (ItemStack. Material/STICK)
+                                        (repeat 6 (ItemStack. Material/WOOD)))}
+        items (table (.getType block))
+        block2 (.getBlock (.getLocation entity))
+        items2 (table (.getType block2))]
+    (if items
+      (do
+        (.setType block Material/AIR)
+        (doseq [item items]
+          (.dropItemNaturally (.getWorld block) (.getLocation block) item)))
+      (if items2
+        (do
+          (.setType block2 Material/AIR)
+          (doseq [item items2]
+            (.dropItemNaturally (.getWorld block2) (.getLocation block2) item)))
+        (.sendMessage (.getShooter entity) "Woodbreak failed."))))
+  (.remove entity))
+
 (def arrow-skill (atom {}))
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
@@ -767,7 +791,8 @@
                  Material/RED_MUSHROOM ['arrow-skill-poison "POISON"]
                  Material/FENCE_GATE [arrow-skill-popcorn "POPCORN"]
                  Material/WATER [arrow-skill-water "WATER"]
-                 Material/LAVA [arrow-skill-lava "LAVA"]}]
+                 Material/LAVA [arrow-skill-lava "LAVA"]
+                 Material/LOG [arrow-skill-woodbreak "WOODBREAK"]}]
       (when-let [skill-name (table (.getType block))]
         (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
@@ -1333,6 +1358,15 @@
                                 (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
                                 (when (= 0 (rand-int 2))
                                   (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
+
+        #_(and
+          (= Material/COAL (.getType (.getItemInHand player)))
+          (instance? Minecart (.getVehicle player)))
+        #_(let [cart (.getVehicle player)
+              dire (.multiply (.getDirection (.getLocation player)) 10.0)]
+          (c/add-velocity cart (.getX dire) 0.1 (.getZ dire))
+          #_(c/consume-item player)
+          )
 
         (and
           (zombie-player? player)
@@ -2387,18 +2421,6 @@
     (.addIngredient x 4 Material/SEEDS)
     x))
 
-(def recipe-door-wood
-  (let [x (org.bukkit.inventory.ShapelessRecipe.
-            (ItemStack. Material/WOOD 2))]
-    (.addIngredient x 1 Material/WOODEN_DOOR)
-    x))
-
-(def recipe-fence-stick
-  (let [x (org.bukkit.inventory.ShapelessRecipe.
-            (ItemStack. Material/STICK 6))]
-    (.addIngredient x 2 Material/FENCE)
-    x))
-
 (defn player-inspect [player verbose?]
   (format
     "%s (%s)"
@@ -2422,8 +2444,6 @@
   (Bukkit/addRecipe recipe-gravel-flint)
   (Bukkit/addRecipe recipe-flint-gravel)
   (Bukkit/addRecipe recipe-seed-coal)
-  (Bukkit/addRecipe recipe-door-wood)
-  (Bukkit/addRecipe recipe-fence-stick)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (periodically)) 50 50)
   #_(.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (cloft-scheduler)) 0 1)
   (comment (proxy [java.lang.Object CommandExecuter] []
