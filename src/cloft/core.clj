@@ -1245,6 +1245,13 @@
 
 (def plowed-sands (atom #{}))
 
+(def hoe-durabilities
+  {Material/WOOD_HOE 60
+   Material/STONE_HOE 132
+   Material/IRON_HOE 251
+   Material/GOLD_HOE 33
+   Material/DIAMOND_HOE 1562})
+
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)
         block (.getClickedBlock evt)]
@@ -1303,27 +1310,21 @@
         (let [item-type (if (= 0 (rand-int 50)) Material/GOLD_INGOT Material/GOLD_NUGGET)]
           (.dropItemNaturally (.getWorld block) (.getLocation block) (ItemStack. item-type)))
         (and
-          (#{Material/WOOD_HOE Material/STONE_HOE Material/GOLD_HOE
-             Material/IRON_HOE Material/DIAMOND_HOE}
-              (.. player (getItemInHand) (getType)))
+          (hoe-durabilities (.. player (getItemInHand) (getType)))
           (and (= org.bukkit.block.Biome/RIVER (.getBiome block))
+               (not (@plowed-sands block))
                (= Material/SAND (.getType block))
                (> 64.0 (.getY (.getLocation block)))
                (.isLiquid (.getBlock (.add (.getLocation block) 0 1 0)))))
         (let [item (.getItemInHand player)]
           (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/TORCH)
-          (if (> (.getDurability item) ({Material/WOOD_HOE 60
-                                           Material/STONE_HOE 132
-                                           Material/IRON_HOE 251
-                                           Material/GOLD_HOE 33
-                                           Material/DIAMOND_HOE 1562}
-                                          (.getType item)))
+          (if (> (.getDurability item) (hoe-durabilities (.getType item)))
             (.remove (.getInventory player) item)
             (do
               (.setDurability item (+ 2 (.getDurability item)))
               (future-call #(do
                               (swap! plowed-sands conj block)
-                              (Thread/sleep 10000)
+                              (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
                               (swap! plowed-sands disj block)
                               (when (= Material/SAND (.getType block))
                                 (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
