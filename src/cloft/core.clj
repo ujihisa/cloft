@@ -1280,6 +1280,7 @@
           (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       #_(.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
       (and
+        block
         (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD)
         (= (.getAction evt) Action/RIGHT_CLICK_BLOCK))
       (do
@@ -1304,12 +1305,14 @@
           (= (.getAction evt) Action/RIGHT_CLICK_BLOCK))
       (cond
         (and
+          block
           (= 0 (rand-int 15))
           (= Material/BOWL (.getType (.getItemInHand player)))
           (@plowed-sands block))
         (let [item-type (if (= 0 (rand-int 50)) Material/GOLD_INGOT Material/GOLD_NUGGET)]
           (.dropItemNaturally (.getWorld block) (.getLocation block) (ItemStack. item-type)))
         (and
+          block
           (hoe-durabilities (.. player (getItemInHand) (getType)))
           (and (= org.bukkit.block.Biome/RIVER (.getBiome block))
                (not (@plowed-sands block))
@@ -1328,7 +1331,7 @@
                               (swap! plowed-sands disj block)
                               (when (= Material/SAND (.getType block))
                                 (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
-                                (when (= 0 (rand-int 3))
+                                (when (= 0 (rand-int 2))
                                   (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
 
         (and
