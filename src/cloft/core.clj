@@ -1112,6 +1112,13 @@
         (alchemy player block)
         (prn "no effect is defined for " block)))))
 
+(defn teleport-machine [player block block-against]
+  (when (= Material/WATER (.getType block))
+    (let [wools (for [x [-1 0 1] z [-1 0 1] :when (or (not= x 0) (not= z 0))]
+                  (.getType (.getBlock
+                              (.add (.clone (.getLocation block-against)) x 0 z))))]
+      nil)))
+
 (defn block-damage-event [evt]
   (let [player (.getPlayer evt)]
     (when (and
@@ -1144,6 +1151,7 @@
       (pickaxe-skillchange player block (.getBlockAgainst evt))
       (reaction-skillchange player block (.getBlockAgainst evt))
       (invoke-alchemy player block (.getBlockAgainst evt))
+      (teleport-machine player block (.getBlockAgainst evt))
       (comment (prn (vector-from-to block player))
                (.setVelocity player (vector-from-to player block))
                (doseq [entity (.getNearbyEntities player 4 4 4)]
@@ -1162,7 +1170,7 @@
                       (if (or
                             (= "10.0" (apply str (take 4 ip)))
                             (= "127.0.0.1" ip)
-                            (= "219.111.70.24" ip)
+                            #_(= "219.111.70.24" ip)
                             (= "113.151.154.229" ip)
                             (= "0:0:0:0:0:0:0:1" ip))
                         (do
@@ -1170,7 +1178,8 @@
                           (prn [player 'is 'op]))
                         (.setOp player false)))
                     (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
-                    #_(.sendMessage player "[NEWS] blazeが現世にも現れる。中身は全く別物。要注意!")))
+                    #_(.sendMessage player "[NEWS] blazeが現世にも現れる。中身は全く別物。要注意!")
+                    (.sendMessage player "[NEWS] 川で砂金をとろう! クワと皿を忘れずに。")))
     (c/lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
@@ -1199,7 +1208,8 @@
     (c/lingr "computer_science" (str (name2icon name) (.getMessage evt)))))
 
 (defn touch-player [target]
-  (.setFoodLevel target (dec (.getFoodLevel target))))
+  (.setFoodLevel target (dec (.getFoodLevel target)))
+  (.setGameMode target org.bukkit.GameMode/SURVIVAL))
 
 (defn teleport-machine? [loc]
   (=
@@ -2473,6 +2483,6 @@
                                   (.spawn (.getWorld p) (.add (.getLocation p) 0 2 0) Chicken)))))
                           (when-not (empty? players)
                             (c/broadcast (str (:user contents) ": " (:body contents)))))))))))
-  (c/lingr "cloft plugin running..."))
+  #_(c/lingr "cloft plugin running..."))
 
 ;  (c/lingr "cloft plugin stopping...")
