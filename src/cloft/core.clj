@@ -152,6 +152,16 @@
 (def bossbattle-player nil)
 (defn player-move-event [evt]
   (let [player (.getPlayer evt)]
+    #_(when-let [cart (.getVehicle player)]
+      (when (instance? Minecart cart)
+        (if (#{Material/STONE} (.getType (.getBlock (.getTo evt))))
+          (.setDerailedVelocityMod cart (Vector. 0.90 0.90 0.90))
+          (if (#{Material/STONE} (.getType (.getBlock (.getFrom evt))))
+            (do
+              #_(.setCancelled evt true)
+              (.setVelocity cart (.multiply (.getVelocity cart) -1)))
+            (.setDerailedVelocityMod cart (Vector. 0.1 0.5 0.1))
+))))
     (when (and
             (.hasPotionEffect player PotionEffectType/SPEED)
             (.isSprinting player)
@@ -1222,7 +1232,13 @@
           Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE)))
 
 (defn teleport-up [entity block]
-  (when (#{Material/STONE_PLATE Material/WOOD_PLATE} (.getType block))
+  (if (instance? Minecart entity)
+    (do
+      (.teleport entity (.add (.getLocation entity) 0 2 0))
+      (c/add-velocity entity 0 10 0)
+      (.setFlyingVelocityMod entity (Vector. 1.0 1.0 1.0))
+      (prn 'ok))
+    (when (#{Material/STONE_PLATE Material/WOOD_PLATE} (.getType block))
     (let [entity-loc (.getLocation entity)
           loc (.add (.getLocation block) 0 -1 0)]
       (when (teleport-machine? loc)
@@ -1237,7 +1253,7 @@
                         (.playEffect (.getWorld entity-loc) (.add entity-loc 0 1 0) Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld newloc) newloc Effect/BOW_FIRE nil)
                         (.playEffect (.getWorld entity-loc) entity-loc Effect/ENDER_SIGNAL nil)
-                        (.playEffect (.getWorld newloc) newloc Effect/ENDER_SIGNAL nil)))))))
+                        (.playEffect (.getWorld newloc) newloc Effect/ENDER_SIGNAL nil))))))))
 
 (defn entity-interact-physical-event [evt entity]
   (teleport-up entity (.getBlock evt)))
@@ -1287,6 +1303,12 @@
    Material/GOLD_HOE 33
    Material/DIAMOND_HOE 1562})
 
+(defn minecart-accelerate [cart]
+  (let [dire (.getDirection (.getLocation cart))]
+    (let [x (- (* (.getX dire) 0.707) (* (.getZ dire) 0.707))
+          z (+ (* (.getX dire) 0.707) (* (.getZ dire) 0.707))]
+      (.setVelocity cart (Vector. (* (.getZ dire) -2) 0.0 (* (.getX dire) 2))))))
+
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)
         block (.getClickedBlock evt)]
@@ -1325,6 +1347,11 @@
       (or (= (.getAction evt) Action/LEFT_CLICK_AIR)
           (= (.getAction evt) Action/LEFT_CLICK_BLOCK))
       (cond
+        (instance? Minecart (.getVehicle player))
+        (do
+          (.setCancelled evt true)
+          (minecart-accelerate (.getVehicle player))))
+
         (and
           (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
           (= (.getHealth player) (.getMaxHealth player)))
@@ -1334,7 +1361,7 @@
             (swap! special-snowball-set conj snowball)
             (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
           (let [arrow (.launchProjectile player Arrow)]
-            (.setVelocity arrow (.multiply (.getVelocity arrow) 3)))))
+            (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))
       (or
           (= (.getAction evt) Action/RIGHT_CLICK_AIR)
           (= (.getAction evt) Action/RIGHT_CLICK_BLOCK))
@@ -1395,6 +1422,16 @@
 
         (= (.. evt (getMaterial)) Material/FEATHER)
         (player-super-jump evt player)))))
+
+(defn player-item-held-event [evt]
+  (let [player (.getPlayer evt)]
+    (when (instance? Minecart (.getVehicle player))
+      (let [cart (.getVehicle player)
+            diff (mod (- (.getNewSlot evt) (.getPreviousSlot evt)) 9)]
+        (when-let [anglediff ({1 15 8 -15} diff)]
+          (let [l (.getLocation cart)]
+            (.setYaw l (+ (.getYaw l) anglediff))
+            (.teleport cart l)))))))
 
 (defn player-drop-item-event [evt]
   (let [item (.getItemDrop evt)
