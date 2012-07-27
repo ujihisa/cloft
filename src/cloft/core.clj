@@ -1205,7 +1205,8 @@
                         (.setOp player false)))
                     (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
                     #_(.sendMessage player "[NEWS] blazeが現世にも現れる。中身は全く別物。要注意!")
-                    (.sendMessage player "[NEWS] 川で砂金をとろう! クワと皿を忘れずに。")))
+                    #_(.sendMessage player "[NEWS] 川で砂金をとろう! クワと皿を忘れずに。")
+                    (.sendMessage player "[NEWS] りんごを食べて界王拳!")))
     (c/lingr (str (name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
