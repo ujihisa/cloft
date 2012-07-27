@@ -122,6 +122,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "food-level-change-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onEntityCombust(EntityCombustEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-combust-event");
         if (f.isBound()) f.invoke(event);
