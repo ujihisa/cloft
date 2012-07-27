@@ -734,6 +734,18 @@
 (defn reaction-skill-poison [you by]
   (.addPotionEffect by (PotionEffect. PotionEffectType/POISON 200 2)))
 
+(defn kaiouken [playername]
+  (let [player (c/get-player playername)]
+    (.sendMessage player "kaiouken!")
+    (.addPotionEffect player (PotionEffect. PotionEffectType/HUNGER 500 3))
+    (.addPotionEffect player (PotionEffect. PotionEffectType/FIRE_RESISTANCE 500 3))
+    (.addPotionEffect player (PotionEffect. PotionEffectType/INCREASE_DAMAGE 500 1))
+    (.addPotionEffect player (PotionEffect. PotionEffectType/DAMAGE_RESISTANCE 500 1))
+    (.addPotionEffect player (PotionEffect. PotionEffectType/SPEED 500 1))
+    (.addPotionEffect player (PotionEffect. PotionEffectType/JUMP 500 1))
+    (.addPotionEffect player (PotionEffect. PotionEffectType/FAST_DIGGING 500 1))
+    (.setFireTicks player 500)))
+
 ;(defn build-long [block block-against]
 ;  (comment (when (= (.getType block) (.getType block-against))
 ;    (let [world (.getWorld block)
