@@ -1,7 +1,6 @@
 (ns cloft.core
   (:require [cloft.cloft :as c])
   (:require [cloft.scheduler :as cloft-scheduler])
-  (:require [cloft.sanctuary :as sanctuary])
   (:require [cloft.chimera-cow :as chimera-cow])
   (:require [cloft.arrow :as a])
   (:require [cloft.recipe ])
@@ -1469,7 +1468,7 @@
 
 (defn creeper-explosion-2 [evt entity]
   (.setCancelled evt true)
-  (if (sanctuary/is-in? (.getLocation entity))
+  (if false #_(sanctuary/is-in? (.getLocation entity))
     (prn 'cancelled)
     (let [loc (.getLocation entity)]
       (.setType (.getBlock loc) Material/PUMPKIN)
