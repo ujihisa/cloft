@@ -487,7 +487,7 @@
                Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
                Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
                Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
-               Material/APPLE [Material/APPLE Material/GOLDEN_APPLE]
+               #_(Material/APPLE [Material/APPLE Material/GOLDEN_APPLE])
                Material/ROTTEN_FLESH [Material/ROTTEN_FLESH Material/COAL]}
         itemstack (.getItemStack item)]
     (when (table (.getType itemstack))
