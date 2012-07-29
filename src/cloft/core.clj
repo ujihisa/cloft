@@ -1694,16 +1694,17 @@
                  Chicken Material/RAW_CHICKEN
                  Zombie Material/LEATHER_CHESTPLATE
                  Skeleton Material/BOW
-                 Creeper Material/TNT
+                 Creeper Material/SULPHUR
                  CaveSpider Material/IRON_INGOT
                  Spider Material/REDSTONE
                  Sheep Material/BED
-                 Villager Material/LEATHER_LEGGINGS
-                 Silverfish Material/DIAMOND_SWORD
+                 Villager Material/APPLE
+                 Silverfish Material/IRON_SWORD
                  IronGolem Material/FISHING_ROD
                  Squid Material/RAW_FISH
                  Blaze Material/GLOWSTONE_DUST
-                 MagmaCube Material/FLINT}]
+                 MagmaCube Material/FLINT
+                 Giant Material/DIRT}]
       (if-let [m (last (first (filter #(instance? (first %) target) table)))]
         (.dropItem (.getWorld target) (.getLocation target) (ItemStack. m 1))
         (cond
