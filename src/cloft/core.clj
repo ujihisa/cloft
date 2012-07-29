@@ -1744,8 +1744,6 @@
                 (instance? Villager target)
                 (instance? EntityDamageByEntityEvent evt)
                 (instance? Player attacker))
-          (.sendMessage attacker
-                        (str (.getDisplayName attacker) "is attacking a Villager"))
           (.damage attacker (.getDamage evt)))
         (when (instance? Fish attacker)
           (fish-damages-entity-event evt attacker target))
