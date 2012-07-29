@@ -146,6 +146,17 @@
 (defn event [evt]
   (prn evt))
 
+(defn kaiouken [player]
+  (.sendMessage player "kaiouken!")
+  (.addPotionEffect player (PotionEffect. PotionEffectType/HUNGER 500 10))
+  (.addPotionEffect player (PotionEffect. PotionEffectType/FIRE_RESISTANCE 500 3))
+  (.addPotionEffect player (PotionEffect. PotionEffectType/INCREASE_DAMAGE 500 1))
+  (.addPotionEffect player (PotionEffect. PotionEffectType/DAMAGE_RESISTANCE 500 1))
+  (.addPotionEffect player (PotionEffect. PotionEffectType/SPEED 500 1))
+  (.addPotionEffect player (PotionEffect. PotionEffectType/JUMP 500 1))
+  (.addPotionEffect player (PotionEffect. PotionEffectType/FAST_DIGGING 500 1))
+  (.setFireTicks player 500))
+
 (defn food-level-change-event [evt]
   (let [player (.getEntity evt)]
     (when-let [itemstack (.getItemInHand player)]
@@ -740,16 +751,6 @@
 (defn reaction-skill-poison [you by]
   (.addPotionEffect by (PotionEffect. PotionEffectType/POISON 200 2)))
 
-(defn kaiouken [player]
-  (.sendMessage player "kaiouken!")
-  (.addPotionEffect player (PotionEffect. PotionEffectType/HUNGER 500 10))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/FIRE_RESISTANCE 500 3))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/INCREASE_DAMAGE 500 1))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/DAMAGE_RESISTANCE 500 1))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/SPEED 500 1))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/JUMP 500 1))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/FAST_DIGGING 500 1))
-  (.setFireTicks player 500))
 
 ;(defn build-long [block block-against]
 ;  (comment (when (= (.getType block) (.getType block-against))
