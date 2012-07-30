@@ -946,15 +946,15 @@
         (and
           (= (.getY l1) (.getY l2))
           (= (.getZ l1) (.getZ l2)))
-        :x
+        #(.getX %)
         (and
           (= (.getZ l1) (.getZ l2))
           (= (.getX l1) (.getX l2)))
-        :y
+        #(.getY %)
         (and
           (= (.getX l1) (.getX l2))
           (= (.getY l1) (.getY l2)))
-        :z)))
+        #(.getZ %))))
   (first (filter
            (fn [[_ _ xyz]] xyz)
            (map (fn [[b p]]
@@ -968,20 +968,23 @@
   (let [block (.getBlock evt)]
     (let [player (.getPlayer evt)]
       (when (instance? Player player)
-        (if-let [[another-block another-player xyz] (lookup-player-block-placed block player)]
+        (if-let [[another-block another-player xyz-getter] (lookup-player-block-placed block player)]
           (do
-            (prn 'xyz xyz)
-            (when (= xyz :y)
             (swap! player-block-placed empty)
-            (let [block1 (min-key #(.getY %) block another-block)
-                  block2 (if (= block1 block) another-block block)]
-              (doseq [ydiff (range 1 (- (.getY block2) (.getY block1)))]
-                (when (< ydiff 64)
-                  (let [b (.getBlock (.add (.clone (.getLocation block1)) 0 ydiff 0))]
+            (let [block1 (min-key xyz-getter block another-block)
+                  block2 (if (= block1 block) another-block block)
+                  unit-vec (.normalize
+                             (.toVector (.subtract
+                                          (.getLocation block2)
+                                          (.getLocation block1))))]
+              (doseq [diff (range 1 (- (xyz-getter block2) (xyz-getter block1)))]
+                (when (< diff 200)
+                  (let [b (.getBlock (.add (.clone (.getLocation block1))
+                                           (.multiply (.clone unit-vec) diff)))]
                     (when ((cloft.block/category :enterable) (.getType b))
                       (.setType b (.getType block1)))))))
             (.sendMessage another-player "ok (second)")
-            (.sendMessage player "ok (first)")))
+            (.sendMessage player "ok (first)"))
           (do
             (future-call #(do
                             (Thread/sleep 3000)
