@@ -968,8 +968,10 @@
   (let [block (.getBlock evt)]
     (let [player (.getPlayer evt)]
       (when (instance? Player player)
-        (if-let [[another-block another-player] (lookup-player-block-placed block player)]
+        (if-let [[another-block another-player xyz] (lookup-player-block-placed block player)]
           (do
+            (prn 'xyz xyz)
+            (when (= xyz :y)
             #_(swap! player-block-placed empty)
             (let [block1 (min-key #(.getY %) block another-block)
                   block2 (if (= block1 block) another-block block)]
@@ -979,7 +981,7 @@
                     (when ((cloft.block/category :enterable) (.getType b))
                       (.setType b (.getType block1)))))))
             (.sendMessage another-player "ok (second)")
-            (.sendMessage player "ok (first)"))
+            (.sendMessage player "ok (first)")))
           (do
             (future-call #(do
                             (Thread/sleep 3000)
