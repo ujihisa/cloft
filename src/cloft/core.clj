@@ -962,11 +962,14 @@
                         (swap! player-block-placed dissoc block)
                         (prn @player-block-placed)))
         (when-let [[another-block another-player] (lookup-player-block-placed block player)]
-          (.setCancelled evt true)
-          (.setType another-block Material/GOLD_BLOCK)
-          (.setType block Material/GOLD_BLOCK)
-          (.sendMessage player "ok1")
-          (.sendMessage another-player "ok2"))
+          (let [block1 (min-key #(.getY %) block another-block)
+                block2 (max-key #(.getY %) block another-block)]
+            (doseq [ydiff (range 1 (- (.getY block2) (.getY block1)))]
+              (when (< ydiff 64)
+                (let [b (.getBlock (.add (.clone (.getLocation block1)) 0 ydiff 0))]
+                  (.setType b (.getType block1))))))
+          (.sendMessage another-player "ok2")
+          (.sendMessage player "ok1"))
         (arrow-skillchange player block (.getBlockAgainst evt))
         (pickaxe-skillchange player block (.getBlockAgainst evt))
         (reaction-skillchange player block (.getBlockAgainst evt))
