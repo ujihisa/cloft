@@ -936,6 +936,11 @@
 
 (def player-block-placed (atom {}))
 
+(defn lookup-player-block-placed [block]
+  """returns nil or a player"""
+  "mock"
+  nil)
+
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
     (let [player (.getPlayer evt)]
@@ -946,6 +951,9 @@
                         (Thread/sleep 1000)
                         (swap! player-block-placed dissoc player)
                         (prn @player-block-placed)))
+        (when-let [another-player (lookup-player-block-placed block)]
+          (.sendMessage player "ok1")
+          (.sendMessage another-player "ok2"))
         (arrow-skillchange player block (.getBlockAgainst evt))
         (pickaxe-skillchange player block (.getBlockAgainst evt))
         (reaction-skillchange player block (.getBlockAgainst evt))
