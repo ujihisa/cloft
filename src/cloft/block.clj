@@ -33,7 +33,6 @@
               Material/PUMPKIN_STEM #{:gettable :combustible :enterable}
               Material/MELON_STEM #{:gettable :combustible :enterable}
               Material/VINE #{:combustible :enterable}
-              Material/GRASS #{:combustible :enterable}
               Material/DEAD_BUSH #{:combustible :enterable}
               Material/SUGAR_CANE #{:gettable :combustible :enterable}
               Material/LEAVES  #{:gettable :combustible}
