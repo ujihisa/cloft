@@ -945,11 +945,11 @@
   (let [block (.getBlock evt)]
     (let [player (.getPlayer evt)]
       (when (instance? Player player)
-        (swap! player-block-placed assoc player block)
+        (swap! player-block-placed assoc block player)
         (prn @player-block-placed)
         (future-call #(do
                         (Thread/sleep 1000)
-                        (swap! player-block-placed dissoc player)
+                        (swap! player-block-placed dissoc block)
                         (prn @player-block-placed)))
         (when-let [another-player (lookup-player-block-placed block)]
           (.sendMessage player "ok1")
