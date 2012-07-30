@@ -934,10 +934,17 @@
 (defn vector-from-to [ent-from ent-to]
   (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
 
+(def player-block-placed (atom {}))
+
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
-    (comment (.spawn (.getWorld block) (.getLocation block) Pig))
     (let [player (.getPlayer evt)]
+      (swap! player-block-placed assoc player block)
+      (prn @player-block-placed)
+      (future-call #(do
+                      (Thread/sleep 1000)
+                      (swap! player-block-placed dissoc player)
+                      (prn @player-block-placed)))
       (arrow-skillchange player block (.getBlockAgainst evt))
       (pickaxe-skillchange player block (.getBlockAgainst evt))
       (reaction-skillchange player block (.getBlockAgainst evt))
