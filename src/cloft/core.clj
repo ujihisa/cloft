@@ -972,7 +972,7 @@
           (do
             (prn 'xyz xyz)
             (when (= xyz :y)
-            #_(swap! player-block-placed empty)
+            (swap! player-block-placed empty)
             (let [block1 (min-key #(.getY %) block another-block)
                   block2 (if (= block1 block) another-block block)]
               (doseq [ydiff (range 1 (- (.getY block2) (.getY block1)))]
