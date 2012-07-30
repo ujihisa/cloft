@@ -938,8 +938,14 @@
 
 (defn lookup-player-block-placed [block]
   """returns nil or a player"""
-  "mock"
-  nil)
+  (defn block-linear? [b1 b2]
+    (let [l1 (.getLocation b1)
+          l2 (.getLocation b2)]
+      (and
+        (= (.getX l1) (.getX l2))
+        (= (.getZ l1) (.getZ l2)))))
+  (when-let [[b p] (first (filter (fn [b _] (block-linear? b block)) @player-block-placed))]
+    p))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
