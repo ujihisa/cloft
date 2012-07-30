@@ -955,20 +955,23 @@
   (let [block (.getBlock evt)]
     (let [player (.getPlayer evt)]
       (when (instance? Player player)
-        (swap! player-block-placed assoc block player)
-        (future-call #(do
-                        (Thread/sleep 3000)
-                        (swap! player-block-placed dissoc block)))
-        (when-let [[another-block another-player] (lookup-player-block-placed block player)]
-          (let [block1 (min-key #(.getY %) block another-block)
-                block2 (max-key #(.getY %) block another-block)]
-            (doseq [ydiff (range 1 (- (.getY block2) (.getY block1)))]
-              (when (< ydiff 64)
-                (let [b (.getBlock (.add (.clone (.getLocation block1)) 0 ydiff 0))]
-                  (when ((cloft.block/category :enterable) (.getType b))
-                    (.setType b (.getType block1)))))))
-          (.sendMessage another-player "ok2")
-          (.sendMessage player "ok1"))
+        (if-let [[another-block another-player] (lookup-player-block-placed block player)]
+          (do
+            (swap! player-block-placed empty)
+            (let [block1 (min-key #(.getY %) block another-block)
+                  block2 (if (= block1 block) another-block block)]
+              (doseq [ydiff (range 1 (- (.getY block2) (.getY block1)))]
+                (when (< ydiff 64)
+                  (let [b (.getBlock (.add (.clone (.getLocation block1)) 0 ydiff 0))]
+                    (when ((cloft.block/category :enterable) (.getType b))
+                      (.setType b (.getType block1)))))))
+            (.sendMessage another-player "ok (second)")
+            (.sendMessage player "ok (first)"))
+          (do
+            (future-call #(do
+                            (Thread/sleep 3000)
+                            (swap! player-block-placed dissoc block)))
+            (swap! player-block-placed assoc block player)))
         (arrow-skillchange player block (.getBlockAgainst evt))
         (pickaxe-skillchange player block (.getBlockAgainst evt))
         (reaction-skillchange player block (.getBlockAgainst evt))
