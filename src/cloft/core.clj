@@ -937,19 +937,32 @@
 (def player-block-placed (atom {}))
 
 (defn lookup-player-block-placed [block player]
-  """returns nil or a tuple of block and player"""
-  (defn block-linear? [b1 b2]
+  """returns nil or a tuple of (block, player, xyz)"""
+  (defn block-linear [b1 b2]
+    "returns :x, :y, :z or false"
     (let [l1 (.getLocation b1)
           l2 (.getLocation b2)]
-      (and
-        (= (.getX l1) (.getX l2))
-        (= (.getZ l1) (.getZ l2)))))
+      (cond
+        (and
+          (= (.getY l1) (.getY l2))
+          (= (.getZ l1) (.getZ l2)))
+        :x
+        (and
+          (= (.getZ l1) (.getZ l2))
+          (= (.getX l1) (.getX l2)))
+        :y
+        (and
+          (= (.getX l1) (.getX l2))
+          (= (.getY l1) (.getY l2)))
+        :z)))
   (first (filter
-           (fn [[b p]] (and
+           (fn [[_ _ xyz]] xyz)
+           (map (fn [[b p]]
+                  [b p (and
                          (= (.getType b) (.getType block))
                          (not= p player)
-                         (block-linear? b block)))
-           @player-block-placed)))
+                         (block-linear b block))])
+                @player-block-placed))))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
@@ -957,7 +970,7 @@
       (when (instance? Player player)
         (if-let [[another-block another-player] (lookup-player-block-placed block player)]
           (do
-            (swap! player-block-placed empty)
+            #_(swap! player-block-placed empty)
             (let [block1 (min-key #(.getY %) block another-block)
                   block2 (if (= block1 block) another-block block)]
               (doseq [ydiff (range 1 (- (.getY block2) (.getY block1)))]
