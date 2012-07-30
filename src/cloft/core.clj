@@ -967,7 +967,8 @@
             (doseq [ydiff (range 1 (- (.getY block2) (.getY block1)))]
               (when (< ydiff 64)
                 (let [b (.getBlock (.add (.clone (.getLocation block1)) 0 ydiff 0))]
-                  (.setType b (.getType block1))))))
+                  (when ((cloft.block/category :enterable) (.getType b))
+                    (.setType b (.getType block1)))))))
           (.sendMessage another-player "ok2")
           (.sendMessage player "ok1"))
         (arrow-skillchange player block (.getBlockAgainst evt))
