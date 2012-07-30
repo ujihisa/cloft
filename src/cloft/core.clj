@@ -939,21 +939,22 @@
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
     (let [player (.getPlayer evt)]
-      (swap! player-block-placed assoc player block)
-      (prn @player-block-placed)
-      (future-call #(do
-                      (Thread/sleep 1000)
-                      (swap! player-block-placed dissoc player)
-                      (prn @player-block-placed)))
-      (arrow-skillchange player block (.getBlockAgainst evt))
-      (pickaxe-skillchange player block (.getBlockAgainst evt))
-      (reaction-skillchange player block (.getBlockAgainst evt))
-      (invoke-alchemy player block (.getBlockAgainst evt))
-      (transport/teleport-machine player block (.getBlockAgainst evt))
-      (comment (prn (vector-from-to block player))
-               (.setVelocity player (vector-from-to player block))
-               (doseq [entity (.getNearbyEntities player 4 4 4)]
-                 (.setVelocity entity (vector-from-to entity block)))))
+      (when (instance? Player player)
+        (swap! player-block-placed assoc player block)
+        (prn @player-block-placed)
+        (future-call #(do
+                        (Thread/sleep 1000)
+                        (swap! player-block-placed dissoc player)
+                        (prn @player-block-placed)))
+        (arrow-skillchange player block (.getBlockAgainst evt))
+        (pickaxe-skillchange player block (.getBlockAgainst evt))
+        (reaction-skillchange player block (.getBlockAgainst evt))
+        (invoke-alchemy player block (.getBlockAgainst evt))
+        (transport/teleport-machine player block (.getBlockAgainst evt))
+        (comment (prn (vector-from-to block player))
+                 (.setVelocity player (vector-from-to player block))
+                 (doseq [entity (.getNearbyEntities player 4 4 4)]
+                   (.setVelocity entity (vector-from-to entity block))))))
     #_(build-long block (.getBlockAgainst evt))
     #_(when (sanctuary/is-in? (.getLocation block))
         (.setCancelled evt true))))
