@@ -956,11 +956,9 @@
     (let [player (.getPlayer evt)]
       (when (instance? Player player)
         (swap! player-block-placed assoc block player)
-        (prn @player-block-placed)
         (future-call #(do
                         (Thread/sleep 3000)
-                        (swap! player-block-placed dissoc block)
-                        (prn @player-block-placed)))
+                        (swap! player-block-placed dissoc block)))
         (when-let [[another-block another-player] (lookup-player-block-placed block player)]
           (let [block1 (min-key #(.getY %) block another-block)
                 block2 (max-key #(.getY %) block another-block)]
