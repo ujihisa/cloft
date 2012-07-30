@@ -936,16 +936,20 @@
 
 (def player-block-placed (atom {}))
 
-(defn lookup-player-block-placed [block]
-  """returns nil or a player"""
+(defn lookup-player-block-placed [block player]
+  """returns nil or a tuple of block and player"""
   (defn block-linear? [b1 b2]
     (let [l1 (.getLocation b1)
           l2 (.getLocation b2)]
       (and
         (= (.getX l1) (.getX l2))
         (= (.getZ l1) (.getZ l2)))))
-  (when-let [[b p] (first (filter (fn [b _] (block-linear? b block)) @player-block-placed))]
-    p))
+  (first (filter
+           (fn [[b p]] (and
+                         (= (.getType b) (.getType block))
+                         (not= p player)
+                         (block-linear? b block)))
+           @player-block-placed)))
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)]
@@ -954,10 +958,13 @@
         (swap! player-block-placed assoc block player)
         (prn @player-block-placed)
         (future-call #(do
-                        (Thread/sleep 1000)
+                        (Thread/sleep 3000)
                         (swap! player-block-placed dissoc block)
                         (prn @player-block-placed)))
-        (when-let [another-player (lookup-player-block-placed block)]
+        (when-let [[another-block another-player] (lookup-player-block-placed block player)]
+          (.setCancelled evt true)
+          (.setType another-block Material/GOLD_BLOCK)
+          (.setType block Material/GOLD_BLOCK)
           (.sendMessage player "ok1")
           (.sendMessage another-player "ok2"))
         (arrow-skillchange player block (.getBlockAgainst evt))
