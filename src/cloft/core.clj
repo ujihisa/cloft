@@ -1825,6 +1825,13 @@
               (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
                     vector (.multiply (.normalize (.toVector direction)) 3)]
                 (c/add-velocity target (.getX vector) (+ (.getY vector) 2.0) (.getZ vector))))))
+        (when (instance? Enderman attacker)
+          (when (instance? Player target)
+            (if (= target (.getPassenger attacker))
+              (.setCancelled evt true)
+              (when (= 0 (rand-int 5))
+                (.sendMessage target "Enderman picked you! (sneaking to get off)")
+                (.setPassenger attacker target)))))
         (when (instance? Arrow attacker)
           (arrow-damages-entity-event evt attacker target))
         (when (instance? Player attacker)
@@ -2027,7 +2034,10 @@
           (.setFoodLevel player 20)
           (.teleport player loc)
           (c/add-velocity player 0 0.6 0))))
-    (transport/cauldron-teleport player)))
+    (transport/cauldron-teleport player)
+    (when-let [vehicle (.getVehicle player)]
+      (when (instance? Enderman vehicle)
+        (.leaveVehicle player)))))
 
 
 (comment (defn enderman-pickup-event* [evt]
