@@ -1781,7 +1781,7 @@
       (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
       (when (player/zombie? target)
         (.setCancelled evt true)
-        (player/rebirth-from-zombie target)))
+        (player/rebirth-from-zombie target))
 
       (= EntityDamageEvent$DamageCause/ENTITY_EXPLOSION (.getCause evt))
       (do
@@ -1873,7 +1873,7 @@
             (player/zombieze target)
             (.sendMessage attacker "You made a friend")))
         (when (chimera-cow/is? target)
-          (chimera-cow/damage-event evt target attacker)))))
+          (chimera-cow/damage-event evt target attacker))))))
 
 (defn block-break-event [evt]
   (let [block (.getBlock evt)]
