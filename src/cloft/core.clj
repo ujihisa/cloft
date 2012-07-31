@@ -1276,7 +1276,8 @@
     (future-call #(do
                     (Thread/sleep 10000)
                     (when (= player (.getPassenger player))
-                      (.setPassenger player nil))))))
+                      (.setPassenger player nil))))
+    nil))
 
 
 
@@ -1791,8 +1792,15 @@
           (.setDamage evt 0)))
 
       (= EntityDamageEvent$DamageCause/FALL (.getCause evt))
-      (if (chimera-cow/is? target)
+      (cond
+        (chimera-cow/is? target)
         (chimera-cow/fall-damage-event evt target)
+
+        (when-let [vehicle (.getVehicle target)]
+          (and vehicle (instance? Boat vehicle)))
+        (.setCancelled evt true)
+
+        :else
         (let [loc (.add (.getLocation target) 0 -1 0)]
           (doseq [fence [Material/FENCE Material/NETHER_FENCE]]
             (when (= fence (.getType (.getBlock loc)))
@@ -2036,8 +2044,38 @@
           (c/add-velocity player 0 0.6 0))))
     (transport/cauldron-teleport player)
     (when-let [vehicle (.getVehicle player)]
-      (when (instance? Enderman vehicle)
+      (cond
+        (instance? Boat vehicle)
+        (.setVelocity vehicle (Vector. 0 0 0))
+        (instance? Enderman vehicle)
         (.leaveVehicle player)))))
+
+(defn just-for-now
+  ([] (just-for-now (c/ujm)))
+  ([player]
+   (def b (.spawn (.getWorld player) (.getLocation player) Boat))
+   (.setPassenger b player)
+   (.setWorkOnLand b true)
+   (.setOccupiedDeceleration b 0.5)
+   (.setMaxSpeed b 2.0)))
+
+(defn vehicle-block-collision-event [evt]
+  (let [vehicle (.getVehicle evt)]
+    (when-let [passenger (.getPassenger vehicle)]
+      (when (instance? Boat vehicle)
+        (let [block (.getBlock evt)]
+          (.teleport vehicle (.add (.getLocation vehicle) 0 1 0)))))))
+
+#_(defn vehicle-damage-event [evt]
+  (prn 'vehicle-damage))
+
+(defn vehicle-destroy-event [evt]
+  (let [vehicle (.getVehicle evt)]
+    (when-let [passenger (.getPassenger vehicle)]
+      (.setCancelled evt true))))
+
+#_(defn vehicle-entity-collision-event [evt]
+  (prn 'vehicle-entity-collision-event))
 
 
 (comment (defn enderman-pickup-event* [evt]

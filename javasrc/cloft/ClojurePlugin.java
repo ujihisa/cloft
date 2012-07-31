@@ -224,8 +224,50 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onVehicleBlockCollision(VehicleBlockCollisionEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-block-collision-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    /*
+    @EventHandler
+    public void onVehicleCreate(VehicleCreateEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-create-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    */
+    @EventHandler
+    public void onVehicleDamage(VehicleDamageEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-damage-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onVehicleDestroy(VehicleDestroyEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-destroy-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onVehicleEnter(VehicleEnterEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-enter-event");
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-enter-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onVehicleEntityCollision(VehicleEntityCollisionEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-entity-collision-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onVehicleExit(VehicleExitEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-exit-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onVehicleMove(VehicleMoveEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-move-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onVehicleUpdate(VehicleUpdateEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-update-event");
         if (f.isBound()) f.invoke(event);
     }
     /* end auto-generated code */

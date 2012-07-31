@@ -29,8 +29,9 @@
      ;LeavesDecayEvent SignChangeEvent
      )
    ;vehicle
-   '(VehicleCollisionEvent VehicleCreateEvent VehicleDamageEvent
-     VehicleDestroyEvent VehicleEnterEvent VehicleExitEvent VehicleMoveEvent
+   '(VehicleBlockCollisionEvent VehicleCollisionEvent VehicleCreateEvent
+     VehicleDamageEvent VehicleDestroyEvent VehicleEnterEvent
+     VehicleEntityCollisionEvent VehicleExitEvent VehicleMoveEvent
      VehicleUpdateEvent)])
 
 (doseq [category events]
