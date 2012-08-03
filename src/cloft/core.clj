@@ -1049,8 +1049,9 @@
 (defn player-chat-event [evt]
   (let [name (.getDisplayName (.getPlayer evt))
         msg (.getMessage evt)]
-    (when (< 1 (count msg))
-      (c/lingr "computer_science" (str (player/name2icon name) msg)))))
+    (cond
+      (< 1 (count msg)) nil
+      :else (c/lingr "computer_science" (str (player/name2icon name) msg)))))
 
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target)))
