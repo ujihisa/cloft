@@ -1051,6 +1051,15 @@
         msg (.getMessage evt)]
     (cond
       (< 1 (count msg)) nil
+      (= "countdown") (do
+                        (.setCancelled evt true)
+                        (future-call #(do
+                                      (Thread/sleep 1000)
+                                      (c/broadcast 3)
+                                      (Thread/sleep 1000)
+                                      (c/broadcast 2)
+                                      (Thread/sleep 1000)
+                                      (c/broadcast 1))))
       :else (c/lingr "computer_science" (str (player/name2icon name) msg)))))
 
 (defn touch-player [target]
