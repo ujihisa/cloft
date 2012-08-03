@@ -1047,8 +1047,10 @@
 ;      (c/lingr (str (player/name2icon (.getDisplayName (.getPlayer evt))) "quitted.")))))
 
 (defn player-chat-event [evt]
-  (let [name (.getDisplayName (.getPlayer evt))]
-    (c/lingr "computer_science" (str (player/name2icon name) (.getMessage evt)))))
+  (let [name (.getDisplayName (.getPlayer evt))
+        msg (.getMessage evt)]
+    (when (< 1 (count msg))
+      (c/lingr "computer_science" (str (player/name2icon name) msg)))))
 
 (defn touch-player [target]
   (.setFoodLevel target (dec (.getFoodLevel target)))
@@ -2130,6 +2132,7 @@
                     (while true
                       (let [contents (read-string (mq/recv-str subscriber))
                             players (Bukkit/getOnlinePlayers)]
+                        (prn 'received contents)
                         (condp #(.startsWith %2 %1) (:body contents)
                           "/list"
                           (let [msg (if (empty? players)
