@@ -1082,7 +1082,7 @@
         (instance? Minecart (.getVehicle player))
         (do
           (.setCancelled evt true)
-          (minecart-accelerate (.getVehicle player))))
+          (minecart-accelerate (.getVehicle player)))
 
         (and
           (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
@@ -1093,7 +1093,7 @@
             (swap! special-snowball-set conj snowball)
             (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
           (let [arrow (.launchProjectile player Arrow)]
-            (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))
+            (.setVelocity arrow (.multiply (.getVelocity arrow) 3)))))
       (or
           (= action Action/RIGHT_CLICK_AIR)
           (= action Action/RIGHT_CLICK_BLOCK))
