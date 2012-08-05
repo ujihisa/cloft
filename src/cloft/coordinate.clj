@@ -11,6 +11,6 @@
    [depth height right-hand]))
 
 (defn local-to-world [player origin-block dx hx rx]
-  (let [[d h r] (direction-of (.getLocation player))
-        loc (.toVector (.getLocation origin-block))]
-    (.add loc (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
+  (let [[d h r] (direction-of (.getLocation player))]
+    (.add (.toVector (.getLocation origin-block))
+          (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
