@@ -37,6 +37,7 @@
       (let [amount (.getAmount (.getItemInHand player))
             x (if (.isSprinting player) (* amount 2) amount)
             x2 (/ (java.lang.Math/log x) 2)]
+        (.setFallDistance player 0.0)
         (c/consume-itemstack (.getInventory player) Material/FEATHER)
         (c/add-velocity player 0 x2 0)))))
 
