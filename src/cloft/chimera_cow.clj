@@ -1,6 +1,6 @@
 (ns cloft.chimera-cow
     (:require [cloft.cloft :as c])
-    (:require [cloft.arrow :as a])
+    (:require [cloft.arrow :as arrow])
     (:import [org.bukkit.entity Cow Fireball Arrow Minecart Player])
     (:import [org.bukkit Material Location Effect])
     (:import [org.bukkit.inventory ItemStack])
@@ -41,7 +41,7 @@
   (.setDamage evt (min (.getDamage evt) 2))
   (condp instance? attacker
     Fireball (.setCancelled evt true)
-    Arrow (a/reflect-arrow evt attacker cow)
+    Arrow (arrow/reflect evt attacker cow)
     nil))
 
 (defn arrow-hit [entity]
