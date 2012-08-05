@@ -542,9 +542,6 @@
   (let [entity (.getEntity evt)]
     (when (instance? Creeper entity)
       (when-let [target (.getTarget evt)]
-        #_(let [block (.getBlock (.getLocation entity))]
-          (when (= Material/AIR (.getType block))
-            (.setType block Material/FIRE)))
         (.setFireTicks entity 40)
         (when (and
                 (not @takumi-watched?)
@@ -1733,6 +1730,10 @@
         (if (= (rem @creeper-explosion-idx 3) 0)
           (.setDamage evt (min (.getDamage evt) 19))
           (.setDamage evt 0)))
+
+      (= EntityDamageEvent$DamageCause/FIRE_TICK (.getCause evt))
+      (when (instance? Creeper target)
+        (.setCancelled evt true))
 
       (= EntityDamageEvent$DamageCause/FALL (.getCause evt))
       (cond
