@@ -1058,16 +1058,6 @@
       (= action Action/PHYSICAL)
       (transport/teleport-up player block)
 
-      (and
-        (= action Action/RIGHT_CLICK_BLOCK)
-        (= (.getType block) Material/CAKE_BLOCK))
-      (if-let [death-point (player/death-location-of player)]
-        (do
-          (.load (.getChunk death-point))
-          (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
-          (.teleport player death-point))
-        (.sendMessage player "You didn't die yet."))
-
       (or (= action Action/LEFT_CLICK_AIR)
           (= action Action/LEFT_CLICK_BLOCK))
       (cond
@@ -1090,11 +1080,21 @@
           (= action Action/RIGHT_CLICK_BLOCK))
       (cond
         (and
-          (not= action Action/RIGHT_CLICK_AIR)
+          (= action Action/RIGHT_CLICK_BLOCK)
           (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD))
         (do
           (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
           (.sendMessage player (format "biome: %s" (.getBiome block))))
+
+        (and
+          (= action Action/RIGHT_CLICK_BLOCK)
+          (= (.getType block) Material/CAKE_BLOCK))
+        (if-let [death-point (player/death-location-of player)]
+          (do
+            (.load (.getChunk death-point))
+            (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
+            (.teleport player death-point))
+          (.sendMessage player "You didn't die yet."))
 
         (and
           block
