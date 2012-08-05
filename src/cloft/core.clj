@@ -45,7 +45,7 @@
         (c/add-velocity player 0 x2 0)))))
 
 (defn kaiouken [player]
-  (.sendMessage player "kaiouken!")
+  (.sendMessage player "界王拳3倍!")
   (.addPotionEffect player (PotionEffect. PotionEffectType/HUNGER 500 10))
   (.addPotionEffect player (PotionEffect. PotionEffectType/FIRE_RESISTANCE 500 3))
   (.addPotionEffect player (PotionEffect. PotionEffectType/INCREASE_DAMAGE 500 1))
