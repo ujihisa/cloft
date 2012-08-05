@@ -944,7 +944,8 @@
               (let [b (.getBlock (.add (.clone (.getLocation block1))
                                        (.multiply (.clone unit-vec) diff)))]
                 (when ((cloft.block/category :enterable) (.getType b))
-                  (.setType b (.getType block1)))))))
+                  (.setType b (.getType another-block))
+                  (.setData b (.getData another-block)))))))
         (.sendMessage another-player "ok (second)")
         (.sendMessage player "ok (first)"))
       (do
@@ -973,7 +974,9 @@
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
       (.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")
       (.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました")
-      (.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます"))
+      (.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
+      #_(when (= "mozukusoba" (.getDisplayName player))
+        (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
