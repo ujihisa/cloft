@@ -5,8 +5,7 @@
   (.normalize (Vector. (.getX v) 0.0 (.getZ v))))
 
 (defn player-direction [player]
-  (let [world (.getWorld player)
-        loc (.getLocation player)
+  (let [loc (.getLocation player)
         height (Vector. 0.0 1.0 0.0)
         depth (xz-normalized-vector (.getDirection loc))
         right-hand (.crossProduct (.clone depth) height)]
