@@ -922,34 +922,34 @@
 (defn block-place-event [evt]
   (let [block (.getBlock evt)
         player (.getPlayer evt)]
-    (when (instance? Player player)
-      (if-let [[another-block another-player xyz-getter] (lookup-player-block-placed block player)]
-        (do
-          (swap! player-block-placed empty)
-          (let [block1 (min-key xyz-getter block another-block)
-                block2 (if (= block1 block) another-block block)
-                unit-vec (.normalize
-                           (.toVector (.subtract
-                                        (.getLocation block2)
-                                        (.getLocation block1))))]
-            (doseq [diff (range 1 (- (xyz-getter block2) (xyz-getter block1)))]
-              (when (< diff 200)
-                (let [b (.getBlock (.add (.clone (.getLocation block1))
-                                         (.multiply (.clone unit-vec) diff)))]
-                  (when ((cloft.block/category :enterable) (.getType b))
-                    (.setType b (.getType block1)))))))
-          (.sendMessage another-player "ok (second)")
-          (.sendMessage player "ok (first)"))
-        (do
-          (future-call #(do
-                          (Thread/sleep 3000)
-                          (swap! player-block-placed dissoc block)))
-          (swap! player-block-placed assoc block player)))
-      (arrow-skillchange player block (.getBlockAgainst evt))
-      (pickaxe-skillchange player block (.getBlockAgainst evt))
-      (reaction-skillchange player block (.getBlockAgainst evt))
-      (invoke-alchemy player block (.getBlockAgainst evt))
-      (transport/teleport-machine player block (.getBlockAgainst evt)))))
+    (assert (instance? Player player))
+    (if-let [[another-block another-player xyz-getter] (lookup-player-block-placed block player)]
+      (do
+        (swap! player-block-placed empty)
+        (let [block1 (min-key xyz-getter block another-block)
+              block2 (if (= block1 block) another-block block)
+              unit-vec (.normalize
+                         (.toVector (.subtract
+                                      (.getLocation block2)
+                                      (.getLocation block1))))]
+          (doseq [diff (range 1 (- (xyz-getter block2) (xyz-getter block1)))]
+            (when (< diff 200)
+              (let [b (.getBlock (.add (.clone (.getLocation block1))
+                                       (.multiply (.clone unit-vec) diff)))]
+                (when ((cloft.block/category :enterable) (.getType b))
+                  (.setType b (.getType block1)))))))
+        (.sendMessage another-player "ok (second)")
+        (.sendMessage player "ok (first)"))
+      (do
+        (future-call #(do
+                        (Thread/sleep 3000)
+                        (swap! player-block-placed dissoc block)))
+        (swap! player-block-placed assoc block player)))
+    (arrow-skillchange player block (.getBlockAgainst evt))
+    (pickaxe-skillchange player block (.getBlockAgainst evt))
+    (reaction-skillchange player block (.getBlockAgainst evt))
+    (invoke-alchemy player block (.getBlockAgainst evt))
+    (transport/teleport-machine player block (.getBlockAgainst evt))))
 
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
