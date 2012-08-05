@@ -1122,8 +1122,8 @@
           (.setType (.getItemInHand player) Material/BUCKET)))
 
       (and
-        (= (.. evt (getMaterial)) Material/COAL)
-        (.getAllowFlight player))
+        (.getAllowFlight player)
+        (= (.. evt (getMaterial)) Material/COAL))
       (do
         (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
         (c/consume-item player))
