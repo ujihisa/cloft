@@ -415,7 +415,7 @@
 
 (defn blaze2-get-damaged [evt blaze2]
   (when (not= "world" (.getName (.getWorld blaze2))) (prn 'omg-assertion-failed))
-  (.setDamage evt (int (/ (.getDamage evt) 2))))
+  (.setDamage evt (max (int (/ (.getDamage evt) 2)) 9)))
 
 (defn blaze2-murder-event [evt blaze2 player]
   (when (not= "world" (.getName (.getWorld blaze2))) (prn 'omg-assertion-failed))
@@ -1762,6 +1762,9 @@
                 (.damage target 100))))))
       :else
       (do
+        (when (and (instance? Blaze target)
+                   (= "world" (.getName (.getWorld target))))
+          (blaze2-get-damaged evt target))
         (when (and
                 (instance? Villager target)
                 (instance? EntityDamageByEntityEvent evt)
@@ -1796,9 +1799,6 @@
             (when (c/pickaxes (.getType item))
               (when (= 'pickaxe-skill-fire (pickaxe-skill-of attacker))
                 (.setFireTicks target 200))))
-          (when (and (instance? Blaze target)
-                     (= "world" (.getName (.getWorld target))))
-            (blaze2-get-damaged evt target))
           (when (and (instance? Spider target)
                      (not (instance? CaveSpider target)))
             (player-attacks-spider-event evt attacker target))
