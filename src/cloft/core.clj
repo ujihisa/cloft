@@ -767,8 +767,8 @@
             (summon-set-of-evils-at pos1 loc world)
             (summon-set-of-evils-at pos2 loc world)
             (summon-set-of-evils-at pos3 loc world)
-            (summon-x (coor/local-to-world player block -5.0 0.5 0.0) world Creeper 80) ;hehehe
-            (c/broadcast (.getDisplayName player) " has summoned hurd of Blaze, PigZombie and Ghast!!"))))
+            (summon-x (coor/local-to-world player block -5.0 0.5 0.0) world Creeper 80)
+            (c/broadcast (.getDisplayName player) " has summoned Blazes, PigZombies and Ghasts!"))))
 
 (def active-fusion-wall(atom {}))
 (defn active-fusion-wall-of[player]
