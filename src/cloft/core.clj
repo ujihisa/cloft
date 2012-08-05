@@ -1011,8 +1011,7 @@
                     (Thread/sleep 1000)
                     (let [ip (.. player getAddress getAddress getHostAddress)]
                       (if (or
-                            (= "10.0" (apply str (take 4 ip)))
-                            #_(= "127.0.0.1" ip)
+                            (.startsWith ip "10.0")
                             (= "113.151.154.229" ip)
                             (= "0:0:0:0:0:0:0:1" ip))
                         (do
