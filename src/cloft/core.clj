@@ -758,7 +758,7 @@
         spawn-at  (coor/local-to-world player block 10.0 0.0 0.0)]
     (.strikeLightningEffect world (.toLocation spawn-at world))
     (summon-x spawn-at world Giant)
-    (c/broadcast (.getDisplayName player) " has summoned Giant!!")))
+    (c/broadcast (.getDisplayName player) " has summoned a Giant!")))
 
 (defn summon-residents-of-nether [player block]
   (let [world (.getWorld player)
