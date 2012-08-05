@@ -11,6 +11,7 @@
    [depth height right-hand]))
 
 (defn local-to-world [player origin-block dx hx rx]
+  """returns a bukkit Vector"""
   (let [[d h r] (direction-of (.getLocation player))]
     (.add (.toVector (.getLocation origin-block))
           (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
