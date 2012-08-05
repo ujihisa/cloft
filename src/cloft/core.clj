@@ -753,22 +753,20 @@
     (letfn [(sure-explosion-at
               ([pos wolrd] (sure-explosion-at pos world 1))
               ([pos world delay]
-               (cloft-scheduler/settimer 1  (fn []
-                                             (when-not (.createExplosion world (.toLocation pos world) 0.0 true)
+               (cloft-scheduler/settimer 1  #(when-not (.createExplosion world (.toLocation pos world) 0.0 true)
                                                ; retry 1 tick later
-                                               (sure-explosion-at pos world))))))
-            (summon-set-of-evils-at
-              [pos loc world]
+                                               (sure-explosion-at pos world)))))
+            (summon-set-of-evils-at [pos loc world]
               (cloft-scheduler/settimer
                 1
-                (fn []
-                  (cloft.block/place-in-line world (.clone loc) (.clone pos) place-fire 2)
-                  (sure-explosion-at (.clone pos) world 60)
-                  (summon-x pos world Blaze 65)
-                  (summon-x loc world PigZombie 65)
-                  (let [ghast-pos (.add (.clone pos) (Vector. 0.0 7.0 0.0))]
-                    (sure-explosion-at ghast-pos world)
-                    (summon-x ghast-pos world Ghast 65)))))]
+                #(do
+                   (cloft.block/place-in-line world (.clone loc) (.clone pos) place-fire 2)
+                   (sure-explosion-at (.clone pos) world 60)
+                   (summon-x pos world Blaze 65)
+                   (summon-x loc world PigZombie 65)
+                   (let [ghast-pos (.add (.clone pos) (Vector. 0.0 7.0 0.0))]
+                     (sure-explosion-at ghast-pos world)
+                     (summon-x ghast-pos world Ghast 65)))))]
             (summon-set-of-evils-at pos1 loc world)
             (summon-set-of-evils-at pos2 loc world)
             (summon-set-of-evils-at pos3 loc world)
