@@ -536,6 +536,8 @@
             (.setVelocity arrow (.getVelocity (.getProjectile evt)))
             (c/add-velocity arrow (rand1) (rand1) (rand1))))))))
 
+(def takumi-watched? (atom false))
+
 (defn entity-target-event [evt]
   (let [entity (.getEntity evt)]
     (when (instance? Creeper entity)
@@ -544,7 +546,13 @@
           (when (= Material/AIR (.getType block))
             (.setType block Material/FIRE)))
         (.setFireTicks entity 40)
-        (when (instance? Player target)
+        (when (and
+                (not @takumi-watched?)
+                (instance? Player target))
+          (swap! takumi-watched? (constantly true))
+          (future
+            (Thread/sleep 5000)
+            (swap! takumi-watched? (constantly false)))
           (c/broadcast "Takumi is watching " (.getDisplayName target)))))))
 
 (defn entity-explosion-prime-event [evt]
