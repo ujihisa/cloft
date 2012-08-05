@@ -966,6 +966,7 @@
       #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
       (.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました"))
+      (.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました")
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
