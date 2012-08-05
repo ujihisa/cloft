@@ -1050,108 +1050,116 @@
           z (+ (* (.getX dire) 0.707) (* (.getZ dire) 0.707))]
       (.setVelocity cart (Vector. (* (.getZ dire) -2) 0.0 (* (.getX dire) 2))))))
 
-(defn player-interact-event [evt]
-  (let [player (.getPlayer evt)
-        block (.getClickedBlock evt)
-        action (.getAction evt)]
+(defn player-left-click-event [evt player]
+  (cond
+    (instance? Minecart (.getVehicle player))
+    (do
+      (.setCancelled evt true)
+      (minecart-accelerate (.getVehicle player)))
+
+    (and
+      (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
+      (= (.getHealth player) (.getMaxHealth player)))
+    (if (empty? (.getEnchantments (.getItemInHand player)))
+      (let [snowball (.launchProjectile player Snowball)]
+        (swap! special-snowball-set conj snowball)
+        (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
+      (let [arrow (.launchProjectile player Arrow)]
+        (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))))
+
+(defn player-right-click-event [evt player]
+  (let [action (.getAction evt)
+        block (.getClickedBlock evt)]
     (cond
-      (= action Action/PHYSICAL)
-      (transport/teleport-up player block)
+      (and
+        (= action Action/RIGHT_CLICK_BLOCK)
+        (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD))
+      (do
+        (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
+        (.sendMessage player (format "biome: %s" (.getBiome block))))
 
-      (or (= action Action/LEFT_CLICK_AIR)
-          (= action Action/LEFT_CLICK_BLOCK))
-      (cond
-        (instance? Minecart (.getVehicle player))
+      (and
+        (= action Action/RIGHT_CLICK_BLOCK)
+        (= (.getType block) Material/CAKE_BLOCK))
+      (if-let [death-point (player/death-location-of player)]
         (do
-          (.setCancelled evt true)
-          (minecart-accelerate (.getVehicle player)))
+          (.load (.getChunk death-point))
+          (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
+          (.teleport player death-point))
+        (.sendMessage player "You didn't die yet."))
 
-        (and
-          (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
-          (= (.getHealth player) (.getMaxHealth player)))
-        (if (empty? (.getEnchantments (.getItemInHand player)))
-          (let [snowball (.launchProjectile player Snowball)]
-            (swap! special-snowball-set conj snowball)
-            (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
-          (let [arrow (.launchProjectile player Arrow)]
-            (.setVelocity arrow (.multiply (.getVelocity arrow) 3)))))
-      (or
-          (= action Action/RIGHT_CLICK_AIR)
-          (= action Action/RIGHT_CLICK_BLOCK))
-      (cond
-        (and
-          (= action Action/RIGHT_CLICK_BLOCK)
-          (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD))
-        (do
-          (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
-          (.sendMessage player (format "biome: %s" (.getBiome block))))
-
-        (and
-          (= action Action/RIGHT_CLICK_BLOCK)
-          (= (.getType block) Material/CAKE_BLOCK))
-        (if-let [death-point (player/death-location-of player)]
+      (and
+        block
+        (= 0 (rand-int 15))
+        (= Material/BOWL (.getType (.getItemInHand player)))
+        (@plowed-sands block))
+      (let [item-type (if (= 0 (rand-int 50)) Material/GOLD_INGOT Material/GOLD_NUGGET)]
+        (.dropItemNaturally (.getWorld block) (.getLocation block) (ItemStack. item-type)))
+      (and
+        block
+        (hoe-durabilities (.. player (getItemInHand) (getType)))
+        (and (= org.bukkit.block.Biome/RIVER (.getBiome block))
+             (not (@plowed-sands block))
+             (= Material/SAND (.getType block))
+             (> 64.0 (.getY (.getLocation block)))
+             (.isLiquid (.getBlock (.add (.getLocation block) 0 1 0)))))
+      (let [item (.getItemInHand player)]
+        (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/TORCH)
+        (if (> (.getDurability item) (hoe-durabilities (.getType item)))
+          (.remove (.getInventory player) item)
           (do
-            (.load (.getChunk death-point))
-            (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
-            (.teleport player death-point))
-          (.sendMessage player "You didn't die yet."))
+            (.setDurability item (+ 2 (.getDurability item)))
+            (future-call #(do
+                            (swap! plowed-sands conj block)
+                            (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
+                            (swap! plowed-sands disj block)
+                            (when (= Material/SAND (.getType block))
+                              (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
+                              (when (= 0 (rand-int 2))
+                                (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
 
-        (and
-          block
-          (= 0 (rand-int 15))
-          (= Material/BOWL (.getType (.getItemInHand player)))
-          (@plowed-sands block))
-        (let [item-type (if (= 0 (rand-int 50)) Material/GOLD_INGOT Material/GOLD_NUGGET)]
-          (.dropItemNaturally (.getWorld block) (.getLocation block) (ItemStack. item-type)))
-        (and
-          block
-          (hoe-durabilities (.. player (getItemInHand) (getType)))
-          (and (= org.bukkit.block.Biome/RIVER (.getBiome block))
-               (not (@plowed-sands block))
-               (= Material/SAND (.getType block))
-               (> 64.0 (.getY (.getLocation block)))
-               (.isLiquid (.getBlock (.add (.getLocation block) 0 1 0)))))
-        (let [item (.getItemInHand player)]
-          (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/TORCH)
-          (if (> (.getDurability item) (hoe-durabilities (.getType item)))
-            (.remove (.getInventory player) item)
-            (do
-              (.setDurability item (+ 2 (.getDurability item)))
-              (future-call #(do
-                              (swap! plowed-sands conj block)
-                              (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
-                              (swap! plowed-sands disj block)
-                              (when (= Material/SAND (.getType block))
-                                (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
-                                (when (= 0 (rand-int 2))
-                                  (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
-
-        #_(and
+      #_(and
           (= Material/COAL (.getType (.getItemInHand player)))
           (instance? Minecart (.getVehicle player)))
-        #_(let [cart (.getVehicle player)
+      #_(let [cart (.getVehicle player)
               dire (.multiply (.getDirection (.getLocation player)) 10.0)]
           (c/add-velocity cart (.getX dire) 0.1 (.getZ dire))
           #_(c/consume-item player)
           )
 
-        (and
-          (player/zombie? player)
-          (= (.. evt (getMaterial)) Material/MILK_BUCKET))
-        (do
-          (player/rebirth-from-zombie player)
-          (when (= 0 (rand-int 3))
-            (.setType (.getItemInHand player) Material/BUCKET)))
+      (and
+        (player/zombie? player)
+        (= (.. evt (getMaterial)) Material/MILK_BUCKET))
+      (do
+        (player/rebirth-from-zombie player)
+        (when (= 0 (rand-int 3))
+          (.setType (.getItemInHand player) Material/BUCKET)))
 
-        (and
-          (= (.. evt (getMaterial)) Material/COAL)
-          (.getAllowFlight player))
-        (do
-          (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
-          (c/consume-item player))
+      (and
+        (= (.. evt (getMaterial)) Material/COAL)
+        (.getAllowFlight player))
+      (do
+        (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
+        (c/consume-item player))
 
-        (= (.. evt (getMaterial)) Material/FEATHER)
-        (player-super-jump evt player)))))
+      (= (.. evt (getMaterial)) Material/FEATHER)
+      (player-super-jump evt player))))
+
+(defn player-interact-event [evt]
+  (let [player (.getPlayer evt)
+        action (.getAction evt)]
+    (cond
+      (= action Action/PHYSICAL)
+      (transport/teleport-up player (.getClickedBlock evt))
+
+      (or (= action Action/LEFT_CLICK_AIR)
+          (= action Action/LEFT_CLICK_BLOCK))
+      (player-left-click-event evt player)
+
+      (or
+          (= action Action/RIGHT_CLICK_AIR)
+          (= action Action/RIGHT_CLICK_BLOCK))
+      (player-right-click-event evt player))))
 
 (defn player-item-held-event [evt]
   (let [player (.getPlayer evt)]
