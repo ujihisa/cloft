@@ -1068,14 +1068,6 @@
           (.teleport player death-point))
         (.sendMessage player "You didn't die yet."))
 
-      (and
-        block
-        (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD)
-        (= action Action/RIGHT_CLICK_BLOCK))
-      (do
-        (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
-        (.sendMessage player (format "biome: %s" (.getBiome block))))
-
       (or (= action Action/LEFT_CLICK_AIR)
           (= action Action/LEFT_CLICK_BLOCK))
       (cond
@@ -1087,7 +1079,6 @@
         (and
           (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
           (= (.getHealth player) (.getMaxHealth player)))
-
         (if (empty? (.getEnchantments (.getItemInHand player)))
           (let [snowball (.launchProjectile player Snowball)]
             (swap! special-snowball-set conj snowball)
@@ -1098,6 +1089,13 @@
           (= action Action/RIGHT_CLICK_AIR)
           (= action Action/RIGHT_CLICK_BLOCK))
       (cond
+        (and
+          (not= action Action/RIGHT_CLICK_AIR)
+          (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD))
+        (do
+          (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
+          (.sendMessage player (format "biome: %s" (.getBiome block))))
+
         (and
           block
           (= 0 (rand-int 15))
