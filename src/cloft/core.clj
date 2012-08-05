@@ -1068,18 +1068,17 @@
         (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))))
 
 (defn player-right-click-event [evt player]
-  (let [action (.getAction evt)
-        block (.getClickedBlock evt)]
+  (let [block (.getClickedBlock evt)]
     (cond
       (and
-        (= action Action/RIGHT_CLICK_BLOCK)
+        block
         (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD))
       (do
         (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
         (.sendMessage player (format "biome: %s" (.getBiome block))))
 
       (and
-        (= action Action/RIGHT_CLICK_BLOCK)
+        block
         (= (.getType block) Material/CAKE_BLOCK))
       (if-let [death-point (player/death-location-of player)]
         (do
@@ -1095,6 +1094,7 @@
         (@plowed-sands block))
       (let [item-type (if (= 0 (rand-int 50)) Material/GOLD_INGOT Material/GOLD_NUGGET)]
         (.dropItemNaturally (.getWorld block) (.getLocation block) (ItemStack. item-type)))
+
       (and
         block
         (hoe-durabilities (.. player (getItemInHand) (getType)))
