@@ -1,7 +1,7 @@
 (ns cloft.arrow
   (:import [org.bukkit.entity Arrow]))
 
-(defn reflect-arrow [evt arrow target]
+(defn reflect [evt arrow target]
   """assumes arrow is an arrow"""
   (let [shooter (.getShooter arrow)]
     (.setCancelled evt true)

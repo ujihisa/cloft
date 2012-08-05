@@ -2,17 +2,14 @@
   (:require [cloft.cloft :as c])
   (:require [cloft.scheduler :as cloft-scheduler])
   (:require [cloft.chimera-cow :as chimera-cow])
-  (:require [cloft.arrow :as a])
-  (:require [cloft.recipe ])
+  (:require [cloft.arrow :as arrow])
+  (:require [cloft.recipe])
   (:require [cloft.player :as player])
   (:require [cloft.block])
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
-  ;(:require [clojure.core.match :as m])
   (:require [swank.swank])
   (:require [clojure.string :as s])
-  (:require [clojure.set])
-  (comment (:import [org.bukkit.command CommandExecuter CommandSender Command]))
   (:import [org.bukkit Bukkit Material])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
@@ -1580,7 +1577,7 @@
             (not-empty (.getEnchantments chestplate)))))
     (do
       (c/broadcast (.getDisplayName target) "'s enchanted leather chestplate reflects arrows!")
-      (a/reflect-arrow evt arrow target))
+      (arrow/reflect evt arrow target))
     (when-let [shooter (.getShooter arrow)]
       (when (instance? Player shooter)
         (cond
