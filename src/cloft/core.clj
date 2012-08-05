@@ -743,7 +743,7 @@
         pos1 (coor/local-to-world player block 15.0 1.0 -5.0)
         pos2 (coor/local-to-world player block 15.0 1.0 0.0)
         pos3 (coor/local-to-world player block 15.0 1.0 5.0)
-        fire-effect (fn [v i]
+        place-fire (fn [v i]
                       (cloft-scheduler/settimer
                         (* 4 i)
                         (fn []
@@ -762,7 +762,7 @@
               (cloft-scheduler/settimer
                 1
                 (fn []
-                  (cloft.block/place-in-line world (.clone loc) (.clone pos) fire-effect 2)
+                  (cloft.block/place-in-line world (.clone loc) (.clone pos) place-fire 2)
                   (sure-explosion-at (.clone pos) world 60)
                   (summon-x pos world Blaze 65)
                   (summon-x loc world PigZombie 65)
