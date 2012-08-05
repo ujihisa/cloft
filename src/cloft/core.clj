@@ -1007,17 +1007,16 @@
   (let [player (.getPlayer evt)]
     (comment (when (= (.getDisplayName player) "Player")
       (.setDisplayName player "raa0121")))
-    (future-call #(do
-                    (Thread/sleep 1000)
-                    (let [ip (.. player getAddress getAddress getHostAddress)]
-                      (.setOp player (or
-                                       (.startsWith ip "10.0")
-                                       (= "113.151.154.229" ip)
-                                       (= "0:0:0:0:0:0:0:1" ip))))
-                    (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
-                    #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
-                    #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
-                    (.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")))
+    (future (Thread/sleep 1000)
+      (let [ip (.. player getAddress getAddress getHostAddress)]
+        (.setOp player (or
+                         (.startsWith ip "10.0")
+                         (= "113.151.154.229" ip)
+                         (= "0:0:0:0:0:0:0:1" ip))))
+      (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
+      #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
+      #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
+      (.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました"))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
