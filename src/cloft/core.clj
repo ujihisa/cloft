@@ -1069,17 +1069,15 @@
         (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))))
 
 (defn player-right-click-event [evt player]
-  (let [block (.getClickedBlock evt)]
+  (if-let [block (.getClickedBlock evt)]
     (cond
       (and
-        block
         (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD))
       (do
         (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
         (.sendMessage player (format "biome: %s" (.getBiome block))))
 
       (and
-        block
         (= (.getType block) Material/CAKE_BLOCK))
       (if-let [death-point (player/death-location-of player)]
         (do
@@ -1089,7 +1087,6 @@
         (.sendMessage player "You didn't die yet."))
 
       (and
-        block
         (= 0 (rand-int 15))
         (= Material/BOWL (.getType (.getItemInHand player)))
         (@plowed-sands block))
@@ -1097,7 +1094,6 @@
         (.dropItemNaturally (.getWorld block) (.getLocation block) (ItemStack. item-type)))
 
       (and
-        block
         (hoe-durabilities (.. player (getItemInHand) (getType)))
         (and (= org.bukkit.block.Biome/RIVER (.getBiome block))
              (not (@plowed-sands block))
@@ -1117,34 +1113,25 @@
                             (when (= Material/SAND (.getType block))
                               (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
                               (when (= 0 (rand-int 2))
-                                (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
+                                (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY]))))))))))
+      (cond
+        (and
+          (player/zombie? player)
+          (= (.. evt (getMaterial)) Material/MILK_BUCKET))
+        (do
+          (player/rebirth-from-zombie player)
+          (when (= 0 (rand-int 3))
+            (.setType (.getItemInHand player) Material/BUCKET)))
 
-      #_(and
-          (= Material/COAL (.getType (.getItemInHand player)))
-          (instance? Minecart (.getVehicle player)))
-      #_(let [cart (.getVehicle player)
-              dire (.multiply (.getDirection (.getLocation player)) 10.0)]
-          (c/add-velocity cart (.getX dire) 0.1 (.getZ dire))
-          #_(c/consume-item player)
-          )
+        (and
+          (= (.. evt (getMaterial)) Material/COAL)
+          (.getAllowFlight player))
+        (do
+          (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
+          (c/consume-item player))
 
-      (and
-        (player/zombie? player)
-        (= (.. evt (getMaterial)) Material/MILK_BUCKET))
-      (do
-        (player/rebirth-from-zombie player)
-        (when (= 0 (rand-int 3))
-          (.setType (.getItemInHand player) Material/BUCKET)))
-
-      (and
-        (= (.. evt (getMaterial)) Material/COAL)
-        (.getAllowFlight player))
-      (do
-        (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
-        (c/consume-item player))
-
-      (= (.. evt (getMaterial)) Material/FEATHER)
-      (player-super-jump evt player))))
+        (= (.. evt (getMaterial)) Material/FEATHER)
+        (player-super-jump evt player))))
 
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)
