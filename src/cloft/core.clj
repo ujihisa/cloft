@@ -1047,19 +1047,19 @@
 ;      (c/lingr (str (player/name2icon (.getDisplayName (.getPlayer evt))) "quitted.")))))
 
 (defn player-chat-event [evt]
-  (let [name (.getDisplayName (.getPlayer evt))
+  (let [player (.getPlayer evt)
+        name (.getDisplayName player)
         msg (.getMessage evt)]
     (cond
-      (< 1 (count msg)) nil
-      (= "countdown") (do
-                        (.setCancelled evt true)
-                        (future-call #(do
-                                      (Thread/sleep 1000)
-                                      (c/broadcast 3)
-                                      (Thread/sleep 1000)
-                                      (c/broadcast 2)
-                                      (Thread/sleep 1000)
-                                      (c/broadcast 1))))
+      (= 1 (count msg)) nil
+      (= "countdown" msg) (do
+                            (.setCancelled evt true)
+                            (future-call #(do
+                                            (c/broadcast name ": " 3 " " (.getType (.getItemInHand player)))
+                                            (Thread/sleep 1000)
+                                            (c/broadcast 2)
+                                            (Thread/sleep 1000)
+                                            (c/broadcast 1))))
       :else (c/lingr "computer_science" (str (player/name2icon name) msg)))))
 
 (defn touch-player [target]
