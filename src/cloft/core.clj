@@ -1014,9 +1014,7 @@
                             (.startsWith ip "10.0")
                             (= "113.151.154.229" ip)
                             (= "0:0:0:0:0:0:0:1" ip))
-                        (do
-                          (.setOp player true)
-                          (prn [player 'is 'op]))
+                        (.setOp player true)
                         (.setOp player false)))
                     (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
                     #_(.sendMessage player "[NEWS] blazeが現世にも現れる。中身は全く別物。要注意!")
