@@ -1071,14 +1071,12 @@
 (defn player-right-click-event [evt player]
   (if-let [block (.getClickedBlock evt)]
     (cond
-      (and
-        (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD))
+      (= Material/BLAZE_ROD (.. player (getItemInHand) (getType)))
       (do
         (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
         (.sendMessage player (format "biome: %s" (.getBiome block))))
 
-      (and
-        (= (.getType block) Material/CAKE_BLOCK))
+      (= Material/CAKE_BLOCK (.getType block))
       (if-let [death-point (player/death-location-of player)]
         (do
           (.load (.getChunk death-point))
