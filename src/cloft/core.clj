@@ -750,19 +750,19 @@
                           (when (= Material/AIR (.getType v))
                             (.playEffect (.getWorld v) (.getLocation v) Effect/BLAZE_SHOOT nil)
                             (.setType v Material/FIRE)))))]
-    (letfn [(sure-explosion-at ([pos world delay]
+    (letfn [(explode-at ([pos world delay]
                (cloft-scheduler/settimer 1  #(when-not (.createExplosion world (.toLocation pos world) 0.0 true)
-                                               (sure-explosion-at pos world 1)))))
+                                               (explode-at pos world 1)))))
             (summon-set-of-evils-at [pos loc world]
               (cloft-scheduler/settimer
                 1
                 #(do
                    (cloft.block/place-in-line world (.clone loc) (.clone pos) place-fire 2)
-                   (sure-explosion-at (.clone pos) world 60)
+                   (explode-at (.clone pos) world 60)
                    (summon-x pos world Blaze 65)
                    (summon-x loc world PigZombie 65)
                    (let [ghast-pos (.add (.clone pos) (Vector. 0.0 7.0 0.0))]
-                     (sure-explosion-at ghast-pos world 1)
+                     (explode-at ghast-pos world 1)
                      (summon-x ghast-pos world Ghast 65)))))]
             (summon-set-of-evils-at pos1 loc world)
             (summon-set-of-evils-at pos2 loc world)
