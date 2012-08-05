@@ -1052,18 +1052,13 @@
 
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)
-        block (.getClickedBlock evt)]
+        block (.getClickedBlock evt)
+        action (.getAction evt)]
     (cond
-      #_(
-        (and
-          (= Action/LEFT_CLICK_BLOCK (.getAction evt))
-          (= Material/WOODEN_DOOR (.getType block)))
-        (elevator player block))
-
-      (= (.getAction evt) Action/PHYSICAL)
+      (= action Action/PHYSICAL)
       (transport/teleport-up player block)
       (and
-        (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)
+        (= action Action/RIGHT_CLICK_BLOCK)
         (= (.getType block) Material/CAKE_BLOCK))
       (if-let [death-point (player/death-location-of player)]
         (do
@@ -1071,22 +1066,17 @@
           (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
           (.teleport player death-point))
         (.sendMessage player "You didn't die yet."))
-      #_(and
-        (= (.. player (getItemInHand) (getType)) Material/GLASS_BOTTLE)
-        (or
-          (= (.getAction evt) Action/RIGHT_CLICK_AIR)
-          (= (.getAction evt) Action/RIGHT_CLICK_BLOCK)))
       #_(.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
       (and
         block
         (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD)
-        (= (.getAction evt) Action/RIGHT_CLICK_BLOCK))
+        (= action Action/RIGHT_CLICK_BLOCK))
       (do
         (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
         (.sendMessage player (format "biome: %s" (.getBiome block))))
 
-      (or (= (.getAction evt) Action/LEFT_CLICK_AIR)
-          (= (.getAction evt) Action/LEFT_CLICK_BLOCK))
+      (or (= action Action/LEFT_CLICK_AIR)
+          (= action Action/LEFT_CLICK_BLOCK))
       (cond
         (instance? Minecart (.getVehicle player))
         (do
@@ -1104,8 +1094,8 @@
           (let [arrow (.launchProjectile player Arrow)]
             (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))
       (or
-          (= (.getAction evt) Action/RIGHT_CLICK_AIR)
-          (= (.getAction evt) Action/RIGHT_CLICK_BLOCK))
+          (= action Action/RIGHT_CLICK_AIR)
+          (= action Action/RIGHT_CLICK_BLOCK))
       (cond
         (and
           block
