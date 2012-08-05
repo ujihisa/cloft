@@ -746,10 +746,9 @@
         place-fire (fn [v i]
                       (cloft-scheduler/settimer
                         (* 4 i)
-                        (fn []
-                          (when (= Material/AIR (.getType v))
-                            (.playEffect (.getWorld v) (.getLocation v) Effect/BLAZE_SHOOT nil)
-                            (.setType v Material/FIRE)))))]
+                        #(when (= Material/AIR (.getType v))
+                           (.playEffect (.getWorld v) (.getLocation v) Effect/BLAZE_SHOOT nil)
+                           (.setType v Material/FIRE))))]
     (letfn [(explode-at ([pos world delay]
                (cloft-scheduler/settimer 1  #(when-not (.createExplosion world (.toLocation pos world) 0.0 true)
                                                (explode-at pos world 1)))))
