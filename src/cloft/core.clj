@@ -9,7 +9,6 @@
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
   (:require [swank.swank])
-  (:require [clojure.string :as s])
   (:import [org.bukkit Bukkit Material])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
