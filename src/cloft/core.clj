@@ -970,8 +970,8 @@
       (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
       #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
-      (.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました"))
-      (.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました")
+      (.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")
+      (.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました"))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
@@ -2003,12 +2003,18 @@
    (.setOccupiedDeceleration b 0.5)
    (.setMaxSpeed b 2.0)))
 
+(defn just-for-now2 []
+  (let [chicken (.spawn (.getWorld (c/ujm)) (.getLocation (c/ujm)) Chicken)]
+    (.setPassenger (c/ujm) chicken)
+    (.setAllowFlight (c/ujm) true)))
+
 (defn vehicle-block-collision-event [evt]
   (let [vehicle (.getVehicle evt)]
     (when-let [passenger (.getPassenger vehicle)]
       (when (instance? Boat vehicle)
-        (let [block (.getBlock evt)]
-          (.teleport vehicle (.add (.getLocation vehicle) 0 1 0)))))))
+        (when (.getWorkOnLand vehicle)
+          (let [block (.getBlock evt)]
+            (.teleport vehicle (.add (.getLocation vehicle) 0 1 0))))))))
 
 #_(defn vehicle-damage-event [evt]
   (prn 'vehicle-damage))
