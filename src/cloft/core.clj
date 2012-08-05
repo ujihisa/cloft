@@ -921,7 +921,8 @@
 
 (defn block-place-event [evt]
   (let [block (.getBlock evt)
-        player (.getPlayer evt)]
+        player (.getPlayer evt)
+        block-against (.getBlockAgainst evt)]
     (assert (instance? Player player))
     (if-let [[another-block another-player xyz-getter] (lookup-player-block-placed block player)]
       (do
@@ -945,11 +946,11 @@
                         (Thread/sleep 3000)
                         (swap! player-block-placed dissoc block)))
         (swap! player-block-placed assoc block player)))
-    (arrow-skillchange player block (.getBlockAgainst evt))
-    (pickaxe-skillchange player block (.getBlockAgainst evt))
-    (reaction-skillchange player block (.getBlockAgainst evt))
-    (invoke-alchemy player block (.getBlockAgainst evt))
-    (transport/teleport-machine player block (.getBlockAgainst evt))))
+    (arrow-skillchange player block block-against)
+    (pickaxe-skillchange player block block-against)
+    (reaction-skillchange player block block-against)
+    (invoke-alchemy player block block-against)
+    (transport/teleport-machine player block block-against)))
 
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
