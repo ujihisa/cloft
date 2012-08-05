@@ -1015,9 +1015,9 @@
                                        (= "113.151.154.229" ip)
                                        (= "0:0:0:0:0:0:0:1" ip))))
                     (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
-                    #_(.sendMessage player "[NEWS] blazeが現世にも現れる。中身は全く別物。要注意!")
-                    #_(.sendMessage player "[NEWS] 川で砂金をとろう! クワと皿を忘れずに。")
-                    (.sendMessage player "[NEWS] りんごを食べて界王拳!")))
+                    #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
+                    #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
+                    (.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
@@ -1336,8 +1336,7 @@
           (c/consume-item player))
         ; right-click sheep -> wool
         (instance? Sheep target) (d 35 (rand-int 16))
-        ; right-click chicken -> rail
-        (instance? Chicken target) (d 66)
+        (instance? Chicken target) (d (.getId Material/FEATHER))
         ; right-click pig -> cocoa
         (instance? Pig target) (d 351 3)
         (instance? Cow target)
