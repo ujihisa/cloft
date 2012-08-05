@@ -630,18 +630,6 @@
   (.addPotionEffect by (PotionEffect. PotionEffectType/POISON 200 2)))
 
 
-;(defn build-long [block block-against]
-;  (comment (when (= (.getType block) (.getType block-against))
-;    (let [world (.getWorld block)
-;          loc (.getLocation block)
-;          diff (.subtract (.clone loc) (.getLocation block-against))]
-;      (doseq [m (range 1 10)]
-;        (let [newblock (.getBlockAt
-;                         world
-;                         (.add (.clone loc) (.multiply (.clone diff) (double m))))]
-;          (when (= (.getType newblock) Material/AIR)
-;            (.setType newblock (.getType block)))))))))
-
 (defn blazon? [block-type block-against]
   (and (every? #(= % block-type)
                (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
@@ -961,14 +949,7 @@
         (pickaxe-skillchange player block (.getBlockAgainst evt))
         (reaction-skillchange player block (.getBlockAgainst evt))
         (invoke-alchemy player block (.getBlockAgainst evt))
-        (transport/teleport-machine player block (.getBlockAgainst evt))
-        (comment (prn (vector-from-to block player))
-                 (.setVelocity player (vector-from-to player block))
-                 (doseq [entity (.getNearbyEntities player 4 4 4)]
-                   (.setVelocity entity (vector-from-to entity block))))))
-    #_(build-long block (.getBlockAgainst evt))
-    #_(when (sanctuary/is-in? (.getLocation block))
-        (.setCancelled evt true))))
+        (transport/teleport-machine player block (.getBlockAgainst evt))))))
 
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
