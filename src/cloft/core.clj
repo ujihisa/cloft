@@ -1069,6 +1069,26 @@
         (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))))
 
 (defn player-right-click-event [evt player]
+  (defn else []
+    """just for DRY"""
+    (cond
+      (and
+        (player/zombie? player)
+        (= (.. evt (getMaterial)) Material/MILK_BUCKET))
+      (do
+        (player/rebirth-from-zombie player)
+        (when (= 0 (rand-int 3))
+          (.setType (.getItemInHand player) Material/BUCKET)))
+
+      (and
+        (.getAllowFlight player)
+        (= (.. evt (getMaterial)) Material/COAL))
+      (do
+        (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
+        (c/consume-item player))
+
+      (= (.. evt (getMaterial)) Material/FEATHER)
+      (player-super-jump evt player)))
   (if-let [block (.getClickedBlock evt)]
     (cond
       (= Material/BLAZE_ROD (.. player (getItemInHand) (getType)))
@@ -1111,25 +1131,10 @@
                             (when (= Material/SAND (.getType block))
                               (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
                               (when (= 0 (rand-int 2))
-                                (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY]))))))))))
-    (cond
-      (and
-        (player/zombie? player)
-        (= (.. evt (getMaterial)) Material/MILK_BUCKET))
-      (do
-        (player/rebirth-from-zombie player)
-        (when (= 0 (rand-int 3))
-          (.setType (.getItemInHand player) Material/BUCKET)))
-
-      (and
-        (.getAllowFlight player)
-        (= (.. evt (getMaterial)) Material/COAL))
-      (do
-        (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
-        (c/consume-item player))
-
-      (= (.. evt (getMaterial)) Material/FEATHER)
-      (player-super-jump evt player))))
+                                (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
+      :else
+      (else))
+    (else)))
 
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)
