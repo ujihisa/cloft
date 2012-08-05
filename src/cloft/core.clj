@@ -1114,24 +1114,24 @@
                               (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
                               (when (= 0 (rand-int 2))
                                 (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY]))))))))))
-      (cond
-        (and
-          (player/zombie? player)
-          (= (.. evt (getMaterial)) Material/MILK_BUCKET))
-        (do
-          (player/rebirth-from-zombie player)
-          (when (= 0 (rand-int 3))
-            (.setType (.getItemInHand player) Material/BUCKET)))
+    (cond
+      (and
+        (player/zombie? player)
+        (= (.. evt (getMaterial)) Material/MILK_BUCKET))
+      (do
+        (player/rebirth-from-zombie player)
+        (when (= 0 (rand-int 3))
+          (.setType (.getItemInHand player) Material/BUCKET)))
 
-        (and
-          (= (.. evt (getMaterial)) Material/COAL)
-          (.getAllowFlight player))
-        (do
-          (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
-          (c/consume-item player))
+      (and
+        (= (.. evt (getMaterial)) Material/COAL)
+        (.getAllowFlight player))
+      (do
+        (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
+        (c/consume-item player))
 
-        (= (.. evt (getMaterial)) Material/FEATHER)
-        (player-super-jump evt player))))
+      (= (.. evt (getMaterial)) Material/FEATHER)
+      (player-super-jump evt player))))
 
 (defn player-interact-event [evt]
   (let [player (.getPlayer evt)
