@@ -1000,13 +1000,6 @@
                        (.spawn (.getWorld loc) loc Creeper)))))))]
     ((rand-nth [unlucky]) player)))
 
-;(defn c/get-player-quit-listener []
-;  (c/auto-proxy
-;    [Listener] []
-;    (onPlayerQuit
-;      [evt]
-;      (c/lingr (str (player/name2icon (.getDisplayName (.getPlayer evt))) "quitted.")))))
-
 (defn player-chat-event [evt]
   (let [player (.getPlayer evt)
         name (.getDisplayName player)
@@ -2017,10 +2010,8 @@
     (transport/cauldron-teleport player)
     (when-let [vehicle (.getVehicle player)]
       (cond
-        (instance? Boat vehicle)
-        (.setVelocity vehicle (Vector. 0 0 0))
-        (instance? Enderman vehicle)
-        (.leaveVehicle player)))))
+        (instance? Boat vehicle) (.setVelocity vehicle (Vector. 0 0 0))
+        (instance? Enderman vehicle) (.leaveVehicle player)))))
 
 (defn just-for-now
   ([] (just-for-now (c/ujm)))

@@ -11,7 +11,8 @@
    "bgnori" "http://a0.twimg.com/profile_images/2040663765/Flowers002.JPG\n"})
 
 (defn name2icon [name]
-  (get NAME-ICON name (str name ": ")))
+  #_(get NAME-ICON name (str name ": "))
+  (str name ": "))
 
 """zombie related"""
 
