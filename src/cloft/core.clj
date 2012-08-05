@@ -972,7 +972,8 @@
       #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
       (.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")
-      (.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました"))
+      (.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました")
+      (.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます"))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
 
 (defn paperlot [player]
@@ -1241,6 +1242,12 @@
                 (.getLocation target)
                 (ItemStack. (int n) (int 1) (short 0) (Byte. m)))))]
       (cond
+        (when-let [passenger (.getPassenger player)]
+          (= passenger target))
+        (do
+          (.sendMessage player (format "Thanks, %s!" (c/entity2name target)))
+          (.setAllowFlight player false)
+          (.eject player))
         (= Material/STRING (.getType (.getItemInHand player)))
         (player-entity-with-string-event evt player target)
 
