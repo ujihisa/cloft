@@ -1010,12 +1010,10 @@
     (future-call #(do
                     (Thread/sleep 1000)
                     (let [ip (.. player getAddress getAddress getHostAddress)]
-                      (if (or
-                            (.startsWith ip "10.0")
-                            (= "113.151.154.229" ip)
-                            (= "0:0:0:0:0:0:0:1" ip))
-                        (.setOp player true)
-                        (.setOp player false)))
+                      (.setOp player (or
+                                       (.startsWith ip "10.0")
+                                       (= "113.151.154.229" ip)
+                                       (= "0:0:0:0:0:0:0:1" ip))))
                     (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
                     #_(.sendMessage player "[NEWS] blazeが現世にも現れる。中身は全く別物。要注意!")
                     #_(.sendMessage player "[NEWS] 川で砂金をとろう! クワと皿を忘れずに。")
