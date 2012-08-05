@@ -33,28 +33,7 @@
   (:import [org.bukkit.event.block Action])
   (:require [cloft.zhelpers :as mq]))
 
-
-;(defn block-break [evt]
-;  (.sendMessage (.getPlayer evt) "You know. Breaking stuff should be illegal."))
-;
-;(defn sign-change [evt]
-;  (.sendMessage (.getPlayer evt) "Now I've placed a sign and changed the text"))
-;
-;(defn player-move [evt]
-;  (.sendMessage (.getPlayer evt) "Ok, no, really.. stop moving."))
-;
-;(defn get-blocklistener []
-;  (c/auto-proxy
-;   [Listener] []
-;   (onBlockBreak [evt] (if (.isCancelled evt) nil (block-break evt)))
-;   (onSignChange [evt] (if (.isCancelled evt) nil (sign-change evt))))
-;  )
-
 (def world (Bukkit/getWorld "world"))
-
-
-(def last-vertical-shots (atom {}))
-
 
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
@@ -64,10 +43,6 @@
             x2 (/ (java.lang.Math/log x) 2)]
         (c/consume-itemstack (.getInventory player) Material/FEATHER)
         (c/add-velocity player 0 x2 0)))))
-
-
-(defn event [evt]
-  (prn evt))
 
 (defn kaiouken [player]
   (.sendMessage player "kaiouken!")
@@ -395,6 +370,8 @@
     (Thread/sleep (rand-int 1000))
     (.strikeLightningEffect (.getWorld x) (.getLocation x))
     (.damage x amount)))
+
+(def last-vertical-shots (atom {}))
 
 (defn enough-previous-shots-by-players? [triggered-by threshold]
   (let [locs (vals @last-vertical-shots)]
