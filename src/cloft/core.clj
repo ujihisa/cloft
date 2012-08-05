@@ -950,7 +950,7 @@
     (pickaxe-skillchange player block block-against)
     (reaction-skillchange player block block-against)
     (invoke-alchemy player block block-against)
-    (transport/teleport-machine player block block-against)))
+    #_(transport/teleport-machine player block block-against)))
 
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
