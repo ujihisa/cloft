@@ -1057,6 +1057,7 @@
     (cond
       (= action Action/PHYSICAL)
       (transport/teleport-up player block)
+
       (and
         (= action Action/RIGHT_CLICK_BLOCK)
         (= (.getType block) Material/CAKE_BLOCK))
@@ -1066,7 +1067,7 @@
           (c/broadcast (str (.getDisplayName player) " is teleporting to the last death place..."))
           (.teleport player death-point))
         (.sendMessage player "You didn't die yet."))
-      #_(.setItemInHand player (.toItemStack (Potion. (rand-nth c/potion-types))  (rand-nth [1 1 2 3 5])))
+
       (and
         block
         (= (.. player (getItemInHand) (getType)) Material/BLAZE_ROD)
