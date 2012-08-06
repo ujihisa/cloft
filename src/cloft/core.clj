@@ -1332,7 +1332,7 @@
               (c/broadcast "Giant!"))
             (c/consume-item player)
             (.remove target))
-          (d (.getId Material/ROTEN_FLESH)))
+          (d (.getId Material/ROTTEN_FLESH)))
 
         (instance? Skeleton target) (d (.getId Material/ARROW))
         (instance? Spider target) (d (.getId Material/STRING))
