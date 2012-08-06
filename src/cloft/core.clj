@@ -56,12 +56,22 @@
       (.setFireTicks player 500))))
 
 (defn food-level-change-event [evt]
+  (defn o157 [player]
+    (when (= 0 (rand-int 2))
+      (let [msg (format "%s got O157! Don't eat a yukhoe or a raw liver!")]
+        (c/broadcast msg)
+        (c/lingr msg)
+        (.addPotionEffect player (PotionEffect. PotionEffectType/POISON 100 1))
+        (.addPotionEffect player (PotionEffect. PotionEffectType/BLINDNESS 500 1))
+        (.addPotionEffect player (PotionEffect. PotionEffectType/CONFUSION 500 1)))))
   (let [player (.getEntity evt)
         eating? (< (.getFoodLevel player) (.getFoodLevel evt))]
     (when eating?
       (when-let [itemstack (.getItemInHand player)]
-        (when (= Material/APPLE (.getType itemstack))
-          (kaiouken player))))))
+        (case (.getType itemstack)
+          Material/APPLE (kaiouken player)
+          Material/RAW_BEEF (o157 player)
+          nil)))))
 
 (defn entity-combust-event [evt]
   (.setCancelled evt true))
