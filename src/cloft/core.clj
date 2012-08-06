@@ -1519,7 +1519,8 @@
         ] (rem @creeper-explosion-idx 4)))
 
 (defn entity-explode-event [evt]
-  (if [entity (.getEntity evt)]
+  (let [entity (.getEntity evt)]
+    (assert entity)
     (let [ename (c/entity2name entity)
           players-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
       (cond
@@ -1535,8 +1536,7 @@
         (and ename (not-empty players-nearby) (not (instance? EnderDragon entity)))
         (letfn [(join [xs x]
                   (apply str (interpose x xs)))]
-          (c/lingr (str ename " is exploding near " (join (map #(.getDisplayName %) players-nearby) ", "))))))
-    (prn 'explosion-without-entity)))
+          (c/lingr (str ename " is exploding near " (join (map #(.getDisplayName %) players-nearby) ", "))))))))
 
 (comment (defn potion-weakness [name]
   (.apply
