@@ -1268,6 +1268,7 @@
           (.sendMessage player (format "Thanks, %s!" (c/entity2name target)))
           (.setAllowFlight player false)
           (.eject player))
+
         (= Material/STRING (.getType (.getItemInHand player)))
         (player-entity-with-string-event evt player target)
 
@@ -1284,25 +1285,30 @@
             (future-call #(do
                             (Thread/sleep 100)
                             (.setVelocity target (Vector. new-x (.getY v) new-z))))))
+
         ; give wheat to zombie pigman -> pig
         (and (instance? PigZombie target)
              (= (.getTypeId (.getItemInHand player)) 296))
         (do
           (c/swap-entity target Pig)
           (c/consume-item player))
+
         ; give zombeef to pig -> zombie pigman
         (and (instance? Pig target)
              (= (.getTypeId (.getItemInHand player)) 367))
         (do
           (c/swap-entity target PigZombie)
           (c/consume-item player))
+
         ; right-click sheep -> wool
         (instance? Sheep target) (d 35 (rand-int 16))
         (instance? Chicken target) (d (.getId Material/FEATHER))
         ; right-click pig -> cocoa
         (instance? Pig target) (d 351 3)
-        (instance? Cow target)
-        (player-rightclick-cow player target)
+        (instance? Cow target) (player-rightclick-cow player target)
+        (instance? Creeper target) (d (.getId Material/SULPHUR))
+
+        (instance? Villager target)
         (if-let [item (.getItemInHand player)]
           (condp = (.getType item)
             Material/BROWN_MUSHROOM (do
@@ -1322,7 +1328,6 @@
                                 (c/consume-item player))
             (d 92))
           (d 92))
-        (instance? Creeper target) (d (.getId Material/SULPHUR))
 
         (and (instance? Zombie target) (not (instance? PigZombie target)))
         (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
@@ -1423,9 +1428,20 @@
       (future-call #(.remove entity))
       #_(.setCancelled evt true))))
 
-(defn entity-murder-event [evt entity]
-  (let [killer (.getKiller entity)]
+(defn pig-death-event [entity]
+  (when-let [killer (.getKiller entity)]
     (when (instance? Player killer)
+      (.sendMessage killer "PIG: Pig Is God"))
+    (.setFireTicks killer 1000)))
+
+(defn entity-murder-event [evt entity killer]
+  (if (instance? Player entity)
+    (player/death-event evt entity)
+    (when (instance? Player killer)
+      (when (instance? Pig entity)
+        (pig-death-event entity))
+      (when (instance? PigZombie entity)
+        nil)
       (when (instance? Zombie entity)
         ((rand-nth
            [#(let [loc (.getLocation entity)]
@@ -1454,17 +1470,15 @@
         (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
       (player/record-and-report killer entity evt))))
 
+(defn entity-orthothanasia-event [evt entity]
+  (when (instance? Player entity)
+    (player/death-event evt entity)))
+
 (defn entity-death-event [evt]
-  (defn pig-death-event [entity]
-    (when-let [killer (.getKiller entity)]
-      (when (instance? Player killer)
-        (.sendMessage killer "PIG: Pig Is God"))
-      (.setFireTicks killer 1000)))
   (let [entity (.getEntity evt)]
-    (cond
-      (instance? Pig entity) (pig-death-event entity)
-      (instance? Player entity) (player/death-event evt entity)
-      (.getKiller entity) (entity-murder-event evt entity))))
+    (if-let [killer (.getKiller entity)]
+      (entity-murder-event evt entity killer)
+      (entity-orthothanasia-event evt entity))))
 
 (defn creeper-explosion-1 [evt entity]
   (.setCancelled evt true)
@@ -1512,8 +1526,7 @@
         ] (rem @creeper-explosion-idx 4)))
 
 (defn entity-explode-event [evt]
-  (let [entity (.getEntity evt)]
-    (assert entity)
+  (if-let [entity (.getEntity evt)]
     (let [ename (c/entity2name entity)
           players-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
       (cond
@@ -1529,7 +1542,8 @@
         (and ename (not-empty players-nearby) (not (instance? EnderDragon entity)))
         (letfn [(join [xs x]
                   (apply str (interpose x xs)))]
-          (c/lingr (str ename " is exploding near " (join (map #(.getDisplayName %) players-nearby) ", "))))))))
+          (c/lingr (str ename " is exploding near " (join (map #(.getDisplayName %) players-nearby) ", "))))))
+    (prn 'explosion-without-entity)))
 
 (defn digg-entity [target shooter]
   (loop [depth -1]
