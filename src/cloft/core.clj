@@ -1538,11 +1538,6 @@
                   (apply str (interpose x xs)))]
           (c/lingr (str ename " is exploding near " (join (map #(.getDisplayName %) players-nearby) ", "))))))))
 
-(comment (defn potion-weakness [name]
-  (.apply
-    (org.bukkit.potion.PotionEffect. org.bukkit.potion.PotionEffectType/WEAKNESS 500 1)
-    (Bukkit/getPlayer name))))
-
 (defn digg-entity [target shooter]
   (loop [depth -1]
     (when (> depth -3)
@@ -1919,29 +1914,6 @@
       (.remove entity))
     (instance? Cow (.getShooter entity))
     (chimera-cow/arrow-hit evt)))
-        ;(do
-        ;  (comment (when (= (.getDisplayName (.getShooter entity)) "sugizou")
-        ;             (let [location (.getLocation entity)
-        ;                   world (.getWorld location)]
-        ;               (.generateTree world location org.bukkit.TreeType/BIRCH))))
-        ;  (when (= (.getDisplayName (.getShooter entity)) "Sandkat")
-        ;    (doseq [near-target (filter
-        ;                          #(instance? LivingEntity %)
-        ;                          (.getNearbyEntities entity 2 2 2))]
-        ;      (.damage near-target 3 entity)))
-        ;  (when (= (.getDisplayName (.getShooter entity)) "ujm")
-        ;    (do
-        ;      (let [location (.getLocation entity)
-        ;            world (.getWorld location)]
-        ;        (.strikeLightningEffect world location))
-        ;      (doseq [near-target (filter
-        ;                            #(instance? Monster %)
-        ;                            (.getNearbyEntities entity 10 10 3))]
-        ;        (.damage near-target 30 (.getShooter entity))))))
-
-(comment (defn fish-hit-event [evt fish]
-  (if-let [shooter (.getShooter fish)]
-    (prn ['fish-hit-event evt fish shooter]))))
 
 (defn snowball-hit-event [evt snowball]
   (cond
