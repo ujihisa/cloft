@@ -1438,29 +1438,24 @@
   (if (instance? Player entity)
     (player/death-event evt entity)
     (when (instance? Player killer)
-      (when (instance? Pig entity)
-        (pig-murder-event entity))
-      (when (instance? PigZombie entity)
+      (condp instance? entity
+        Pig (pig-murder-event entity)
+        PigZombie nil
+        Zombie ((rand-nth
+                  [#(let [loc (.getLocation entity)]
+                      (.createExplosion (.getWorld entity) loc 0)
+                      (when (= Material/AIR (.getType (.getBlock loc)))
+                        (.setType (.getBlock loc) Material/FIRE)))
+                   #(.spawn (.getWorld entity) (.getLocation entity) Villager)
+                   #(.spawn (.getWorld entity) (.getLocation entity) Silverfish)
+                   #(.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/IRON_SWORD))]))
+        Giant (.setDroppedExp evt 1000)
+        Creeper (.setDroppedExp evt 10)
+        Blaze (when (= "world" (.getName (.getWorld entity)))
+                (blaze2-murder-event evt entity killer))
         nil)
-      (when (instance? Zombie entity)
-        ((rand-nth
-           [#(let [loc (.getLocation entity)]
-               (.createExplosion (.getWorld entity) loc 0)
-               (when (= Material/AIR (.getType (.getBlock loc)))
-                 (.setType (.getBlock loc) Material/FIRE)))
-            #(.spawn (.getWorld entity) (.getLocation entity) Villager)
-            #(.spawn (.getWorld entity) (.getLocation entity) Silverfish)
-            #(.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/IRON_SWORD))])))
-      (when (and
-              (instance? Blaze entity)
-              (= "world" (.getName (.getWorld entity))))
-        (blaze2-murder-event evt entity killer))
       (when (chimera-cow/is? entity)
         (chimera-cow/murder-event evt entity killer))
-      (when (instance? Giant entity)
-        (.setDroppedExp evt 1000))
-      (when (instance? Creeper entity)
-        (.setDroppedExp evt 10))
       (when (and
               (= 0 (rand-int 2))
               (instance? CaveSpider entity))
