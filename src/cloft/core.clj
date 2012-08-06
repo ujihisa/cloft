@@ -993,7 +993,7 @@
                        (.spawn (.getWorld loc) loc Creeper)))))))]
     ((rand-nth [unlucky]) player)))
 
-(defn player-chat-event [evt]
+(defn async-player-chat-event [evt]
   (let [player (.getPlayer evt)
         name (.getDisplayName player)
         msg (.getMessage evt)]

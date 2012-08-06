@@ -62,8 +62,8 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
-    public void onPlayerChat(PlayerChatEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "player-chat-event");
+    public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "async-player-chat-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler

@@ -4,7 +4,7 @@
                  [swank-clojure/swank-clojure "1.3.3"]
                  [org.zmq/jzmq "1.0.0"]
                  [org.clojure/clojure "1.4.0"]]
-  :dev-dependencies [[org.bukkit/bukkit "1.2.5-R5.1-SNAPSHOT"]]
+  :dev-dependencies [[org.bukkit/bukkit "1.3.1-R0.1-SNAPSHOT"]]
   ;:repl-options [:init nil :caught clj-stacktrace.repl/pst+]
   ;:repositories {"spout-repo-snap" "http://repo.getspout.org/content/repositories/snapshots/"
   ;               "spout-repo-rel" "http://repo.getspout.org/content/repositories/releases/"})
