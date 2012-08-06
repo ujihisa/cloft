@@ -1682,7 +1682,8 @@
   (.remove spider))
 
 (defn player-attacks-pig-event [evt player pig]
-  (when (= 0 (rand-int 2))
+  (when (and (= 0 (rand-int 2))
+             (not (.isDead pig)))
     (future-call #(let [another-pig (.spawn (.getWorld pig) (.getLocation pig) Pig)]
                     (Thread/sleep 3000)
                     (when-not (.isDead another-pig)
@@ -2017,6 +2018,11 @@
   (let [chicken (.spawn (.getWorld (c/ujm)) (.getLocation (c/ujm)) Chicken)]
     (.setPassenger (c/ujm) chicken)
     (.setAllowFlight (c/ujm) true)))
+
+(defn just-for-now3 []
+  (let [gs (ItemStack. Material/GOLD_SWORD)]
+    (.addEnchantment gs org.bukkit.enchantments.Enchantment/DAMAGE_ALL 5)
+    (.setItemInHand (c/ujm) gs)))
 
 (defn vehicle-block-collision-event [evt]
   (let [vehicle (.getVehicle evt)]
