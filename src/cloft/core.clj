@@ -42,15 +42,18 @@
         (c/add-velocity player 0 x2 0)))))
 
 (defn kaiouken [player]
-  (.sendMessage player "界王拳3倍!")
-  (.addPotionEffect player (PotionEffect. PotionEffectType/HUNGER 500 10))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/FIRE_RESISTANCE 500 3))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/INCREASE_DAMAGE 500 1))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/DAMAGE_RESISTANCE 500 1))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/SPEED 500 1))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/JUMP 500 1))
-  (.addPotionEffect player (PotionEffect. PotionEffectType/FAST_DIGGING 500 1))
-  (.setFireTicks player 500))
+  (if (> 0 (.getFireTicks player))
+    (.sendMessage player "(界王拳失敗)")
+    (do
+      (.sendMessage player "界王拳3倍!")
+      (.addPotionEffect player (PotionEffect. PotionEffectType/HUNGER 500 10))
+      (.addPotionEffect player (PotionEffect. PotionEffectType/FIRE_RESISTANCE 500 3))
+      (.addPotionEffect player (PotionEffect. PotionEffectType/INCREASE_DAMAGE 500 1))
+      (.addPotionEffect player (PotionEffect. PotionEffectType/DAMAGE_RESISTANCE 500 1))
+      (.addPotionEffect player (PotionEffect. PotionEffectType/SPEED 500 1))
+      (.addPotionEffect player (PotionEffect. PotionEffectType/JUMP 500 1))
+      (.addPotionEffect player (PotionEffect. PotionEffectType/FAST_DIGGING 500 1))
+      (.setFireTicks player 500))))
 
 (defn food-level-change-event [evt]
   (let [player (.getEntity evt)]
