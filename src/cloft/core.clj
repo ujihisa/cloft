@@ -5,6 +5,7 @@
   (:require [cloft.arrow :as arrow])
   (:require [cloft.recipe])
   (:require [cloft.player :as player])
+  (:require [cloft.loc :as loc])
   (:require [cloft.block])
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
@@ -258,7 +259,7 @@
         (.setType block Material/AIR)
         (if (= 0 (rand-int 2))
           (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/WOOL))
-          (.spawn (.getWorld entity) (.getLocation entity) Sheep)))
+          (loc/spawn (.getLocation entity) Sheep)))
       nil))
   (.remove entity)
   (let [loc (.getLocation entity)]
@@ -419,9 +420,9 @@
   (if (= 0 (rand-int 5))
     (let [loc (.getLocation blaze2)]
       (.playEffect (.getWorld loc) loc Effect/MOBSPAWNER_FLAMES nil)
-      (.spawn (.getWorld blaze2)
-              (.add loc 0 2 0)
-              (rand-nth [Skeleton Zombie Spider MagmaCube MagmaCube Silverfish
+      (loc/spawn
+           (.add loc 0 2 0)
+           (rand-nth [Skeleton Zombie Spider MagmaCube MagmaCube Silverfish
                          Enderman Villager Creeper])))
     (.launchProjectile blaze2 Arrow)))
 
@@ -466,7 +467,7 @@
             (= 0 (rand-int 10))
             (= "world" (.getName (.getWorld creature)))
             (some #(instance? % creature) [Zombie Skeleton]))
-      (.spawn (.getWorld creature) (.getLocation creature) Blaze)
+      (loc/spawn (.getLocation creature) Blaze)
       (.setCancelled evt true))))
 
 (defn item-spawn-event [evt]
@@ -611,7 +612,7 @@
   (.setFireTicks by 100))
 
 (defn reaction-skill-golem [you by]
-  (let [golem (.spawn (.getWorld by) (.getLocation by) IronGolem)]
+  (let [golem (loc/spawn (.getLocation by) IronGolem)]
     (.setTarget golem by)
     (future-call #(do
                     (Thread/sleep 10000)
@@ -619,7 +620,7 @@
   (.sendMessage you "a golem helps you!"))
 
 (defn reaction-skill-wolf [you by]
-  (let [wolf (.spawn (.getWorld by) (.getLocation by) Wolf)]
+  (let [wolf (loc/spawn (.getLocation by) Wolf)]
     (.setTamed wolf true)
     (.setOwner wolf you)
     (.setTarget wolf by)
@@ -1212,7 +1213,7 @@
                         (doseq [p parts]
                           (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (if (not= 0 (rand-int 10)) p Material/COAL) (.getAmount itemstack))))
                         (when (not-empty (.getEnchantments itemstack))
-                          (let [exp (.spawn (.getWorld item) (.getLocation item) ExperienceOrb)]
+                          (let [exp (loc/spawn (.getLocation item) ExperienceOrb)]
                             (.setExperience exp (rand-nth (range 10 20)))))
                         (.remove item))))
       (and
@@ -1333,7 +1334,7 @@
         (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
           (do
             (when (= 0 (rand-int 20))
-              (.spawn (.getWorld target) (.getLocation target) Giant)
+              (loc/spawn (.getLocation target) Giant)
               (c/broadcast "Giant!"))
             (c/consume-item player)
             (.remove target))
@@ -1446,9 +1447,9 @@
                       (.createExplosion (.getWorld entity) loc 0)
                       (when (= Material/AIR (.getType (.getBlock loc)))
                         (.setType (.getBlock loc) Material/FIRE)))
-                   #(.spawn (.getWorld entity) (.getLocation entity) Villager)
-                   #(.spawn (.getWorld entity) (.getLocation entity) Silverfish)
-                   #(.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/IRON_SWORD))]))
+                   #(loc/spawn (.getLocation entity) Villager)
+                   #(loc/spawn (.getLocation entity) Silverfish)
+                   #(loc/drop-tem (.getLocation entity) (ItemStack. Material/IRON_SWORD))]))
         Giant (.setDroppedExp evt 1000)
         Creeper (.setDroppedExp evt 10)
         Blaze (when (= "world" (.getName (.getWorld entity)))
@@ -1502,7 +1503,7 @@
                         (Thread/sleep 1000)
                         (when (= (.getType (.getBlock loc)) Material/PUMPKIN)
                           (.setType (.getBlock loc) Material/AIR)
-                          (let [tnt (.spawn (.getWorld loc) loc TNTPrimed)]
+                          (let [tnt (loc/spawn loc TNTPrimed)]
                             (Thread/sleep 1000)
                             (.remove tnt)
                             (c/broadcast "big explosion!")
@@ -1604,7 +1605,7 @@
               (.setType block Material/PUMPKIN)
               (future-call #(do
                               (Thread/sleep 3000)
-                              (let [newmob (.spawn (.getWorld loc) loc klass)]
+                              (let [newmob (loc/spawn loc klass)]
                                 (if (= Material/PUMPKIN (.getType block))
                                   (do
                                     (.setHealth newmob health)
@@ -1615,7 +1616,7 @@
           (cond
             (some #(instance? % target) [Zombie Skeleton])
             (do
-              (.spawn (.getWorld target) (.getLocation target) Villager)
+              (loc/spawn (.getLocation target) Villager)
               (.remove target))
             :else
             (do
@@ -1653,14 +1654,14 @@
                                        Silverfish Skeleton Slime Snowman Spider
                                        Squid Squid Squid StorageMinecart
                                        TNTPrimed Villager Wolf Ocelot Zombie])]
-              (.spawn (.getWorld target) (.getLocation target) change-to))
+              (loc/spawn (.getLocation target) change-to))
             (.remove target))
           (= arrow-skill-pull (arrow-skill-of shooter))
           (.teleport target shooter)
           (= arrow-skill-fire (arrow-skill-of shooter))
           (.setFireTicks target 400)
           (= 'cart (arrow-skill-of shooter))
-          (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
+          (let [cart (loc/spawn (.getLocation target) Minecart)]
             (.setPassenger cart target))))
       (when (instance? Blaze shooter)
         "arrow from blaze = always it's by blaze2"
@@ -1673,7 +1674,7 @@
            (c/add-velocity cart 0 5 0)))
 
 (defn player-attacks-spider-event [evt player spider]
-  (let [cave-spider (.spawn (.getWorld spider) (.getLocation spider) CaveSpider)]
+  (let [cave-spider (loc/spawn (.getLocation spider) CaveSpider)]
     (.sendMessage player "The spider turned into a cave spider!")
     (.addPotionEffect cave-spider (PotionEffect.
                                     PotionEffectType/BLINDNESS
@@ -1684,7 +1685,7 @@
 (defn player-attacks-pig-event [evt player pig]
   (when (and (= 0 (rand-int 2))
              (not (.isDead pig)))
-    (future-call #(let [another-pig (.spawn (.getWorld pig) (.getLocation pig) Pig)]
+    (future-call #(let [another-pig (loc/spawn (.getLocation pig) Pig)]
                     (Thread/sleep 3000)
                     (when-not (.isDead another-pig)
                       (.remove another-pig))))))
