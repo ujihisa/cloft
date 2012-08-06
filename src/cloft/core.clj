@@ -987,9 +987,10 @@
       (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
       #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
-      (.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")
+      #_(.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")
       (.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました")
       (.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
+      (.sendMessage player "[NEWS] 生牛肉は危険です")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
@@ -1739,8 +1740,15 @@
           :else
           (.teleport target shooter))))))
 
+(defn entity-damage-by-drawning-event [evt target]
+  (cond
+    (player/zombie? target)
+    (do
+      (.setCancelled evt true)
+      (player/rebirth-from-zombie target))
 
-
+    (= Material/GLASS (.getType (.getHelmet (.getInventory target))))
+    (.setCancelled evt true)))
 
 (defn entity-damage-event [evt]
   (let [target (.getEntity evt)
@@ -1748,14 +1756,7 @@
                    (.getDamager evt))]
     (cond
       (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
-      (cond
-        (player/zombie? target)
-        (do
-          (.setCancelled evt true)
-          (player/rebirth-from-zombie target))
-
-        (= Material/GLASS (.getHelmet (.getInventory target)))
-        (.setCancelled evt true))
+      (entity-damage-by-drawning-event evt target)
 
       (= EntityDamageEvent$DamageCause/ENTITY_EXPLOSION (.getCause evt))
       (do
