@@ -1747,7 +1747,10 @@
       (.setCancelled evt true)
       (player/rebirth-from-zombie target))
 
-    (= Material/GLASS (.getType (.getHelmet (.getInventory target))))
+    (and
+      (instance? Player target)
+      (.getHelmet (.getInventory target))
+      (= Material/GLASS (.getType (.getHelmet (.getInventory target)))))
     (.setCancelled evt true)))
 
 (defn entity-damage-event [evt]
