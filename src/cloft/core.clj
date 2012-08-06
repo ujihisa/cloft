@@ -56,10 +56,12 @@
       (.setFireTicks player 500))))
 
 (defn food-level-change-event [evt]
-  (let [player (.getEntity evt)]
-    (when-let [itemstack (.getItemInHand player)]
-      (when (= Material/APPLE (.getType itemstack))
-        (kaiouken player)))))
+  (let [player (.getEntity evt)
+        eating? (< (.getFoodLevel player) (.getFoodLevel evt))]
+    (when eating?
+      (when-let [itemstack (.getItemInHand player)]
+        (when (= Material/APPLE (.getType itemstack))
+          (kaiouken player))))))
 
 (defn entity-combust-event [evt]
   (.setCancelled evt true))
