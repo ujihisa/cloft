@@ -1400,12 +1400,6 @@
             (filter player/zombie? (Bukkit/getOnlinePlayers))))
   nil)
 
-(defn pig-death-event [entity]
-  (when-let [killer (.getKiller entity)]
-    (when (instance? Player killer)
-      (.sendMessage killer "PIG: Pig Is God"))
-    (.setFireTicks killer 1000)))
-
 (defn player-respawn-event [evt]
   (let [player (.getPlayer evt)]
     (future-call #(do
@@ -1460,8 +1454,12 @@
         (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
       (player/record-and-report killer entity evt))))
 
-
 (defn entity-death-event [evt]
+  (defn pig-death-event [entity]
+    (when-let [killer (.getKiller entity)]
+      (when (instance? Player killer)
+        (.sendMessage killer "PIG: Pig Is God"))
+      (.setFireTicks killer 1000)))
   (let [entity (.getEntity evt)]
     (cond
       (instance? Pig entity) (pig-death-event entity)
