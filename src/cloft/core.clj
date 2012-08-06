@@ -991,6 +991,7 @@
       (.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました")
       (.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
       (.sendMessage player "[NEWS] 生牛肉は危険です")
+      (.sendMessage player "[NEWS] shiftでプレイヤからも降りれます")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
@@ -1992,10 +1993,14 @@
           (.setFoodLevel player 20)
           (.teleport player loc)
           (c/add-velocity player 0 0.6 0))))
+
     (transport/cauldron-teleport player)
     (when-let [vehicle (.getVehicle player)]
       (cond
         (instance? Boat vehicle) (.setVelocity vehicle (Vector. 0 0 0))
+        (instance? Minecart vehicle) nil
+        (instance? Pig vehicle) nil
+        (instance? Player vehicle) (.leaveVehicle player)
         (instance? Enderman vehicle) (.leaveVehicle player)))))
 
 (defn just-for-now
