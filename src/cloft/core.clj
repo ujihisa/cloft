@@ -1748,9 +1748,14 @@
                    (.getDamager evt))]
     (cond
       (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
-      (when (player/zombie? target)
-        (.setCancelled evt true)
-        (player/rebirth-from-zombie target))
+      (cond
+        (player/zombie? target)
+        (do
+          (.setCancelled evt true)
+          (player/rebirth-from-zombie target))
+
+        (= Material/GLASS (.getHelmet (.getInventory target)))
+        (.setCancelled evt true))
 
       (= EntityDamageEvent$DamageCause/ENTITY_EXPLOSION (.getCause evt))
       (do
