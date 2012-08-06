@@ -1428,7 +1428,7 @@
       (future-call #(.remove entity))
       #_(.setCancelled evt true))))
 
-(defn pig-death-event [entity]
+(defn pig-murder-event [entity]
   (when-let [killer (.getKiller entity)]
     (when (instance? Player killer)
       (.sendMessage killer "PIG: Pig Is God"))
@@ -1439,7 +1439,7 @@
     (player/death-event evt entity)
     (when (instance? Player killer)
       (when (instance? Pig entity)
-        (pig-death-event entity))
+        (pig-murder-event entity))
       (when (instance? PigZombie entity)
         nil)
       (when (instance? Zombie entity)
