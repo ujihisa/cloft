@@ -1303,8 +1303,6 @@
         (instance? Pig target) (d 351 3)
         (instance? Cow target)
         (player-rightclick-cow player target)
-        ; right-click villager -> cake
-        (instance? Villager target)
         (if-let [item (.getItemInHand player)]
           (condp = (.getType item)
             Material/BROWN_MUSHROOM (do
@@ -1324,8 +1322,7 @@
                                 (c/consume-item player))
             (d 92))
           (d 92))
-        ; right-click creeper -> gunpowder
-        (instance? Creeper target) (d 289)
+        (instance? Creeper target) (d (.getId Material/SULPHUR))
 
         (and (instance? Zombie target) (not (instance? PigZombie target)))
         (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
@@ -1335,13 +1332,10 @@
               (c/broadcast "Giant!"))
             (c/consume-item player)
             (.remove target))
-          ; right-click zombie -> zombeef
-          (d 367))
+          (d (.getId Material/ROTEN_FLESH)))
 
-        ; right-click skelton -> arrow
-        (instance? Skeleton target) (d 262)
-        ; right-click spider -> string
-        (instance? Spider target) (d 287)
+        (instance? Skeleton target) (d (.getId Material/ARROW))
+        (instance? Spider target) (d (.getId Material/STRING))
         ; right-click squid -> chat and hungry
         (instance? Squid target)
         (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
