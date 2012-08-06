@@ -1466,7 +1466,7 @@
     (cond
       (instance? Pig entity) (pig-death-event entity)
       (instance? Player entity) (player/death-event evt entity)
-      (and (instance? LivingEntity entity) (.getKiller entity)) (entity-murder-event evt entity))))
+      (.getKiller entity) (entity-murder-event evt entity))))
 
 (defn creeper-explosion-1 [evt entity]
   (.setCancelled evt true)
