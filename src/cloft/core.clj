@@ -1358,10 +1358,7 @@
     (c/broadcast "Level up! "(.getDisplayName (.getPlayer evt)) " is Lv" (.getNewLevel evt))))
 
 
-(comment (def chain (atom {:entity nil :loc nil})))
-
 (defn chain-entity [entity shooter]
-  (comment (swap! chain assoc :entity entity :loc (.getLocation entity)))
   (let [block (.getBlock (.getLocation entity))]
     (when-not (.isLiquid block)
       (let [msg (str (.getDisplayName shooter) " chained " (c/entity2name entity))]
@@ -1372,10 +1369,6 @@
                       (Thread/sleep 10000)
                       (when (= (.getType block) Material/WEB)
                         (.setType block Material/AIR)))))))
-
-(comment (defn rechain-entity []
-  (when (:entity @chain)
-    (.teleport (:entity @chain) (:loc @chain)))))
 
 (def chicken-attacking (atom 0))
 (defn chicken-touch-player [chicken player]
@@ -1390,15 +1383,14 @@
       (doseq [chicken chickens]
         (chicken-touch-player chicken player)))))
 
-(defn periodically-terminate-nonchicken-flighter []
+(defn periodically-terminate-flying []
   (doseq [player (Bukkit/getOnlinePlayers)]
     (when-not (.getPassenger player)
-      (.setAllowFlight player false))))
-
+      (.setAllowFlight player false)
+      (.setFallDistance player 0.0))))
 
 (defn periodically []
-  (periodically-terminate-nonchicken-flighter)
-  (comment (rechain-entity))
+  (periodically-terminate-flying)
   (periodically-entity-touch-player-event)
   (comment (.setHealth v (inc (.getHealth v))))
   (chimera-cow/periodically)
