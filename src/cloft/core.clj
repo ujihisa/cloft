@@ -2088,8 +2088,8 @@
   (when (nil? swank*)
     (def swank* (swank.swank/start-repl 4005)))
   (cloft.recipe/on-enable)
-  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (periodically)) 50 50)
-  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin (fn [] (cloft-scheduler/on-beat)) 0 1)
+  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
+  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 1)
   (comment (proxy [java.lang.Object CommandExecuter] []
     (onCommand [this ^CommandSender sender ^Command command ^String label ^String[] args]
       (prn command))))
