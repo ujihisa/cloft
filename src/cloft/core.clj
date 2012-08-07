@@ -34,7 +34,7 @@
 
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
-    (when (= (.getType (.getItemInHand player)) Material/FEATHER)
+    (when (= Material/FEATHER (.getType (.getItemInHand player)))
       (let [amount (.getAmount (.getItemInHand player))
             x (if (.isSprinting player) (* amount 2) amount)
             x2 (/ (java.lang.Math/log x) 2)]
@@ -77,7 +77,6 @@
 (defn entity-combust-event [evt]
   (.setCancelled evt true))
 
-(def bossbattle-player nil)
 (defn player-move-event [evt]
   (let [player (.getPlayer evt)]
     #_(when-let [cart (.getVehicle player)]
@@ -94,43 +93,7 @@
             (.hasPotionEffect player PotionEffectType/SPEED)
             (.isSprinting player)
             (= 0 (rand-int 2)))
-      (.playEffect (.getWorld player) (.add (.getLocation player) 0 -1 0) Effect/MOBSPAWNER_FLAMES nil))
-    (comment(let [before-y (.getY (.getFrom evt))
-          after-y (.getY (.getTo evt))]
-      (when (< (- after-y before-y) 0)
-        (let [tmp (.getTo evt)]
-          (.setY tmp (+ 1 (.getY (.getTo evt))))
-          (prn tmp)
-          (.setTo evt tmp)))))
-    (comment (let [new-velo (.getDirection (.getLocation player))]
-      (.setY new-velo 0)
-      (.setVelocity player new-velo)))
-    (comment(when (> -0.1 (.getY (.getVelocity player)))
-      (.setVelocity player (.setY (.clone (.getVelocity player)) -0.1))))
-    #_(let [name (.getDisplayName player)]
-        (sanctuary/on-player-move-event [player])
-      (when (and (= (.getWorld player) world) (< (.distance (org.bukkit.Location. world 70 66 -58) (.getLocation player)) 1))
-        (if (c/jumping? evt)
-          (when (not= @bossbattle-player player)
-            (c/broadcast player " entered the boss' room!")
-            (dosync
-              (ref-set bossbattle-player player)))
-          (do
-            (.sendMessage player "You can't leave")
-            (.setTo evt (.add (.getFrom evt) 0 0.5 0))))))
-    (comment (when (walking? evt)
-      (let [l (.getLocation player)
-            b-up (.getBlock l)
-            b-down (.getBlock (.add l 0 -1 0))]
-        (when (and
-                (= (.getType (.getItemInHand player)) Material/RAILS)
-                (= (.getType b-up) Material/AIR)
-                (contains? #{Material/STONE Material/COBBLESTONE
-                             Material/SAND Material/GRAVEL
-                             Material/GRASS Material/DIRT}
-                           (.getType b-down)))
-          (.setType b-up Material/RAILS)
-          (c/consume-item player)))))))
+      (.playEffect (.getWorld player) (.add (.getLocation player) 0 -1 0) Effect/MOBSPAWNER_FLAMES nil))))
 
 (defn block-of-arrow [entity]
   (let [location (.getLocation entity)
@@ -838,7 +801,7 @@
         center-vector (.setY (.clone xz) 255)
         center-location (.toLocation center-vector world)]
     (doseq [v (cloft.block/blocks-in-radiaus-xz world center-location 20 70)]
-      (when (= (rand-int 30) 1)
+      (when (= 1 (rand-int 30))
         (cloft-scheduler/settimer
           (rand-int 300)
           #(let [tnt (.spawn world (.getLocation v) TNTPrimed)
@@ -1361,7 +1324,7 @@
       (.setType block Material/WEB)
       (future-call #(do
                       (Thread/sleep 10000)
-                      (when (= (.getType block) Material/WEB)
+                      (when (= Material/WEB (.getType block))
                         (.setType block Material/AIR)))))))
 
 (def chicken-attacking (atom 0))
@@ -1491,7 +1454,7 @@
                             (Thread/sleep 1000)
                             (.remove tnt)
                             (c/broadcast "big explosion!")
-                            (.createExplosion (.getWorld loc) loc 6 true)))))))))
+                            (loc/explode loc 6 true)))))))))
 
 (defn creeper-explosion-3 [evt entity]
   (.setCancelled evt true)
@@ -1743,7 +1706,7 @@
       (= EntityDamageEvent$DamageCause/ENTITY_EXPLOSION (.getCause evt))
       (do
         #_(prn 'entity-explosion (.getEntity evt))
-        (if (= (rem @creeper-explosion-idx 3) 0)
+        (if (= 0 (rem @creeper-explosion-idx 3))
           (.setDamage evt (min (.getDamage evt) 19))
           (.setDamage evt 0)))
 
