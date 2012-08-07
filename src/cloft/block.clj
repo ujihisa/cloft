@@ -80,9 +80,6 @@
               Material/WOOD_STAIRS #{:crafted :enterable :combustible :gettable}}]
     (into {} (filter #(clojure.set/subset? c (last %)) data))))
 
-(defn place-in-line [world start end place-fn]
-   (place-in-line-with-offset world start end place-fn 0))
-
 (defn place-in-line-with-offset [world start end place-fn offset-count]
    (let [m (Math/ceil (.distance start end))
          unit (.normalize (.add (.clone end) (.multiply (.clone start) -1.0)))
@@ -93,6 +90,8 @@
        (when (.hasNext iter)
          (recur (.hasNext iter) (inc i))))))
 
+(defn place-in-line [world start end place-fn]
+   (place-in-line-with-offset world start end place-fn 0))
 
 (defn blocks-in-radiaus-xz
   [world center inner outer]
