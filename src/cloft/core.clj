@@ -93,7 +93,7 @@
             (.hasPotionEffect player PotionEffectType/SPEED)
             (.isSprinting player)
             (= 0 (rand-int 2)))
-      (.playEffect (.getWorld player) (.add (.getLocation player) 0 -1 0) Effect/MOBSPAWNER_FLAMES nil))))
+      (loc/play-effect (.add (.getLocation player) 0 -1 0) Effect/MOBSPAWNER_FLAMES nil))))
 
 (defn block-of-arrow [entity]
   (let [location (.getLocation entity)
@@ -102,15 +102,14 @@
     (.getBlock (.add (.clone location) direction))))
 
 (defn arrow-skill-explosion [entity]
-  (.createExplosion (.getWorld entity) (.getLocation entity) 0)
+  (loc/explode (.getLocation entity) 0 false)
   (let [block (block-of-arrow entity)]
     (.breakNaturally block (ItemStack. Material/DIAMOND_PICKAXE)))
   (.remove entity))
 
 (defn arrow-skill-torch [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (.setType (.getBlockAt world location) Material/TORCH)))
+  (let [location (.getLocation entity)]
+    (.setType (.getBlock location) Material/TORCH)))
 
 (defn arrow-skill-pull [entity]
   (let [block (block-of-arrow entity)]
@@ -132,12 +131,10 @@
     (c/teleport-without-angle shooter location)))
 
 (defn arrow-skill-fire [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (doseq [target (filter
-                     #(and (instance? LivingEntity %) (not= (.getShooter entity) %))
-                     (.getNearbyEntities entity 1 1 1))]
-      (.setFireTicks target 200))))
+  (doseq [target (filter
+                   #(and (instance? LivingEntity %) (not= (.getShooter entity) %))
+                   (.getNearbyEntities entity 1 1 1))]
+    (.setFireTicks target 200)))
 
 (defn arrow-skill-flame [entity]
   (doseq [x [-1 0 1] y [-1 0 1] z [-1 0 1]
