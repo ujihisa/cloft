@@ -1,4 +1,5 @@
-(ns cloft.item)
+(ns cloft.item
+  (:import [org.bukkit Material]))
 
 (def swords #{Material/WOOD_SWORD Material/STONE_SWORD Material/IRON_SWORD
               Material/GOLD_SWORD Material/DIAMOND_SWORD})

@@ -7,7 +7,7 @@
   (:require [cloft.player :as player])
   (:require [cloft.loc :as loc])
   (:require [cloft.block])
-  (:require [cloft.item])
+  (:require [cloft.item :as item])
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
   (:require [swank.swank])
@@ -942,7 +942,7 @@
                          (.startsWith ip "10.0")
                          (= "113.151.154.229" ip)
                          (= "0:0:0:0:0:0:0:1" ip))))
-      (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth items/records))
+      (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
       #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
       #_(.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")
@@ -1055,6 +1055,24 @@
       (let [arrow (.launchProjectile player Arrow)]
         (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))))
 
+(defn y->pitch [y]
+  (* 90 (Math/sin (* y -0.5 Math/PI))))
+
+(defn xz->yaw [x z]
+  (mod (* 90 (/ (Math/atan2 (* -1 x) z) (/ Math/PI 2))) 360))
+
+(defn autofocus [player]
+  (let [ploc (.getLocation player)
+        monsters (filter #(instance? Monster %) (.getNearbyEntities player 50 10 50))]
+    (when-let [target
+               (apply min-key (cons #(.distance ploc (.getLocation %))
+                                    monsters))]
+      (let [direction (.normalize (.toVector (.subtract (.getLocation target) ploc))) ]
+        #_(.sendMessage player (str direction))
+        (.setPitch ploc (y->pitch (.getY direction)))
+        (.setYaw ploc (xz->yaw (.getX (.normalize direction)) (.getZ (.normalize direction))))
+        (.teleport player ploc)))))
+
 (defn player-right-click-event [evt player]
   (defn else []
     """just for DRY"""
@@ -1073,6 +1091,9 @@
       (do
         (.setVelocity player (.multiply (.getDirection (.getLocation player)) 4))
         (c/consume-item player))
+
+      (item/swords (.getType (.getItemInHand player)))
+      (autofocus player)
 
       (= Material/FEATHER (.. evt (getMaterial)))
       (player-super-jump evt player)))
