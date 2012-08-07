@@ -1390,10 +1390,9 @@
 (defn periodically []
   (periodically-terminate-flying)
   (periodically-entity-touch-player-event)
-  (comment (.setHealth v (inc (.getHealth v))))
   (chimera-cow/periodically)
-  (seq (map player/zombie-player-periodically
-            (filter player/zombie? (Bukkit/getOnlinePlayers))))
+  (doseq [player (filter player/zombie? (Bukkit/getOnlinePlayers))]
+    (player/zombie-player-periodically player))
   nil)
 
 (defn player-respawn-event [evt]
