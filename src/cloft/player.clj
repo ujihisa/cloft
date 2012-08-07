@@ -21,10 +21,10 @@
 (defn zombie? [entity]
   (and
     (instance? Player entity)
-    (boolean (get @zombie-players (.getDisplayName entity)))))
+    (boolean (get @zombie-players entity))))
 
 (defn zombieze [entity]
-  (swap! zombie-players conj (.getDisplayName entity))
+  (swap! zombie-players conj entity)
   (.setMaximumAir entity 1)
   (.setRemainingAir entity 1)
   (.sendMessage entity "You turned into a zombie.")
@@ -34,7 +34,7 @@
   (.setMaximumAir target 300)
   (.setRemainingAir target 300)
   (.setHealth target (.getMaxHealth target))
-  (swap! zombie-players disj (.getDisplayName target))
+  (swap! zombie-players disj target)
   (c/broadcast (.getDisplayName target) " rebirthed as a human."))
 
 (defn periodically-zombie-player []
