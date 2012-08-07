@@ -1,17 +1,9 @@
 (ns cloft.player
   (:require [cloft.cloft :as c])
-  (:import [org.bukkit.entity Player]))
-
-(def NAME-ICON
-  {"ujm" "http://www.gravatar.com/avatar/d9d0ceb387e3b6de5c4562af78e8a910.jpg?s=28\n"
-   "sbwhitecap" "http://www.gravatar.com/avatar/198149c17c72f7db3a15e432b454067e.jpg?s=28\n"
-   "Sandkat" "https://twimg0-a.akamaihd.net/profile_images/1584518036/claire2_mini.jpg\n"
-   "kldsas" "http://a0.twimg.com/profile_images/1825629510/____normal.png\n"
-   "raa0121" "http://a0.twimg.com/profile_images/1414030177/nakamigi_normal.png\n"
-   "bgnori" "http://a0.twimg.com/profile_images/2040663765/Flowers002.JPG\n"})
+  (:import [org.bukkit.entity Player])
+  (:import [org.bukkit Bukkit]))
 
 (defn name2icon [name]
-  #_(get NAME-ICON name (str name ": "))
   (str name ": "))
 
 """zombie related"""
@@ -38,7 +30,7 @@
   (c/broadcast (.getDisplayName target) " rebirthed as a human."))
 
 (defn periodically-zombie-player []
-  (doseq [zplayer (filter player/zombie? (Bukkit/getOnlinePlayers))]
+  (doseq [zplayer (filter zombie? (Bukkit/getOnlinePlayers))]
     (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
       (.setFireTicks zplayer 100))
     (.setFoodLevel zplayer (dec (.getFoodLevel zplayer)))))
