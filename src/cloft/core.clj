@@ -751,7 +751,7 @@
         pos3 (coor/local-to-world player block 15.0 1.0 5.0)
         place-fire (fn [v i]
                       (cloft-scheduler/settimer
-                        (* 4 i)
+                        i
                         #(when (= Material/AIR (.getType v))
                            (.playEffect (.getWorld v) (.getLocation v) Effect/BLAZE_SHOOT nil)
                            (.setType v Material/FIRE))))]
@@ -775,8 +775,8 @@
             (summon-x (coor/local-to-world player block -5.0 0.5 0.0) world Creeper 80)
             (c/broadcast (.getDisplayName player) " has summoned Blazes, PigZombies and Ghasts!"))))
 
-(def active-fusion-wall(atom {}))
-(defn active-fusion-wall-of[player]
+(def active-fusion-wall (atom {}))
+(defn active-fusion-wall-of [player]
   (get @active-fusion-wall (.getDisplayName player)))
 
 (defn alchemy-fusion-wall [player block]
@@ -785,7 +785,7 @@
         bottom (coor/local-to-world player block 15.0 0.0 0.0)
         top (coor/local-to-world player block 15.0 6.0 0.0)]
     (letfn [(place-cobblestones [v i]
-              (cloft-scheduler/settimer (* 4 i)
+              (cloft-scheduler/settimer i
                                        #(when (= Material/AIR (.getType v))
                                           (.setType v Material/COBBLESTONE))))]
       (.strikeLightningEffect world (.toLocation bottom world))
@@ -809,7 +809,7 @@
         end-right (coor/local-to-world player block distance 0.0 1.0)
         block-floor (fn [v i]
                       (cloft-scheduler/settimer
-                        (* 4 i)
+                        i
                         #(when (boolean ((cloft.block/category :enterable) (.getType v)))
                            (when (= 0 (rand-int 6))
                              (.strikeLightningEffect world (.getLocation v)))
@@ -882,9 +882,8 @@
           table2 {Material/TNT close-air-support
                   Material/NETHERRACK erupt-volcano
                   Material/RED_MUSHROOM earthen-pipe}]
-      (if-let [alchemy (table (.getType block))]
-        (alchemy player block)
-        (prn "no effect is defined for " block)))))
+      (when-let [alchemy (table (.getType block))]
+        (alchemy player block)))))
 
 
 (defn block-damage-event [evt]
@@ -2089,12 +2088,11 @@
     (def swank* (swank.swank/start-repl 4005)))
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
-  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 1)
+  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
   (comment (proxy [java.lang.Object CommandExecuter] []
     (onCommand [this ^CommandSender sender ^Command command ^String label ^String[] args]
       (prn command))))
   (c/lingr "cloft plugin running...")
-  (cloft-scheduler/msg "core.clj")
   (future-call (fn []
                  (do
                   (let [ctx (mq/context 1)
