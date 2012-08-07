@@ -1378,10 +1378,8 @@
 
 (defn periodically-entity-touch-player-event []
   (doseq [player (Bukkit/getOnlinePlayers)]
-    (let [entities (.getNearbyEntities player 2 2 2)
-          chickens (filter #(instance? Chicken %) entities)]
-      (doseq [chicken chickens]
-        (chicken-touch-player chicken player)))))
+    (doseq [chicken (take 3 (filter #(instance? Chicken %) (.getNearbyEntities player 2 2 2)))]
+      (chicken-touch-player chicken player))))
 
 (defn periodically-terminate-flying []
   (doseq [player (Bukkit/getOnlinePlayers)]
