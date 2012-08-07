@@ -1438,33 +1438,34 @@
 (defn entity-murder-event [evt entity killer]
   (if (instance? Player entity)
     (player/death-event evt entity)
+    (let [location (.getLocation entity)]
     (when (instance? Player killer)
       (condp instance? entity
         Pig (pig-murder-event entity)
         PigZombie nil
         Zombie ((rand-nth
-                  [#(let [loc (.getLocation entity)]
-                      (.createExplosion (.getWorld entity) loc 0)
-                      (when (= Material/AIR (.getType (.getBlock loc)))
-                        (.setType (.getBlock loc) Material/FIRE)))
-                   #(loc/spawn (.getLocation entity) Villager)
-                   #(loc/spawn (.getLocation entity) Silverfish)
-                   #(loc/drop-tem (.getLocation entity) (ItemStack. Material/IRON_SWORD))]))
+                  [#(do
+                      (.createExplosion (.getWorld entity) location 0)
+                      (when (= Material/AIR (.getType (.getBlock location)))
+                        (.setType (.getBlock location) Material/FIRE)))
+                   #(loc/spawn location Villager)
+                   #(loc/spawn location Silverfish)
+                   #(loc/drop-item location (ItemStack. Material/IRON_SWORD))]))
         Giant (.setDroppedExp evt 1000)
         Creeper (.setDroppedExp evt 10)
         Blaze (when (= "world" (.getName (.getWorld entity)))
                 (blaze2-murder-event evt entity killer))
+        CaveSpider (when (= 0 (rand-int 3))
+                     (loc/drop-item location (ItemStack. Material/GOLD_SWORD)))
         nil)
       (when (chimera-cow/is? entity)
         (chimera-cow/murder-event evt entity killer))
-      (when (and
-              (= 0 (rand-int 2))
-              (instance? CaveSpider entity))
-        (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/GOLD_SWORD)))
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
       (when (= 'exp (arrow-skill-of killer))
         (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
-      (player/record-and-report killer entity evt))))
+      (when (= 0 (rand-int 3))
+        (loc/drop-item location (ItemStack. Material/EMERALD_ORE (rand-nth [1 2]))))
+      (player/record-and-report killer entity evt)))))
 
 (defn entity-orthothanasia-event [evt entity]
   (when (instance? Player entity)
