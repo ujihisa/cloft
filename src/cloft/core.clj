@@ -460,8 +460,9 @@
 (defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
     (when (instance? Player shooter)
-      (when (or (.isSneaking shooter)
-                (= 'strong (arrow-skill-of shooter)))
+      (when (.isSneaking shooter)
+        (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 2)))
+      (when (= 'strong (arrow-skill-of shooter))
         (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 2)))
       (comment (.setCancelled evt true))
       (comment (.setVelocity shooter (.multiply (.getVelocity (.getProjectile evt)) 2)))
