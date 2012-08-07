@@ -37,7 +37,7 @@
   (swap! zombie-players disj (.getDisplayName target))
   (c/broadcast (.getDisplayName target) " rebirthed as a human."))
 
-(defn zombie-player-periodically [zplayer]
+(defn periodically-zombie-player [zplayer]
   (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
     (.setFireTicks zplayer 100))
   (.setFoodLevel zplayer (dec (.getFoodLevel zplayer))))

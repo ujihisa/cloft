@@ -1392,7 +1392,7 @@
   (periodically-entity-touch-player-event)
   (chimera-cow/periodically)
   (doseq [player (filter player/zombie? (Bukkit/getOnlinePlayers))]
-    (player/zombie-player-periodically player))
+    (player/periodically-zombie-player player))
   nil)
 
 (defn player-respawn-event [evt]
