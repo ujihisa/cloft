@@ -145,7 +145,7 @@
 (defn arrow-skill-tree [entity]
   (let [location (.getLocation entity)
         world (.getWorld location)]
-    (.generateTree world location org.bukkit.TreeType/BIRCH)))
+    (.generateTree world location (rand-nth (org.bukkit.TreeType/values)))))
 
 (defn arrow-skill-ore [entity]
   (let [block (block-of-arrow entity)]
@@ -174,8 +174,7 @@
         (and
           (= Material/AIR (.getType (.getBlock loc-above)))
           (not= Material/AIR (.getType (.getBlock loc))))
-        (.setType (.getBlock loc-above) Material/SNOW))
-      (.dropItem (.getWorld loc-above) loc-above (ItemStack. Material/ARROW))))
+        (.setType (.getBlock loc-above) Material/SNOW))))
   (.remove entity))
 
 (defn arrow-skill-pumpkin [entity]
@@ -947,6 +946,7 @@
       (.sendMessage player "[NEWS] 生牛肉は危険です")
       (.sendMessage player "[NEWS] shiftでプレイヤからも降りれます")
       (.sendMessage player "[NEWS] exp5以上のなにか殺すとたまにEmeraldもらえます")
+      #_(.sendMessage player "[NEWS] arrow-skill-treeで生える木の種類がランダムに")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
