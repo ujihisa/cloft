@@ -7,6 +7,7 @@
   (:require [cloft.player :as player])
   (:require [cloft.loc :as loc])
   (:require [cloft.block])
+  (:require [cloft.item])
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
   (:require [swank.swank])
@@ -846,7 +847,7 @@
 (defn block-damage-event [evt]
   (let [player (.getPlayer evt)]
     (when (and
-            (c/pickaxes (.getType (.getItemInHand player)))
+            (item/pickaxes (.getType (.getItemInHand player)))
             (= 'pickaxe-skill-stone (pickaxe-skill-of player)))
       (if (= Material/STONE (.getType (.getBlock evt)))
         (.setInstaBreak evt true)
@@ -1073,7 +1074,7 @@
         (.setVelocity player (.multiply (.getDirection (.getLocation player)) 4))
         (c/consume-item player))
 
-      (= (.. evt (getMaterial)) Material/FEATHER)
+      (= Material/FEATHER (.. evt (getMaterial)))
       (player-super-jump evt player)))
   (if-let [block (.getClickedBlock evt)]
     (cond
@@ -1175,7 +1176,7 @@
                             (.setExperience exp (rand-nth (range 10 20)))))
                         (.remove item))))
       (and
-        (c/pickaxes (.getType itemstack))
+        (item/pickaxes (.getType itemstack))
         (= 'pickaxe-skill-teleport (pickaxe-skill-of player)))
       (future-call
         #(do
@@ -1773,7 +1774,7 @@
           (when-not (instance? Player target)
             (spawn-block-generater target))
           (when-let [item (.getItemInHand attacker)]
-            (when (c/pickaxes (.getType item))
+            (when (item/pickaxes (.getType item))
               (when (= 'pickaxe-skill-fire (pickaxe-skill-of attacker))
                 (.setFireTicks target 200))))
           (when (and (instance? Spider target)
@@ -1819,7 +1820,7 @@
           (do
             (.sendMessage player "Your hand hurts!")
             (.damage player (rand-int 5)))
-          c/pickaxes
+          item/pickaxes
           (when (and
                   (= 'pickaxe-skill-ore (pickaxe-skill-of player))
                   (= Material/STONE (.getType block)))
