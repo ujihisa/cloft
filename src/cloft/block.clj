@@ -1,6 +1,5 @@
 (ns cloft.block
   (:import [org.bukkit Material])
-  (:require [clojure.set])
   (:import [org.bukkit.util BlockIterator Vector]))
 
 (defn category
@@ -41,15 +40,15 @@
               Material/WATER_LILY  #{:gettable :enterable}
               Material/BED_BLOCK #{:gettable :combustible :enterable}
               Material/CACTUS #{:gettable :combustible}
-              Material/SAND #{:gettable }
+              Material/SAND #{:gettable}
               Material/SANDSTONE #{:gettable}
-              Material/STONE #{:gettable }
-              Material/SOUL_SAND #{:gettable }
+              Material/STONE #{:gettable}
+              Material/SOUL_SAND #{:gettable}
               Material/STEP #{:gettable :crafted :enterable}
               Material/STONE_BUTTON #{:gettable :crafted :enterable}
-              Material/TNT #{:crafted :gettable }
+              Material/TNT #{:crafted :gettable}
               Material/WALL_SIGN #{:crafted :enterable}
-              Material/SOIL #{:crafted :gettable }
+              Material/SOIL #{:crafted :gettable}
               Material/TORCH #{:crafted :enterable :gettable}
               Material/TRAP_DOOR #{:crafted :enterable :gettable}
               Material/SNOW_BLOCK #{:crafted :gettable}
@@ -81,11 +80,10 @@
               Material/WOOD_STAIRS #{:crafted :enterable :combustible :gettable}}]
     (into {} (filter #(clojure.set/subset? c (last %)) data))))
 
+(defn place-in-line [world start end place-fn]
+   (place-in-line-with-offset world start end place-fn 0))
 
-(defn place-in-line
-  ([world start end place-fn]
-   (place-in-line world start end place-fn 0))
-  ([world start end place-fn offset-count]
+(defn place-in-line-with-offset [world start end place-fn offset-count]
    (let [m (Math/ceil (.distance start end))
          unit (.normalize (.add (.clone end) (.multiply (.clone start) -1.0)))
          iter (BlockIterator. world (.add start (.multiply (.clone unit) offset-count)) unit 0.0 m)]
@@ -93,7 +91,7 @@
             i 0]
        (place-fn (.next iter) i)
        (when (.hasNext iter)
-         (recur (.hasNext iter) (inc i)))))))
+         (recur (.hasNext iter) (inc i))))))
 
 
 (defn blocks-in-radiaus-xz
@@ -119,13 +117,11 @@
                   (> (.distance grided-cetner-vector v) (Math/floor inner)))]
       (.getBlockAt world (.toLocation v world)))))
 
-
 (defn place-in-circle
   [world inner outer center place-fn]
   """with fill. naive way."""
   (doseq [v (blocks-in-radiaus-xz world center inner outer)]
     (place-fn v 0)))
-
 
 (defn can-build-event [evt]
   (when (and

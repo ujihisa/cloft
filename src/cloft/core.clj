@@ -718,7 +718,7 @@
               (cloft-scheduler/settimer
                 1
                 #(do
-                   (cloft.block/place-in-line world (.clone loc) (.clone pos) place-fire 2)
+                   (cloft.block/place-in-line-with-offset world (.clone loc) (.clone pos) place-fire 2)
                    (explode-at (.clone pos) world 60)
                    (summon-x pos world Blaze 65)
                    (summon-x loc world PigZombie 65)
@@ -770,9 +770,9 @@
                            (when (= 0 (rand-int 6))
                              (.strikeLightningEffect world (.getLocation v)))
                            (.setType v Material/COBBLESTONE))))]
-    (cloft.block/place-in-line world start-left end-left block-floor 2)
-    (cloft.block/place-in-line world start-center end-center block-floor 2)
-    (cloft.block/place-in-line world start-right end-right block-floor 2)))
+    (cloft.block/place-in-line-with-offset world start-left end-left block-floor 2)
+    (cloft.block/place-in-line-with-offset world start-center end-center block-floor 2)
+    (cloft.block/place-in-line-with-offset world start-right end-right block-floor 2)))
 
 (defn make-redstone-for-livings [player block]
   (let [world (.getWorld player)]
@@ -2027,7 +2027,7 @@
 
 (defonce swank* nil)
 (defn on-enable [plugin]
-  (when (nil? swank*)
+  (when-not swank*
     (def swank* (swank.swank/start-repl 4005)))
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
