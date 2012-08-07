@@ -993,6 +993,7 @@
       (.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
       (.sendMessage player "[NEWS] 生牛肉は危険です")
       (.sendMessage player "[NEWS] shiftでプレイヤからも降りれます")
+      (.sendMessage player "[NEWS] 何か殺すとたまにEmeraldもらえます")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
@@ -1464,7 +1465,7 @@
       (when (= 'exp (arrow-skill-of killer))
         (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
       (when (= 0 (rand-int 3))
-        (loc/drop-item location (ItemStack. Material/EMERALD_ORE (rand-nth [1 2]))))
+        (loc/drop-item location (ItemStack. Material/EMERALD (rand-nth [1 2]))))
       (player/record-and-report killer entity evt)))))
 
 (defn entity-orthothanasia-event [evt entity]
@@ -1887,6 +1888,7 @@
                 (= 0 (rand-int 30)) (f Material/REDSTONE_ORE)
                 (= 0 (rand-int 40)) (f Material/LAPIS_ORE)
                 (= 0 (rand-int 50)) (f Material/GOLD_ORE)
+                (= 0 (rand-int 100)) (f Material/EMERALD_ORE)
                 (= 0 (rand-int 1000)) (f Material/DIAMOND_ORE)
                 (= 0 (rand-int 300)) (f Material/GLOWSTONE)
                 (= 0 (rand-int 1000)) (f Material/LAPIS_BLOCK)
