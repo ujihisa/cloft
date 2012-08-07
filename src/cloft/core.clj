@@ -992,7 +992,7 @@
       (.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
       (.sendMessage player "[NEWS] 生牛肉は危険です")
       (.sendMessage player "[NEWS] shiftでプレイヤからも降りれます")
-      (.sendMessage player "[NEWS] 何か殺すとたまにEmeraldもらえます")
+      (.sendMessage player "[NEWS] exp5以上のなにか殺すとたまにEmeraldもらえます")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
@@ -1463,7 +1463,9 @@
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
       (when (= 'exp (arrow-skill-of killer))
         (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
-      (when (= 0 (rand-int 3))
+      (when (and
+              (< 5 (.getDroppedExp evt))
+              (= 0 (rand-int 10)))
         (loc/drop-item location (ItemStack. Material/EMERALD (rand-nth [1 2]))))
       (player/record-and-report killer entity evt)))))
 
@@ -2089,9 +2091,6 @@
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
-  (comment (proxy [java.lang.Object CommandExecuter] []
-    (onCommand [this ^CommandSender sender ^Command command ^String label ^String[] args]
-      (prn command))))
   (c/lingr "cloft plugin running...")
   (future-call (fn []
                  (do
