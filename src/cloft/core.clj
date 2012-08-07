@@ -462,7 +462,7 @@
     (when (instance? Player shooter)
       (when (or (.isSneaking shooter)
                 (= 'strong (arrow-skill-of shooter)))
-        (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 3)))
+        (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 2)))
       (comment (.setCancelled evt true))
       (comment (.setVelocity shooter (.multiply (.getVelocity (.getProjectile evt)) 2)))
       (comment (when (and
@@ -952,6 +952,8 @@
       (.sendMessage player "[NEWS] shiftでプレイヤからも降りれます")
       (.sendMessage player "[NEWS] exp5以上のなにか殺すとたまにEmeraldもらえます")
       #_(.sendMessage player "[NEWS] arrow-skill-treeで生える木の種類がランダムに")
+      #_(.sendMessage player "[NEWS] しゃがんだまま剣でガードすると近くの敵に自動照準")
+      #_(.sendMessage player "[NEWS] しゃがんだまま弓を構えると近くの敵に自動照準")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
@@ -1053,7 +1055,7 @@
         (swap! special-snowball-set conj snowball)
         (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
       (let [arrow (.launchProjectile player Arrow)]
-        (.setVelocity arrow (.multiply (.getVelocity arrow) 3))))))
+        (.setVelocity arrow (.multiply (.getVelocity arrow) 1.5))))))
 
 (defn y->pitch [y]
   (* 90 (Math/sin (* y -0.5 Math/PI))))
@@ -1064,14 +1066,14 @@
 (defn autofocus [player]
   (let [ploc (.getLocation player)
         monsters (filter #(instance? Monster %) (.getNearbyEntities player 50 10 50))]
-    (when-let [target
-               (apply min-key (cons #(.distance ploc (.getLocation %))
-                                    monsters))]
-      (let [direction (.normalize (.toVector (.subtract (.getLocation target) ploc))) ]
-        #_(.sendMessage player (str direction))
-        (.setPitch ploc (y->pitch (.getY direction)))
-        (.setYaw ploc (xz->yaw (.getX (.normalize direction)) (.getZ (.normalize direction))))
-        (.teleport player ploc)))))
+    (when (< 0 (count monsters))
+      (let [target (apply min-key (cons #(.distance ploc (.getLocation %))
+                                        monsters))]
+        (let [direction (.normalize (.toVector (.subtract (.getLocation target) ploc))) ]
+          #_(.sendMessage player (str direction))
+          (.setPitch ploc (y->pitch (.getY direction)))
+          (.setYaw ploc (xz->yaw (.getX (.normalize direction)) (.getZ (.normalize direction))))
+          (.teleport player ploc))))))
 
 (defn player-right-click-event [evt player]
   (defn else []
@@ -1092,7 +1094,9 @@
         (.setVelocity player (.multiply (.getDirection (.getLocation player)) 4))
         (c/consume-item player))
 
-      (item/swords (.getType (.getItemInHand player)))
+      (and
+        (.isSneaking player)
+        ((conj item/swords Material/BOW) (.getType (.getItemInHand player))))
       (autofocus player)
 
       (= Material/FEATHER (.. evt (getMaterial)))
@@ -1997,6 +2001,11 @@
   (let [gs (ItemStack. Material/GOLD_SWORD)]
     (.addEnchantment gs org.bukkit.enchantments.Enchantment/DAMAGE_ALL 5)
     (.setItemInHand (c/ujm) gs)))
+
+(defn just-for-now4 []
+  (let [gp (ItemStack. Material/GOLD_PICKAXE)]
+    (.addEnchantment gp org.bukkit.enchantments.Enchantment/DIG_SPEED 4)
+    (.setItemInHand (c/ujm) gp)))
 
 (defn vehicle-block-collision-event [evt]
   (let [vehicle (.getVehicle evt)]
