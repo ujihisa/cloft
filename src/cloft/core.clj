@@ -942,7 +942,7 @@
                          (.startsWith ip "10.0")
                          (= "113.151.154.229" ip)
                          (= "0:0:0:0:0:0:0:1" ip))))
-      (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth c/records))
+      (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth items/records))
       #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
       #_(.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")
