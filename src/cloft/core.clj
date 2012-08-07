@@ -148,7 +148,8 @@
         trees (remove #{TreeType/JUNGLE TreeType/BROWN_MUSHROOM
                         TreeType/RED_MUSHROOM}
                       (TreeType/values))]
-    (.generateTree world location (rand-nth trees))))
+    (.generateTree world location (rand-nth trees)))
+  (.remove entity))
 
 (defn arrow-skill-ore [entity]
   (let [block (block-of-arrow entity)]
@@ -1069,7 +1070,7 @@
         (.getAllowFlight player)
         (= (.. evt (getMaterial)) Material/COAL))
       (do
-        (.setVelocity player (.multiply (.getDirection (.getLocation player)) 3))
+        (.setVelocity player (.multiply (.getDirection (.getLocation player)) 4))
         (c/consume-item player))
 
       (= (.. evt (getMaterial)) Material/FEATHER)
