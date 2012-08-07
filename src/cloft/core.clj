@@ -10,7 +10,7 @@
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
   (:require [swank.swank])
-  (:import [org.bukkit Bukkit Material])
+  (:import [org.bukkit Bukkit Material TreeType])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
             EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
@@ -144,8 +144,11 @@
 
 (defn arrow-skill-tree [entity]
   (let [location (.getLocation entity)
-        world (.getWorld location)]
-    (.generateTree world location (rand-nth (org.bukkit.TreeType/values)))))
+        world (.getWorld location)
+        trees (remove #{TreeType/JUNGLE TreeType/BROWN_MUSHROOM
+                        TreeType/RED_MUSHROOM}
+                      (TreeType/values))]
+    (.generateTree world location (rand-nth trees))))
 
 (defn arrow-skill-ore [entity]
   (let [block (block-of-arrow entity)]
