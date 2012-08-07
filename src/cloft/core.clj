@@ -448,7 +448,6 @@
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
   (c/lingr (format "%s beated a blaze2!" (.getDisplayName player))))
 
-
 (defn projectile-launch-event [evt]
   (let [projectile (.getEntity evt)
         shooter (.getShooter projectile)]
@@ -651,7 +650,6 @@
 (defn reaction-skill-poison [you by]
   (.addPotionEffect by (PotionEffect. PotionEffectType/POISON 200 2)))
 
-
 (defn blazon? [block-type block-against]
   (and (every? #(= % block-type)
                (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
@@ -724,10 +722,6 @@
         (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed pickaxe-skill to " (last skill-name))
         (swap! pickaxe-skill assoc (.getDisplayName player) (first skill-name))))))
-
-(def max-altitude 255)
-
-
 
 (defn summon-x
   ([pos world creature] (summon-x pos world creature 1))
@@ -841,7 +835,7 @@
 (defn close-air-support [player block]
   (let [world (.getWorld player)
         xz (coor/local-to-world player block 0.0 0.0 0.0)
-        center-vector (.setY  (.clone xz) max-altitude)
+        center-vector (.setY (.clone xz) 255)
         center-location (.toLocation center-vector world)]
     (doseq [v (cloft.block/blocks-in-radiaus-xz world center-location 20 70)]
       (when (= (rand-int 30) 1)
@@ -1400,7 +1394,6 @@
                     (.setHealth player (/ (.getMaxHealth player) 3))
                     (.setFoodLevel player 5)))))
 
-
 (defn spawn-block-generater [entity]
   (let [loc (.getLocation entity)]
     (when
@@ -1547,7 +1540,6 @@
             (.setPitch block-loc (.getPitch loc))
             (.teleport target (.add block-loc 0.5 1 0.5)))
           (recur (dec depth)))))))
-
 
 (defn arrow-damages-entity-event [evt arrow target]
   (if (and
@@ -1939,9 +1931,8 @@
           #_(Fish (fish-hit-event evt entity))
           Arrow (arrow-hit-event evt entity)
           Snowball (snowball-hit-event evt entity)
-          ;(instance? Snowball entity) (.strikeLightning (.getWorld entity) (.getLocation entity))
+          #_(instance? Snowball entity) #_(.strikeLightning (.getWorld entity) (.getLocation entity))
           nil)))
-
 
 (defn block-dispense-event [evt]
   (when (= Material/SEEDS (.getType (.getItem evt)))
@@ -2039,7 +2030,6 @@
 
 #_(defn vehicle-entity-collision-event [evt]
   (prn 'vehicle-entity-collision-event))
-
 
 (comment (defn enderman-pickup-event* [evt]
   (prn 'epe)))
