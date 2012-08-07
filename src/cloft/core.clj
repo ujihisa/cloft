@@ -1391,8 +1391,7 @@
   (periodically-terminate-flying)
   (periodically-entity-touch-player-event)
   (chimera-cow/periodically)
-  (doseq [player (filter player/zombie? (Bukkit/getOnlinePlayers))]
-    (player/periodically-zombie-player player))
+  (player/periodically-zombie-player)
   nil)
 
 (defn player-respawn-event [evt]

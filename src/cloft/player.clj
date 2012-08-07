@@ -37,10 +37,11 @@
   (swap! zombie-players disj (.getDisplayName target))
   (c/broadcast (.getDisplayName target) " rebirthed as a human."))
 
-(defn periodically-zombie-player [zplayer]
-  (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
-    (.setFireTicks zplayer 100))
-  (.setFoodLevel zplayer (dec (.getFoodLevel zplayer))))
+(defn periodically-zombie-player []
+  (doseq [zplayer (filter player/zombie? (Bukkit/getOnlinePlayers))]
+    (when (= 15 (.getLightLevel (.getBlock (.getLocation zplayer))))
+      (.setFireTicks zplayer 100))
+    (.setFoodLevel zplayer (dec (.getFoodLevel zplayer)))))
 
 """death realated"""
 
