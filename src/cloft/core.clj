@@ -1910,14 +1910,14 @@
     (instance? Player (.getShooter entity))
     (do
       (let [skill (arrow-skill-of (.getShooter entity))]
-      (cond
-        (fn? skill) (skill entity)
-        (symbol? skill) nil
-        :else (.sendMessage (.getShooter entity) "You don't have a skill yet."))
-      (when (let [player (.getShooter entity)
-                  inhand (.getItemInHand player)]
-              (and inhand (= Material/GOLD_SWORD (.getType inhand))))
-        (.remove entity))))
+        (cond
+          (fn? skill) (skill entity)
+          (symbol? skill) nil
+          :else (.sendMessage (.getShooter entity) "You don't have a skill yet."))
+        (when (let [player (.getShooter entity)
+                    inhand (.getItemInHand player)]
+                (and inhand (= Material/GOLD_SWORD (.getType inhand))))
+          (.remove entity))))
     (instance? Skeleton (.getShooter entity))
     (when (= 0 (rand-int 2))
       (.createExplosion (.getWorld entity) (.getLocation entity) 1)
