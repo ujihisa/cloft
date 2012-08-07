@@ -1392,7 +1392,7 @@
 
 (defn periodically-terminate-nonchicken-flighter []
   (doseq [player (Bukkit/getOnlinePlayers)]
-    (when (and (nil? (.getPassenger player)) (not= "ujm" (.getDisplayName player)))
+    (when-not (.getPassenger player)
       (.setAllowFlight player false))))
 
 
