@@ -1056,7 +1056,8 @@
         (swap! special-snowball-set conj snowball)
         (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
       (let [arrow (.launchProjectile player Arrow)]
-        (.setVelocity arrow (.multiply (.getVelocity arrow) 1.5))))))
+        (.setVelocity arrow (.multiply (.getVelocity arrow)
+                                       (if (= 'strong (arrow-skill-of shooter)) 2.5 1.5)))))))
 
 (defn y->pitch [y]
   (* 90 (Math/sin (* y -0.5 Math/PI))))
