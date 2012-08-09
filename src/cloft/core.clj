@@ -44,7 +44,7 @@
         (c/add-velocity player 0 x2 0)))))
 
 (defn kaiouken [player]
-  (if (> 0 (.getFireTicks player))
+  (if (< 0 (.getFireTicks player))
     (.sendMessage player "(界王拳失敗)")
     (do
       (.sendMessage player "界王拳3倍!")
@@ -70,7 +70,8 @@
         eating? (< (.getFoodLevel player) (.getFoodLevel evt))]
     (when eating?
       (when-let [itemstack (.getItemInHand player)]
-        (case (.getType itemstack)
+        """for some reason case didn't work"""
+        (condp = (.getType itemstack)
           Material/APPLE (kaiouken player)
           Material/RAW_BEEF (o157 player)
           nil)))))
