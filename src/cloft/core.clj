@@ -1578,14 +1578,17 @@
               (.remove target)
               (.remove arrow)
               (.setType block Material/PUMPKIN)
-              (future-call #(do
-                              (Thread/sleep 3000)
-                              (let [newmob (loc/spawn loc klass)]
-                                (if (= Material/PUMPKIN (.getType block))
-                                  (do
-                                    (.setHealth newmob health)
-                                    (.setType block block-type))
-                                  (.damage newmob (.getMaxHealth newmob)))))))
+              (future
+                (Thread/sleep 3000)
+                (let [newmob (loc/spawn loc klass)]
+                  (if (= Material/PUMPKIN (.getType block))
+                    (do
+                      (.setHealth newmob health)
+                      (.setType block block-type))
+                    (if-let [player (first (filter #(instance? Player %)
+                                                   (.getNearbyEntities newmob 3 3 3)))]
+                      (.damage newmob (.getMaxHealth newmob) player)
+                      (.damage newmob (.getMaxHealth newmob)))))))
             nil)
           (= arrow-skill-diamond (arrow-skill-of shooter))
           (cond
@@ -2076,7 +2079,7 @@
                     (while true
                       (let [contents (read-string (mq/recv-str subscriber))
                             players (Bukkit/getOnlinePlayers)]
-                        (prn 'received contents)
+                        #_(prn 'received contents)
                         (condp #(.startsWith %2 %1) (:body contents)
                           "/list"
                           (let [msg (if (empty? players)
