@@ -288,7 +288,10 @@
                Material/WALL_SIGN (cons (ItemStack. Material/STICK)
                                         (repeat 6 (ItemStack. Material/WOOD)))
                Material/SIGN_POST (cons (ItemStack. Material/STICK)
-                                        (repeat 6 (ItemStack. Material/WOOD)))}
+                                        (repeat 6 (ItemStack. Material/WOOD)))
+               Material/FENCE_GATE (concat (repeat 2 (ItemStack. Material/WOOD))
+                                           (repeat 4 (ItemStack. Material/STICK)))
+               Material/TRAP_DOOR (repeat 6 (ItemStack. Material/WOOD))}
         items (table (.getType block))
         block2 (.getBlock (.getLocation entity))
         items2 (table (.getType block2))]
