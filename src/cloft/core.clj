@@ -1029,10 +1029,10 @@
   (loc/play-effect center-loc Effect/CLICK1 nil)
   (loc/play-effect center-loc Effect/CLICK2 nil)
   (dosync (ref-set lifting? true))
-  (let [tuples (for [x [-1 0 1] y [-1 0 1] z [-1 0 1]]
+  (let [tuples (for [x (range -2 3) y (range -1 4) z (range -2 3)]
                  (let [block (.getBlock (.add (.clone center-loc) x y z))]
                    [(.getType block) (.getData block)]))
-        new-coords (for [x [-1 0 1] y [-1 0 1] z [-1 0 1]]
+        new-coords (for [x (range -2 3) y (range -1 4) z (range -2 3)]
                      [x (+ y ydiff) z])
         zipped (map #(list %1 %2) tuples new-coords)]
     (doseq [[[btype bdata] [x y z]] zipped]
@@ -1044,9 +1044,18 @@
       (let [block (.getBlock (.add (.clone center-loc) x y z))]
         (.setType block btype)
         (.setData block bdata)))
-    (doseq [x [-1 0 1] z [-1 0 1]]
+    (doseq [x (range -2 3)  z (range -2 3)]
       (let [block (.getBlock (.add (.clone center-loc) x (- 0 ydiff) z))]
         (.setType block Material/AIR))))
+  (doseq [player (Bukkit/getOnlinePlayers)
+          :when (.isInAABB
+                  (.toVector (.getLocation player))
+                  (.toVector (.add (.clone center-loc) -3 -3 -3))
+                  (.toVector (.add (.clone center-loc) 3 3 3)))
+          :let [loc (.getLocation player)]]
+    (.add loc 0 ydiff 0)
+    (.teleport player loc)
+    (.sendMessage player "elevator!"))
   (dosync (ref-set lifting? false)))
 
 (comment (defn elevator [player door]
@@ -1104,7 +1113,12 @@
         (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
       (let [arrow (.launchProjectile player Arrow)]
         (.setVelocity arrow (.multiply (.getVelocity arrow)
-                                       (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))))))
+                                       (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))))
+    (and (.getClickedBlock evt)
+         (= Material/STONE_BUTTON (.getType (.getClickedBlock evt)))
+         (blazon? Material/EMERALD_BLOCK (.getBlock (.add (.getLocation player) 0 -1 0))))
+    (lift-up (.getLocation player))))
+
 
 (defn y->pitch [y]
   (* 90 (Math/sin (* y -0.5 Math/PI))))
@@ -1152,6 +1166,10 @@
       (player-super-jump evt player)))
   (if-let [block (.getClickedBlock evt)]
     (cond
+      (and (= Material/STONE_BUTTON (.getType block))
+           (blazon? Material/EMERALD_BLOCK (.getBlock (.add (.getLocation player) 0 -1 0))))
+      (lift-down (.getLocation player))
+
       (= Material/BLAZE_ROD (.. player (getItemInHand) (getType)))
       (do
         (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
