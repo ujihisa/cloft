@@ -439,7 +439,11 @@
       (loc/spawn (.getLocation creature) Blaze)
       (.setCancelled evt true))))
 
+(def lifting? (ref false))
+
 (defn item-spawn-event [evt]
+  (when @lifting?
+    (.setCancelled evt true))
   (let [item (.getEntity evt)
         table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
                Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
@@ -1022,7 +1026,9 @@
   (lift center-loc -1))
 
 (defn lift [center-loc ydiff]
-  (loc/play-effect center-loc Effect/STEP_SOUND Material/COBBLESTONE)
+  (loc/play-effect center-loc Effect/CLICK1 nil)
+  (loc/play-effect center-loc Effect/CLICK2 nil)
+  (dosync (ref-set lifting? true))
   (let [tuples (for [x [-1 0 1] y [-1 0 1] z [-1 0 1]]
                  (let [block (.getBlock (.add (.clone center-loc) x y z))]
                    [(.getType block) (.getData block)]))
@@ -1040,7 +1046,8 @@
         (.setData block bdata)))
     (doseq [x [-1 0 1] z [-1 0 1]]
       (let [block (.getBlock (.add (.clone center-loc) x (- 0 ydiff) z))]
-        (.setType block Material/AIR)))))
+        (.setType block Material/AIR))))
+  (dosync (ref-set lifting? false)))
 
 (comment (defn elevator [player door]
   (let [loc (.getLocation (.getBlock (.getLocation player)))]
