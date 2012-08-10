@@ -1012,6 +1012,33 @@
 
 (def special-snowball-set (atom #{}))
 
+(defn lift-up [center-loc]
+  (lift center-loc 1))
+
+(defn lift-down [center-loc]
+  (lift center-loc -1))
+
+(defn lift [center-loc ydiff]
+  (loc/play-effect center-loc Effect/STEP_SOUND Material/COBBLESTONE)
+  (let [tuples (for [x [-1 0 1] y [-1 0 1] z [-1 0 1]]
+                 (let [block (.getBlock (.add (.clone center-loc) x y z))]
+                   [(.getType block) (.getData block)]))
+        new-coords (for [x [-1 0 1] y [-1 0 1] z [-1 0 1]]
+                     [x (+ y ydiff) z])
+        zipped (map #(list %1 %2) tuples new-coords)]
+    (doseq [[[btype bdata] [x y z]] zipped]
+      "I don't know why but this line is vital")
+    (doseq [[[btype bdata] [x y z]] zipped]
+      (let [block (.getBlock (.add (.clone center-loc) x y z))]
+        (.setType block Material/AIR)))
+    (doseq [[[btype bdata] [x y z]] zipped]
+      (let [block (.getBlock (.add (.clone center-loc) x y z))]
+        (.setType block btype)
+        (.setData block bdata)))
+    (doseq [x [-1 0 1] z [-1 0 1]]
+      (let [block (.getBlock (.add (.clone center-loc) x (- 0 ydiff) z))]
+        (.setType block Material/AIR)))))
+
 (comment (defn elevator [player door]
   (let [loc (.getLocation (.getBlock (.getLocation player)))]
     (when (and
@@ -2024,6 +2051,20 @@
     (.addEnchantment gp org.bukkit.enchantments.Enchantment/DIG_SPEED 4)
     (.addEnchantment gp org.bukkit.enchantments.Enchantment/DURABILITY 3)
     (.setItemInHand (c/ujm) gp)))
+
+(def just-for-now5-state (ref true))
+(defn just-for-now5 []
+  (if @just-for-now5-state
+    (dosync
+      (.sendMessage (c/ujm) "to false")
+      (doseq [player (Bukkit/getOnlinePlayers)]
+        (.hidePlayer player (c/ujm)))
+      (ref-set just-for-now5-state false))
+    (dosync
+      (.sendMessage (c/ujm) "to true")
+      (doseq [player (Bukkit/getOnlinePlayers)]
+        (.showPlayer player (c/ujm)))
+      (ref-set just-for-now5-state true))))
 
 (defn vehicle-block-collision-event [evt]
   (let [vehicle (.getVehicle evt)]
