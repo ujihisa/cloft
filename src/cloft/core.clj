@@ -130,7 +130,8 @@
         world (.getWorld location)
         shooter (.getShooter entity)]
     (.setFallDistance shooter 0.0)
-    (c/teleport-without-angle shooter location)))
+    (c/teleport-without-angle shooter location))
+  (.remove entity))
 
 (defn arrow-skill-fire [entity]
   (doseq [target (filter
@@ -948,14 +949,14 @@
       #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
       #_(.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")
-      (.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました")
-      (.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
+      #_(.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました")
+      #_(.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
       (.sendMessage player "[NEWS] 生牛肉は危険です")
       (.sendMessage player "[NEWS] shiftでプレイヤからも降りれます")
-      (.sendMessage player "[NEWS] exp5以上のなにか殺すとたまにEmeraldもらえます")
-      #_(.sendMessage player "[NEWS] arrow-skill-treeで生える木の種類がランダムに")
-      #_(.sendMessage player "[NEWS] しゃがんだまま剣でガードすると近くの敵に自動照準")
-      #_(.sendMessage player "[NEWS] しゃがんだまま弓を構えると近くの敵に自動照準")
+      #_(.sendMessage player "[NEWS] exp5以上のなにか殺すとたまにEmeraldもらえます")
+      (.sendMessage player "[NEWS] arrow-skill-treeで生える木の種類がランダムに")
+      (.sendMessage player "[NEWS] しゃがんだまま剣でガードすると近くの敵に自動照準")
+      (.sendMessage player "[NEWS] しゃがんだまま弓を構えると近くの敵に自動照準")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
@@ -1639,6 +1640,8 @@
           (.teleport target shooter)
           (= arrow-skill-fire (arrow-skill-of shooter))
           (.setFireTicks target 400)
+          (= arrow-skill-teleport (arrow-skill-of shooter))
+          (.setCancelled evt true)
           (= 'cart (arrow-skill-of shooter))
           (let [cart (loc/spawn (.getLocation target) Minecart)]
             (.setPassenger cart target))))
