@@ -60,7 +60,8 @@
 (defn food-level-change-event [evt]
   (defn o157 [player]
     (when (= 0 (rand-int 2))
-      (let [msg (format "%s got O157! Don't eat a yukhoe or a raw liver!")]
+      (let [msg (format "%s got O157! Don't eat a yukhoe or a raw liver!"
+                        (.getDisplayName player))]
         (c/broadcast msg)
         (c/lingr msg)
         (.addPotionEffect player (PotionEffect. PotionEffectType/POISON 100 1))
@@ -871,6 +872,7 @@
 (defn vector-from-to [ent-from ent-to]
   (.toVector (.subtract (.getLocation ent-to) (.getLocation ent-from))))
 
+(def countdowning? (ref false))
 (def player-block-placed (atom {}))
 
 (defn lookup-player-block-placed [block player]
@@ -924,7 +926,7 @@
                   (.setData b (.getData another-block)))))))
         (.sendMessage another-player "ok (second)")
         (.sendMessage player "ok (first)"))
-      (do
+      (when @countdowning?
         (future-call #(do
                         (Thread/sleep 3000)
                         (swap! player-block-placed dissoc block)))
@@ -944,13 +946,14 @@
         (.setOp player (or
                          (.startsWith ip "10.0")
                          (= "113.151.154.229" ip)
-                         (= "0:0:0:0:0:0:0:1" ip))))
+                         (= "127.0.0.1" ip)
+                         #_(= "0:0:0:0:0:0:0:1" ip))))
       (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
       #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
-      #_(.sendMessage player "[NEWS] 鶏右クリックドロップアイテム変わりました")
-      #_(.sendMessage player "[NEWS] 金の剣のビームや矢は左クリックになりました")
-      #_(.sendMessage player "[NEWS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
+      #_(.sendMessage player "[TIPS] 鶏右クリックドロップアイテム変わりました")
+      #_(.sendMessage player "[TIPS] 金の剣のビームや矢は左クリックになりました")
+      #_(.sendMessage player "[TIPS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
       (.sendMessage player "[NEWS] 生牛肉は危険です")
       (.sendMessage player "[NEWS] shiftでプレイヤからも降りれます")
       #_(.sendMessage player "[NEWS] exp5以上のなにか殺すとたまにEmeraldもらえます")
@@ -985,10 +988,15 @@
                             (.setCancelled evt true)
                             (future-call #(do
                                             (c/broadcast name ": " 3 " " (.getType (.getItemInHand player)))
+                                            (dosync
+                                              (ref-set countdowning? true))
                                             (Thread/sleep 1000)
                                             (c/broadcast 2)
                                             (Thread/sleep 1000)
-                                            (c/broadcast 1))))
+                                            (c/broadcast 1)
+                                            (Thread/sleep 2000)
+                                            (dosync
+                                              (ref-set countdowning? false)))))
       :else (c/lingr "computer_science" (str (player/name2icon name) msg)))))
 
 (defn touch-player [target]
@@ -2014,6 +2022,7 @@
 (defn just-for-now4 []
   (let [gp (ItemStack. Material/GOLD_PICKAXE)]
     (.addEnchantment gp org.bukkit.enchantments.Enchantment/DIG_SPEED 4)
+    (.addEnchantment gp org.bukkit.enchantments.Enchantment/DURABILITY 3)
     (.setItemInHand (c/ujm) gp)))
 
 (defn vehicle-block-collision-event [evt]
