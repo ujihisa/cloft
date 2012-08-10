@@ -1602,6 +1602,9 @@
   (if (and
         (not= 0 (rand-int 10))
         (instance? Player target)
+        (or (not (instance? Player (.getShooter arrow)))
+            (not= arrow-skill-teleport
+                  (arrow-skill-of (.getShooter arrow))))
         (when-let [chestplate (.getChestplate (.getInventory target))]
           (and
             (= Material/LEATHER_CHESTPLATE (.getType chestplate))
