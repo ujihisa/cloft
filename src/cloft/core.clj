@@ -11,7 +11,8 @@
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
   (:require [swank.swank])
-  (:import [org.bukkit Bukkit Material TreeType])
+  (:import [org.bukkit Bukkit Material TreeType DyeColor])
+  (:import [org.bukkit.material Wool])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
             EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
@@ -1324,7 +1325,7 @@
         (= Material/STRING (.getType (.getItemInHand player)))
         (player-entity-with-string-event evt player target)
 
-        (and (= (.getType (.getItemInHand player)) Material/COAL)
+        (and (= Material/COAL (.getType (.getItemInHand player)))
              (instance? PoweredMinecart target))
         (do
           (.setMaxSpeed target 5.0)
@@ -1338,27 +1339,31 @@
                             (Thread/sleep 100)
                             (.setVelocity target (Vector. new-x (.getY v) new-z))))))
 
-        ; give wheat to zombie pigman -> pig
         (and (instance? PigZombie target)
-             (= (.getTypeId (.getItemInHand player)) 296))
+             (= Material/WHEAT (.getType (.getItemInHand player))))
         (do
           (c/swap-entity target Pig)
           (c/consume-item player))
 
-        ; give zombeef to pig -> zombie pigman
         (and (instance? Pig target)
-             (= (.getTypeId (.getItemInHand player)) 367))
+             (= Material/ROTTEN_FLESH (.getType (.getItemInHand player))))
         (do
           (c/swap-entity target PigZombie)
           (c/consume-item player))
 
-        ; right-click sheep -> wool
-        (instance? Sheep target) (d 35 (rand-int 16))
-        (instance? Chicken target) (d (.getId Material/FEATHER))
+        (instance? Sheep target)
+        (let [w (loc/drop-item (.getLocation target) (ItemStack. Material/WOOL))]
+          (.setData (.getItemStack w) (Wool. (rand-nth (DyeColor/values)))))
+
+        (instance? Chicken target)
+        (loc/drop-item (.getLocation target) (ItemStack. Material/FEATHER))
+
         ; right-click pig -> cocoa
         (instance? Pig target) (d 351 3)
         (instance? Cow target) (player-rightclick-cow player target)
-        (instance? Creeper target) (d (.getId Material/SULPHUR))
+
+        (instance? Creeper target)
+        (loc/drop-item (.getLocation target) (ItemStack.  Material/SULPHUR))
 
         (instance? Villager target)
         (if-let [item (.getItemInHand player)]
