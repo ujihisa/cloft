@@ -343,7 +343,6 @@
 
 (defn arrow-velocity-vertical? [arrow]
   (let [v (.getVelocity arrow)]
-    ;(prn 'arrow-velocity-vertical? v)
     (and (> 0.1 (Math/abs (.getX v)))
          (> 0.1 (Math/abs (.getZ v))))))
 
@@ -667,7 +666,7 @@
                  Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
                  Material/RAILS ['cart "CART"]
                  Material/BOOKSHELF ['mobchange "MOBCHANGE"]
-                 Material/SANDSTONE ['arrow-skill-tntmissile "TNTMissle"]
+                 #_(Material/SANDSTONE ['arrow-skill-tntmissile "TNTMissle"])
                  #_( Material/STONE ['sniping "SNIPING"])
                  Material/SNOW_BLOCK [arrow-skill-ice "ICE"]
                  Material/POWERED_RAIL ['exp "EXP"]
@@ -679,7 +678,7 @@
                  #_( Material/FIRE [arrow-skill-flame "FLAME"])
                  Material/BROWN_MUSHROOM [arrow-skill-quake "QUAKE"]
                  Material/RED_MUSHROOM ['arrow-skill-poison "POISON"]
-                 Material/FENCE_GATE [arrow-skill-popcorn "POPCORN"]
+                 #_(Material/FENCE_GATE [arrow-skill-popcorn "POPCORN"])
                  Material/WATER [arrow-skill-water "WATER"]
                  Material/LAVA [arrow-skill-lava "LAVA"]
                  Material/LOG [arrow-skill-woodbreak "WOODBREAK"]}]
@@ -957,20 +956,21 @@
                          (= "127.0.0.1" ip)
                          #_(= "0:0:0:0:0:0:0:1" ip))))
       (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
-      #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
+      (.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
+      #_(.sendMessage player "[TIPS] 3人が同時に真上に矢を撃つと敵がEmeraldに")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
-      #_(.sendMessage player "[TIPS] 鶏右クリックドロップアイテム変わりました")
-      #_(.sendMessage player "[TIPS] 金の剣のビームや矢は左クリックになりました")
+      #_(.sendMessage player "[TIPS] HP Maxのときに金の剣で攻撃するとビーム")
       #_(.sendMessage player "[TIPS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
-      (.sendMessage player "[NEWS] 生牛肉は危険です")
-      (.sendMessage player "[NEWS] shiftでプレイヤからも降りれます")
+      #_(.sendMessage player "[NEWS] 生牛肉は危険です")
+      #_(.sendMessage player "[NEWS] shiftでプレイヤからも降りれます")
       #_(.sendMessage player "[NEWS] exp5以上のなにか殺すとたまにEmeraldもらえます")
-      (.sendMessage player "[NEWS] arrow-skill-treeで生える木の種類がランダムに")
-      (.sendMessage player "[NEWS] しゃがんだまま剣でガードすると近くの敵に自動照準")
-      (.sendMessage player "[NEWS] しゃがんだまま弓を構えると近くの敵に自動照準")
+      #_(.sendMessage player "[NEWS] arrow-skill-treeで生える木の種類がランダムに")
+      #_(.sendMessage player "[NEWS] しゃがんだまま剣でガードすると近くの敵に自動照準")
+      #_(.sendMessage player "[NEWS] しゃがんだまま弓を構えると近くの敵に自動照準")
+      (.sendMessage player "[NEWS] arrow-skill-woodbreakがちょっと便利に")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
-    (c/lingr (str (player/name2icon (.getDisplayName player)) "logged in now."))))
+    (c/lingr (format "%s logged in" (.getDisplayName player)))))
 
 (defn paperlot [player]
   (letfn [(unlucky [player]
@@ -1081,7 +1081,6 @@
         (.setType (.getBlock (.add (.clone loc) x 12 z)) Material/COBBLESTONE))
       (.setType (.getBlock (.getLocation door)) Material/AIR)
       (.setType (.getBlock (.add (.getLocation door) 0 10 0)) Material/IRON_DOOR)))))
-
 
 (def plowed-sands (atom #{}))
 
