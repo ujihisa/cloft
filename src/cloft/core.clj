@@ -1354,37 +1354,6 @@
           (.remove target))
         (loc/drop-item (.getLocation target) (ItemStack. Material/ROTTEN_FLESH)))
 
-      (instance? Sheep target)
-      (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
-
-      (instance? Chicken target)
-      (loc/drop-item
-        (.getLocation target)
-        (ItemStack. (rand-nth [Material/FEATHER Material/FEATHER
-                               Material/SAND Material/STRING])))
-
-      (instance? Pig target)
-      (loc/drop-item (.getLocation target) (.toItemStack (Dye. Material/COCOA) 1))
-
-      (instance? Cow target)
-      (player-rightclick-cow player target)
-
-      (instance? Creeper target)
-      (loc/drop-item (.getLocation target) (ItemStack.  Material/SULPHUR))
-
-      (instance? Skeleton target) (loc/drop-item (.getLocation target) (ItemStack. Material/ARROW))
-
-      (instance? Spider target)
-      (loc/drop-item
-        (.getLocation target)
-        (ItemStack. (rand-nth [Material/SPIDER_EYE Material/DIRT
-                               Material/SAND Material/STRING])))
-
-
-      (instance? IronGolem target)
-      (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
-                                                         [Material/YELLOW_FLOWER
-                                                          Material/RED_ROSE])))
       (instance? Villager target)
       (letfn [(default [] (loc/drop-item (.getLocation target) (ItemStack. Material/CAKE)))]
         (if-let [item (.getItemInHand player)]
@@ -1416,7 +1385,38 @@
         (.setFoodLevel player 0))
 
       (instance? Player target)
-      (touch-player target))))
+      (touch-player target)
+
+      (instance? Sheep target)
+      (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
+
+      (instance? Chicken target)
+      (loc/drop-item
+        (.getLocation target)
+        (ItemStack. (rand-nth [Material/FEATHER Material/FEATHER
+                               Material/SAND Material/STRING])))
+
+      (instance? Pig target)
+      (loc/drop-item (.getLocation target) (.toItemStack (Dye. Material/COCOA) 1))
+
+      (instance? Cow target)
+      (player-rightclick-cow player target)
+
+      (instance? Creeper target)
+      (loc/drop-item (.getLocation target) (ItemStack.  Material/SULPHUR))
+
+      (instance? Skeleton target) (loc/drop-item (.getLocation target) (ItemStack. Material/ARROW))
+
+      (instance? Spider target)
+      (loc/drop-item
+        (.getLocation target)
+        (ItemStack. (rand-nth [Material/SPIDER_EYE Material/DIRT
+                               Material/SAND Material/STRING])))
+
+      (instance? IronGolem target)
+      (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
+                                                         [Material/YELLOW_FLOWER
+                                                          Material/RED_ROSE]))))))
 
 (defn player-level-change-event [evt]
   (when (< (.getOldLevel evt) (.getNewLevel evt))
