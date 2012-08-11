@@ -1308,112 +1308,112 @@
 (defn player-interact-entity-event [evt]
   (let [player (.getPlayer evt)
         target (.getRightClicked evt)]
-      (cond
-        (when-let [passenger (.getPassenger player)]
-          (= passenger target))
+    (cond
+      (when-let [passenger (.getPassenger player)]
+        (= passenger target))
+      (do
+        (.setAllowFlight player false)
+        (.eject player))
+
+      (= Material/STRING (.getType (.getItemInHand player)))
+      (player-entity-with-string-event evt player target)
+
+      (and (= Material/COAL (.getType (.getItemInHand player)))
+           (instance? PoweredMinecart target))
+      (do
+        (.setMaxSpeed target 5.0)
+        (let [v (.getVelocity target)
+              x (.getX v)
+              z (.getY v)
+              r2 (max (+ (* x x) (* z z)) 0.1)
+              new-x (* 2 (/ x r2))
+              new-z (* 2 (/ z r2))]
+          (future-call #(do
+                          (Thread/sleep 100)
+                          (.setVelocity target (Vector. new-x (.getY v) new-z))))))
+
+      (and (instance? PigZombie target)
+           (= Material/WHEAT (.getType (.getItemInHand player))))
+      (do
+        (c/swap-entity target Pig)
+        (c/consume-item player))
+
+      (and (instance? Pig target)
+           (= Material/ROTTEN_FLESH (.getType (.getItemInHand player))))
+      (do
+        (c/swap-entity target PigZombie)
+        (c/consume-item player))
+
+      (and (instance? Zombie target)
+           (not (instance? PigZombie target)))
+      (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
         (do
-          (.setAllowFlight player false)
-          (.eject player))
+          (loc/spawn (.getLocation target) Giant)
+          (c/broadcast "Giant!")
+          (c/consume-item player)
+          (.remove target))
+        (loc/drop-item (.getLocation target) (ItemStack. Material/ROTTEN_FLESH)))
 
-        (= Material/STRING (.getType (.getItemInHand player)))
-        (player-entity-with-string-event evt player target)
+      (instance? Sheep target)
+      (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
 
-        (and (= Material/COAL (.getType (.getItemInHand player)))
-             (instance? PoweredMinecart target))
-        (do
-          (.setMaxSpeed target 5.0)
-          (let [v (.getVelocity target)
-                x (.getX v)
-                z (.getY v)
-                r2 (max (+ (* x x) (* z z)) 0.1)
-                new-x (* 2 (/ x r2))
-                new-z (* 2 (/ z r2))]
-            (future-call #(do
-                            (Thread/sleep 100)
-                            (.setVelocity target (Vector. new-x (.getY v) new-z))))))
+      (instance? Chicken target)
+      (loc/drop-item (.getLocation target) (ItemStack. Material/FEATHER))
 
-        (and (instance? PigZombie target)
-             (= Material/WHEAT (.getType (.getItemInHand player))))
-        (do
-          (c/swap-entity target Pig)
-          (c/consume-item player))
+      (instance? Pig target)
+      (loc/drop-item (.getLocation target) (.toItemStack (Dye. Material/COCOA) 1))
 
-        (and (instance? Pig target)
-             (= Material/ROTTEN_FLESH (.getType (.getItemInHand player))))
-        (do
-          (c/swap-entity target PigZombie)
-          (c/consume-item player))
+      (instance? Cow target)
+      (player-rightclick-cow player target)
 
-        (and (instance? Zombie target)
-             (not (instance? PigZombie target)))
-        (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
-          (do
-            (loc/spawn (.getLocation target) Giant)
-            (c/broadcast "Giant!")
-            (c/consume-item player)
-            (.remove target))
-          (loc/drop-item (.getLocation target) (ItemStack. Material/ROTTEN_FLESH)))
+      (instance? Creeper target)
+      (loc/drop-item (.getLocation target) (ItemStack.  Material/SULPHUR))
 
-        (instance? Sheep target)
-        (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
-
-        (instance? Chicken target)
-        (loc/drop-item (.getLocation target) (ItemStack. Material/FEATHER))
-
-        (instance? Pig target)
-        (loc/drop-item (.getLocation target) (.toItemStack (Dye. Material/COCOA) 1))
-
-        (instance? Cow target)
-        (player-rightclick-cow player target)
-
-        (instance? Creeper target)
-        (loc/drop-item (.getLocation target) (ItemStack.  Material/SULPHUR))
-
-        (instance? Villager target)
-        (letfn [(default [] (loc/drop-item (.getLocation target) (ItemStack. Material/CAKE)))]
-          (if-let [item (.getItemInHand player)]
-            (condp = (.getType item)
-              Material/BROWN_MUSHROOM (do
-                                        (.setProfession target Villager$Profession/LIBRARIAN)
-                                        (c/consume-item player))
-              Material/RED_MUSHROOM (do
-                                      (.setProfession target Villager$Profession/PRIEST)
+      (instance? Villager target)
+      (letfn [(default [] (loc/drop-item (.getLocation target) (ItemStack. Material/CAKE)))]
+        (if-let [item (.getItemInHand player)]
+          (condp = (.getType item)
+            Material/BROWN_MUSHROOM (do
+                                      (.setProfession target Villager$Profession/LIBRARIAN)
                                       (c/consume-item player))
-              Material/YELLOW_FLOWER (do
-                                       (.setProfession target Villager$Profession/BLACKSMITH)
-                                       (c/consume-item player))
-              Material/RED_ROSE (do
-                                  (.setProfession target Villager$Profession/BUTCHER)
-                                  (c/consume-item player))
-              Material/REDSTONE (do
-                                  (.setProfession target Villager$Profession/FARMER)
-                                  (c/consume-item player))
-              (default))
-            (default)))
+            Material/RED_MUSHROOM (do
+                                    (.setProfession target Villager$Profession/PRIEST)
+                                    (c/consume-item player))
+            Material/YELLOW_FLOWER (do
+                                     (.setProfession target Villager$Profession/BLACKSMITH)
+                                     (c/consume-item player))
+            Material/RED_ROSE (do
+                                (.setProfession target Villager$Profession/BUTCHER)
+                                (c/consume-item player))
+            Material/REDSTONE (do
+                                (.setProfession target Villager$Profession/FARMER)
+                                (c/consume-item player))
+            (default))
+          (default)))
 
-        (instance? Skeleton target) (loc/drop-item (.getLocation target) (ItemStack. Material/ARROW))
+      (instance? Skeleton target) (loc/drop-item (.getLocation target) (ItemStack. Material/ARROW))
 
-        (instance? Spider target)
-        (loc/drop-item
-          (.getLocation target)
-          (ItemStack. (rand-nth [Material/SPIDER_EYE Material/DIRT
-                                 Material/SAND Material/STRING])))
+      (instance? Spider target)
+      (loc/drop-item
+        (.getLocation target)
+        (ItemStack. (rand-nth [Material/SPIDER_EYE Material/DIRT
+                               Material/SAND Material/STRING])))
 
-        (instance? Squid target)
-        (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
-                                                     65394 65394 65411 65438
-                                                     65405]))]
-          (c/lingr msg)
-          (c/broadcast (.getDisplayName player) ": " msg)
-          (.setFoodLevel player 0))
+      (instance? Squid target)
+      (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
+                                                   65394 65394 65411 65438
+                                                   65405]))]
+        (c/lingr msg)
+        (c/broadcast (.getDisplayName player) ": " msg)
+        (.setFoodLevel player 0))
 
-        (instance? IronGolem target)
-        (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
-                                                           [Material/YELLOW_FLOWER
-                                                            Material/RED_ROSE])))
+      (instance? IronGolem target)
+      (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
+                                                         [Material/YELLOW_FLOWER
+                                                          Material/RED_ROSE])))
 
-        (instance? Player target)
-        (touch-player target))))
+      (instance? Player target)
+      (touch-player target))))
 
 (defn player-level-change-event [evt]
   (when (< (.getOldLevel evt) (.getNewLevel evt))
