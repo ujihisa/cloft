@@ -1,4 +1,5 @@
-(ns cloft.loc)
+(ns cloft.loc
+  (:import [org.bukkit Bukkit]))
 
 (defn spawn [loc klass]
   (.spawn (.getWorld loc) loc klass))
@@ -11,3 +12,6 @@
 
 (defn play-effect [loc effect data]
   (.playEffect (.getWorld loc) loc effect data))
+
+(defn of [pname]
+  (.getLocation (Bukkit/getPlayer pname)))
