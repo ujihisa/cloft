@@ -1358,7 +1358,10 @@
       (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
 
       (instance? Chicken target)
-      (loc/drop-item (.getLocation target) (ItemStack. Material/FEATHER))
+      (loc/drop-item
+        (.getLocation target)
+        (ItemStack. (rand-nth [Material/FEATHER Material/FEATHER
+                               Material/SAND Material/STRING])))
 
       (instance? Pig target)
       (loc/drop-item (.getLocation target) (.toItemStack (Dye. Material/COCOA) 1))
@@ -1369,6 +1372,19 @@
       (instance? Creeper target)
       (loc/drop-item (.getLocation target) (ItemStack.  Material/SULPHUR))
 
+      (instance? Skeleton target) (loc/drop-item (.getLocation target) (ItemStack. Material/ARROW))
+
+      (instance? Spider target)
+      (loc/drop-item
+        (.getLocation target)
+        (ItemStack. (rand-nth [Material/SPIDER_EYE Material/DIRT
+                               Material/SAND Material/STRING])))
+
+
+      (instance? IronGolem target)
+      (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
+                                                         [Material/YELLOW_FLOWER
+                                                          Material/RED_ROSE])))
       (instance? Villager target)
       (letfn [(default [] (loc/drop-item (.getLocation target) (ItemStack. Material/CAKE)))]
         (if-let [item (.getItemInHand player)]
@@ -1391,14 +1407,6 @@
             (default))
           (default)))
 
-      (instance? Skeleton target) (loc/drop-item (.getLocation target) (ItemStack. Material/ARROW))
-
-      (instance? Spider target)
-      (loc/drop-item
-        (.getLocation target)
-        (ItemStack. (rand-nth [Material/SPIDER_EYE Material/DIRT
-                               Material/SAND Material/STRING])))
-
       (instance? Squid target)
       (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
                                                    65394 65394 65411 65438
@@ -1406,11 +1414,6 @@
         (c/lingr msg)
         (c/broadcast (.getDisplayName player) ": " msg)
         (.setFoodLevel player 0))
-
-      (instance? IronGolem target)
-      (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
-                                                         [Material/YELLOW_FLOWER
-                                                          Material/RED_ROSE])))
 
       (instance? Player target)
       (touch-player target))))
