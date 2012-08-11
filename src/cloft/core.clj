@@ -1019,12 +1019,6 @@
 
 (def special-snowball-set (atom #{}))
 
-(defn lift-up [center-loc]
-  (lift center-loc 1))
-
-(defn lift-down [center-loc]
-  (lift center-loc -1))
-
 (defn lift [center-loc ydiff]
   (loc/play-effect center-loc Effect/CLICK1 nil)
   (loc/play-effect center-loc Effect/CLICK2 nil)
@@ -1057,6 +1051,12 @@
     (.teleport player loc)
     (.sendMessage player "elevator!"))
   (dosync (ref-set lifting? false)))
+
+(defn lift-up [center-loc]
+  (lift center-loc 1))
+
+(defn lift-down [center-loc]
+  (lift center-loc -1))
 
 (comment (defn elevator [player door]
   (let [loc (.getLocation (.getBlock (.getLocation player)))]
