@@ -1318,102 +1318,104 @@
       (= Material/STRING (.getType (.getItemInHand player)))
       (player-entity-with-string-event evt player target)
 
-      (instance? PoweredMinecart target)
-      (when (= Material/COAL (.getType (.getItemInHand player)))
-        (.setMaxSpeed target 5.0)
-        (let [v (.getVelocity target)
-              x (.getX v)
-              z (.getY v)
-              r2 (max (+ (* x x) (* z z)) 0.1)
-              new-x (* 2 (/ x r2))
-              new-z (* 2 (/ z r2))]
-          (future-call #(do
-                          (Thread/sleep 100)
-                          (.setVelocity target (Vector. new-x (.getY v) new-z))))))
+      :else
+      (condp instance? target
+        PoweredMinecart
+        (when (= Material/COAL (.getType (.getItemInHand player)))
+          (.setMaxSpeed target 5.0)
+          (let [v (.getVelocity target)
+                x (.getX v)
+                z (.getY v)
+                r2 (max (+ (* x x) (* z z)) 0.1)
+                new-x (* 2 (/ x r2))
+                new-z (* 2 (/ z r2))]
+            (future-call #(do
+                            (Thread/sleep 100)
+                            (.setVelocity target (Vector. new-x (.getY v) new-z))))))
 
-      (instance? PigZombie target)
-      (when (= Material/WHEAT (.getType (.getItemInHand player)))
-        (c/swap-entity target Pig)
-        (c/consume-item player))
-
-      (instance? Pig target)
-      (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
-        (do
-          (c/swap-entity target PigZombie)
+        PigZombie
+        (when (= Material/WHEAT (.getType (.getItemInHand player)))
+          (c/swap-entity target Pig)
           (c/consume-item player))
-        (loc/drop-item (.getLocation target)
-             (.toItemStack (doto (Dye.) (.setColor DyeColor/BROWN)) 1)))
 
-      (instance? Zombie target)
-      (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
-        (do
-          (loc/spawn (.getLocation target) Giant)
-          (c/broadcast "Giant!")
-          (c/consume-item player)
-          (.remove target))
-        (loc/drop-item (.getLocation target) (ItemStack. Material/ROTTEN_FLESH)))
+        Pig
+        (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
+          (do
+            (c/swap-entity target PigZombie)
+            (c/consume-item player))
+          (loc/drop-item (.getLocation target)
+               (.toItemStack (doto (Dye.) (.setColor DyeColor/BROWN)) 1)))
 
-      (instance? Villager target)
-      (letfn [(default [] (loc/drop-item (.getLocation target) (ItemStack. Material/CAKE)))]
-        (if-let [item (.getItemInHand player)]
-          (condp = (.getType item)
-            Material/BROWN_MUSHROOM (do
-                                      (.setProfession target Villager$Profession/LIBRARIAN)
+        Zombie
+        (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
+          (do
+            (loc/spawn (.getLocation target) Giant)
+            (c/broadcast "Giant!")
+            (c/consume-item player)
+            (.remove target))
+          (loc/drop-item (.getLocation target) (ItemStack. Material/ROTTEN_FLESH)))
+
+        Villager
+        (letfn [(default [] (loc/drop-item (.getLocation target) (ItemStack. Material/CAKE)))]
+          (if-let [item (.getItemInHand player)]
+            (condp = (.getType item)
+              Material/BROWN_MUSHROOM (do
+                                        (.setProfession target Villager$Profession/LIBRARIAN)
+                                        (c/consume-item player))
+              Material/RED_MUSHROOM (do
+                                      (.setProfession target Villager$Profession/PRIEST)
                                       (c/consume-item player))
-            Material/RED_MUSHROOM (do
-                                    (.setProfession target Villager$Profession/PRIEST)
-                                    (c/consume-item player))
-            Material/YELLOW_FLOWER (do
-                                     (.setProfession target Villager$Profession/BLACKSMITH)
-                                     (c/consume-item player))
-            Material/RED_ROSE (do
-                                (.setProfession target Villager$Profession/BUTCHER)
-                                (c/consume-item player))
-            Material/REDSTONE (do
-                                (.setProfession target Villager$Profession/FARMER)
-                                (c/consume-item player))
-            (default))
-          (default)))
+              Material/YELLOW_FLOWER (do
+                                       (.setProfession target Villager$Profession/BLACKSMITH)
+                                       (c/consume-item player))
+              Material/RED_ROSE (do
+                                  (.setProfession target Villager$Profession/BUTCHER)
+                                  (c/consume-item player))
+              Material/REDSTONE (do
+                                  (.setProfession target Villager$Profession/FARMER)
+                                  (c/consume-item player))
+              (default))
+            (default)))
 
-      (instance? Squid target)
-      (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
-                                                   65394 65394 65411 65438
-                                                   65405]))]
-        (c/lingr msg)
-        (c/broadcast (.getDisplayName player) ": " msg)
-        (.setFoodLevel player 0))
+        Squid
+        (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
+                                                     65394 65394 65411 65438
+                                                     65405]))]
+          (c/lingr msg)
+          (c/broadcast (.getDisplayName player) ": " msg)
+          (.setFoodLevel player 0))
 
-      (instance? Player target)
-      (touch-player target)
+        Player
+        (touch-player target)
 
-      (instance? Sheep target)
-      (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
+        Sheep
+        (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
 
-      (instance? Chicken target)
-      (loc/drop-item
-        (.getLocation target)
-        (ItemStack. (rand-nth [Material/FEATHER Material/FEATHER
-                               Material/SAND])))
+        Chicken
+        (loc/drop-item
+          (.getLocation target)
+          (ItemStack. (rand-nth [Material/FEATHER Material/FEATHER
+                                 Material/SAND])))
 
-      (instance? Cow target)
-      (player-rightclick-cow player target)
+        Cow
+        (player-rightclick-cow player target)
 
-      (instance? Creeper target)
-      (loc/drop-item (.getLocation target) (ItemStack.  Material/SULPHUR))
+        Creeper
+        (loc/drop-item (.getLocation target) (ItemStack.  Material/SULPHUR))
 
-      (instance? Skeleton target) (loc/drop-item (.getLocation target) (ItemStack. Material/ARROW))
+        Skeleton (loc/drop-item (.getLocation target) (ItemStack. Material/ARROW))
 
-      (instance? Spider target)
-      (loc/drop-item
-        (.getLocation target)
-        (ItemStack. (rand-nth [Material/SPIDER_EYE Material/DIRT
-                               Material/SAND Material/STRING])))
+        Spider
+        (loc/drop-item
+          (.getLocation target)
+          (ItemStack. (rand-nth [Material/SPIDER_EYE Material/DIRT
+                                 Material/SAND Material/STRING])))
 
-      (instance? IronGolem target)
-      (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
-                                                         [Material/YELLOW_FLOWER
-                                                          Material/RED_ROSE])))
-      :else nil)))
+        IronGolem
+        (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
+                                                           [Material/YELLOW_FLOWER
+                                                            Material/RED_ROSE])))
+        nil))))
 
 (defn player-level-change-event [evt]
   (when (< (.getOldLevel evt) (.getNewLevel evt))
