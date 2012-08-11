@@ -1318,9 +1318,8 @@
       (= Material/STRING (.getType (.getItemInHand player)))
       (player-entity-with-string-event evt player target)
 
-      (and (= Material/COAL (.getType (.getItemInHand player)))
-           (instance? PoweredMinecart target))
-      (do
+      (instance? PoweredMinecart target)
+      (when (= Material/COAL (.getType (.getItemInHand player)))
         (.setMaxSpeed target 5.0)
         (let [v (.getVelocity target)
               x (.getX v)
@@ -1332,20 +1331,20 @@
                           (Thread/sleep 100)
                           (.setVelocity target (Vector. new-x (.getY v) new-z))))))
 
-      (and (instance? PigZombie target)
-           (= Material/WHEAT (.getType (.getItemInHand player))))
-      (do
+      (instance? PigZombie target)
+      (when (= Material/WHEAT (.getType (.getItemInHand player)))
         (c/swap-entity target Pig)
         (c/consume-item player))
 
-      (and (instance? Pig target)
-           (= Material/ROTTEN_FLESH (.getType (.getItemInHand player))))
-      (do
-        (c/swap-entity target PigZombie)
-        (c/consume-item player))
+      (instance? Pig target)
+      (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
+        (do
+          (c/swap-entity target PigZombie)
+          (c/consume-item player))
+        (loc/drop-item (.getLocation target)
+             (.toItemStack (doto (Dye.) (.setColor DyeColor/BROWN)) 1)))
 
-      (and (instance? Zombie target)
-           (not (instance? PigZombie target)))
+      (instance? Zombie target)
       (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
         (do
           (loc/spawn (.getLocation target) Giant)
@@ -1394,10 +1393,7 @@
       (loc/drop-item
         (.getLocation target)
         (ItemStack. (rand-nth [Material/FEATHER Material/FEATHER
-                               Material/SAND Material/STRING])))
-
-      (instance? Pig target)
-      (loc/drop-item (.getLocation target) (.toItemStack (Dye. Material/COCOA) 1))
+                               Material/SAND])))
 
       (instance? Cow target)
       (player-rightclick-cow player target)
@@ -1416,7 +1412,8 @@
       (instance? IronGolem target)
       (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
                                                          [Material/YELLOW_FLOWER
-                                                          Material/RED_ROSE]))))))
+                                                          Material/RED_ROSE])))
+      :else nil)))
 
 (defn player-level-change-event [evt]
   (when (< (.getOldLevel evt) (.getNewLevel evt))
