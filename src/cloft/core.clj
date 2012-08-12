@@ -1204,7 +1204,7 @@
         (= Material/BOWL (.getType (.getItemInHand player)))
         (@plowed-sands block))
       (let [item-type (if (= 0 (rand-int 50)) Material/GOLD_INGOT Material/GOLD_NUGGET)]
-        (.dropItemNaturally (.getWorld block) (.getLocation block) (ItemStack. item-type)))
+        (loc/drop-item (.getLocation block) (ItemStack. item-type)))
 
       (and
         (hoe-durabilities (.. player (getItemInHand) (getType)))
