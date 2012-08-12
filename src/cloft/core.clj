@@ -440,17 +440,21 @@
       (.setCancelled evt true))))
 
 (def lifting? (ref false))
+(def popcorning? (ref false))
 
 (defn item-spawn-event [evt]
   (when @lifting?
     (.setCancelled evt true))
+  (when @popcorning?
+    (let [itemstack (.getItemStack (.getEntity evt))]
+      (prn itemstack)))
   (let [item (.getEntity evt)
         table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
                Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
                Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
                Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
                #_(Material/APPLE [Material/APPLE Material/GOLDEN_APPLE])
-               Material/ROTTEN_FLESH [Material/ROTTEN_FLESH Material/COAL]}
+               Material/ROTTEN_FLESH [Material/AIR Material/COAL]}
         itemstack (.getItemStack item)]
     (when (table (.getType itemstack))
       (future-call #(let [pair (table (.getType itemstack))]
@@ -1469,7 +1473,8 @@
           :when (.getAllowFlight player)]
     (if (.getPassenger player)
       (let [randvelodiff #(/ (- (rand) 0.5) 2.0)]
-        (when (= 0 (rand-int 2))
+        (when (or (not= "ujm" (.getDisplayName player))
+                  (= 0 (rand-int 2)))
           (c/add-velocity player (randvelodiff) (randvelodiff) (randvelodiff))))
       (do
         (.setAllowFlight player false)
@@ -1987,7 +1992,15 @@
                   :else nil)))
 
             #{Material/CHEST Material/ENDER_CHEST}
-            (.sendMessage player "not implemented yet...")
+            (when (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
+              #_(.setCancelled evt true)
+              (dosync
+                (ref-set popcorning? true)
+                (.breakNaturally block (ItemStack. Material/AIR))
+                (ref-set popcorning? false))
+              (let [msg (format "%s popcorned!" (.getDisplayName player))]
+                (c/lingr msg)
+                (c/broadcast msg)))
             nil)
           nil)))))
 
