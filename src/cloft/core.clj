@@ -1987,7 +1987,8 @@
                   :else nil)))
 
             #{Material/CHEST Material/ENDER_CHEST}
-            (.sendMessage player "not implemented yet..."))
+            (.sendMessage player "not implemented yet...")
+            nil)
           nil)))))
 
 (defn block-grow-event [evt]
