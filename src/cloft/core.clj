@@ -972,6 +972,8 @@
       #_(.sendMessage player "[NEWS] しゃがんだまま剣でガードすると近くの敵に自動照準")
       #_(.sendMessage player "[NEWS] しゃがんだまま弓を構えると近くの敵に自動照準")
       (.sendMessage player "[NEWS] arrow-skill-woodbreakがちょっと便利に")
+      (.sendMessage player "[NEWS] stone plateを持って他人を右クリックするとスカウター")
+      (.sendMessage player "[NEWS] ラピュタ近くの地上の村、実はその下に地下帝国が...")
       #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
