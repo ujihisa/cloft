@@ -1448,7 +1448,7 @@
           chicken (take 3 (filter #(instance? Chicken %) (.getNearbyEntities player 2 2 2)))]
       (chicken-touch-player chicken player)))
 
-(defn periodically-terminate-flying []
+(defn periodically-flyers []
   (doseq [player (Bukkit/getOnlinePlayers)
           :when (.getAllowFlight player)]
     (if (.getPassenger player)
@@ -1460,7 +1460,7 @@
         (.setFallDistance player 0.0)))))
 
 (defn periodically []
-  (periodically-terminate-flying)
+  (periodically-flyers)
   (periodically-entity-touch-player-event)
   (chimera-cow/periodically)
   (player/periodically-zombie-player)
