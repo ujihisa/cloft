@@ -694,9 +694,13 @@
                  Material/WORKBENCH ['pickaxe-skill-ore "ORE"]
                  Material/STONE ['pickaxe-skill-stone "STONE"]}]
       (when-let [skill-name (table (.getType block))]
-        (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
+        (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed pickaxe-skill to " (last skill-name))
-        (swap! pickaxe-skill assoc (.getDisplayName player) (first skill-name))))))
+        (swap! pickaxe-skill assoc (.getDisplayName player) (first skill-name))))
+    (when (#{Material/CHEST Material/ENDER_CHEST} (.getType block))
+      (swap! pickaxe-skill dissoc (.getDisplayName player))
+      (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
+      (.sendMessage player "ざわ・・・"))))
 
 (defn summon-x
   ([pos world creature] (summon-x pos world creature 1))
@@ -968,6 +972,7 @@
       #_(.sendMessage player "[NEWS] しゃがんだまま剣でガードすると近くの敵に自動照準")
       #_(.sendMessage player "[NEWS] しゃがんだまま弓を構えると近くの敵に自動照準")
       (.sendMessage player "[NEWS] arrow-skill-woodbreakがちょっと便利に")
+      #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (format "%s logged in" (.getDisplayName player)))))
@@ -1941,28 +1946,32 @@
           (do
             (.sendMessage player "Your hand hurts!")
             (.damage player (rand-int 5)))
+
           item/pickaxes
-          (when (and
-                  (= 'pickaxe-skill-ore (pickaxe-skill-of player))
-                  (= Material/STONE (.getType block)))
-            (letfn [(f [blocktype]
-                      (.setType block blocktype)
-                      (.setCancelled evt true)
-                      (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil))]
-              (cond
-                (= 0 (rand-int 10)) (f Material/COAL_ORE)
-                (= 0 (rand-int 20)) (f Material/IRON_ORE)
-                (= 0 (rand-int 30)) (f Material/REDSTONE_ORE)
-                (= 0 (rand-int 40)) (f Material/LAPIS_ORE)
-                (= 0 (rand-int 50)) (f Material/GOLD_ORE)
-                (= 0 (rand-int 100)) (f Material/EMERALD_ORE)
-                (= 0 (rand-int 1000)) (f Material/DIAMOND_ORE)
-                (= 0 (rand-int 300)) (f Material/GLOWSTONE)
-                (= 0 (rand-int 1000)) (f Material/LAPIS_BLOCK)
-                (= 0 (rand-int 1500)) (f Material/GOLD_BLOCK)
-                (= 0 (rand-int 2000)) (f Material/GOLD_BLOCK)
-                (= 0 (rand-int 50000)) (f Material/DIAMOND_BLOCK)
-                :else nil)))
+          (condp get (.getType block)
+            #{Material/STONE}
+            (when (= 'pickaxe-skill-ore (pickaxe-skill-of player))
+              (letfn [(f [blocktype]
+                        (.setType block blocktype)
+                        (.setCancelled evt true)
+                        (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil))]
+                (cond
+                  (= 0 (rand-int 10)) (f Material/COAL_ORE)
+                  (= 0 (rand-int 20)) (f Material/IRON_ORE)
+                  (= 0 (rand-int 30)) (f Material/REDSTONE_ORE)
+                  (= 0 (rand-int 40)) (f Material/LAPIS_ORE)
+                  (= 0 (rand-int 50)) (f Material/GOLD_ORE)
+                  (= 0 (rand-int 100)) (f Material/EMERALD_ORE)
+                  (= 0 (rand-int 1000)) (f Material/DIAMOND_ORE)
+                  (= 0 (rand-int 300)) (f Material/GLOWSTONE)
+                  (= 0 (rand-int 1000)) (f Material/LAPIS_BLOCK)
+                  (= 0 (rand-int 1500)) (f Material/GOLD_BLOCK)
+                  (= 0 (rand-int 2000)) (f Material/GOLD_BLOCK)
+                  (= 0 (rand-int 50000)) (f Material/DIAMOND_BLOCK)
+                  :else nil)))
+
+            #{Material/CHEST Material/ENDER_CHEST}
+            (.sendMessage player "not implemented yet..."))
           nil)))))
 
 (defn block-grow-event [evt]
