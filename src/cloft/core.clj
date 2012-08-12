@@ -1449,10 +1449,15 @@
       (chicken-touch-player chicken player)))
 
 (defn periodically-terminate-flying []
-  (doseq [player (Bukkit/getOnlinePlayers)]
-    (when-not (.getPassenger player)
-      (.setAllowFlight player false)
-      (.setFallDistance player 0.0))))
+  (doseq [player (Bukkit/getOnlinePlayers)
+          :when (.getAllowFlight player)]
+    (if (.getPassenger player)
+      (let [randvelodiff #(/ (- (rand) 0.5) 2.0)]
+        (when (= 0 (rand-int 2))
+          (c/add-velocity player (randvelodiff) (randvelodiff) (randvelodiff))))
+      (do
+        (.setAllowFlight player false)
+        (.setFallDistance player 0.0)))))
 
 (defn periodically []
   (periodically-terminate-flying)
