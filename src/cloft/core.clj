@@ -1145,14 +1145,14 @@
       (.remove (.getInventory player) item)
       (do
         (.setDurability item (+ 2 (.getDurability item)))
-        (future-call #(do
-                        (swap! plowed-sands conj block)
-                        (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
-                        (swap! plowed-sands disj block)
-                        (when (= Material/SAND (.getType block))
-                          (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
-                          (when (= 0 (rand-int 2))
-                            (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY]))))))))))
+        (future
+          (swap! plowed-sands conj block)
+          (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
+          (swap! plowed-sands disj block)
+          (when (= Material/SAND (.getType block))
+            (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
+            (when (= 0 (rand-int 2))
+              (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
 
 (defn player-right-click-event [evt player]
   (defn else []
