@@ -2194,11 +2194,10 @@
                             (c/lingr "computer_science" msg)
                             (c/broadcast msg))
                           "/chicken"
-                          (future-call
-                            (fn []
-                              (doseq [p (Bukkit/getOnlinePlayers)]
-                                (when-not (.isDead p)
-                                  (.spawn (.getWorld p) (.add (.getLocation p) 0 2 0) Chicken)))))
+                          (future
+                            (doseq [p (Bukkit/getOnlinePlayers)]
+                              (when-not (.isDead p)
+                                (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))))
                           (when-not (empty? players)
-                            (c/broadcast (str (:user contents) ": " (:body contents)))))))))))
+                            (c/broadcast (format "%s: %s" (:user contents) (:body contents)))))))))))
   #_(c/lingr "cloft plugin running..."))
