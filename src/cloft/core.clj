@@ -1012,9 +1012,18 @@
                                               (ref-set countdowning? false)))))
       :else (c/lingr "computer_science" (str (player/name2icon name) msg)))))
 
-(defn touch-player [target]
-  (.setFoodLevel target (dec (.getFoodLevel target)))
-  (.setGameMode target org.bukkit.GameMode/SURVIVAL))
+(defn touch-player [player target]
+  (if (and (.getItemInHand player)
+           (= Material/STONE_PLATE (.getType (.getItemInHand player))))
+    (do
+      (.sendMessage target "Stone plate helmet!")
+      (when-let [helmet (.getHelmet (.getInventory target))]
+        (loc/drop-item (.getLocation target) helmet))
+      (.setHelmet (.getInventory target) (ItemStack. Material/STONE_PLATE))
+      (c/consume-item player))
+    (do
+      (.setFoodLevel target (dec (.getFoodLevel target)))
+      (.setGameMode target org.bukkit.GameMode/SURVIVAL))))
 
 (defn entity-interact-physical-event [evt entity]
   (transport/teleport-up entity (.getBlock evt)))
@@ -1394,7 +1403,7 @@
           (.setFoodLevel player 0))
 
         Player
-        (touch-player target)
+        (touch-player player target)
 
         Sheep
         (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
@@ -1909,7 +1918,12 @@
           (when (instance? Pig target)
             (player-attacks-pig-event evt attacker target))
           (when (instance? Chicken target)
-            (player-attacks-chicken-event evt attacker target)))
+            (player-attacks-chicken-event evt attacker target))
+          (when-let [helmet (.getHelmet (.getInventory attacker))]
+            (when (= Material/STONE_PLATE (.getType helmet))
+              (.sendMessage attacker (format "damage: %s, HP: %s"
+                                             (.getDamage evt)
+                                             (- (.getHealth target) (.getDamage evt)))))))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (when (instance? Fireball attacker)
             (when-let [shooter (.getShooter attacker)]
