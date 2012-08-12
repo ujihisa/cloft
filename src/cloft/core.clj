@@ -1138,6 +1138,22 @@
           (.setYaw ploc (xz->yaw (.getX (.normalize direction)) (.getZ (.normalize direction))))
           (.teleport player ploc))))))
 
+(defn pan-gold-wait [player block]
+  (let [item (.getItemInHand player)]
+    (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/TORCH)
+    (if (> (.getDurability item) (hoe-durabilities (.getType item)))
+      (.remove (.getInventory player) item)
+      (do
+        (.setDurability item (+ 2 (.getDurability item)))
+        (future-call #(do
+                        (swap! plowed-sands conj block)
+                        (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
+                        (swap! plowed-sands disj block)
+                        (when (= Material/SAND (.getType block))
+                          (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
+                          (when (= 0 (rand-int 2))
+                            (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY]))))))))))
+
 (defn player-right-click-event [evt player]
   (defn else []
     """just for DRY"""
@@ -1197,20 +1213,8 @@
              (= Material/SAND (.getType block))
              (> 64.0 (.getY (.getLocation block)))
              (.isLiquid (.getBlock (.add (.getLocation block) 0 1 0)))))
-      (let [item (.getItemInHand player)]
-        (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/TORCH)
-        (if (> (.getDurability item) (hoe-durabilities (.getType item)))
-          (.remove (.getInventory player) item)
-          (do
-            (.setDurability item (+ 2 (.getDurability item)))
-            (future-call #(do
-                            (swap! plowed-sands conj block)
-                            (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
-                            (swap! plowed-sands disj block)
-                            (when (= Material/SAND (.getType block))
-                              (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
-                              (when (= 0 (rand-int 2))
-                                (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
+      (pan-gold-wait player block)
+
       :else
       (else))
     (else)))
