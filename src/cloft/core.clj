@@ -977,9 +977,10 @@
       #_(.sendMessage player "[NEWS] arrow-skill-treeで生える木の種類がランダムに")
       #_(.sendMessage player "[NEWS] しゃがんだまま剣でガードすると近くの敵に自動照準")
       #_(.sendMessage player "[NEWS] しゃがんだまま弓を構えると近くの敵に自動照準")
-      (.sendMessage player "[NEWS] arrow-skill-woodbreakがちょっと便利に")
+      #_(.sendMessage player "[NEWS] arrow-skill-woodbreakがちょっと便利に")
       (.sendMessage player "[NEWS] stone plateを持って他人を右クリックするとスカウター")
       (.sendMessage player "[NEWS] ラピュタ近くの地上の村、実はその下に地下帝国が...")
+      (.sendMessage player "[NEWS] 剣を焼くと分解できる。もしそれがenchantされてると...?")
       #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
@@ -1288,7 +1289,7 @@
                               (#{Material/FURNACE Material/BURNING_FURNACE}
                                   (.getType (.getBlock (.add (.getLocation item) 0 -1 0)))))
                         (doseq [p parts]
-                          (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (if (not= 0 (rand-int 10)) p Material/COAL) (.getAmount itemstack))))
+                          (loc/drop-item (.getLocation item) (ItemStack. (if (not= 0 (rand-int 10)) p Material/COAL) (.getAmount itemstack))))
                         (when (not-empty (.getEnchantments itemstack))
                           (let [exp (loc/spawn (.getLocation item) ExperienceOrb)]
                             (.setExperience exp (rand-nth (range 10 20)))))
