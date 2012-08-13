@@ -445,9 +445,10 @@
 (defn item-spawn-event [evt]
   (when @lifting?
     (.setCancelled evt true))
-  (when @popcorning?
+  (if @popcorning?
     (let [itemstack (.getItemStack (.getEntity evt))]
-      (prn itemstack)))
+      (when-not (#{Material/CHEST Material/ENDER_CHEST} (.getType itemstack))
+        (prn 'popcorn (.getType itemstack)))))
   (let [item (.getEntity evt)
         table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
                Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
