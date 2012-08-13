@@ -448,29 +448,29 @@
   (if @popcorning?
     (let [itemstack (.getItemStack (.getEntity evt))]
       (when-not (#{Material/CHEST Material/ENDER_CHEST} (.getType itemstack))
-        (prn 'popcorn (.getType itemstack)))))
-  (let [item (.getEntity evt)
-        table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
-               Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
-               Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
-               Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
-               #_(Material/APPLE [Material/APPLE Material/GOLDEN_APPLE])
-               Material/ROTTEN_FLESH [Material/AIR Material/COAL]}
-        itemstack (.getItemStack item)]
-    (when (table (.getType itemstack))
-      (future-call #(let [pair (table (.getType itemstack))]
-                      (Thread/sleep 5000)
-                      (when-not (.isDead item)
-                        (if (#{Material/FURNACE Material/BURNING_FURNACE}
-                                      (.getType (.getBlock (.add (.getLocation item) 0 -1 0))))
-                          (do
-                            (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (last pair) (.getAmount itemstack)))
-                            (.remove item))
-                          (do
-                            (Thread/sleep 25000)
-                            (when-not (.isDead item)
-                              (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (first pair) (.getAmount itemstack)))
-                              (.remove item))))))))))
+        (prn 'popcorn (.getType itemstack))))
+    (let [item (.getEntity evt)
+          table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
+                 Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
+                 Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
+                 Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
+                 #_(Material/APPLE [Material/APPLE Material/GOLDEN_APPLE])
+                 Material/ROTTEN_FLESH [Material/AIR Material/COAL]}
+          itemstack (.getItemStack item)]
+      (when (table (.getType itemstack))
+        (future-call #(let [pair (table (.getType itemstack))]
+                        (Thread/sleep 5000)
+                        (when-not (.isDead item)
+                          (if (#{Material/FURNACE Material/BURNING_FURNACE}
+                                  (.getType (.getBlock (.add (.getLocation item) 0 -1 0))))
+                            (do
+                              (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (last pair) (.getAmount itemstack)))
+                              (.remove item))
+                            (do
+                              (Thread/sleep 25000)
+                              (when-not (.isDead item)
+                                (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (first pair) (.getAmount itemstack)))
+                                (.remove item)))))))))))
 
 (defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
