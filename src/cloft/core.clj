@@ -934,19 +934,19 @@
                          (.toVector (.subtract
                                       (.getLocation block2)
                                       (.getLocation block1))))]
-          (doseq [diff (range 1 (- (xyz-getter block2) (xyz-getter block1)))]
-            (when (< diff 200)
-              (let [b (.getBlock (.add (.clone (.getLocation block1))
-                                       (.multiply (.clone unit-vec) diff)))]
-                (when ((cloft.block/category :enterable) (.getType b))
-                  (.setType b (.getType another-block))
-                  (.setData b (.getData another-block)))))))
+          (doseq [diff (range 1 (- (xyz-getter block2) (xyz-getter block1)))
+                  :when (< diff 200)]
+            (let [b (.getBlock (.add (.clone (.getLocation block1))
+                                     (.multiply (.clone unit-vec) diff)))]
+              (when ((cloft.block/category :enterable) (.getType b))
+                (.setType b (.getType another-block))
+                (.setData b (.getData another-block))))))
         (.sendMessage another-player "ok (second)")
         (.sendMessage player "ok (first)"))
       (when @countdowning?
-        (future-call #(do
-                        (Thread/sleep 3000)
-                        (swap! player-block-placed dissoc block)))
+        (future
+          (Thread/sleep 3000)
+          (swap! player-block-placed dissoc block))
         (swap! player-block-placed assoc block player)))
     (arrow-skillchange player block block-against)
     (pickaxe-skillchange player block block-against)
