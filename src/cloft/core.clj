@@ -29,7 +29,7 @@
   (:import [org.bukkit.inventory ItemStack])
   (:import [org.bukkit.util Vector])
   (:import [org.bukkit Location Effect])
-  (:import [org.bukkit.event.block Action])
+  (:import [org.bukkit.event.block Action Biome])
   (:require [cloft.zhelpers :as mq]))
 
 (def world (Bukkit/getWorld "world"))
@@ -1228,7 +1228,7 @@
 
       (and
         (hoe-durabilities (.. player (getItemInHand) (getType)))
-        (and (= org.bukkit.block.Biome/RIVER (.getBiome block))
+        (and (= Biome/RIVER (.getBiome block))
              (not (@plowed-sands block))
              (#{Material/SAND Material/GRAVEL} (.getType block))
              (> 64.0 (.getY (.getLocation block)))
