@@ -2227,6 +2227,17 @@
 (defn block-can-build-event [evt]
   (cloft.block/can-build-event evt))
 
+(defn chunk-populate-event [evt]
+  #_(let [chk (.getChunk evt)]
+    (prn 'chunk (.getX chk) (.getZ chk) (.isLoaded chk))
+    (doseq [x (range 0 16) y (range 0 80) z (range 0 16)
+            :let [block (.getBlock chk x y z)]]
+      (when-let [btype ({Material/GRASS Material/DIRT
+                         Material/DIRT Material/GLASS
+                         Material/STONE Material/AIR
+                         Material/COAL_ORE Material/AIR} (.getType block))]
+        (.setType block btype)))))
+
 (defonce swank* nil)
 (defn on-enable [plugin]
   (when-not swank*

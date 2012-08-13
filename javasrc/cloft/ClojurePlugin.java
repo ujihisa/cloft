@@ -16,6 +16,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.vehicle.*;
+import org.bukkit.event.world.*;
 
 public class ClojurePlugin extends JavaPlugin implements Listener {
     private String ns;
@@ -268,6 +269,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onVehicleUpdate(VehicleUpdateEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-update-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onChunkPopulate(ChunkPopulateEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "chunk-populate-event");
         if (f.isBound()) f.invoke(event);
     }
     /* end auto-generated code */
