@@ -455,7 +455,7 @@
                  Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
                  Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
                  #_(Material/APPLE [Material/APPLE Material/GOLDEN_APPLE])
-                 Material/ROTTEN_FLESH [Material/AIR Material/COAL]}
+                 Material/ROTTEN_FLESH [nil Material/COAL]}
           itemstack (.getItemStack item)]
       (when (table (.getType itemstack))
         (future-call #(let [pair (table (.getType itemstack))]
@@ -466,10 +466,10 @@
                             (do
                               (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (last pair) (.getAmount itemstack)))
                               (.remove item))
-                            (do
+                            (when-let [type-to (first pair)]
                               (Thread/sleep 25000)
                               (when-not (.isDead item)
-                                (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (first pair) (.getAmount itemstack)))
+                                (.dropItem (.getWorld item) (.getLocation item) (ItemStack. type-to (.getAmount itemstack)))
                                 (.remove item)))))))))))
 
 (defn entity-shoot-bow-event [evt]
