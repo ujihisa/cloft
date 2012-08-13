@@ -29,7 +29,8 @@
   (:import [org.bukkit.inventory ItemStack])
   (:import [org.bukkit.util Vector])
   (:import [org.bukkit Location Effect])
-  (:import [org.bukkit.event.block Action Biome])
+  (:import [org.bukkit.block Biome])
+  (:import [org.bukkit.event.block Action])
   (:require [cloft.zhelpers :as mq]))
 
 (def world (Bukkit/getWorld "world"))
