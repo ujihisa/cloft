@@ -440,16 +440,33 @@
       (loc/spawn (.getLocation creature) Blaze)
       (.setCancelled evt true))))
 
+(defn popcorn [item p]
+  "args: item entity (maybe dead), success probability 0..100"
+  "after delay."
+  (future
+    (Thread/sleep (rand-int 2000))
+    (when-not (.isDead item)
+      (if (> p (rand-int 100))
+        (do
+          (loc/play-effect (.getLocation item) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
+          (c/add-velocity item (- (rand) 0.5) 0.9 (- (rand) 0.5))
+          (loc/drop-item (.getLocation item) (.getItemStack item)))
+        (do
+          (loc/play-effect (.getLocation item) Effect/CLICK1 nil)
+          (.remove item))))))
+
 (def lifting? (ref false))
-(def popcorning? (ref false))
+(def popcorning (ref nil))
 
 (defn item-spawn-event [evt]
   (when @lifting?
     (.setCancelled evt true))
-  (if @popcorning?
-    (let [itemstack (.getItemStack (.getEntity evt))]
+  (if @popcorning
+    (let [item (.getEntity evt)
+          itemstack (.getItemStack item)]
       (when-not (#{Material/CHEST Material/ENDER_CHEST} (.getType itemstack))
-        (prn 'popcorn (.getType itemstack))))
+        (popcorn item (get {Material/CHEST 50 Material/ENDER_CHEST 90}
+                           @popcorning))))
     (let [item (.getEntity evt)
           table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
                  Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
@@ -1998,9 +2015,9 @@
             (when (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
               #_(.setCancelled evt true)
               (dosync
-                (ref-set popcorning? true)
+                (ref-set popcorning (.getType block))
                 (.breakNaturally block (ItemStack. Material/AIR))
-                (ref-set popcorning? false))
+                (ref-set popcorning nil))
               (let [msg (format "%s popcorned!" (.getDisplayName player))]
                 (c/lingr msg)
                 (c/broadcast msg)))
