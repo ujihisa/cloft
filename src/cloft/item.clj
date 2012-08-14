@@ -13,3 +13,5 @@
    Material/RECORD_11 Material/RECORD_3 Material/RECORD_4 Material/RECORD_5
    Material/RECORD_6 Material/RECORD_7 Material/RECORD_8 Material/RECORD_9])
 
+(defn modify-durability [item f]
+  (.setDurability item (f (.getDurability item))))

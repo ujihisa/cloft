@@ -1155,6 +1155,8 @@
         (let [arrow (.launchProjectile player Arrow)]
           (.setVelocity arrow (.multiply (.getVelocity arrow)
                                          (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))
+          (when (= 0 (rand-int 2))
+            (item/modify-durability item inc))
           (when (= 0 (rand-int 1000))
             (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
               (c/lingr msg)
@@ -1203,7 +1205,7 @@
     (if (> (.getDurability item) (hoe-durabilities (.getType item)))
       (.remove (.getInventory player) item)
       (do
-        (.setDurability item (+ 2 (.getDurability item)))
+        (item/modify-durability item #(+ 2 %))
         (future
           (swap! plowed-sands conj block)
           (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
