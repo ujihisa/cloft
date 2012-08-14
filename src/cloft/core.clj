@@ -241,7 +241,7 @@
          (doseq [_ [1 2 3]]
            (doseq [target targets :when (instance? klass target)]
              (Thread/sleep (rand-int 300))
-             (.playEffect (.getWorld target) (.getLocation target) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
+             (loc/play-effect (.getLocation target) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
              (c/add-velocity target (- (rand) 0.5) 0.9 (- (rand) 0.5))
              (f target))
            (Thread/sleep 1500))
@@ -310,7 +310,7 @@
         (.sendMessage (.getShooter entity) "Woodbreak failed."))))
   (.remove entity))
 
-(def arrow-skill (atom {}))
+(def arrow-skill (atom {"ujm" arrow-skill-teleport}))
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
 
@@ -1138,26 +1138,45 @@
       (.setVelocity cart (Vector. (* (.getZ dire) -2) 0.0 (* (.getX dire) 2))))))
 
 (defn player-left-click-event [evt player]
-  (cond
-    (instance? Minecart (.getVehicle player))
-    (do
-      (.setCancelled evt true)
-      (minecart-accelerate (.getVehicle player)))
+  (let [item (.getItemInHand player)]
+    (cond
+      (instance? Minecart (.getVehicle player))
+      (do
+        (.setCancelled evt true)
+        (minecart-accelerate (.getVehicle player)))
 
-    (and
-      (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
-      (= (.getHealth player) (.getMaxHealth player)))
-    (if (empty? (.getEnchantments (.getItemInHand player)))
-      (let [snowball (.launchProjectile player Snowball)]
-        (swap! special-snowball-set conj snowball)
-        (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
-      (let [arrow (.launchProjectile player Arrow)]
-        (.setVelocity arrow (.multiply (.getVelocity arrow)
-                                       (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))))
-    (and (.getClickedBlock evt)
-         (= Material/STONE_BUTTON (.getType (.getClickedBlock evt)))
-         (blazon? Material/EMERALD_BLOCK (.getBlock (.add (.getLocation player) 0 -1 0))))
-    (lift-up (.getLocation player))))
+      (and
+        (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
+        (= (.getHealth player) (.getMaxHealth player)))
+      (if (empty? (.getEnchantments item))
+        (let [snowball (.launchProjectile player Snowball)]
+          (swap! special-snowball-set conj snowball)
+          (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
+        (let [arrow (.launchProjectile player Arrow)]
+          (.setVelocity arrow (.multiply (.getVelocity arrow)
+                                         (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))
+          (when (= 0 (rand-int 1000))
+            (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
+              (c/lingr msg)
+              (c/broadcast msg))
+            (doseq [[enchant level] (.getEnchantments item)]
+              (.removeEnchantment item enchant)))))
+
+      (and
+        (= Material/FEATHER (.getType item))
+        (< 0.01 (.getFallDistance player)))
+      (do
+        (.setVelocity player (doto
+                               (.getVelocity player)
+                               (.setY 0)))
+        (.setFallDistance player 0.0)
+        (when (= 0 (rand-int 3))
+          (c/consume-item player)))
+
+      (and (.getClickedBlock evt)
+           (= Material/STONE_BUTTON (.getType (.getClickedBlock evt)))
+           (blazon? Material/EMERALD_BLOCK (.getBlock (.add (.getLocation player) 0 -1 0))))
+      (lift-up (.getLocation player)))))
 
 
 (defn y->pitch [y]
@@ -1493,7 +1512,7 @@
           :when (.getAllowFlight player)]
     (if (.getPassenger player)
       (let [randvelodiff #(/ (- (rand) 0.5) 2.0)]
-        (when (or (not= "ujm" (.getDisplayName player))
+        (when (and (not= "ujm" (.getDisplayName player))
                   (= 0 (rand-int 2)))
           (c/add-velocity player (randvelodiff) (randvelodiff) (randvelodiff))))
       (do
@@ -1660,6 +1679,13 @@
             (.teleport target (.add block-loc 0.5 1 0.5)))
           (recur (dec depth)))))))
 
+(defn scouter [evt attacker target]
+  (when-let [helmet (.getHelmet (.getInventory attacker))]
+    (when (= Material/STONE_PLATE (.getType helmet))
+      (.sendMessage attacker (format "damage: %s, HP: %s"
+                                     (.getDamage evt)
+                                     (- (.getHealth target) (.getDamage evt)))))))
+
 (defn arrow-damages-entity-event [evt arrow target]
   (if (and
         (not= 0 (rand-int 10))
@@ -1772,7 +1798,8 @@
           (.setCancelled evt true)
           (= 'cart (arrow-skill-of shooter))
           (let [cart (loc/spawn (.getLocation target) Minecart)]
-            (.setPassenger cart target))))
+            (.setPassenger cart target)))
+        (scouter evt shooter target))
       (when (instance? Blaze shooter)
         "arrow from blaze = always it's by blaze2"
         (blaze2-arrow-hit target)))))
@@ -1946,11 +1973,7 @@
             (player-attacks-pig-event evt attacker target))
           (when (instance? Chicken target)
             (player-attacks-chicken-event evt attacker target))
-          (when-let [helmet (.getHelmet (.getInventory attacker))]
-            (when (= Material/STONE_PLATE (.getType helmet))
-              (.sendMessage attacker (format "damage: %s, HP: %s"
-                                             (.getDamage evt)
-                                             (- (.getHealth target) (.getDamage evt)))))))
+          (scouter evt attacker target))
         (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
           (when (instance? Fireball attacker)
             (when-let [shooter (.getShooter attacker)]
@@ -2176,6 +2199,10 @@
       (doseq [player (Bukkit/getOnlinePlayers)]
         (.showPlayer player (c/ujm)))
       (ref-set just-for-now5-state true))))
+
+(defn just-for-now6 []
+  (let [items [(ItemStack. Material/BOW 1) (ItemStack. Material/GLASS 64) (ItemStack. Material/DIRT 64) (ItemStack. Material/TORCH 64) (ItemStack. Material/STRING 64) (ItemStack. Material/DIAMOND_AXE 1) (ItemStack. Material/DIAMOND_SPADE 1) (ItemStack. Material/WATER_BUCKET 1) (ItemStack. Material/GOLD_SWORD 1) (ItemStack. Material/BREAD 64) (ItemStack. Material/DIAMOND_HOE 1) (ItemStack. Material/WATER_BUCKET 1) (ItemStack. Material/BLAZE_ROD 1) (ItemStack. Material/STONE 64) (ItemStack. Material/EGG 16) (ItemStack. Material/WORKBENCH 3) (ItemStack. Material/BED 1) (ItemStack. Material/REDSTONE 64) (ItemStack. Material/GLOWSTONE 64) (ItemStack. Material/POTION 1) (ItemStack. Material/POTION 1) (ItemStack. Material/SAND 64) (ItemStack. Material/GOLDEN_APPLE 64) (ItemStack. Material/IRON_INGOT 64) (ItemStack. Material/ARROW 64) (ItemStack. Material/COAL 64) (ItemStack. Material/COBBLESTONE 64) (ItemStack. Material/DIRT 64) (ItemStack. Material/WOOD 64) (ItemStack. Material/LOG 64) (ItemStack. Material/STONE_PLATE 64) (ItemStack. Material/MILK_BUCKET 1) (ItemStack. Material/CAKE 1) (ItemStack. Material/EGG 1) (ItemStack. Material/DIAMOND_SWORD 1) (ItemStack. Material/INK_SACK 64)]]
+    (doseq [i (range 0 (count items))] (.setItem (.getInventory (c/ujm)) i (get items i)))))
 
 (defn vehicle-block-collision-event [evt]
   (let [vehicle (.getVehicle evt)]
