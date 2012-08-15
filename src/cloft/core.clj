@@ -1148,21 +1148,23 @@
       (and
         (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
         (= (.getHealth player) (.getMaxHealth player)))
-      (if (empty? (.getEnchantments item))
+      (if (< 33 (.getDurability item))
+        (c/consume-item player)
+        (if (empty? (.getEnchantments item))
         (let [snowball (.launchProjectile player Snowball)]
           (swap! special-snowball-set conj snowball)
           (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
         (let [arrow (.launchProjectile player Arrow)]
           (.setVelocity arrow (.multiply (.getVelocity arrow)
                                          (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))
-          (when (= 0 (rand-int 2))
+          (when (= 0 (rand-int 5))
             (item/modify-durability item inc))
           (when (= 0 (rand-int 1000))
             (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
               (c/lingr msg)
               (c/broadcast msg))
             (doseq [[enchant level] (.getEnchantments item)]
-              (.removeEnchantment item enchant)))))
+              (.removeEnchantment item enchant))))))
 
       (and
         (= Material/FEATHER (.getType item))
