@@ -2275,28 +2275,26 @@
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
   (c/lingr "cloft plugin running...")
-  (future-call (fn []
-                 (do
-                  (let [ctx (mq/context 1)
-                        subscriber (mq/socket ctx mq/sub)]
-                    (mq/bind subscriber "tcp://*:1235")
-                    (mq/subscribe subscriber "")
-                    (while true
-                      (let [contents (read-string (mq/recv-str subscriber))
-                            players (Bukkit/getOnlinePlayers)]
-                        #_(prn 'received contents)
-                        (condp #(.startsWith %2 %1) (:body contents)
-                          "/list"
-                          (let [msg (if (empty? players)
-                                      "(no players)"
-                                      (clojure.string/join "\n" (map #(player/player-inspect % (= (:body contents) "/list -l")) players)))]
-                            (c/lingr "computer_science" msg)
-                            (c/broadcast msg))
-                          "/chicken"
-                          (future
-                            (doseq [p (Bukkit/getOnlinePlayers)]
-                              (when-not (.isDead p)
-                                (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))))
-                          (when-not (empty? players)
-                            (c/broadcast (format "%s: %s" (:user contents) (:body contents)))))))))))
-  #_(c/lingr "cloft plugin running..."))
+  (future
+    (let [ctx (mq/context 1)
+          subscriber (mq/socket ctx mq/sub)]
+      (mq/bind subscriber "tcp://*:1235")
+      (mq/subscribe subscriber "")
+      (while true
+        (let [contents (read-string (mq/recv-str subscriber))
+              players (Bukkit/getOnlinePlayers)]
+          #_(prn 'received contents)
+          (condp #(.startsWith %2 %1) (:body contents)
+            "/list"
+            (let [msg (if (empty? players)
+                        "(no players)"
+                        (clojure.string/join "\n" (map #(player/player-inspect % (= (:body contents) "/list -l")) players)))]
+              (c/lingr "computer_science" msg)
+              (c/broadcast msg))
+            "/chicken"
+            (future
+              (doseq [p (Bukkit/getOnlinePlayers)]
+                (when-not (.isDead p)
+                  (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))))
+            (when-not (empty? players)
+              (c/broadcast (format "%s: %s" (:user contents) (:body contents))))))))))
