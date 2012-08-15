@@ -998,6 +998,7 @@
       (.sendMessage player "[NEWS] stone plateを持って他人を右クリックするとスカウター")
       (.sendMessage player "[NEWS] ラピュタ近くの地上の村、実はその下に地下帝国が...")
       (.sendMessage player "[NEWS] 剣を焼くと分解できる。もしそれがenchantされてると...?")
+      (.sendMessage player "[NEWS] TNTの上に置かれたチェストを開くと、即座に...!")
       #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
@@ -1253,6 +1254,13 @@
       (do
         (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
         (.sendMessage player (format "biome: %s" (.getBiome block))))
+
+      (and
+        (= Material/CHEST (.getType block))
+        (= Material/TNT (.getType (.getBlock (.add (.getLocation block) 0 -1 0)))))
+      (do
+        (.setType (.getBlock (.add (.getLocation block) 0 -1 0)) Material/AIR)
+        (loc/spawn (.add (.getLocation block) 0 1 0) TNTPrimed))
 
       (= Material/CAKE_BLOCK (.getType block))
       (if-let [death-point (player/death-location-of player)]
