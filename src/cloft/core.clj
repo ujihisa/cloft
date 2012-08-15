@@ -2296,5 +2296,5 @@
               (doseq [p (Bukkit/getOnlinePlayers)]
                 (when-not (.isDead p)
                   (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))))
-            (when-not (empty? players)
-              (c/broadcast (format "%s: %s" (:user contents) (:body contents))))))))))
+            (doseq [player players]
+              (.sendMessage player (format "%s: %s" (:user contents) (:body contents))))))))))
