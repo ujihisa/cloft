@@ -1037,6 +1037,16 @@
                                             (Thread/sleep 2000)
                                             (dosync
                                               (ref-set countdowning? false)))))
+      (= "where am I?" msg)
+      (let [loc (.getLocation player)
+            msg (format "%s (%d %d %d)"
+                        name
+                        (int (.getX loc))
+                        (int (.getY loc))
+                        (int (.getZ loc)))]
+        (c/lingr "computer_science" msg)
+        (c/broadcast msg))
+
       :else (c/lingr "computer_science" (str (player/name2icon name) msg)))))
 
 (defn touch-player [player target]
