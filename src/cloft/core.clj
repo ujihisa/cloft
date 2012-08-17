@@ -415,7 +415,7 @@
           (.getBlock (.add (.clone loc) x y z))
           (rand-nth [Material/NETHER_BRICK Material/NETHERRACK Material/SOUL_SAND
                      Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE])))))
-  (.setDroppedExp evt 200)
+  (.setDroppedExp evt 80)
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
   (c/lingr (format "%s beated a blaze2!" (.getDisplayName player))))
 
@@ -1630,7 +1630,7 @@
                    #(loc/spawn location Villager)
                    #(loc/spawn location Silverfish)
                    #(loc/drop-item location (ItemStack. Material/IRON_SWORD))]))
-        Giant (.setDroppedExp evt 1000)
+        Giant (.setDroppedExp evt 500)
         Creeper (.setDroppedExp evt 10)
         Blaze (when (= "world" (.getName (.getWorld entity)))
                 (blaze2-murder-event evt entity killer))
