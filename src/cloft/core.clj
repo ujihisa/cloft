@@ -1234,16 +1234,18 @@
               (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
 
 (defn night? [world]
-  (let [time (.getTime world)]
-    (or (< 18000 time) (< time 5000))))
+  (< 18000 (.getTime world)))
 
 (defn chest-popcorn-probability [block]
   (assert (#{Material/CHEST Material/ENDER_CHEST} (.getType block)) block)
   (let [base (if (night? (.getWorld block)) 60 50)
-        emeralds (filter #(and % (= Material/EMERALD (.getType %)))
-                         (.getContents (.getBlockInventory (.getState block))))
-        total-emeralds (apply + (map #(.getAmount %) emeralds))]
-    (min (+ base (* total-emeralds 5)) 90)))
+        contents (filter identity (.getContents (.getBlockInventory (.getState block))))
+        emeralds (filter #(= Material/EMERALD (.getType %)) contents)
+        total-emeralds (apply + (map #(.getAmount %) emeralds))
+        emerald-blocks (filter #(= Material/EMERALD_BLOCK (.getType %)) contents)
+        total-emerald-blocks (apply + (map #(.getAmount %) emerald-blocks))
+        emerald-effect-num (max 0 (- total-emeralds (* total-emerald-blocks 2)))]
+    (min 90 (+ base (* emerald-effect-num 5)))))
 
 (defn player-right-click-event [evt player]
   (defn else []
