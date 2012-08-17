@@ -386,7 +386,7 @@
        (fly-with-check projectile fn))))
 
 (defn blaze2-launch-fireball [blaze2 projectile]
-  (when (not= "world" (.getName (.getWorld blaze2))) (prn 'omg-assertion-failed))
+  (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
   (.remove projectile)
   (if (= 0 (rand-int 5))
     (let [loc (.getLocation blaze2)]
@@ -401,11 +401,11 @@
   (.setFireTicks target 200))
 
 (defn blaze2-get-damaged [evt blaze2]
-  (when (not= "world" (.getName (.getWorld blaze2))) (prn 'omg-assertion-failed))
+  (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
   (.setDamage evt (max (int (/ (.getDamage evt) 2)) 9)))
 
 (defn blaze2-murder-event [evt blaze2 player]
-  (when (not= "world" (.getName (.getWorld blaze2))) (prn 'omg-assertion-failed))
+  (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
   (doseq [[x y z] [[0 0 0] [-1 0 0] [0 -1 0] [0 0 -1] [1 0 0] [0 1 0] [0 0 1]]
           :let [loc (.add (.clone (.getLocation blaze2)) x y z)]
           :when (= Material/AIR (.getType (.getBlock loc)))
