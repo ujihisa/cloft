@@ -1238,7 +1238,11 @@
 
 (defn chest-popcorn-probability [block]
   (assert (#{Material/CHEST Material/ENDER_CHEST} (.getType block)) block)
-  (let [base (if (night? (.getWorld block)) 60 50)
+  (let [world (.getWorld block)
+        base (int (* 30
+                     (if (night? world) 1.4 1)
+                     (if (.hasStorm world) 1.4 1)
+                     (if (.isThundering world) 1.4 1)))
         contents (filter identity (.getContents (.getBlockInventory (.getState block))))
         emeralds (filter #(= Material/EMERALD (.getType %)) contents)
         total-emeralds (apply + (map #(.getAmount %) emeralds))
