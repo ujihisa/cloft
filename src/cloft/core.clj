@@ -468,8 +468,7 @@
       (cond
         (= Material/EMERALD itemtype) (.setCancelled evt true)
         (#{Material/CHEST Material/ENDER_CHEST} itemtype) nil
-        :else (popcorn item (get {Material/CHEST 50 Material/ENDER_CHEST 90}
-                                 @popcorning))))
+        :else (popcorn item (chest-popcorn-probability @popcorning))))
     (let [item (.getEntity evt)
           table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
                  Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
@@ -1234,12 +1233,17 @@
             (when (= 0 (rand-int 2))
               (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
 
+(defn night? [world]
+  (let [time (.getTime world)]
+    (or (< 18000 time) (< time 5000))))
+
 (defn chest-popcorn-probability [block]
   (assert (#{Material/CHEST Material/ENDER_CHEST} (.getType block)) block)
-  (let [emeralds (filter #(and % (= Material/EMERALD (.getType %)))
+  (let [base (if (night? (.getWorld block)) 0.60 0.50)
+        emeralds (filter #(and % (= Material/EMERALD (.getType %)))
                          (.getContents (.getBlockInventory (.getState block))))
         total-emeralds (apply + (map #(.getAmount %) emeralds))]
-    (min (+ 0.50 (* total-emeralds 0.02)) 0.80)))
+    (min (+ base (* total-emeralds 0.05)) 0.90)))
 
 (defn player-right-click-event [evt player]
   (defn else []
@@ -2088,7 +2092,7 @@
             (when (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
               #_(.setCancelled evt true)
               (dosync
-                (ref-set popcorning (.getType block))
+                (ref-set popcorning block)
                 (.breakNaturally block (ItemStack. Material/AIR))
                 (ref-set popcorning nil))
               (let [msg (format "%s popcorned!" (.getDisplayName player))]
