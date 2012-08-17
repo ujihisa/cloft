@@ -406,15 +406,13 @@
 
 (defn blaze2-murder-event [evt blaze2 player]
   (when (not= "world" (.getName (.getWorld blaze2))) (prn 'omg-assertion-failed))
-  (doseq [[x y z] [[0 0 0] [-1 0 0] [0 -1 0] [0 0 -1] [1 0 0] [0 1 0] [0 0 1]]]
-    (let [loc (.getLocation blaze2)]
-      (when (and
-              (= Material/AIR (.getType (.getBlock loc)))
-              (not= 0 (rand-int 3)))
+  (doseq [[x y z] [[0 0 0] [-1 0 0] [0 -1 0] [0 0 -1] [1 0 0] [0 1 0] [0 0 1]]
+          :let [loc (.add (.clone (.getLocation blaze2)) x y z)]]
+    (when (= Material/AIR (.getType (.getBlock loc)))
         (.setType
-          (.getBlock (.add (.clone loc) x y z))
+          (.getBlock loc)
           (rand-nth [Material/NETHER_BRICK Material/NETHERRACK Material/SOUL_SAND
-                     Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE])))))
+                     Material/GLOWSTONE Material/GLOWSTONE Material/GLOWSTONE]))))
   (.setDroppedExp evt 80)
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
   (c/lingr (format "%s beated a blaze2!" (.getDisplayName player))))
