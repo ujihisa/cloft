@@ -1239,11 +1239,11 @@
 
 (defn chest-popcorn-probability [block]
   (assert (#{Material/CHEST Material/ENDER_CHEST} (.getType block)) block)
-  (let [base (if (night? (.getWorld block)) 0.60 0.50)
+  (let [base (if (night? (.getWorld block)) 60 50)
         emeralds (filter #(and % (= Material/EMERALD (.getType %)))
                          (.getContents (.getBlockInventory (.getState block))))
         total-emeralds (apply + (map #(.getAmount %) emeralds))]
-    (min (+ base (* total-emeralds 0.05)) 0.90)))
+    (min (+ base (* total-emeralds 5)) 90)))
 
 (defn player-right-click-event [evt player]
   (defn else []
@@ -1282,7 +1282,7 @@
                (#{Material/CHEST Material/ENDER_CHEST} (.getType block)))
         (let [probability (chest-popcorn-probability block)]
           (.setCancelled evt true)
-          (.sendMessage player (format "current probability: %.2f" probability)))
+          (.sendMessage player (format "current probability: %.2f" (/ probability 100.0))))
         (do
           (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
           (.sendMessage player (format "biome: %s" (.getBiome block)))))
