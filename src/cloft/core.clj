@@ -1044,6 +1044,7 @@
                         (int (.getX loc))
                         (int (.getY loc))
                         (int (.getZ loc)))]
+        (.setCancelled evt true)
         (c/lingr "computer_science" msg)
         (c/broadcast msg))
 
@@ -2111,6 +2112,7 @@
     :else
     (do
       (let [shooter (.getShooter snowball)]
+        (assert (instance? Player shooter))
         (.setFoodLevel shooter (dec (.getFoodLevel shooter))))
       (.createExplosion (.getWorld snowball) (.getLocation snowball) 0)
       (.remove snowball))))
@@ -2244,6 +2246,22 @@
 
 #_(defn vehicle-entity-collision-event [evt]
   (prn 'vehicle-entity-collision-event))
+
+(defn vehicle-exit-event [evt]
+  (let [entity (.getExited evt)
+        vehicle (.getVehicle evt)]
+    (when (and
+            (instance? Player entity)
+            (instance? Minecart vehicle))
+      (let [center (.add (.getLocation vehicle) 0 -1 0)]
+        (when-let [iron-loc (first
+                              (for [x (range -1 2)
+                                    z (range -1 2)
+                                    :let [loc (.add (.clone center) x 0 z)]
+                                    :when (= Material/IRON_BLOCK
+                                             (.getType (.getBlock loc)))]
+                                loc))]
+          (future (c/teleport-without-angle entity (.add iron-loc 0 5 0))))))))
 
 (comment (defn enderman-pickup-event* [evt]
   (prn 'epe)))
