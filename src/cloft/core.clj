@@ -413,7 +413,7 @@
                 (rand-nth [Material/NETHER_BRICK Material/NETHERRACK
                            Material/SOUL_SAND Material/GLOWSTONE
                            Material/GLOWSTONE Material/GLOWSTONE
-                           Material/AIR])]]
+                           Material/AIR Material/AIR])]]
     (.setType (.getBlock loc) new-block-type))
   (.setDroppedExp evt 80)
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
