@@ -463,10 +463,13 @@
     (.setCancelled evt true))
   (if @popcorning
     (let [item (.getEntity evt)
-          itemstack (.getItemStack item)]
-      (when-not (#{Material/CHEST Material/ENDER_CHEST} (.getType itemstack))
-        (popcorn item (get {Material/CHEST 50 Material/ENDER_CHEST 90}
-                           @popcorning))))
+          itemstack (.getItemStack item)
+          itemtype (.getType itemstack)]
+      (cond
+        (= Material/EMERALD itemtype) (.setCancelled evt true)
+        (#{Material/CHEST Material/ENDER_CHEST} itemtype) nil
+        :else (popcorn item (get {Material/CHEST 50 Material/ENDER_CHEST 90}
+                                 @popcorning))))
     (let [item (.getEntity evt)
           table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
                  Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
@@ -995,11 +998,13 @@
       #_(.sendMessage player "[NEWS] しゃがんだまま剣でガードすると近くの敵に自動照準")
       #_(.sendMessage player "[NEWS] しゃがんだまま弓を構えると近くの敵に自動照準")
       #_(.sendMessage player "[NEWS] arrow-skill-woodbreakがちょっと便利に")
+      #_(.sendMessage player "[NEWS] ラピュタ近くの地上の村、実はその下に地下帝国が...")
+      #_(.sendMessage player "[NEWS] 剣を焼くと分解できる。もしそれがenchantされてると...?")
       (.sendMessage player "[NEWS] stone plateを持って他人を右クリックするとスカウター")
-      (.sendMessage player "[NEWS] ラピュタ近くの地上の村、実はその下に地下帝国が...")
-      (.sendMessage player "[NEWS] 剣を焼くと分解できる。もしそれがenchantされてると...?")
       (.sendMessage player "[NEWS] TNTの上に置かれたチェストを開くと、即座に...!")
-      #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
+      (.sendMessage player "[NEWS] Snowman右クリックでもアイテム")
+      (.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
+      #_(.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (format "%s logged in" (.getDisplayName player)))))
@@ -1229,6 +1234,13 @@
             (when (= 0 (rand-int 2))
               (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
 
+(defn chest-popcorn-probability [block]
+  (assert (#{Material/CHEST Material/ENDER_CHEST} (.getType block)) block)
+  (let [emeralds (filter #(and % (= Material/EMERALD (.getType %)))
+                         (.getContents (.getBlockInventory (.getState block))))
+        total-emeralds (apply + (map #(.getAmount %) emeralds))]
+    (min (+ 0.50 (* total-emeralds 0.02)) 0.80)))
+
 (defn player-right-click-event [evt player]
   (defn else []
     """just for DRY"""
@@ -1262,9 +1274,14 @@
       (lift-down (.getLocation player))
 
       (= Material/BLAZE_ROD (.. player (getItemInHand) (getType)))
-      (do
-        (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
-        (.sendMessage player (format "biome: %s" (.getBiome block))))
+      (if (and (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
+               (#{Material/CHEST Material/ENDER_CHEST} (.getType block)))
+        (let [probability (chest-popcorn-probability block)]
+          (.setCancelled evt true)
+          (.sendMessage player (format "current probability: %.2f" probability)))
+        (do
+          (.sendMessage player (format "%s: %1.3f" (.getType block) (.getTemperature block)))
+          (.sendMessage player (format "biome: %s" (.getBiome block)))))
 
       (and
         (= Material/CHEST (.getType block))
@@ -1500,6 +1517,16 @@
         (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
                                                            [Material/YELLOW_FLOWER
                                                             Material/RED_ROSE])))
+
+        Snowman
+        (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
+                                                           [Material/DIRT
+                                                            Material/SNOW_BALL
+                                                            Material/SNOW_BALL
+                                                            Material/SNOW_BALL
+                                                            Material/SNOW_BALL
+                                                            Material/SNOW_BALL
+                                                            Material/BUCKET])))
         nil))))
 
 (defn player-level-change-event [evt]
@@ -2112,7 +2139,7 @@
     :else
     (do
       (let [shooter (.getShooter snowball)]
-        (assert (instance? Player shooter))
+        (assert (instance? Player shooter) shooter)
         (.setFoodLevel shooter (dec (.getFoodLevel shooter))))
       (.createExplosion (.getWorld snowball) (.getLocation snowball) 0)
       (.remove snowball))))
