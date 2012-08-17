@@ -468,7 +468,7 @@
       (cond
         (= Material/EMERALD itemtype) (.setCancelled evt true)
         (#{Material/CHEST Material/ENDER_CHEST} itemtype) nil
-        :else (popcorn item (chest-popcorn-probability @popcorning))))
+        :else (popcorn item @popcorning)))
     (let [item (.getEntity evt)
           table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
                  Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
@@ -2092,7 +2092,7 @@
             (when (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
               #_(.setCancelled evt true)
               (dosync
-                (ref-set popcorning block)
+                (ref-set popcorning (chest-popcorn-probability block))
                 (.breakNaturally block (ItemStack. Material/AIR))
                 (ref-set popcorning nil))
               (let [msg (format "%s popcorned!" (.getDisplayName player))]
