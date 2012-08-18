@@ -404,6 +404,10 @@
   (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
   (.setDamage evt (max (int (/ (.getDamage evt) 2)) 9)))
 
+(defn ghast2-get-damaged [evt ghast2]
+  (assert (= "world" (.getName (.getWorld ghast2))) ghast2)
+  (.setDamage evt (max (int (/ (.getDamage evt) 2)) 9)))
+
 (defn blaze2-murder-event [evt blaze2 player]
   (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
   (doseq [[x y z] [[0 0 0] [-1 0 0] [0 -1 0] [0 0 -1] [1 0 0] [0 1 0] [0 0 1]]
@@ -418,6 +422,11 @@
   (.setDroppedExp evt 80)
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
   (c/lingr (format "%s beated a blaze2!" (.getDisplayName player))))
+
+(defn ghast2-murder-event [evt ghast2 player]
+  (assert (= "world" (.getName (.getWorld ghast2))) ghast2)
+  (.setDroppedExp evt 80)
+  (let [msg (format "% beated a ghast2!" (.getDisplayName player))]))
 
 (defn projectile-launch-event [evt]
   (let [projectile (.getEntity evt)
@@ -1640,6 +1649,8 @@ nil))))
         Creeper (.setDroppedExp evt 10)
         Blaze (when (= "world" (.getName (.getWorld entity)))
                 (blaze2-murder-event evt entity killer))
+        Ghast (when (= "world" (.getName (.getWorld entity)))
+                (ghast2-murder-event evt entity killer))
         CaveSpider (when (= 0 (rand-int 3))
                      (loc/drop-item location (ItemStack. Material/GOLD_SWORD)))
         nil)
@@ -1995,9 +2006,16 @@ nil))))
                 (.damage target 100))))))
       :else
       (do
-        (when (and (instance? Blaze target)
-                   (= "world" (.getName (.getWorld target))))
-          (blaze2-get-damaged evt target))
+        (cond
+          (and (instance? Blaze target)
+               (= "world" (.getName (.getWorld target))))
+          (blaze2-get-damaged evt target)
+
+          (and (instance? Ghast target)
+               (= "world" (.getName (.getWorld target))))
+          (ghast2-get-damaged evt target)
+
+          :else nil)
         (when (and
                 (instance? Villager target)
                 (instance? EntityDamageByEntityEvent evt)
