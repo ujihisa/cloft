@@ -406,9 +406,15 @@
 
 (defn ghast2-get-damaged [evt ghast2 attacker]
   (assert (= "world" (.getName (.getWorld ghast2))) ghast2)
-  (if (or (nil? attacker)
-          (instance? Projectile attacker))
-    (.setCancelled evt true)
+  (cond
+    (nil? attacker) (.setCancelled evt true)
+
+    (instance? Projectile attacker)
+    (do
+      (.remove attacker)
+      (.setCancelled evt true))
+
+    :else
     (.setDamage evt (min (int (/ (.getDamage evt) 2)) 4))))
 
 (defn blaze2-murder-event [evt blaze2 player]
