@@ -1769,10 +1769,13 @@ nil))))
 (defn scouter [evt attacker target]
   (when-let [helmet (.getHelmet (.getInventory attacker))]
     (when (= Material/STONE_PLATE (.getType helmet))
-      (.sendMessage attacker (format "damage: %s, HP: %s (%s)"
-                                     (.getDamage evt)
-                                     (- (.getHealth target) (.getDamage evt))
-                                     (c/entity2name target))))))
+      (let [damage (if (.isCancelled evt)
+                     0
+                     (.getDamage evt))]
+        (.sendMessage attacker (format "damage: %s, HP: %s (%s)"
+                                     damage
+                                     (- (.getHealth target) damage)
+                                     (c/entity2name target)))))))
 
 (defn arrow-damages-entity-event [evt arrow target]
   (if (and
