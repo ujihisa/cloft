@@ -681,7 +681,7 @@
     (let [table {Material/GLOWSTONE ['strong "STRONG"]
                  Material/TNT [arrow-skill-explosion "EXPLOSION"]
                  Material/TORCH [arrow-skill-torch "TORCH"]
-                 Material/REDSTONE_TORCH_ON [arrow-skill-pull "PULL"]
+                 Material/PISTON_STICKY_BASE [arrow-skill-pull "PULL"]
                  Material/YELLOW_FLOWER [arrow-skill-teleport "TELEPORT"]
                  Material/RED_ROSE [arrow-skill-fire "FIRE"]
                  Material/SAPLING [arrow-skill-tree "TREE"]
@@ -1537,7 +1537,13 @@
                                                             Material/SNOW_BALL
                                                             Material/SNOW_BALL
                                                             Material/BUCKET])))
-        nil))))
+
+        Enderman
+        (loc/drop-item (.getLocation target)
+             (ItemStack. (rand-nth [Material/STICK Material/ENDER_STONE
+                                    Material/ENDER_STONE
+                                    Material/EYE_OF_ENDER])))
+nil))))
 
 (defn player-level-change-event [evt]
   (when (< (.getOldLevel evt) (.getNewLevel evt))
