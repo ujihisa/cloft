@@ -404,9 +404,12 @@
   (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
   (.setDamage evt (max (int (/ (.getDamage evt) 2)) 9)))
 
-(defn ghast2-get-damaged [evt ghast2]
+(defn ghast2-get-damaged [evt ghast2 attacker]
   (assert (= "world" (.getName (.getWorld ghast2))) ghast2)
-  (.setDamage evt (max (int (/ (.getDamage evt) 2)) 9)))
+  (if (or (nil? attacker)
+          (instance? Projectile attacker))
+    (.setCancelled evt true)
+    (.setDamage evt (min (int (/ (.getDamage evt) 2)) 4))))
 
 (defn blaze2-murder-event [evt blaze2 player]
   (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
@@ -426,7 +429,8 @@
 (defn ghast2-murder-event [evt ghast2 player]
   (assert (= "world" (.getName (.getWorld ghast2))) ghast2)
   (.setDroppedExp evt 80)
-  (let [msg (format "% beated a ghast2!" (.getDisplayName player))]))
+  (let [msg (format "%s beated a ghast2!" (.getDisplayName player))]
+    (c/lingr msg)))
 
 (defn projectile-launch-event [evt]
   (let [projectile (.getEntity evt)
@@ -1759,9 +1763,10 @@ nil))))
 (defn scouter [evt attacker target]
   (when-let [helmet (.getHelmet (.getInventory attacker))]
     (when (= Material/STONE_PLATE (.getType helmet))
-      (.sendMessage attacker (format "damage: %s, HP: %s"
+      (.sendMessage attacker (format "damage: %s, HP: %s (%s)"
                                      (.getDamage evt)
-                                     (- (.getHealth target) (.getDamage evt)))))))
+                                     (- (.getHealth target) (.getDamage evt))
+                                     (c/entity2name target))))))
 
 (defn arrow-damages-entity-event [evt arrow target]
   (if (and
@@ -1964,6 +1969,7 @@ nil))))
     (.setCancelled evt true)))
 
 (defn entity-damage-intent-event [evt target attacker]
+  "attacker can be nil."
   (cond
     (and (instance? Blaze target)
          (= "world" (.getName (.getWorld target))))
@@ -1971,7 +1977,7 @@ nil))))
 
     (and (instance? Ghast target)
          (= "world" (.getName (.getWorld target))))
-    (ghast2-get-damaged evt target)
+    (ghast2-get-damaged evt target attacker)
 
     :else nil)
   (when (and
@@ -2086,7 +2092,9 @@ nil))))
                     (.sendMessage target msg)))
                 (.damage target 100))))))
       :else
-      (entity-damage-intent-event evt target attacker))))
+      (do
+        (prn 'indent (class evt) target attacker)
+        (entity-damage-intent-event evt target attacker)))))
 
 (defn block-break-event [evt]
   (let [block (.getBlock evt)]
