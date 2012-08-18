@@ -2089,7 +2089,7 @@
                   (= 0 (rand-int 1000)) (f Material/DIAMOND_ORE)
                   (= 0 (rand-int 300)) (f Material/GLOWSTONE)
                   (= 0 (rand-int 1000)) (f Material/LAPIS_BLOCK)
-                  (= 0 (rand-int 1500)) (f Material/GOLD_BLOCK)
+                  (= 0 (rand-int 1500)) (f Material/IRON_BLOCK)
                   (= 0 (rand-int 2000)) (f Material/GOLD_BLOCK)
                   (= 0 (rand-int 50000)) (f Material/DIAMOND_BLOCK)
                   :else nil)))
