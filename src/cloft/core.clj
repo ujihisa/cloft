@@ -2015,6 +2015,7 @@ nil))))
                 (.damage target 2 (.getShooter attacker)))
               (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
                     vector (.multiply (.normalize (.toVector direction)) 3)]
+                (.setCancelled evt true)
                 (c/add-velocity target (.getX vector) (+ (.getY vector) 2.0) (.getZ vector))))))
         (when (instance? Enderman attacker)
           (when (instance? Player target)
@@ -2157,7 +2158,7 @@ nil))))
       (let [shooter (.getShooter snowball)]
         (assert (instance? Player shooter) shooter)
         (.setFoodLevel shooter (dec (.getFoodLevel shooter))))
-      (.createExplosion (.getWorld snowball) (.getLocation snowball) 0)
+      (loc/explode (.getLocation snowball) 0 false)
       (.remove snowball))))
 
 (defn projectile-hit-event [evt]
