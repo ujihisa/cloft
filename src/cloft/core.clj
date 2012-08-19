@@ -209,9 +209,11 @@
         (when (and (.contains inventory Material/SEEDS)
                    (= Material/AIR (.getType (.getBlock loc)))
                    (= Material/SOIL (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))
-          (c/consume-itemstack inventory Material/SEEDS)
-          (c/consume-itemstack inventory Material/SEEDS)
-          (.setType (.getBlock loc) Material/CROPS))))))
+          (try
+            (c/consume-itemstack inventory Material/SEEDS)
+            (c/consume-itemstack inventory Material/SEEDS)
+            (.setType (.getBlock loc) Material/CROPS)
+            (catch org.bukkit.event.EventException e nil)))))))
 
 (defn arrow-skill-diamond [entity]
   (let [block (.getBlock (.getLocation entity))]
@@ -1020,9 +1022,11 @@
       #_(.sendMessage player "[NEWS] 剣を焼くと分解できる。もしそれがenchantされてると...?")
       (.sendMessage player "[NEWS] stone plateを持って他人を右クリックするとスカウター")
       (.sendMessage player "[NEWS] TNTの上に置かれたチェストを開くと、即座に...!")
-      (.sendMessage player "[NEWS] Snowman右クリックでもアイテム")
+      #_(.sendMessage player "[NEWS] Snowman右クリックでもアイテム")
+      (.sendMessage player "[NEWS] Enderman右クリックでもアイテム。たまに怒られるよ")
       (.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
-      #_(.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
+      (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
+      (.sendMessage player "[!] いまなんかlingrが不安定みたいです")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (format "%s logged in" (.getDisplayName player)))))
@@ -1928,10 +1932,11 @@ nil))))
   (when (not= 0 (rand-int 3))
     (let [location (.getLocation player)
           world (.getWorld location)]
+      (.setFoodLevel player 0)
       (swap! chicken-attacking inc)
-      (future-call #(do
-                      (Thread/sleep 20000)
-                      (swap! chicken-attacking dec)))
+      (future
+        (Thread/sleep 20000)
+        (swap! chicken-attacking dec))
       (doseq [x [-2 -1 0 1 2] z [-2 -1 0 1 2]]
         (let [chicken (.spawn world (.add (.clone location) x 3 z) Chicken)]
           (future-call #(do
@@ -2391,9 +2396,12 @@ nil))))
         (.setType block btype)))))
 
 (defonce swank* nil)
+(defonce plugin* nil)
 (defn on-enable [plugin]
   (when-not swank*
     (def swank* (swank.swank/start-repl 4005)))
+  (when-not plugin*
+    (def plugin* plugin))
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
