@@ -1558,10 +1558,15 @@
                                                             Material/BUCKET])))
 
         Enderman
-        (loc/drop-item (.getLocation target)
+        (if (= 0 (rand-int 50))
+          (.setPassenger target player)
+          (loc/drop-item (.getLocation target)
              (ItemStack. (rand-nth [Material/STICK Material/ENDER_STONE
                                     Material/ENDER_STONE
-                                    Material/EYE_OF_ENDER])))
+                                    Material/ENDER_STONE
+                                    Material/ENDER_STONE
+                                    Material/ENDER_STONE
+                                    Material/EYE_OF_ENDER]))))
 nil))))
 
 (defn player-level-change-event [evt]
@@ -1772,10 +1777,11 @@ nil))))
       (let [damage (if (.isCancelled evt)
                      0
                      (.getDamage evt))]
-        (.sendMessage attacker (format "damage: %s, HP: %s (%s)"
-                                     damage
-                                     (- (.getHealth target) damage)
-                                     (c/entity2name target)))))))
+        (.sendMessage attacker (format "damage: %s, HP: %s -> %s (%s)"
+                                       damage
+                                       (.getHealth target)
+                                       (- (.getHealth target) damage)
+                                       (c/entity2name target)))))))
 
 (defn arrow-damages-entity-event [evt arrow target]
   (if (and
@@ -2101,9 +2107,7 @@ nil))))
                     (.sendMessage target msg)))
                 (.damage target 100))))))
       :else
-      (do
-        (prn 'indent (class evt) target attacker)
-        (entity-damage-intent-event evt target attacker)))))
+      (entity-damage-intent-event evt target attacker))))
 
 (defn block-break-event [evt]
   (let [block (.getBlock evt)]
