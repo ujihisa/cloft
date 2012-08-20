@@ -4,6 +4,9 @@
 (defn spawn [loc klass]
   (.spawn (.getWorld loc) loc klass))
 
+(defn fall-block [loc material data]
+  (.spawnFallingBlock (.getWorld loc) loc material data))
+
 (defn explode [loc power fire?]
   (.createExplosion (.getWorld loc) loc power fire?))
 
@@ -15,3 +18,4 @@
 
 (defn of [pname]
   (.getLocation (Bukkit/getPlayer pname)))
+

@@ -45,6 +45,14 @@
         (c/consume-itemstack (.getInventory player) Material/FEATHER)
         (c/add-velocity player 0 x2 0)))))
 
+(defonce plugin* nil)
+(defmacro later [& exps]
+  `(.scheduleSyncDelayedTask
+     (Bukkit/getScheduler)
+     cloft.core/plugin*
+     (fn [] ~@exps)
+     0))
+
 (defn kaiouken [player]
   (if (< 0 (.getFireTicks player))
     (.sendMessage player "(界王拳失敗)")
@@ -466,7 +474,7 @@
   "after delay."
   (future
     (Thread/sleep (rand-int 2000))
-    (when-not (.isDead item)
+    (later (when-not (.isDead item)
       (if (> p (rand-int 100))
         (do
           (loc/play-effect (.getLocation item) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
@@ -474,7 +482,7 @@
           (loc/drop-item (.getLocation item) (.getItemStack item)))
         (do
           (loc/play-effect (.getLocation item) Effect/CLICK1 nil)
-          (.remove item))))))
+          (.remove item)))))))
 
 (def lifting? (ref false))
 (def popcorning (ref nil))
@@ -738,7 +746,8 @@
     (let [table {Material/YELLOW_FLOWER ['pickaxe-skill-teleport "TELEPORT"]
                  Material/RED_ROSE ['pickaxe-skill-fire "FIRE"]
                  Material/WORKBENCH ['pickaxe-skill-ore "ORE"]
-                 Material/STONE ['pickaxe-skill-stone "STONE"]}]
+                 Material/STONE ['pickaxe-skill-stone "STONE"]
+                 Material/SAND ['pickaxe-skill-fall "FALL"]}]
       (when-let [skill-name (table (.getType block))]
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed pickaxe-skill to " (last skill-name))
@@ -906,14 +915,34 @@
 
 
 (defn block-damage-event [evt]
-  (let [player (.getPlayer evt)]
-    (when (and
-            (item/pickaxes (.getType (.getItemInHand player)))
-            (= 'pickaxe-skill-stone (pickaxe-skill-of player)))
-      (if (= Material/STONE (.getType (.getBlock evt)))
-        (.setInstaBreak evt true)
-        (when (not= 0 (rand-int 1000))
-          (.setCancelled evt true))))))
+  (let [player (.getPlayer evt)
+        block (.getBlock evt)]
+    (when (item/pickaxes (.getType (.getItemInHand player)))
+      (condp = (pickaxe-skill-of player)
+        'pickaxe-skill-stone
+        (if (= Material/STONE (.getType block))
+          (.setInstaBreak evt true)
+          (when (not= 0 (rand-int 1000))
+            (.setCancelled evt true)))
+
+        'pickaxe-skill-fall
+        (when (and
+                (.isBlock (.getType block))
+                (not (instance? org.bukkit.block.ContainerBlock (.getState block))))
+          (loc/fall-block (.getLocation block) (.getType block) (.getData block))
+          (.setType block Material/AIR)
+          (let [item (.getItemInHand player)
+                pickaxe-durabilities {Material/WOOD_PICKAXE 60
+                                      Material/STONE_PICKAXE 132
+                                      Material/IRON_PICKAXE 251
+                                      Material/GOLD_PICKAXE 33
+                                      Material/DIAMOND_PICKAXE 1562}
+                max-durability (pickaxe-durabilities (.getType item))]
+            (if (< max-durability (.getDurability item))
+              (c/consume-item player)
+              (item/modify-durability item #(+ (int (/ max-durability 10)) %)))))
+
+        nil))))
 
 (defn block-piston-extend-event [evt]
   "pushes the entity strongly"
@@ -1026,7 +1055,8 @@
       (.sendMessage player "[NEWS] Enderman右クリックでもアイテム。たまに怒られるよ")
       (.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
       (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
-      (.sendMessage player "[!] いまなんかlingrが不安定みたいです")
+      (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
+      #_(.sendMessage player "[!] いまなんかlingrが不安定みたいです")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (c/lingr (format "%s logged in" (.getDisplayName player)))))
@@ -1941,7 +1971,7 @@ nil))))
         (let [chicken (.spawn world (.add (.clone location) x 3 z) Chicken)]
           (future-call #(do
                           (Thread/sleep 10000)
-                          (.remove chicken))))))))
+                          (later (.remove chicken)))))))))
 
 (defn fish-damages-entity-event [evt fish target]
   (if-let [shooter (.getShooter fish)]
@@ -2199,6 +2229,9 @@ nil))))
     (instance? Snowman (.getShooter snowball))
     nil
 
+    (nil? (.getShooter snowball))
+    nil
+
     :else
     (do
       (let [shooter (.getShooter snowball)]
@@ -2396,7 +2429,6 @@ nil))))
         (.setType block btype)))))
 
 (defonce swank* nil)
-(defonce plugin* nil)
 (defn on-enable [plugin]
   (when-not swank*
     (def swank* (swank.swank/start-repl 4005)))
