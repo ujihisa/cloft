@@ -1461,6 +1461,19 @@
       (chimera-cow/birth player target)
       (.dropItemNaturally (.getWorld target) (.getLocation target) (ItemStack. m/coal)))))
 
+(defn player-rightclick-poweredminecart [player cart]
+  (when (= m/coal (.getType (.getItemInHand player)))
+    (.setMaxSpeed cart 5.0)
+    (let [v (.getVelocity cart)
+          x (.getX v)
+          z (.getY v)
+          r2 (max (+ (* x x) (* z z)) 0.1)
+          new-x (* 2 (/ x r2))
+          new-z (* 2 (/ z r2))]
+      (future-call #(do
+                      (Thread/sleep 100)
+                      (.setVelocity cart (Vector. new-x (.getY v) new-z)))))))
+
 (defn player-interact-entity-event [evt]
   (let [player (.getPlayer evt)
         target (.getRightClicked evt)]
@@ -1476,18 +1489,7 @@
 
       :else
       (condp instance? target
-        PoweredMinecart
-        (when (= m/coal (.getType (.getItemInHand player)))
-          (.setMaxSpeed target 5.0)
-          (let [v (.getVelocity target)
-                x (.getX v)
-                z (.getY v)
-                r2 (max (+ (* x x) (* z z)) 0.1)
-                new-x (* 2 (/ x r2))
-                new-z (* 2 (/ z r2))]
-            (future-call #(do
-                            (Thread/sleep 100)
-                            (.setVelocity target (Vector. new-x (.getY v) new-z))))))
+        PoweredMinecart (player-rightclick-poweredminecart player target)
 
         PigZombie
         (when (= m/wheat (.getType (.getItemInHand player)))
