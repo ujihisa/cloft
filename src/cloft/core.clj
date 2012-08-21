@@ -1474,6 +1474,28 @@
                       (Thread/sleep 100)
                       (.setVelocity cart (Vector. new-x (.getY v) new-z)))))))
 
+(defn player-rightclick-villager [player villager]
+  (letfn [(default [] (loc/drop-item (.getLocation villager) (ItemStack. m/cake)))]
+    (if-let [item (.getItemInHand player)]
+      (condp = (.getType item)
+        m/brown-mushroom (do
+                           (.setProfession villager Villager$Profession/LIBRARIAN)
+                           (c/consume-item player))
+        m/red-mushroom (do
+                         (.setProfession villager Villager$Profession/PRIEST)
+                         (c/consume-item player))
+        m/yellow-flower (do
+                          (.setProfession villager Villager$Profession/BLACKSMITH)
+                          (c/consume-item player))
+        m/red-rose (do
+                     (.setProfession villager Villager$Profession/BUTCHER)
+                     (c/consume-item player))
+        m/redstone (do
+                     (.setProfession villager Villager$Profession/FARMER)
+                     (c/consume-item player))
+        (default))
+      (default))))
+
 (defn player-interact-entity-event [evt]
   (let [player (.getPlayer evt)
         target (.getRightClicked evt)]
@@ -1513,27 +1535,7 @@
             (.remove target))
           (loc/drop-item (.getLocation target) (ItemStack. m/rotten-flesh)))
 
-        Villager
-        (letfn [(default [] (loc/drop-item (.getLocation target) (ItemStack. m/cake)))]
-          (if-let [item (.getItemInHand player)]
-            (condp = (.getType item)
-              m/brown-mushroom (do
-                                        (.setProfession target Villager$Profession/LIBRARIAN)
-                                        (c/consume-item player))
-              m/red-mushroom (do
-                                      (.setProfession target Villager$Profession/PRIEST)
-                                      (c/consume-item player))
-              m/yellow-flower (do
-                                       (.setProfession target Villager$Profession/BLACKSMITH)
-                                       (c/consume-item player))
-              m/red-rose (do
-                                  (.setProfession target Villager$Profession/BUTCHER)
-                                  (c/consume-item player))
-              m/redstone (do
-                                  (.setProfession target Villager$Profession/FARMER)
-                                  (c/consume-item player))
-              (default))
-            (default)))
+        Villager (player-rightclick-villager player target)
 
         Squid
         (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
