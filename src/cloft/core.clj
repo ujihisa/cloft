@@ -1053,6 +1053,7 @@
       (.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
       (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
       (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
+      #_(.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
       #_(.sendMessage player "[NEWS] 金剣ビームはBlazeに逆効果。普通の雪玉なら効果覿面!")
       #_(.sendMessage player "[NEWS] ")
       #_(when (= "mozukusoba" (.getDisplayName player))
@@ -1326,6 +1327,14 @@
       (and (= m/stone-button (.getType block))
            (blazon? m/emerald-block (.getBlock (.add (.getLocation player) 0 -1 0))))
       (lift-down (.getLocation player))
+
+      (and (= m/shears (.getType (.getItemInHand player)))
+           (= m/wool (.getType block)))
+      (do
+        (.setType block m/air)
+        (item/modify-durability (.getItemInHand player) inc)
+        (doseq [_ (range 0 3)]
+          (loc/drop-item (.getLocation block) (ItemStack. m/string 1))))
 
       (= m/blaze-rod (.. player (getItemInHand) (getType)))
       (if (and (blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
