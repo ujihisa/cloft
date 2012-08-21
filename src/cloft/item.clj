@@ -1,20 +1,21 @@
 (ns cloft.item
-  (:import [org.bukkit Material]))
+  (:require [cloft.material :as m]))
 
-(def swords #{Material/WOOD_SWORD Material/STONE_SWORD Material/IRON_SWORD
-              Material/GOLD_SWORD Material/DIAMOND_SWORD})
+(def swords #{m/wood-sword m/stone-sword m/iron-sword
+              m/gold-sword m/diamond-sword})
 
 (def pickaxes
-  #{Material/DIAMOND_PICKAXE Material/GOLD_PICKAXE Material/IRON_PICKAXE
-    Material/STONE_PICKAXE Material/WOOD_PICKAXE})
+  #{m/diamond-pickaxe m/gold-pickaxe m/iron-pickaxe
+    m/stone-pickaxe m/wood-pickaxe})
 
 (def records
-  [Material/GOLD_RECORD Material/GREEN_RECORD Material/RECORD_10
-   Material/RECORD_11 Material/RECORD_3 Material/RECORD_4 Material/RECORD_5
-   Material/RECORD_6 Material/RECORD_7 Material/RECORD_8 Material/RECORD_9])
+  [m/gold-record m/green-record m/record-10
+   m/record-11 m/record-3 m/record-4 m/record-5
+   m/record-6 m/record-7 m/record-8 m/record-9])
 
 (def unobtainable
-  #{Material/MOB_SPAWNER Material/WEB Material/MONSTER_EGGS})
+  #{m/mob-spawner m/web m/monster-eggs})
 
 (defn modify-durability [item f]
   (.setDurability item (f (.getDurability item))))
+

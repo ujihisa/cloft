@@ -1,10 +1,11 @@
 (ns cloft.chimera-cow
-    (:require [cloft.cloft :as c])
-    (:require [cloft.arrow :as arrow])
-    (:import [org.bukkit.entity Cow Fireball Arrow Minecart Player])
-    (:import [org.bukkit Material Location Effect])
-    (:import [org.bukkit.inventory ItemStack])
-    (:import [org.bukkit.util Vector]))
+  (:require [cloft.cloft :as c])
+  (:require [cloft.material :as m])
+  (:require [cloft.arrow :as arrow])
+  (:import [org.bukkit.entity Cow Fireball Arrow Minecart Player])
+  (:import [org.bukkit Material Location Effect])
+  (:import [org.bukkit.inventory ItemStack])
+  (:import [org.bukkit.util Vector]))
 
 (def chimera-cows (atom #{}))
 
@@ -27,8 +28,8 @@
                   (doseq [_ (range 0 20)]
                     (Thread/sleep 1000)
                     (.dropItemNaturally world loc (if (= 0 (rand-int 10))
-                                                    (ItemStack. Material/GOLDEN_APPLE)
-                                                    (ItemStack. Material/APPLE))))))
+                                                    (ItemStack. m/golden-apple)
+                                                    (ItemStack. m/apple))))))
   (.setDroppedExp evt 200)
   (c/broadcast (format "%s beated a chimera cow!" (.getDisplayName player)))
   (c/lingr-mcujm (format "%s beated a chimera cow!" (.getDisplayName player))))

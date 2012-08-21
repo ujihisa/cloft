@@ -1,5 +1,6 @@
 (ns cloft.core
   (:require [cloft.cloft :as c])
+  (:require [cloft.material :as m])
   (:require [cloft.scheduler :as cloft-scheduler])
   (:require [cloft.chimera-cow :as chimera-cow])
   (:require [cloft.arrow :as arrow])
@@ -11,7 +12,7 @@
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
   (:require [swank.swank])
-  (:import [org.bukkit Bukkit Material TreeType DyeColor])
+  (:import [org.bukkit Bukkit TreeType DyeColor])
   (:import [org.bukkit.material Wool Dye])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
@@ -37,12 +38,12 @@
 
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
-    (when (= Material/FEATHER (.getType (.getItemInHand player)))
+    (when (= m/feather (.getType (.getItemInHand player)))
       (let [amount (.getAmount (.getItemInHand player))
             x (if (.isSprinting player) (* amount 2) amount)
             x2 (/ (java.lang.Math/log x) 2)]
         (.setFallDistance player 0.0)
-        (c/consume-itemstack (.getInventory player) Material/FEATHER)
+        (c/consume-itemstack (.getInventory player) m/feather)
         (c/add-velocity player 0 x2 0)))))
 
 (defonce plugin* nil)
@@ -83,8 +84,8 @@
       (when-let [itemstack (.getItemInHand player)]
         """for some reason case didn't work"""
         (condp = (.getType itemstack)
-          Material/APPLE (kaiouken player)
-          Material/RAW_BEEF (o157 player)
+          m/apple (kaiouken player)
+          m/raw-beef (o157 player)
           nil)))))
 
 (defn entity-combust-event [evt]
@@ -94,9 +95,9 @@
   (let [player (.getPlayer evt)]
     #_(when-let [cart (.getVehicle player)]
       (when (instance? Minecart cart)
-        (if (#{Material/STONE} (.getType (.getBlock (.getTo evt))))
+        (if (#{m/stone} (.getType (.getBlock (.getTo evt))))
           (.setDerailedVelocityMod cart (Vector. 0.90 0.90 0.90))
-          (if (#{Material/STONE} (.getType (.getBlock (.getFrom evt))))
+          (if (#{m/stone} (.getType (.getBlock (.getFrom evt))))
             (do
               #_(.setCancelled evt true)
               (.setVelocity cart (.multiply (.getVelocity cart) -1)))
@@ -117,21 +118,21 @@
 (defn arrow-skill-explosion [entity]
   (loc/explode (.getLocation entity) 0 false)
   (let [block (block-of-arrow entity)]
-    (.breakNaturally block (ItemStack. Material/DIAMOND_PICKAXE)))
+    (.breakNaturally block (ItemStack. m/diamond-pickaxe)))
   (.remove entity))
 
 (defn arrow-skill-torch [entity]
   (let [location (.getLocation entity)]
-    (.setType (.getBlock location) Material/TORCH)))
+    (.setType (.getBlock location) m/torch)))
 
 (defn arrow-skill-pull [entity]
   (let [block (block-of-arrow entity)]
     (if (c/removable-block? block)
       (let [shooter-loc (.getLocation (.getShooter entity))]
         (.setType (.getBlock shooter-loc) (.getType block))
-        (when (= Material/MOB_SPAWNER (.getType block))
+        (when (= m/mob-spawner (.getType block))
           (.setSpawnedType (.getState (.getBlock shooter-loc)) (.getSpawnedType (.getState block))))
-        (.setType block Material/AIR)
+        (.setType block m/air)
         (.teleport (.getShooter entity) (.add shooter-loc 0 1 0)))
       (.sendMessage (.getShooter entity) "PULL failed")))
   (.remove entity))
@@ -153,8 +154,8 @@
 (defn arrow-skill-flame [entity]
   (doseq [x [-1 0 1] y [-1 0 1] z [-1 0 1]
           :let [block (.getBlock (.add (.clone (.getLocation entity)) x y z))]
-          :when (= Material/AIR (.getType block))]
-    (.setType block Material/FIRE)))
+          :when (= m/air (.getType block))]
+    (.setType block m/fire)))
 
 (defn arrow-skill-tree [entity]
   (let [location (.getLocation entity)
@@ -167,16 +168,16 @@
 
 (defn arrow-skill-ore [entity]
   (let [block (block-of-arrow entity)]
-    (when (= (.getType block) Material/STONE)
-      (let [block-to-choices [Material/COAL_ORE
-                              Material/COAL_ORE
-                              Material/COBBLESTONE
-                              Material/COBBLESTONE
-                              Material/GRAVEL
-                              Material/IRON_ORE
-                              Material/LAPIS_ORE
-                              Material/GOLD_ORE
-                              Material/REDSTONE_ORE]]
+    (when (= (.getType block) m/stone)
+      (let [block-to-choices [m/coal-ore
+                              m/coal-ore
+                              m/cobblestone
+                              m/cobblestone
+                              m/gravel
+                              m/iron-ore
+                              m/lapis-ore
+                              m/gold-ore
+                              m/redstone-ore]]
         (.setType block (rand-nth block-to-choices))))))
 
 (defn arrow-skill-shotgun [entity]
@@ -184,15 +185,15 @@
 
 (defn arrow-skill-ice [entity]
   (if (.isLiquid (.getBlock (.getLocation entity)))
-    (.setType (.getBlock (.getLocation entity)) Material/ICE)
+    (.setType (.getBlock (.getLocation entity)) m/ice)
     (let [block (block-of-arrow entity)
           loc (.getLocation block)
           loc-above (.add (.clone loc) 0 1 0)]
       (when
         (and
-          (= Material/AIR (.getType (.getBlock loc-above)))
-          (not= Material/AIR (.getType (.getBlock loc))))
-        (.setType (.getBlock loc-above) Material/SNOW))))
+          (= m/air (.getType (.getBlock loc-above)))
+          (not= m/air (.getType (.getBlock loc))))
+        (.setType (.getBlock loc-above) m/snow))))
   (.remove entity))
 
 (defn arrow-skill-pumpkin [entity]
@@ -203,9 +204,9 @@
          (let [block (.getBlock (.getLocation entity))]
            (if (and
                    (= 0 (rand-int 3))
-                   (= Material/AIR (.getType block)))
+                   (= m/air (.getType block)))
              (do
-               (.setType block (rand-nth [Material/PUMPKIN Material/JACK_O_LANTERN]))
+               (.setType block (rand-nth [m/pumpkin m/jack-o-lantern]))
                (.remove entity))
              (.sendMessage (.getShooter entity) "PUMPKIN failed")))))))
 
@@ -214,35 +215,35 @@
     (.remove entity)
     (doseq [x (range -3 4) z (range -3 4)]
       (let [loc (.add (.getLocation entity) x 0 z)]
-        (when (and (.contains inventory Material/SEEDS)
-                   (= Material/AIR (.getType (.getBlock loc)))
-                   (= Material/SOIL (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))
+        (when (and (.contains inventory m/seeds)
+                   (= m/air (.getType (.getBlock loc)))
+                   (= m/soil (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))
           (try
-            (c/consume-itemstack inventory Material/SEEDS)
-            (c/consume-itemstack inventory Material/SEEDS)
-            (.setType (.getBlock loc) Material/CROPS)
+            (c/consume-itemstack inventory m/seeds)
+            (c/consume-itemstack inventory m/seeds)
+            (.setType (.getBlock loc) m/crops)
             (catch org.bukkit.event.EventException e nil)))))))
 
 (defn arrow-skill-diamond [entity]
   (let [block (.getBlock (.getLocation entity))]
     (condp = (.getType block)
-      Material/CROPS
+      m/crops
       (.setData block 7)
       nil))
   (let [block (block-of-arrow entity)]
     (condp = (.getType block)
-      Material/COBBLESTONE
-      (.setType block Material/STONE)
-      Material/WOOL
+      m/cobblestone
+      (.setType block m/stone)
+      m/wool
       (do
-        (.setType block Material/AIR)
+        (.setType block m/air)
         (if (= 0 (rand-int 2))
-          (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/WOOL))
+          (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. m/wool))
           (loc/spawn (.getLocation entity) Sheep)))
       nil))
   (.remove entity)
   (let [loc (.getLocation entity)]
-    (.dropItem (.getWorld loc) loc (ItemStack. Material/ARROW))))
+    (.dropItem (.getWorld loc) loc (ItemStack. m/arrow))))
 
 (defn something-like-quake [entity klass f]
   (let [targets (.getNearbyEntities entity 5 3 5)]
@@ -275,46 +276,46 @@
 
 (defn arrow-skill-liquid [material duration entity]
   (let [block (.getBlock (.getLocation entity))]
-    (if (= Material/AIR (.getType block))
+    (if (= m/air (.getType block))
       (do
         (.setType block material)
         (future-call #(do
                         (Thread/sleep duration)
                         (when (.isLiquid block)
-                          (.setType block Material/AIR)))))
+                          (.setType block m/air)))))
       (.sendMessage (.getShooter entity) "failed")))
   (future-call #(do
-                  (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. Material/ARROW))
+                  (.dropItem (.getWorld entity) (.getLocation entity) (ItemStack. m/arrow))
                   (.remove entity))))
 
 (defn arrow-skill-water [entity]
-  (arrow-skill-liquid Material/WATER 5000 entity))
+  (arrow-skill-liquid m/water 5000 entity))
 
 (defn arrow-skill-lava [entity]
-  (arrow-skill-liquid Material/LAVA 500 entity))
+  (arrow-skill-liquid m/lava 500 entity))
 
 (defn arrow-skill-woodbreak [entity]
   (let [block (block-of-arrow entity)
-        table {Material/WOODEN_DOOR (repeat 6 (ItemStack. Material/WOOD))
-               Material/FENCE (repeat 6 (ItemStack. Material/STICK))
-               Material/WALL_SIGN (cons (ItemStack. Material/STICK)
-                                        (repeat 6 (ItemStack. Material/WOOD)))
-               Material/SIGN_POST (cons (ItemStack. Material/STICK)
-                                        (repeat 6 (ItemStack. Material/WOOD)))
-               Material/FENCE_GATE (concat (repeat 2 (ItemStack. Material/WOOD))
-                                           (repeat 4 (ItemStack. Material/STICK)))
-               Material/TRAP_DOOR (repeat 6 (ItemStack. Material/WOOD))}
+        table {m/wooden-door (repeat 6 (ItemStack. m/wood))
+               m/fence (repeat 6 (ItemStack. m/stick))
+               m/wall-sign (cons (ItemStack. m/stick)
+                                        (repeat 6 (ItemStack. m/wood)))
+               m/sign-post (cons (ItemStack. m/stick)
+                                        (repeat 6 (ItemStack. m/wood)))
+               m/fence-gate (concat (repeat 2 (ItemStack. m/wood))
+                                           (repeat 4 (ItemStack. m/stick)))
+               m/trap-door (repeat 6 (ItemStack. m/wood))}
         items (table (.getType block))
         block2 (.getBlock (.getLocation entity))
         items2 (table (.getType block2))]
     (if items
       (do
-        (.setType block Material/AIR)
+        (.setType block m/air)
         (doseq [item items]
           (.dropItemNaturally (.getWorld block) (.getLocation block) item)))
       (if items2
         (do
-          (.setType block2 Material/AIR)
+          (.setType block2 m/air)
           (doseq [item items2]
             (.dropItemNaturally (.getWorld block2) (.getLocation block2) item)))
         (.sendMessage (.getShooter entity) "Woodbreak failed."))))
@@ -431,12 +432,12 @@
   (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
   (doseq [[x y z] [[0 0 0] [-1 0 0] [0 -1 0] [0 0 -1] [1 0 0] [0 1 0] [0 0 1]]
           :let [loc (.add (.clone (.getLocation blaze2)) x y z)]
-          :when (= Material/AIR (.getType (.getBlock loc)))
+          :when (= m/air (.getType (.getBlock loc)))
           :let [new-block-type
-                (rand-nth [Material/NETHER_BRICK Material/NETHERRACK
-                           Material/SOUL_SAND Material/GLOWSTONE
-                           Material/GLOWSTONE Material/GLOWSTONE
-                           Material/AIR Material/AIR])]]
+                (rand-nth [m/nether-brick m/netherrack
+                           m/soul-sand m/glowstone
+                           m/glowstone m/glowstone
+                           m/air m/air])]]
     (.setType (.getBlock loc) new-block-type))
   (.setDroppedExp evt 80)
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
@@ -495,22 +496,22 @@
           itemstack (.getItemStack item)
           itemtype (.getType itemstack)]
       (cond
-        (= Material/EMERALD itemtype) (.setCancelled evt true)
-        (#{Material/CHEST Material/ENDER_CHEST} itemtype) nil
+        (= m/emerald itemtype) (.setCancelled evt true)
+        (#{m/chest m/ender-chest} itemtype) nil
         :else (popcorn item @popcorning)))
     (let [item (.getEntity evt)
-          table {Material/RAW_BEEF [Material/ROTTEN_FLESH Material/COOKED_BEEF]
-                 Material/RAW_CHICKEN [Material/ROTTEN_FLESH Material/COOKED_CHICKEN]
-                 Material/RAW_FISH [Material/RAW_FISH Material/COOKED_FISH]
-                 Material/PORK [Material/ROTTEN_FLESH Material/GRILLED_PORK]
-                 #_(Material/APPLE [Material/APPLE Material/GOLDEN_APPLE])
-                 Material/ROTTEN_FLESH [nil Material/COAL]}
+          table {m/raw-beef [m/rotten-flesh m/cooked-beef]
+                 m/raw-chicken [m/rotten-flesh m/cooked-chicken]
+                 m/raw-fish [m/raw-fish m/cooked-fish]
+                 m/pork [m/rotten-flesh m/grilled-pork]
+                 #_(m/apple [m/apple m/golden-apple])
+                 m/rotten-flesh [nil m/coal]}
           itemstack (.getItemStack item)]
       (when (table (.getType itemstack))
         (future-call #(let [pair (table (.getType itemstack))]
                         (Thread/sleep 5000)
                         (when-not (.isDead item)
-                          (if (#{Material/FURNACE Material/BURNING_FURNACE}
+                          (if (#{m/furnace m/burning-furnace}
                                   (.getType (.getBlock (.add (.getLocation item) 0 -1 0))))
                             (do
                               (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (last pair) (.getAmount itemstack)))
@@ -557,17 +558,17 @@
       #_(when (= 'arrow-skill-tntmissile (arrow-skill-of shooter))
         (let [inventory (.getInventory shooter)
               arrow (.getProjectile evt)]
-          (if (.contains inventory Material/TNT)
+          (if (.contains inventory m/tnt)
             (fly-with-check
               arrow
               #(let [velocity (.getVelocity %1)
                      location (.getLocation %1)]
                  (if (> (.getY (.toVector location))
                           (+ 5.0 (.getY (.toVector (.getLocation shooter)))))
-                   (if (.contains inventory Material/TNT)
+                   (if (.contains inventory m/tnt)
                      (let [primed-tnt (.spawn world location TNTPrimed) ]
                        (.setVelocity primed-tnt velocity)
-                       (c/consume-itemstack inventory Material/TNT)
+                       (c/consume-itemstack inventory m/tnt)
                        (.remove arrow)
                        false)
                      ((c/broadcast (.getDisplayName shooter) " has no TNT.")
@@ -606,12 +607,12 @@
       (doseq [y [0 1]]
         (doseq [[x z] [[-1 0] [1 0] [0 -1] [0 1]]]
           (let [block (.getBlock (.add (.clone loc) x y z))]
-            (when (#{Material/AIR Material/SNOW} (.getType block))
-              (.setType block Material/GLASS)))))
+            (when (#{m/air m/snow} (.getType block))
+              (.setType block m/glass)))))
       (doseq [y [-1 2]]
         (let [block (.getBlock (.add (.clone loc) 0 y 0))]
-          (when (#{Material/AIR Material/SNOW} (.getType block))
-            (.setType block Material/GLASS))))
+          (when (#{m/air m/snow} (.getType block))
+            (.setType block m/glass))))
       (future-call #(do
                       (Thread/sleep 1000)
                       (when-not (.isDead target)
@@ -621,12 +622,12 @@
                       (doseq [y [0 1]]
                         (doseq [[x z] [[-1 0] [1 0] [0 -1] [0 1]]]
                           (let [block (.getBlock (.add (.clone loc) x y z))]
-                            (when (= (.getType block) Material/GLASS)
-                              (.setType block Material/AIR)))))
+                            (when (= (.getType block) m/glass)
+                              (.setType block m/air)))))
                       (doseq [y [-1 2]]
                         (let [block (.getBlock (.add (.clone loc) 0 y 0))]
-                          (when (= (.getType block) Material/GLASS)
-                            (.setType block Material/AIR)))))))))
+                          (when (= (.getType block) m/glass)
+                            (.setType block m/air)))))))))
 
 (defn reaction-skill-ice [you by]
   (freeze-for-20-sec by)
@@ -665,10 +666,10 @@
                   good-candidates
                   (filter
                     #(and
-                       (not= Material/AIR
+                       (not= m/air
                              (.getType (.getBlock (.add (.clone %) 0 -1 0))))
-                       (= Material/AIR (.getType (.getBlock %)))
-                       (= Material/AIR
+                       (= m/air (.getType (.getBlock %)))
+                       (= m/air
                           (.getType (.getBlock (.add (.clone %) 0 1 0)))))
                     candidates)]
               (rand-nth good-candidates)))]
@@ -688,14 +689,14 @@
                     [-1 1 0 0] [-1 1 0 0]))))
 
 (defn reaction-skillchange [player block block-against]
-  (when (blazon? Material/LOG block-against)
-    (let [table {Material/RED_ROSE [reaction-skill-fire "FIRE"]
-                 Material/YELLOW_FLOWER [reaction-skill-teleport "TELEPORT"]
-                 Material/COBBLESTONE [reaction-skill-knockback "KNOCKBACK"]
-                 Material/DIRT [reaction-skill-wolf "WOLF"]
-                 Material/IRON_BLOCK [reaction-skill-golem "GOLEM"]
-                 Material/SNOW_BLOCK [reaction-skill-ice "ICE"]
-                 Material/RED_MUSHROOM [reaction-skill-poison "POISON"]}]
+  (when (blazon? m/log block-against)
+    (let [table {m/red-rose [reaction-skill-fire "FIRE"]
+                 m/yellow-flower [reaction-skill-teleport "TELEPORT"]
+                 m/cobblestone [reaction-skill-knockback "KNOCKBACK"]
+                 m/dirt [reaction-skill-wolf "WOLF"]
+                 m/iron-block [reaction-skill-golem "GOLEM"]
+                 m/snow-block [reaction-skill-ice "ICE"]
+                 m/red-mushroom [reaction-skill-poison "POISON"]}]
       (when-let [skill-name (table (.getType block))]
         (if (= 0 (.getLevel player))
           (.sendMessage player "Your level is 0. You can't set reaction skill yet.")
@@ -706,53 +707,53 @@
             (swap! reaction-skill assoc (.getDisplayName player) [(first skill-name) l])))))))
 
 (defn arrow-skillchange [player block block-against]
-  (when (blazon? Material/STONE (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (let [table {Material/GLOWSTONE ['strong "STRONG"]
-                 Material/TNT [arrow-skill-explosion "EXPLOSION"]
-                 Material/TORCH [arrow-skill-torch "TORCH"]
-                 Material/PISTON_STICKY_BASE [arrow-skill-pull "PULL"]
-                 Material/YELLOW_FLOWER [arrow-skill-teleport "TELEPORT"]
-                 Material/RED_ROSE [arrow-skill-fire "FIRE"]
-                 Material/SAPLING [arrow-skill-tree "TREE"]
-                 Material/WORKBENCH [arrow-skill-ore "ORE"]
-                 Material/TRAP_DOOR ['digg "DIGG"]
-                 Material/LADDER ['trap "TRAP"]
-                 Material/CACTUS [arrow-skill-shotgun "SHOTGUN"]
-                 Material/RAILS ['cart "CART"]
-                 Material/BOOKSHELF ['mobchange "MOBCHANGE"]
-                 #_(Material/SANDSTONE ['arrow-skill-tntmissile "TNTMissle"])
-                 #_( Material/STONE ['sniping "SNIPING"])
-                 Material/SNOW_BLOCK [arrow-skill-ice "ICE"]
-                 Material/POWERED_RAIL ['exp "EXP"]
-                 Material/PISTON_BASE ['super-knockback "SUPER-KNOCKBACK"]
-                 Material/JACK_O_LANTERN [arrow-skill-pumpkin "PUMPKIN"]
-                 Material/PUMPKIN [arrow-skill-pumpkin "PUMPKIN"]
-                 Material/CROPS [arrow-skill-plant "PLANT"]
-                 Material/DIAMOND_BLOCK [arrow-skill-diamond "CRAZY DIAMOND"]
-                 #_( Material/FIRE [arrow-skill-flame "FLAME"])
-                 Material/BROWN_MUSHROOM [arrow-skill-quake "QUAKE"]
-                 Material/RED_MUSHROOM ['arrow-skill-poison "POISON"]
-                 #_(Material/FENCE_GATE [arrow-skill-popcorn "POPCORN"])
-                 Material/WATER [arrow-skill-water "WATER"]
-                 Material/LAVA [arrow-skill-lava "LAVA"]
-                 Material/LOG [arrow-skill-woodbreak "WOODBREAK"]}]
+  (when (blazon? m/stone (.getBlock (.add (.getLocation block) 0 -1 0)))
+    (let [table {m/glowstone ['strong "STRONG"]
+                 m/tnt [arrow-skill-explosion "EXPLOSION"]
+                 m/torch [arrow-skill-torch "TORCH"]
+                 m/piston-sticky-base [arrow-skill-pull "PULL"]
+                 m/yellow-flower [arrow-skill-teleport "TELEPORT"]
+                 m/red-rose [arrow-skill-fire "FIRE"]
+                 m/sapling [arrow-skill-tree "TREE"]
+                 m/workbench [arrow-skill-ore "ORE"]
+                 m/trap-door ['digg "DIGG"]
+                 m/ladder ['trap "TRAP"]
+                 m/cactus [arrow-skill-shotgun "SHOTGUN"]
+                 m/rails ['cart "CART"]
+                 m/bookshelf ['mobchange "MOBCHANGE"]
+                 #_(m/sandstone ['arrow-skill-tntmissile "TNTMissle"])
+                 #_( m/stone ['sniping "SNIPING"])
+                 m/snow-block [arrow-skill-ice "ICE"]
+                 m/powered-rail ['exp "EXP"]
+                 m/piston-base ['super-knockback "SUPER-KNOCKBACK"]
+                 m/jack-o-lantern [arrow-skill-pumpkin "PUMPKIN"]
+                 m/pumpkin [arrow-skill-pumpkin "PUMPKIN"]
+                 m/crops [arrow-skill-plant "PLANT"]
+                 m/diamond-block [arrow-skill-diamond "CRAZY DIAMOND"]
+                 #_( m/fire [arrow-skill-flame "FLAME"])
+                 m/brown-mushroom [arrow-skill-quake "QUAKE"]
+                 m/red-mushroom ['arrow-skill-poison "POISON"]
+                 #_(m/fence-gate [arrow-skill-popcorn "POPCORN"])
+                 m/water [arrow-skill-water "WATER"]
+                 m/lava [arrow-skill-lava "LAVA"]
+                 m/log [arrow-skill-woodbreak "WOODBREAK"]}]
       (when-let [skill-name (table (.getType block))]
         (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
 
 (defn pickaxe-skillchange [player block block-against]
-  (when (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (let [table {Material/YELLOW_FLOWER ['pickaxe-skill-teleport "TELEPORT"]
-                 Material/RED_ROSE ['pickaxe-skill-fire "FIRE"]
-                 Material/WORKBENCH ['pickaxe-skill-ore "ORE"]
-                 Material/STONE ['pickaxe-skill-stone "STONE"]
-                 Material/SAND ['pickaxe-skill-fall "FALL"]}]
+  (when (blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
+    (let [table {m/yellow-flower ['pickaxe-skill-teleport "TELEPORT"]
+                 m/red-rose ['pickaxe-skill-fire "FIRE"]
+                 m/workbench ['pickaxe-skill-ore "ORE"]
+                 m/stone ['pickaxe-skill-stone "STONE"]
+                 m/sand ['pickaxe-skill-fall "FALL"]}]
       (when-let [skill-name (table (.getType block))]
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed pickaxe-skill to " (last skill-name))
         (swap! pickaxe-skill assoc (.getDisplayName player) (first skill-name))))
-    (when (#{Material/CHEST Material/ENDER_CHEST} (.getType block))
+    (when (#{m/chest m/ender-chest} (.getType block))
       (swap! pickaxe-skill dissoc (.getDisplayName player))
       (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
       (.sendMessage player "ざわ・・・"))))
@@ -780,9 +781,9 @@
         place-fire (fn [v i]
                       (cloft-scheduler/settimer
                         i
-                        #(when (= Material/AIR (.getType v))
+                        #(when (= m/air (.getType v))
                            (.playEffect (.getWorld v) (.getLocation v) Effect/BLAZE_SHOOT nil)
-                           (.setType v Material/FIRE))))]
+                           (.setType v m/fire))))]
     (letfn [(explode-at ([pos world delay]
                (cloft-scheduler/settimer 1  #(when-not (.createExplosion world (.toLocation pos world) 0.0 true)
                                                (explode-at pos world 1)))))
@@ -814,8 +815,8 @@
         top (coor/local-to-world player block 15.0 6.0 0.0)]
     (letfn [(place-cobblestones [v i]
               (cloft-scheduler/settimer i
-                                       #(when (= Material/AIR (.getType v))
-                                          (.setType v Material/COBBLESTONE))))]
+                                       #(when (= m/air (.getType v))
+                                          (.setType v m/cobblestone))))]
       (.strikeLightningEffect world (.toLocation bottom world))
       (cloft.block/place-in-line world bottom top place-cobblestones)
       (if-let [prev (active-fusion-wall-of player)]
@@ -841,7 +842,7 @@
                         #(when (boolean ((cloft.block/category :enterable) (.getType v)))
                            (when (= 0 (rand-int 6))
                              (.strikeLightningEffect world (.getLocation v)))
-                           (.setType v Material/COBBLESTONE))))]
+                           (.setType v m/cobblestone))))]
     (cloft.block/place-in-line-with-offset world start-left end-left block-floor 2)
     (cloft.block/place-in-line-with-offset world start-center end-center block-floor 2)
     (cloft.block/place-in-line-with-offset world start-right end-right block-floor 2)))
@@ -852,19 +853,19 @@
            (let [loc (.getLocation e)]
              (.remove e)
              (.strikeLightningEffect world loc)
-             (.dropItem world loc (ItemStack. Material/REDSTONE))))))
+             (.dropItem world loc (ItemStack. m/redstone))))))
 
 (defn erupt-volcano [player block]
   (let [world (.getWorld player)
         crator-vector (coor/local-to-world player block 40.0 20.0 0.0)
         crator-location (.toLocation crator-vector world)]
     (.strikeLightningEffect world crator-location)
-    (.setType (.getBlockAt world crator-location) Material/LAVA)
+    (.setType (.getBlockAt world crator-location) m/lava)
     (cloft.block/place-in-circle
       world 10 14
       crator-location
       (fn [v i]
-          (.setType v Material/COBBLESTONE)))))
+          (.setType v m/cobblestone)))))
 
 (defn close-air-support [player block]
   (let [world (.getWorld player)
@@ -890,7 +891,7 @@
         world inner outer
         (.toLocation (.add (.clone center-vector) (.multiply (.clone uy) h)) world)
         (fn [v i]
-          (.setType v Material/WOOL)
+          (.setType v m/wool)
           (.setData v (Byte. (byte 5)))))
       (if (< h 20)
         (recur (inc h) inner outer)
@@ -899,17 +900,17 @@
           (recur (inc h) inner 9))))))
 
 (defn invoke-alchemy [player block block-against]
-  (when (blazon? Material/NETHERRACK block-against)
+  (when (blazon? m/netherrack block-against)
     "MEMO: to be changed to STONE BRICK"
     "TODO: consistant naming"
-    (let [table {Material/COBBLESTONE alchemy-fusion-wall
-                 Material/SAND fusion-floor
-                 Material/DIRT summon-giant
-                 Material/LOG make-redstone-for-livings
-                 Material/GLOWSTONE summon-residents-of-nether}
-          table2 {Material/TNT close-air-support
-                  Material/NETHERRACK erupt-volcano
-                  Material/RED_MUSHROOM earthen-pipe}]
+    (let [table {m/cobblestone alchemy-fusion-wall
+                 m/sand fusion-floor
+                 m/dirt summon-giant
+                 m/log make-redstone-for-livings
+                 m/glowstone summon-residents-of-nether}
+          table2 {m/tnt close-air-support
+                  m/netherrack erupt-volcano
+                  m/red-mushroom earthen-pipe}]
       (when-let [alchemy (table (.getType block))]
         (alchemy player block)))))
 
@@ -920,7 +921,7 @@
     (when (item/pickaxes (.getType (.getItemInHand player)))
       (condp = (pickaxe-skill-of player)
         'pickaxe-skill-stone
-        (if (= Material/STONE (.getType block))
+        (if (= m/stone (.getType block))
           (.setInstaBreak evt true)
           (when (not= 0 (rand-int 1000))
             (.setCancelled evt true)))
@@ -932,13 +933,13 @@
                   (not (contains? item/unobtainable btype))
                   (not (instance? org.bukkit.block.ContainerBlock (.getState block))))
             (loc/fall-block (.getLocation block) btype (.getData block))
-            (.setType block Material/AIR)
+            (.setType block m/air)
             (let [item (.getItemInHand player)
-                  pickaxe-durabilities {Material/WOOD_PICKAXE 60
-                                        Material/STONE_PICKAXE 132
-                                        Material/IRON_PICKAXE 251
-                                        Material/GOLD_PICKAXE 33
-                                        Material/DIAMOND_PICKAXE 1562}
+                  pickaxe-durabilities {m/wood-pickaxe 60
+                                        m/stone-pickaxe 132
+                                        m/iron-pickaxe 251
+                                        m/gold-pickaxe 33
+                                        m/diamond-pickaxe 1562}
                   max-durability (pickaxe-durabilities (.getType item))]
               (if (< max-durability (.getDurability item))
                 (c/consume-item player)
@@ -1073,7 +1074,7 @@
                  (doseq [x [-2 2] z [-2 2]]
                    (let [loc (.add (.getLocation player) x 2 z)]
                      (.sendMessage player "!!!")
-                     (when (= Material/AIR (.getType (.getBlock loc)))
+                     (when (= m/air (.getType (.getBlock loc)))
                        (.spawn (.getWorld loc) loc Creeper)))))))]
     ((rand-nth [unlucky]) player)))
 
@@ -1111,12 +1112,12 @@
 
 (defn touch-player [player target]
   (if (and (.getItemInHand player)
-           (= Material/STONE_PLATE (.getType (.getItemInHand player))))
+           (= m/stone-plate (.getType (.getItemInHand player))))
     (do
       (.sendMessage target "Stone plate helmet!")
       (when-let [helmet (.getHelmet (.getInventory target))]
         (loc/drop-item (.getLocation target) helmet))
-      (.setHelmet (.getInventory target) (ItemStack. Material/STONE_PLATE))
+      (.setHelmet (.getInventory target) (ItemStack. m/stone-plate))
       (c/consume-item player))
     (do
       (.setFoodLevel target (dec (.getFoodLevel target)))
@@ -1145,14 +1146,14 @@
       "I don't know why but this line is vital")
     (doseq [[[btype bdata] [x y z]] zipped]
       (let [block (.getBlock (.add (.clone center-loc) x y z))]
-        (.setType block Material/AIR)))
+        (.setType block m/air)))
     (doseq [[[btype bdata] [x y z]] zipped]
       (let [block (.getBlock (.add (.clone center-loc) x y z))]
         (.setType block btype)
         (.setData block bdata)))
     (doseq [x (range -2 3)  z (range -2 3)]
       (let [block (.getBlock (.add (.clone center-loc) x (- 0 ydiff) z))]
-        (.setType block Material/AIR))))
+        (.setType block m/air))))
   (doseq [player (Bukkit/getOnlinePlayers)
           :when (.isInAABB
                   (.toVector (.getLocation player))
@@ -1174,33 +1175,33 @@
   (let [loc (.getLocation (.getBlock (.getLocation player)))]
     (when (and
             (every?
-              #(= Material/COBBLESTONE %)
+              #(= m/cobblestone %)
               (for [x [-1 0 1] z [-1 0 1]]
                 (.getType (.getBlock (.add (.clone loc) x -1 z)))))
             (every?
-              #(= Material/COBBLESTONE %)
+              #(= m/cobblestone %)
               (for [x [-1 0 1] z [-1 0 1]]
                 (.getType (.getBlock (.add (.clone loc) x 2 z))))))
       (.teleport player (.add (.getLocation player) 0 10 0))
       (doseq [x [-1 0 1] z [-1 0 1]]
-        (.setType (.getBlock (.add (.clone loc) x -1 z)) Material/AIR))
+        (.setType (.getBlock (.add (.clone loc) x -1 z)) m/air))
       (doseq [x [-1 0 1] z [-1 0 1]]
-        (.setType (.getBlock (.add (.clone loc) x 2 z)) Material/AIR))
+        (.setType (.getBlock (.add (.clone loc) x 2 z)) m/air))
       (doseq [x [-1 0 1] z [-1 0 1]]
-        (.setType (.getBlock (.add (.clone loc) x 9 z)) Material/COBBLESTONE))
+        (.setType (.getBlock (.add (.clone loc) x 9 z)) m/cobblestone))
       (doseq [x [-1 0 1] z [-1 0 1]]
-        (.setType (.getBlock (.add (.clone loc) x 12 z)) Material/COBBLESTONE))
-      (.setType (.getBlock (.getLocation door)) Material/AIR)
-      (.setType (.getBlock (.add (.getLocation door) 0 10 0)) Material/IRON_DOOR)))))
+        (.setType (.getBlock (.add (.clone loc) x 12 z)) m/cobblestone))
+      (.setType (.getBlock (.getLocation door)) m/air)
+      (.setType (.getBlock (.add (.getLocation door) 0 10 0)) m/iron-door)))))
 
 (def plowed-sands (atom #{}))
 
 (def hoe-durabilities
-  {Material/WOOD_HOE 60
-   Material/STONE_HOE 132
-   Material/IRON_HOE 251
-   Material/GOLD_HOE 33
-   Material/DIAMOND_HOE 1562})
+  {m/wood-hoe 60
+   m/stone-hoe 132
+   m/iron-hoe 251
+   m/gold-hoe 33
+   m/diamond-hoe 1562})
 
 (defn minecart-accelerate [cart]
   (let [dire (.getDirection (.getLocation cart))]
@@ -1217,7 +1218,7 @@
         (minecart-accelerate (.getVehicle player)))
 
       (and
-        (= (.. player (getItemInHand) (getType)) Material/GOLD_SWORD)
+        (= (.. player (getItemInHand) (getType)) m/gold-sword)
         (= (.getHealth player) (.getMaxHealth player)))
       (if (< 33 (.getDurability item))
         (c/consume-item player)
@@ -1238,7 +1239,7 @@
                 (.removeEnchantment item enchant))))))
 
       (and
-        (= Material/FEATHER (.getType item))
+        (= m/feather (.getType item))
         (< 0.01 (.getFallDistance player)))
       (do
         (.setVelocity player (doto
@@ -1249,8 +1250,8 @@
           (c/consume-item player)))
 
       (and (.getClickedBlock evt)
-           (= Material/STONE_BUTTON (.getType (.getClickedBlock evt)))
-           (blazon? Material/EMERALD_BLOCK (.getBlock (.add (.getLocation player) 0 -1 0))))
+           (= m/stone-button (.getType (.getClickedBlock evt)))
+           (blazon? m/emerald-block (.getBlock (.add (.getLocation player) 0 -1 0))))
       (lift-up (.getLocation player)))))
 
 
@@ -1274,7 +1275,7 @@
 
 (defn pan-gold-wait [player block]
   (let [item (.getItemInHand player)]
-    (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/TORCH)
+    (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND m/torch)
     (if (> (.getDurability item) (hoe-durabilities (.getType item)))
       (.remove (.getInventory player) item)
       (do
@@ -1283,25 +1284,25 @@
           (swap! plowed-sands conj block)
           (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
           (swap! plowed-sands disj block)
-          (when (#{Material/SAND Material/GRAVEL} (.getType block))
-            (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND Material/SAND)
+          (when (#{m/sand m/gravel} (.getType block))
+            (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND m/sand)
             (when (= 0 (rand-int 2))
-              (.setType block (rand-nth [Material/SANDSTONE Material/AIR Material/CLAY])))))))))
+              (.setType block (rand-nth [m/sandstone m/air m/clay])))))))))
 
 (defn night? [world]
   (< 18000 (.getTime world)))
 
 (defn chest-popcorn-probability [block]
-  (assert (#{Material/CHEST Material/ENDER_CHEST} (.getType block)) block)
+  (assert (#{m/chest m/ender-chest} (.getType block)) block)
   (let [world (.getWorld block)
         base (int (* 30
                      (if (night? world) 1.4 1)
                      (if (.hasStorm world) 1.4 1)
                      (if (.isThundering world) 1.4 1)))
         contents (filter identity (.getContents (.getBlockInventory (.getState block))))
-        emeralds (filter #(= Material/EMERALD (.getType %)) contents)
+        emeralds (filter #(= m/emerald (.getType %)) contents)
         total-emeralds (apply + (map #(.getAmount %) emeralds))
-        emerald-blocks (filter #(= Material/EMERALD_BLOCK (.getType %)) contents)
+        emerald-blocks (filter #(= m/emerald-block (.getType %)) contents)
         total-emerald-blocks (apply + (map #(.getAmount %) emerald-blocks))
         emerald-effect-num (max 0 (- total-emeralds (* total-emerald-blocks 2)))]
     (min 90 (+ base (* emerald-effect-num 5)))))
@@ -1312,35 +1313,35 @@
     (cond
       (and
         (player/zombie? player)
-        (= (.. evt (getMaterial)) Material/MILK_BUCKET))
+        (= (.. evt (getMaterial)) m/milk-bucket))
       (do
         (player/rebirth-from-zombie player)
         (when (= 0 (rand-int 3))
-          (.setType (.getItemInHand player) Material/BUCKET)))
+          (.setType (.getItemInHand player) m/bucket)))
 
       (and
         (.getAllowFlight player)
-        (= (.. evt (getMaterial)) Material/COAL))
+        (= (.. evt (getMaterial)) m/coal))
       (do
         (.setVelocity player (.multiply (.getDirection (.getLocation player)) 4))
         (c/consume-item player))
 
       (and
         (.isSneaking player)
-        ((conj item/swords Material/BOW) (.getType (.getItemInHand player))))
+        ((conj item/swords m/bow) (.getType (.getItemInHand player))))
       (autofocus player)
 
-      (= Material/FEATHER (.. evt (getMaterial)))
+      (= m/feather (.. evt (getMaterial)))
       (player-super-jump evt player)))
   (if-let [block (.getClickedBlock evt)]
     (cond
-      (and (= Material/STONE_BUTTON (.getType block))
-           (blazon? Material/EMERALD_BLOCK (.getBlock (.add (.getLocation player) 0 -1 0))))
+      (and (= m/stone-button (.getType block))
+           (blazon? m/emerald-block (.getBlock (.add (.getLocation player) 0 -1 0))))
       (lift-down (.getLocation player))
 
-      (= Material/BLAZE_ROD (.. player (getItemInHand) (getType)))
-      (if (and (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
-               (#{Material/CHEST Material/ENDER_CHEST} (.getType block)))
+      (= m/blaze-rod (.. player (getItemInHand) (getType)))
+      (if (and (blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
+               (#{m/chest m/ender-chest} (.getType block)))
         (let [probability (chest-popcorn-probability block)]
           (.setCancelled evt true)
           (.sendMessage player (format "current probability: %.2f" (/ probability 100.0))))
@@ -1349,13 +1350,13 @@
           (.sendMessage player (format "biome: %s" (.getBiome block)))))
 
       (and
-        (= Material/CHEST (.getType block))
-        (= Material/TNT (.getType (.getBlock (.add (.getLocation block) 0 -1 0)))))
+        (= m/chest (.getType block))
+        (= m/tnt (.getType (.getBlock (.add (.getLocation block) 0 -1 0)))))
       (do
-        (.setType (.getBlock (.add (.getLocation block) 0 -1 0)) Material/AIR)
+        (.setType (.getBlock (.add (.getLocation block) 0 -1 0)) m/air)
         (loc/spawn (.add (.getLocation block) 0 1 0) TNTPrimed))
 
-      (= Material/CAKE_BLOCK (.getType block))
+      (= m/cake-block (.getType block))
       (if-let [death-point (player/death-location-of player)]
         (do
           (.load (.getChunk death-point))
@@ -1365,16 +1366,16 @@
 
       (and
         (= 0 (rand-int 15))
-        (= Material/BOWL (.getType (.getItemInHand player)))
+        (= m/bowl (.getType (.getItemInHand player)))
         (@plowed-sands block))
-      (let [item-type (if (= 0 (rand-int 50)) Material/GOLD_INGOT Material/GOLD_NUGGET)]
+      (let [item-type (if (= 0 (rand-int 50)) m/gold-ingot m/gold-nugget)]
         (loc/drop-item (.getLocation block) (ItemStack. item-type)))
 
       (and
         (hoe-durabilities (.. player (getItemInHand) (getType)))
         (and (= Biome/RIVER (.getBiome block))
              (not (@plowed-sands block))
-             (#{Material/SAND Material/GRAVEL} (.getType block))
+             (#{m/sand m/gravel} (.getType block))
              (> 64.0 (.getY (.getLocation block)))
              (.isLiquid (.getBlock (.add (.getLocation block) 0 1 0)))))
       (pan-gold-wait player block)
@@ -1413,11 +1414,11 @@
   (let [item (.getItemDrop evt)
         itemstack (.getItemStack item)
         table-equip
-        {Material/WOOD_SWORD [Material/STICK Material/WOOD Material/WOOD]
-         Material/STONE_SWORD [Material/STICK Material/COBBLESTONE Material/COBBLESTONE]
-         Material/IRON_SWORD [Material/STICK Material/IRON_INGOT Material/IRON_INGOT]
-         Material/GOLD_SWORD [Material/STICK Material/GOLD_INGOT Material/GOLD_INGOT]
-         Material/DIAMOND_SWORD [Material/STICK Material/DIAMOND Material/DIAMOND]}
+        {m/wood-sword [m/stick m/wood m/wood]
+         m/stone-sword [m/stick m/cobblestone m/cobblestone]
+         m/iron-sword [m/stick m/iron-ingot m/iron-ingot]
+         m/gold-sword [m/stick m/gold-ingot m/gold-ingot]
+         m/diamond-sword [m/stick m/diamond m/diamond]}
         player (.getPlayer evt)]
     (when (.isSprinting player)
       (.setVelocity item (.add (.multiply (.getVelocity item) 2.0) (Vector. 0.0 0.5 0.0))))
@@ -1427,10 +1428,10 @@
                       (Thread/sleep 8000)
                       (when (and
                               (not (.isDead item))
-                              (#{Material/FURNACE Material/BURNING_FURNACE}
+                              (#{m/furnace m/burning-furnace}
                                   (.getType (.getBlock (.add (.getLocation item) 0 -1 0)))))
                         (doseq [p parts]
-                          (loc/drop-item (.getLocation item) (ItemStack. (if (not= 0 (rand-int 10)) p Material/COAL) (.getAmount itemstack))))
+                          (loc/drop-item (.getLocation item) (ItemStack. (if (not= 0 (rand-int 10)) p m/coal) (.getAmount itemstack))))
                         (when (not-empty (.getEnchantments itemstack))
                           (let [exp (loc/spawn (.getLocation item) ExperienceOrb)]
                             (.setExperience exp (rand-nth (range 10 20)))))
@@ -1468,9 +1469,9 @@
   (let [itemstack (.getItemInHand player)]
     (if (and
           itemstack
-          (= Material/COOKED_BEEF (.getType itemstack)))
+          (= m/cooked-beef (.getType itemstack)))
       (chimera-cow/birth player target)
-      (.dropItemNaturally (.getWorld target) (.getLocation target) (ItemStack. Material/COAL)))))
+      (.dropItemNaturally (.getWorld target) (.getLocation target) (ItemStack. m/coal)))))
 
 (defn player-interact-entity-event [evt]
   (let [player (.getPlayer evt)
@@ -1482,13 +1483,13 @@
         (.setAllowFlight player false)
         (.eject player))
 
-      (= Material/STRING (.getType (.getItemInHand player)))
+      (= m/string (.getType (.getItemInHand player)))
       (player-entity-with-string-event evt player target)
 
       :else
       (condp instance? target
         PoweredMinecart
-        (when (= Material/COAL (.getType (.getItemInHand player)))
+        (when (= m/coal (.getType (.getItemInHand player)))
           (.setMaxSpeed target 5.0)
           (let [v (.getVelocity target)
                 x (.getX v)
@@ -1501,12 +1502,12 @@
                             (.setVelocity target (Vector. new-x (.getY v) new-z))))))
 
         PigZombie
-        (when (= Material/WHEAT (.getType (.getItemInHand player)))
+        (when (= m/wheat (.getType (.getItemInHand player)))
           (c/swap-entity target Pig)
           (c/consume-item player))
 
         Pig
-        (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
+        (if (= m/rotten-flesh (.getType (.getItemInHand player)))
           (do
             (c/swap-entity target PigZombie)
             (c/consume-item player))
@@ -1514,31 +1515,31 @@
                (.toItemStack (doto (Dye.) (.setColor DyeColor/BROWN)) 1)))
 
         Zombie
-        (if (= Material/ROTTEN_FLESH (.getType (.getItemInHand player)))
+        (if (= m/rotten-flesh (.getType (.getItemInHand player)))
           (do
             (loc/spawn (.getLocation target) Giant)
             (c/broadcast "Giant!")
             (c/consume-item player)
             (.remove target))
-          (loc/drop-item (.getLocation target) (ItemStack. Material/ROTTEN_FLESH)))
+          (loc/drop-item (.getLocation target) (ItemStack. m/rotten-flesh)))
 
         Villager
-        (letfn [(default [] (loc/drop-item (.getLocation target) (ItemStack. Material/CAKE)))]
+        (letfn [(default [] (loc/drop-item (.getLocation target) (ItemStack. m/cake)))]
           (if-let [item (.getItemInHand player)]
             (condp = (.getType item)
-              Material/BROWN_MUSHROOM (do
+              m/brown-mushroom (do
                                         (.setProfession target Villager$Profession/LIBRARIAN)
                                         (c/consume-item player))
-              Material/RED_MUSHROOM (do
+              m/red-mushroom (do
                                       (.setProfession target Villager$Profession/PRIEST)
                                       (c/consume-item player))
-              Material/YELLOW_FLOWER (do
+              m/yellow-flower (do
                                        (.setProfession target Villager$Profession/BLACKSMITH)
                                        (c/consume-item player))
-              Material/RED_ROSE (do
+              m/red-rose (do
                                   (.setProfession target Villager$Profession/BUTCHER)
                                   (c/consume-item player))
-              Material/REDSTONE (do
+              m/redstone (do
                                   (.setProfession target Villager$Profession/FARMER)
                                   (c/consume-item player))
               (default))
@@ -1561,48 +1562,48 @@
         Chicken
         (loc/drop-item
           (.getLocation target)
-          (ItemStack. (rand-nth [Material/FEATHER Material/FEATHER
-                                 Material/SAND])))
+          (ItemStack. (rand-nth [m/feather m/feather
+                                 m/sand])))
 
         Cow
         (player-rightclick-cow player target)
 
         Creeper
-        (loc/drop-item (.getLocation target) (ItemStack.  Material/SULPHUR))
+        (loc/drop-item (.getLocation target) (ItemStack.  m/sulphur))
 
-        Skeleton (loc/drop-item (.getLocation target) (ItemStack. Material/ARROW))
+        Skeleton (loc/drop-item (.getLocation target) (ItemStack. m/arrow))
 
         Spider
         (loc/drop-item
           (.getLocation target)
-          (ItemStack. (rand-nth [Material/SPIDER_EYE Material/DIRT
-                                 Material/SAND Material/STRING])))
+          (ItemStack. (rand-nth [m/spider-eye m/dirt
+                                 m/sand m/string])))
 
         IronGolem
         (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
-                                                           [Material/YELLOW_FLOWER
-                                                            Material/RED_ROSE])))
+                                                           [m/yellow-flower
+                                                            m/red-rose])))
 
         Snowman
         (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
-                                                           [Material/DIRT
-                                                            Material/SNOW_BALL
-                                                            Material/SNOW_BALL
-                                                            Material/SNOW_BALL
-                                                            Material/SNOW_BALL
-                                                            Material/SNOW_BALL
-                                                            Material/BUCKET])))
+                                                           [m/dirt
+                                                            m/snow-ball
+                                                            m/snow-ball
+                                                            m/snow-ball
+                                                            m/snow-ball
+                                                            m/snow-ball
+                                                            m/bucket])))
 
         Enderman
         (if (= 0 (rand-int 50))
           (.setPassenger target player)
           (loc/drop-item (.getLocation target)
-             (ItemStack. (rand-nth [Material/STICK Material/ENDER_STONE
-                                    Material/ENDER_STONE
-                                    Material/ENDER_STONE
-                                    Material/ENDER_STONE
-                                    Material/ENDER_STONE
-                                    Material/EYE_OF_ENDER]))))
+             (ItemStack. (rand-nth [m/stick m/ender-stone
+                                    m/ender-stone
+                                    m/ender-stone
+                                    m/ender-stone
+                                    m/ender-stone
+                                    m/eye-of-ender]))))
 nil))))
 
 (defn player-level-change-event [evt]
@@ -1616,11 +1617,11 @@ nil))))
       (let [msg (str (.getDisplayName shooter) " chained " (c/entity2name entity))]
         (.sendMessage shooter msg)
         (c/lingr-mcujm msg))
-      (.setType block Material/WEB)
+      (.setType block m/web)
       (future-call #(do
                       (Thread/sleep 10000)
-                      (when (= Material/WEB (.getType block))
-                        (.setType block Material/AIR)))))))
+                      (when (= m/web (.getType block))
+                        (.setType block m/air)))))))
 
 (def chicken-attacking (atom 0))
 (defn chicken-touch-player [chicken player]
@@ -1662,15 +1663,15 @@ nil))))
   (let [loc (.getLocation entity)]
     (when
       (and
-        (= Material/DIAMOND_BLOCK (.getType (.getBlock (.add (.clone loc) 0 -1 0))))
+        (= m/diamond-block (.getType (.getBlock (.add (.clone loc) 0 -1 0))))
         (every? identity
                 (for [x [-1 0 1] z [-1 0 1]]
-                  (= Material/GOLD_BLOCK (.getType (.getBlock (.add (.clone loc) x -2 z)))))))
+                  (= m/gold-block (.getType (.getBlock (.add (.clone loc) x -2 z)))))))
       (let [block (.getBlock (.add (.clone loc) 0 -1 0))]
-        (.setType block Material/MOB_SPAWNER)
+        (.setType block m/mob-spawner)
         (.setSpawnedType (.getState block) (.getType entity)))
       (doseq [x [-1 0 1] z [-1 0 1]]
-        (.setType (.getBlock (.add (.clone loc) x -2 z)) Material/MOSSY_COBBLESTONE))
+        (.setType (.getBlock (.add (.clone loc) x -2 z)) m/mossy-cobblestone))
       (future-call #(.remove entity))
       #_(.setCancelled evt true))))
 
@@ -1691,11 +1692,11 @@ nil))))
         Zombie ((rand-nth
                   [#(do
                       (.createExplosion (.getWorld entity) location 0)
-                      (when (= Material/AIR (.getType (.getBlock location)))
-                        (.setType (.getBlock location) Material/FIRE)))
+                      (when (= m/air (.getType (.getBlock location)))
+                        (.setType (.getBlock location) m/fire)))
                    #(loc/spawn location Villager)
                    #(loc/spawn location Silverfish)
-                   #(loc/drop-item location (ItemStack. Material/IRON_SWORD))]))
+                   #(loc/drop-item location (ItemStack. m/iron-sword))]))
         Giant (.setDroppedExp evt 500)
         Creeper (.setDroppedExp evt 10)
         Blaze (when (= "world" (.getName (.getWorld entity)))
@@ -1703,7 +1704,7 @@ nil))))
         Ghast (when (= "world" (.getName (.getWorld entity)))
                 (ghast2-murder-event evt entity killer))
         CaveSpider (when (= 0 (rand-int 3))
-                     (loc/drop-item location (ItemStack. Material/GOLD_SWORD)))
+                     (loc/drop-item location (ItemStack. m/gold-sword)))
         nil)
       (when (chimera-cow/is? entity)
         (chimera-cow/murder-event evt entity killer))
@@ -1713,7 +1714,7 @@ nil))))
       (when (and
               (< 5 (.getDroppedExp evt))
               (= 0 (rand-int 10)))
-        (loc/drop-item location (ItemStack. Material/EMERALD (rand-nth [1 2]))))
+        (loc/drop-item location (ItemStack. m/emerald (rand-nth [1 2]))))
       (player/record-and-report killer entity evt)))))
 
 (defn entity-orthothanasia-event [evt entity]
@@ -1744,15 +1745,15 @@ nil))))
   (if false #_(sanctuary/is-in? (.getLocation entity))
     (prn 'cancelled)
     (let [loc (.getLocation entity)]
-      (.setType (.getBlock loc) Material/PUMPKIN)
+      (.setType (.getBlock loc) m/pumpkin)
       (c/broadcast "break the bomb before it explodes!")
       (future-call #(do
                       (Thread/sleep 7000)
-                      (when (= (.getType (.getBlock loc)) Material/PUMPKIN)
+                      (when (= (.getType (.getBlock loc)) m/pumpkin)
                         (c/broadcast "zawa...")
                         (Thread/sleep 1000)
-                        (when (= (.getType (.getBlock loc)) Material/PUMPKIN)
-                          (.setType (.getBlock loc) Material/AIR)
+                        (when (= (.getType (.getBlock loc)) m/pumpkin)
+                          (.setType (.getBlock loc) m/air)
                           (let [tnt (loc/spawn loc TNTPrimed)]
                             (Thread/sleep 1000)
                             (.remove tnt)
@@ -1796,11 +1797,11 @@ nil))))
     (when (> depth -3)
       (let [loc (.add (.clone (.getLocation target)) 0 depth 0)
             block (.getBlock loc)]
-        (when (#{Material/GRASS Material/DIRT Material/STONE
-                 Material/GRAVEL Material/SAND Material/SANDSTONE
-                 Material/COBBLESTONE Material/SOUL_SAND
-                 Material/NETHERRACK Material/AIR} (.getType block))
-          (.breakNaturally block (ItemStack. Material/DIAMOND_PICKAXE))
+        (when (#{m/grass m/dirt m/stone
+                 m/gravel m/sand m/sandstone
+                 m/cobblestone m/soul-sand
+                 m/netherrack m/air} (.getType block))
+          (.breakNaturally block (ItemStack. m/diamond-pickaxe))
           (let [block-loc (.getLocation block)]
             (.setYaw block-loc (.getYaw loc))
             (.setPitch block-loc (.getPitch loc))
@@ -1809,7 +1810,7 @@ nil))))
 
 (defn scouter [evt attacker target]
   (when-let [helmet (.getHelmet (.getInventory attacker))]
-    (when (= Material/STONE_PLATE (.getType helmet))
+    (when (= m/stone-plate (.getType helmet))
       (let [damage (if (.isCancelled evt)
                      0
                      (.getDamage evt))]
@@ -1828,7 +1829,7 @@ nil))))
                   (arrow-skill-of (.getShooter arrow))))
         (when-let [chestplate (.getChestplate (.getInventory target))]
           (and
-            (= Material/LEATHER_CHESTPLATE (.getType chestplate))
+            (= m/leather-chestplate (.getType chestplate))
             (not-empty (.getEnchantments chestplate)))))
     (do
       (c/broadcast (.getDisplayName target) "'s enchanted leather chestplate reflects arrows!")
@@ -1836,10 +1837,10 @@ nil))))
     (when-let [shooter (.getShooter arrow)]
       (when (instance? Player shooter)
         (cond
-          (.contains (.getInventory shooter) Material/WEB)
+          (.contains (.getInventory shooter) m/web)
           (do
             (chain-entity target shooter)
-            (c/consume-itemstack (.getInventory shooter) Material/WEB))
+            (c/consume-itemstack (.getInventory shooter) m/web))
           (= arrow-skill-explosion (arrow-skill-of shooter))
           (.damage target 10 shooter)
           (= arrow-skill-ice (arrow-skill-of shooter))
@@ -1855,7 +1856,7 @@ nil))))
           (condp instance? target
             Player
             (let [helmet (.getHelmet (.getInventory target))]
-              (.setHelmet (.getInventory target) (ItemStack. Material/PUMPKIN))
+              (.setHelmet (.getInventory target) (ItemStack. m/pumpkin))
               (when helmet
                 (.dropItemNaturally (.getWorld target) (.getLocation target) helmet)))
             LivingEntity
@@ -1866,11 +1867,11 @@ nil))))
                   block-type (.getType block)]
               (.remove target)
               (.remove arrow)
-              (.setType block Material/PUMPKIN)
+              (.setType block m/pumpkin)
               (future
                 (Thread/sleep 3000)
                 (let [newmob (loc/spawn loc klass)]
-                  (if (= Material/PUMPKIN (.getType block))
+                  (if (= m/pumpkin (.getType block))
                     (do
                       (.setHealth newmob health)
                       (.setType block block-type))
@@ -1939,7 +1940,7 @@ nil))))
 
 (comment (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
            (future-call #(let [b (.getBlock (.getLocation target))]
-                           (.setType b Material/RAILS)))
+                           (.setType b m/rails)))
            (.setPassenger cart target)
            (c/add-velocity cart 0 5 0)))
 
@@ -1981,22 +1982,22 @@ nil))))
 
 (defn fish-damages-entity-event [evt fish target]
   (if-let [shooter (.getShooter fish)]
-    (let [table {Cow Material/RAW_BEEF
-                 Pig Material/PORK
-                 Chicken Material/RAW_CHICKEN
-                 Zombie Material/LEATHER_CHESTPLATE
-                 Skeleton Material/BOW
-                 Creeper Material/SULPHUR
-                 CaveSpider Material/IRON_INGOT
-                 Spider Material/REDSTONE
-                 Sheep Material/BED
-                 Villager Material/APPLE
-                 Silverfish Material/IRON_SWORD
-                 IronGolem Material/FISHING_ROD
-                 Squid Material/RAW_FISH
-                 Blaze Material/GLOWSTONE_DUST
-                 MagmaCube Material/FLINT
-                 Giant Material/DIRT}]
+    (let [table {Cow m/raw-beef
+                 Pig m/pork
+                 Chicken m/raw-chicken
+                 Zombie m/leather-chestplate
+                 Skeleton m/bow
+                 Creeper m/sulphur
+                 CaveSpider m/iron-ingot
+                 Spider m/redstone
+                 Sheep m/bed
+                 Villager m/apple
+                 Silverfish m/iron-sword
+                 IronGolem m/fishing-rod
+                 Squid m/raw-fish
+                 Blaze m/glowstone-dust
+                 MagmaCube m/flint
+                 Giant m/dirt}]
       (if-let [m (last (first (filter #(instance? (first %) target) table)))]
         (.dropItem (.getWorld target) (.getLocation target) (ItemStack. m 1))
         (cond
@@ -2004,7 +2005,7 @@ nil))))
           (do
             (when-let [item (.getItemInHand target)]
               (.damage target 1)
-              (.setItemInHand target (ItemStack. Material/AIR))
+              (.setItemInHand target (ItemStack. m/air))
               (.setItemInHand shooter item)
               (c/lingr-mcujm (str (.getDisplayName shooter) " fished " (.getDisplayName target)))))
 
@@ -2021,7 +2022,7 @@ nil))))
     (and
       (instance? Player target)
       (.getHelmet (.getInventory target))
-      (= Material/GLASS (.getType (.getHelmet (.getInventory target)))))
+      (= m/glass (.getType (.getHelmet (.getInventory target)))))
     (.setCancelled evt true)))
 
 (defn entity-damage-intent-event [evt target attacker]
@@ -2136,7 +2137,7 @@ nil))))
 
         :else
         (let [loc (.add (.getLocation target) 0 -1 0)]
-          (doseq [fence [Material/FENCE Material/NETHER_FENCE]]
+          (doseq [fence [m/fence m/nether-fence]]
             (when (= fence (.getType (.getBlock loc)))
               (when (every? #(not= fence %)
                             (map (fn [[x z]]
@@ -2155,40 +2156,40 @@ nil))))
     (when-let [player (.getPlayer evt)]
       (when-let [item (.getItemInHand player)]
         (condp get (.getType item)
-          #{Material/AIR}
+          #{m/air}
           (do
             (.sendMessage player "Your hand hurts!")
             (.damage player (rand-int 5)))
 
           item/pickaxes
           (condp get (.getType block)
-            #{Material/STONE}
+            #{m/stone}
             (when (= 'pickaxe-skill-ore (pickaxe-skill-of player))
               (letfn [(f [blocktype]
                         (.setType block blocktype)
                         (.setCancelled evt true)
                         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil))]
                 (cond
-                  (= 0 (rand-int 10)) (f Material/COAL_ORE)
-                  (= 0 (rand-int 20)) (f Material/IRON_ORE)
-                  (= 0 (rand-int 30)) (f Material/REDSTONE_ORE)
-                  (= 0 (rand-int 40)) (f Material/LAPIS_ORE)
-                  (= 0 (rand-int 50)) (f Material/GOLD_ORE)
-                  (= 0 (rand-int 100)) (f Material/EMERALD_ORE)
-                  (= 0 (rand-int 1000)) (f Material/DIAMOND_ORE)
-                  (= 0 (rand-int 300)) (f Material/GLOWSTONE)
-                  (= 0 (rand-int 1000)) (f Material/LAPIS_BLOCK)
-                  (= 0 (rand-int 1500)) (f Material/IRON_BLOCK)
-                  (= 0 (rand-int 2000)) (f Material/GOLD_BLOCK)
-                  (= 0 (rand-int 50000)) (f Material/DIAMOND_BLOCK)
+                  (= 0 (rand-int 10)) (f m/coal-ore)
+                  (= 0 (rand-int 20)) (f m/iron-ore)
+                  (= 0 (rand-int 30)) (f m/redstone-ore)
+                  (= 0 (rand-int 40)) (f m/lapis-ore)
+                  (= 0 (rand-int 50)) (f m/gold-ore)
+                  (= 0 (rand-int 100)) (f m/emerald-ore)
+                  (= 0 (rand-int 1000)) (f m/diamond-ore)
+                  (= 0 (rand-int 300)) (f m/glowstone)
+                  (= 0 (rand-int 1000)) (f m/lapis-block)
+                  (= 0 (rand-int 1500)) (f m/iron-block)
+                  (= 0 (rand-int 2000)) (f m/gold-block)
+                  (= 0 (rand-int 50000)) (f m/diamond-block)
                   :else nil)))
 
-            #{Material/CHEST Material/ENDER_CHEST}
-            (when (blazon? Material/IRON_ORE (.getBlock (.add (.getLocation block) 0 -1 0)))
+            #{m/chest m/ender-chest}
+            (when (blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
               #_(.setCancelled evt true)
               (dosync
                 (ref-set popcorning (chest-popcorn-probability block))
-                (.breakNaturally block (ItemStack. Material/AIR))
+                (.breakNaturally block (ItemStack. m/air))
                 (ref-set popcorning nil))
               (let [msg (format "%s popcorned!" (.getDisplayName player))]
                 (c/lingr-mcujm msg)
@@ -2199,7 +2200,7 @@ nil))))
 (defn block-grow-event [evt]
   (let [newstate (.getNewState evt)]
     (when (and
-            (= Material/PUMPKIN (.getType newstate))
+            (= m/pumpkin (.getType newstate))
             (= 0 (rand-int 2))
             #_(not-empty (.getNearbyEntities)))
       (.spawn (.getWorld newstate) (.getLocation newstate) Squid)
@@ -2210,7 +2211,7 @@ nil))))
     (instance? Player (.getShooter entity))
     (let [player (.getShooter entity)]
       (when (let [inhand (.getItemInHand player)]
-              (and inhand (= Material/GOLD_SWORD (.getType inhand))))
+              (and inhand (= m/gold-sword (.getType inhand))))
           (.remove entity))
       (let [skill (arrow-skill-of (.getShooter entity))]
         (cond
@@ -2230,8 +2231,8 @@ nil))))
     (do
       (swap! special-snowball-set disj snowball)
       (comment (let [block (.getBlock (.getLocation snowball))]
-                 (when (= Material/AIR (.getType block))
-                   (.setType block Material/SNOW)))))
+                 (when (= m/air (.getType block))
+                   (.setType block m/snow)))))
     (instance? Snowman (.getShooter snowball))
     nil
 
@@ -2256,7 +2257,7 @@ nil))))
           nil)))
 
 (defn block-dispense-event [evt]
-  (when (= Material/SEEDS (.getType (.getItem evt)))
+  (when (= m/seeds (.getType (.getItem evt)))
     (let [dispenser (.getBlock evt)
           item (.dropItem (.getWorld dispenser) (.add (.getLocation dispenser) (.multiply (.getVelocity evt) 4)) (.getItem evt))]
       (.playEffect (.getWorld dispenser) (.getLocation dispenser) Effect/MOBSPAWNER_FLAMES nil)
@@ -2267,9 +2268,9 @@ nil))))
                       (let [soil (.getBlock (.add (.getLocation item) 0 -1 0))
                             air (.getBlock (.getLocation item))]
                         (when (and
-                                (= Material/SOIL (.getType soil))
-                                (= Material/AIR (.getType air)))
-                          (.setType air Material/CROPS)
+                                (= m/soil (.getType soil))
+                                (= m/air (.getType air)))
+                          (.setType air m/crops)
                           (.remove item))))))
     (.setCancelled evt true)))
 
@@ -2295,10 +2296,10 @@ nil))))
   (let [player (.getPlayer evt)]
     "recovery spa"
     (let [loc (.add (.getLocation player) 0 1 0)]
-      (when (= Material/STATIONARY_WATER (.getType (.getBlock loc)))
-        (when (blazon? Material/STONE (.getBlock loc))
+      (when (= m/stationary-water (.getType (.getBlock loc)))
+        (when (blazon? m/stone (.getBlock loc))
           (when (= 0 (rand-int 10))
-            (.setType (.getBlock loc) Material/AIR))
+            (.setType (.getBlock loc) m/air))
           (c/broadcast (.getDisplayName player) ": recovery spa!")
           (.setHealth player 20)
           (.setFoodLevel player 20)
@@ -2329,12 +2330,12 @@ nil))))
     (.setAllowFlight (c/ujm) true)))
 
 (defn just-for-now3 []
-  (let [gs (ItemStack. Material/GOLD_SWORD)]
+  (let [gs (ItemStack. m/gold-sword)]
     (.addEnchantment gs org.bukkit.enchantments.Enchantment/DAMAGE_ALL 5)
     (.setItemInHand (c/ujm) gs)))
 
 (defn just-for-now4 []
-  (let [gp (ItemStack. Material/GOLD_PICKAXE)]
+  (let [gp (ItemStack. m/gold-pickaxe)]
     (.addEnchantment gp org.bukkit.enchantments.Enchantment/DIG_SPEED 4)
     (.addEnchantment gp org.bukkit.enchantments.Enchantment/DURABILITY 3)
     (.setItemInHand (c/ujm) gp)))
@@ -2354,7 +2355,7 @@ nil))))
       (ref-set just-for-now5-state true))))
 
 (defn just-for-now6 []
-  (let [items [(ItemStack. Material/BOW 1) (ItemStack. Material/GLASS 64) (ItemStack. Material/DIRT 64) (ItemStack. Material/TORCH 64) (ItemStack. Material/STRING 64) (ItemStack. Material/DIAMOND_AXE 1) (ItemStack. Material/DIAMOND_SPADE 1) (ItemStack. Material/WATER_BUCKET 1) (ItemStack. Material/GOLD_SWORD 1) (ItemStack. Material/BREAD 64) (ItemStack. Material/DIAMOND_HOE 1) (ItemStack. Material/WATER_BUCKET 1) (ItemStack. Material/BLAZE_ROD 1) (ItemStack. Material/STONE 64) (ItemStack. Material/EGG 16) (ItemStack. Material/WORKBENCH 3) (ItemStack. Material/BED 1) (ItemStack. Material/REDSTONE 64) (ItemStack. Material/GLOWSTONE 64) (ItemStack. Material/POTION 1) (ItemStack. Material/POTION 1) (ItemStack. Material/SAND 64) (ItemStack. Material/GOLDEN_APPLE 64) (ItemStack. Material/IRON_INGOT 64) (ItemStack. Material/ARROW 64) (ItemStack. Material/COAL 64) (ItemStack. Material/COBBLESTONE 64) (ItemStack. Material/DIRT 64) (ItemStack. Material/WOOD 64) (ItemStack. Material/LOG 64) (ItemStack. Material/STONE_PLATE 64) (ItemStack. Material/MILK_BUCKET 1) (ItemStack. Material/CAKE 1) (ItemStack. Material/EGG 1) (ItemStack. Material/DIAMOND_SWORD 1) (ItemStack. Material/INK_SACK 64)]]
+  (let [items [(ItemStack. m/bow 1) (ItemStack. m/glass 64) (ItemStack. m/dirt 64) (ItemStack. m/torch 64) (ItemStack. m/string 64) (ItemStack. m/diamond-axe 1) (ItemStack. m/diamond-spade 1) (ItemStack. m/water-bucket 1) (ItemStack. m/gold-sword 1) (ItemStack. m/bread 64) (ItemStack. m/diamond-hoe 1) (ItemStack. m/water-bucket 1) (ItemStack. m/blaze-rod 1) (ItemStack. m/stone 64) (ItemStack. m/egg 16) (ItemStack. m/workbench 3) (ItemStack. m/bed 1) (ItemStack. m/redstone 64) (ItemStack. m/glowstone 64) (ItemStack. m/potion 1) (ItemStack. m/potion 1) (ItemStack. m/sand 64) (ItemStack. m/golden-apple 64) (ItemStack. m/iron-ingot 64) (ItemStack. m/arrow 64) (ItemStack. m/coal 64) (ItemStack. m/cobblestone 64) (ItemStack. m/dirt 64) (ItemStack. m/wood 64) (ItemStack. m/log 64) (ItemStack. m/stone-plate 64) (ItemStack. m/milk-bucket 1) (ItemStack. m/cake 1) (ItemStack. m/egg 1) (ItemStack. m/diamond-sword 1) (ItemStack. m/ink-sack 64)]]
     (doseq [i (range 0 (count items))] (.setItem (.getInventory (c/ujm)) i (get items i)))))
 
 (defn vehicle-block-collision-event [evt]
@@ -2387,7 +2388,7 @@ nil))))
                               (for [x (range -1 2)
                                     z (range -1 2)
                                     :let [loc (.add (.clone center) x 0 z)]
-                                    :when (= Material/IRON_BLOCK
+                                    :when (= m/iron-block
                                              (.getType (.getBlock loc)))]
                                 loc))]
           (future (c/teleport-without-angle entity (.add iron-loc 0 5 0))))))))
@@ -2428,10 +2429,10 @@ nil))))
     (prn 'chunk (.getX chk) (.getZ chk) (.isLoaded chk))
     (doseq [x (range 0 16) y (range 0 80) z (range 0 16)
             :let [block (.getBlock chk x y z)]]
-      (when-let [btype ({Material/GRASS Material/DIRT
-                         Material/DIRT Material/GLASS
-                         Material/STONE Material/AIR
-                         Material/COAL_ORE Material/AIR} (.getType block))]
+      (when-let [btype ({m/grass m/dirt
+                         m/dirt m/glass
+                         m/stone m/air
+                         m/coal-ore m/air} (.getType block))]
         (.setType block btype)))))
 
 (defonce swank* nil)
@@ -2467,3 +2468,4 @@ nil))))
                   (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))))
             (doseq [player players]
               (.sendMessage player (format "%s: %s" (:user contents) (:body contents))))))))))
+
