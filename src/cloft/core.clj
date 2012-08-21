@@ -1475,7 +1475,7 @@
                       (.setVelocity cart (Vector. new-x (.getY v) new-z)))))))
 
 (defn player-rightclick-villager [player villager]
-  (letfn [(default [] (loc/drop-item (.getLocation villager) (ItemStack. m/cake)))]
+  (let [default #(loc/drop-item (.getLocation villager) (ItemStack. m/cake))]
     (if-let [item (.getItemInHand player)]
       (condp = (.getType item)
         m/brown-mushroom (do
