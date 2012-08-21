@@ -4,9 +4,12 @@
 (def swords #{m/wood-sword m/stone-sword m/iron-sword
               m/gold-sword m/diamond-sword})
 
+(def pickaxe-durabilities
+  {m/wood-pickaxe 60 m/stone-pickaxe 132 m/iron-pickaxe 251 m/gold-pickaxe 33
+   m/diamond-pickaxe 1562})
+
 (def pickaxes
-  #{m/diamond-pickaxe m/gold-pickaxe m/iron-pickaxe
-    m/stone-pickaxe m/wood-pickaxe})
+  (set (keys pickaxe-durabilities)))
 
 (def records
   [m/gold-record m/green-record m/record-10

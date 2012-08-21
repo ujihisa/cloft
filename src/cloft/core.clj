@@ -935,12 +935,7 @@
             (loc/fall-block (.getLocation block) btype (.getData block))
             (.setType block m/air)
             (let [item (.getItemInHand player)
-                  pickaxe-durabilities {m/wood-pickaxe 60
-                                        m/stone-pickaxe 132
-                                        m/iron-pickaxe 251
-                                        m/gold-pickaxe 33
-                                        m/diamond-pickaxe 1562}
-                  max-durability (pickaxe-durabilities (.getType item))]
+                  max-durability (item/pickaxe-durabilities (.getType item))]
               (if (< max-durability (.getDurability item))
                 (c/consume-item player)
                 (item/modify-durability item #(+ (int (/ max-durability 10)) %))))))
