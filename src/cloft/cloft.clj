@@ -34,17 +34,18 @@
                           (slurp "bot_verifier.txt")
                           (catch java.io.FileNotFoundException e "")))))
 
-(defn lingr
-  ([msg] (lingr "mcujm" msg))
-  ([room msg]
-  (future-call
-    #(clj-http.client/post
-       "http://lingr.com/api/room/say"
-       {:form-params
-        {:room room
-         :bot 'cloft
-         :text (str msg)
-         :bot_verifier BOT-VERIFIER}}))))
+(defn lingr [room msg]
+  (future
+    (clj-http.client/post
+      "http://lingr.com/api/room/say"
+      {:form-params
+       {:room room
+        :bot 'cloft
+        :text (str msg)
+        :bot_verifier BOT-VERIFIER}})))
+
+(defn lingr-mcujm [msg]
+  (lingr "mcujm" msg))
 
 (defn broadcast [& strs]
   (.broadcastMessage (Bukkit/getServer) (apply str strs)))

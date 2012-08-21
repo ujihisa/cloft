@@ -31,7 +31,7 @@
                                                     (ItemStack. Material/APPLE))))))
   (.setDroppedExp evt 200)
   (c/broadcast (format "%s beated a chimera cow!" (.getDisplayName player)))
-  (c/lingr (format "%s beated a chimera cow!" (.getDisplayName player))))
+  (c/lingr-mcujm (format "%s beated a chimera cow!" (.getDisplayName player))))
 
 
 (defn fall-damage-event [evt cow]

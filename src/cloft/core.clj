@@ -73,7 +73,7 @@
       (let [msg (format "%s got O157! Don't eat a yukhoe or a raw liver!"
                         (.getDisplayName player))]
         (c/broadcast msg)
-        (c/lingr msg)
+        (c/lingr-mcujm msg)
         (.addPotionEffect player (PotionEffect. PotionEffectType/POISON 100 1))
         (.addPotionEffect player (PotionEffect. PotionEffectType/BLINDNESS 500 1))
         (.addPotionEffect player (PotionEffect. PotionEffectType/CONFUSION 500 1)))))
@@ -440,13 +440,13 @@
     (.setType (.getBlock loc) new-block-type))
   (.setDroppedExp evt 80)
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
-  (c/lingr (format "%s beated a blaze2!" (.getDisplayName player))))
+  (c/lingr-mcujm (format "%s beated a blaze2!" (.getDisplayName player))))
 
 (defn ghast2-murder-event [evt ghast2 player]
   (assert (= "world" (.getName (.getWorld ghast2))) ghast2)
   (.setDroppedExp evt 80)
   (let [msg (format "%s beated a ghast2!" (.getDisplayName player))]
-    (c/lingr msg)))
+    (c/lingr-mcujm msg)))
 
 (defn projectile-launch-event [evt]
   (let [projectile (.getEntity evt)
@@ -630,7 +630,7 @@
 
 (defn reaction-skill-ice [you by]
   (freeze-for-20-sec by)
-  (c/lingr (str "counter attack with ice by " (.getDisplayName you) " to " (c/entity2name by))))
+  (c/lingr-mcujm (str "counter attack with ice by " (.getDisplayName you) " to " (c/entity2name by))))
 
 (defn reaction-skill-knockback [you by]
   (let [direction (.multiply (.normalize (.toVector (.subtract (.getLocation by) (.getLocation you)))) 2)]
@@ -1059,7 +1059,7 @@
       #_(.sendMessage player "[NEWS] ")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
-    (c/lingr (format "%s logged in" (.getDisplayName player)))))
+    (c/lingr-mcujm (format "%s logged in" (.getDisplayName player)))))
 
 (defn paperlot [player]
   (letfn [(unlucky [player]
@@ -1230,7 +1230,7 @@
               (item/modify-durability item inc))
             (when (= 0 (rand-int 1000))
               (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
-                (c/lingr msg)
+                (c/lingr-mcujm msg)
                 (c/broadcast msg))
               (doseq [[enchant level] (.getEnchantments item)]
                 (.removeEnchantment item enchant))))))
@@ -1450,7 +1450,7 @@
     Pig (.setAllowFlight player true)
     Chicken (.setAllowFlight player true)
     Squid (do
-            (c/lingr (str (.getDisplayName player) " is flying with squid!"))
+            (c/lingr-mcujm (str (.getDisplayName player) " is flying with squid!"))
             (.setAllowFlight player true)
             (.setFoodLevel player 20))
     Player
@@ -1546,7 +1546,7 @@
         (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
                                                      65394 65394 65411 65438
                                                      65405]))]
-          (c/lingr msg)
+          (c/lingr-mcujm msg)
           (c/broadcast (.getDisplayName player) ": " msg)
           (.setFoodLevel player 0))
 
@@ -1613,7 +1613,7 @@ nil))))
     (when-not (.isLiquid block)
       (let [msg (str (.getDisplayName shooter) " chained " (c/entity2name entity))]
         (.sendMessage shooter msg)
-        (c/lingr msg))
+        (c/lingr-mcujm msg))
       (.setType block Material/WEB)
       (future-call #(do
                       (Thread/sleep 10000)
@@ -1786,7 +1786,7 @@ nil))))
         (and ename (not-empty players-nearby) (not (instance? EnderDragon entity)))
         (letfn [(join [xs x]
                   (apply str (interpose x xs)))]
-          (c/lingr (str ename " is exploding near " (join (map #(.getDisplayName %) players-nearby) ", "))))))
+          (c/lingr-mcujm (str ename " is exploding near " (join (map #(.getDisplayName %) players-nearby) ", "))))))
     (prn 'explosion-without-entity)))
 
 (defn digg-entity [target shooter]
@@ -2000,7 +2000,7 @@ nil))))
               (.damage target 1)
               (.setItemInHand target (ItemStack. Material/AIR))
               (.setItemInHand shooter item)
-              (c/lingr (str (.getDisplayName shooter) " fished " (.getDisplayName target)))))
+              (c/lingr-mcujm (str (.getDisplayName shooter) " fished " (.getDisplayName target)))))
 
           :else
           (.teleport target shooter))))))
@@ -2138,7 +2138,7 @@ nil))))
                                  [[-1 0] [1 0] [0 -1] [0 1]]))
                 (when (instance? Player target)
                   (let [msg (str "Oh trap! " (.getDisplayName target) " was on a needle.")]
-                    (c/lingr msg)
+                    (c/lingr-mcujm msg)
                     (.sendMessage target msg)))
                 (.damage target 100))))))
       :else
@@ -2185,7 +2185,7 @@ nil))))
                 (.breakNaturally block (ItemStack. Material/AIR))
                 (ref-set popcorning nil))
               (let [msg (format "%s popcorned!" (.getDisplayName player))]
-                (c/lingr msg)
+                (c/lingr-mcujm msg)
                 (c/broadcast msg)))
             nil)
           nil)))))
@@ -2437,7 +2437,7 @@ nil))))
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
-  (c/lingr "cloft plugin running...")
+  (c/lingr-mcujm "cloft plugin running...")
   (future
     (let [ctx (mq/context 1)
           subscriber (mq/socket ctx mq/sub)]
