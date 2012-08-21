@@ -1953,10 +1953,11 @@ nil))))
 (defn player-attacks-pig-event [evt player pig]
   (when (and (= 0 (rand-int 2))
              (not (.isDead pig)))
-    (future-call #(let [another-pig (loc/spawn (.getLocation pig) Pig)]
-                    (Thread/sleep 3000)
-                    (when-not (.isDead another-pig)
-                      (.remove another-pig))))))
+    (let [another-pig (loc/spawn (.getLocation pig) Pig)]
+      (future
+        (Thread/sleep 3000)
+        (when-not (.isDead another-pig)
+          (later (.remove another-pig)))))))
 
 (defn player-attacks-chicken-event [_ player chicken]
   (when (not= 0 (rand-int 3))
@@ -1969,9 +1970,12 @@ nil))))
         (swap! chicken-attacking dec))
       (doseq [x [-2 -1 0 1 2] z [-2 -1 0 1 2]]
         (let [chicken (.spawn world (.add (.clone location) x 3 z) Chicken)]
-          (future-call #(do
-                          (Thread/sleep 10000)
-                          (later (.remove chicken)))))))))
+          (future
+            (Thread/sleep 10000)
+            (when-not (.isDead chicken)
+              (later
+                (prn 'isLoaded chicken (.isLoaded (.getChunk (.getLocation chicken))))
+                (.remove chicken)))))))))
 
 (defn fish-damages-entity-event [evt fish target]
   (if-let [shooter (.getShooter fish)]
