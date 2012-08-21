@@ -11,6 +11,10 @@
 (def pickaxes
   (set (keys pickaxe-durabilities)))
 
+(def hoe-durabilities
+  {m/wood-hoe 60 m/stone-hoe 132 m/iron-hoe 251 m/gold-hoe 33
+   m/diamond-hoe 1562})
+
 (def records
   [m/gold-record m/green-record m/record-10
    m/record-11 m/record-3 m/record-4 m/record-5

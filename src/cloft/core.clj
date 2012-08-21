@@ -1191,13 +1191,6 @@
 
 (def plowed-sands (atom #{}))
 
-(def hoe-durabilities
-  {m/wood-hoe 60
-   m/stone-hoe 132
-   m/iron-hoe 251
-   m/gold-hoe 33
-   m/diamond-hoe 1562})
-
 (defn minecart-accelerate [cart]
   (let [dire (.getDirection (.getLocation cart))]
     (let [x (- (* (.getX dire) 0.707) (* (.getZ dire) 0.707))
@@ -1271,13 +1264,13 @@
 (defn pan-gold-wait [player block]
   (let [item (.getItemInHand player)]
     (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND m/torch)
-    (if (> (.getDurability item) (hoe-durabilities (.getType item)))
+    (if (> (.getDurability item) (item/hoe-durabilities (.getType item)))
       (.remove (.getInventory player) item)
       (do
         (item/modify-durability item #(+ 2 %))
         (future
           (swap! plowed-sands conj block)
-          (Thread/sleep (+ 1000 (* 5 (hoe-durabilities (.getType item)))))
+          (Thread/sleep (+ 1000 (* 5 (item/hoe-durabilities (.getType item)))))
           (swap! plowed-sands disj block)
           (when (#{m/sand m/gravel} (.getType block))
             (.playEffect (.getWorld block) (.getLocation block) Effect/STEP_SOUND m/sand)
@@ -1367,7 +1360,7 @@
         (loc/drop-item (.getLocation block) (ItemStack. item-type)))
 
       (and
-        (hoe-durabilities (.. player (getItemInHand) (getType)))
+        (item/hoe-durabilities (.. player (getItemInHand) (getType)))
         (and (= Biome/RIVER (.getBiome block))
              (not (@plowed-sands block))
              (#{m/sand m/gravel} (.getType block))
