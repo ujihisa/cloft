@@ -926,21 +926,23 @@
             (.setCancelled evt true)))
 
         'pickaxe-skill-fall
-        (when (and
-                (.isBlock (.getType block))
-                (not (instance? org.bukkit.block.ContainerBlock (.getState block))))
-          (loc/fall-block (.getLocation block) (.getType block) (.getData block))
-          (.setType block Material/AIR)
-          (let [item (.getItemInHand player)
-                pickaxe-durabilities {Material/WOOD_PICKAXE 60
-                                      Material/STONE_PICKAXE 132
-                                      Material/IRON_PICKAXE 251
-                                      Material/GOLD_PICKAXE 33
-                                      Material/DIAMOND_PICKAXE 1562}
-                max-durability (pickaxe-durabilities (.getType item))]
-            (if (< max-durability (.getDurability item))
-              (c/consume-item player)
-              (item/modify-durability item #(+ (int (/ max-durability 10)) %)))))
+        (let [btype (.getType block)]
+          (when (and
+                  (.isBlock btype)
+                  (not (contains? item/unobtainable btype))
+                  (not (instance? org.bukkit.block.ContainerBlock (.getState block))))
+            (loc/fall-block (.getLocation block) btype (.getData block))
+            (.setType block Material/AIR)
+            (let [item (.getItemInHand player)
+                  pickaxe-durabilities {Material/WOOD_PICKAXE 60
+                                        Material/STONE_PICKAXE 132
+                                        Material/IRON_PICKAXE 251
+                                        Material/GOLD_PICKAXE 33
+                                        Material/DIAMOND_PICKAXE 1562}
+                  max-durability (pickaxe-durabilities (.getType item))]
+              (if (< max-durability (.getDurability item))
+                (c/consume-item player)
+                (item/modify-durability item #(+ (int (/ max-durability 10)) %))))))
 
         nil))))
 
