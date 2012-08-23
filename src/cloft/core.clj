@@ -144,9 +144,9 @@
   (.remove entity))
 
 (defn arrow-skill-fire [entity]
-  (doseq [target (filter
-                   #(and (instance? LivingEntity %) (not= (.getShooter entity) %))
-                   (.getNearbyEntities entity 1 1 1))]
+  (doseq [target (.getNearbyEntities entity 1 1 1)
+          :when (and (instance? LivingEntity target)
+                     (not= (.getShooter entity) target))]
     (.setFireTicks target 200)))
 
 (defn arrow-skill-flame [entity]
@@ -211,16 +211,16 @@
 (defn arrow-skill-plant [entity]
   (let [inventory (.getInventory (.getShooter entity))]
     (.remove entity)
-    (doseq [x (range -3 4) z (range -3 4)]
-      (let [loc (.add (.getLocation entity) x 0 z)]
-        (when (and (.contains inventory m/seeds)
-                   (= m/air (.getType (.getBlock loc)))
-                   (= m/soil (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))
-          (try
-            (c/consume-itemstack inventory m/seeds)
-            (c/consume-itemstack inventory m/seeds)
-            (.setType (.getBlock loc) m/crops)
-            (catch org.bukkit.event.EventException e nil)))))))
+    (doseq [x (range -3 4) z (range -3 4)
+            :let [loc (.add (.getLocation entity) x 0 z)]
+            :when (and (.contains inventory m/seeds)
+                       (= m/air (.getType (.getBlock loc)))
+                       (= m/soil (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))]
+      (try
+        (c/consume-itemstack inventory m/seeds)
+        (c/consume-itemstack inventory m/seeds)
+        (.setType (.getBlock loc) m/crops)
+        (catch org.bukkit.event.EventException e nil)))))
 
 (defn arrow-skill-diamond [entity]
   (let [block (.getBlock (.getLocation entity))]
@@ -245,16 +245,16 @@
 
 (defn something-like-quake [entity klass f]
   (let [targets (.getNearbyEntities entity 5 3 5)]
-    (future-call
-      #(do
-         (doseq [_ [1 2 3]]
-           (doseq [target targets :when (instance? klass target)]
-             (Thread/sleep (rand-int 300))
-             (loc/play-effect (.getLocation target) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
-             (c/add-velocity target (- (rand) 0.5) 0.9 (- (rand) 0.5))
-             (f target))
-           (Thread/sleep 1500))
-         (.remove entity)))))
+    (future
+      (doseq [_ [1 2 3]]
+        (doseq [target targets :when (instance? klass target)]
+          (Thread/sleep (rand-int 300))
+          (later
+            (loc/play-effect (.getLocation target) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
+            (c/add-velocity target (- (rand) 0.5) 0.9 (- (rand) 0.5))
+            (f target)))
+        (Thread/sleep 1500))
+      (later (.remove entity)))))
 
 (defn arrow-skill-quake [entity]
   (something-like-quake
