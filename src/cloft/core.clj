@@ -1078,19 +1078,22 @@
         msg (.getMessage evt)]
     (cond
       (= 1 (count msg)) nil
-      (= "countdown" msg) (do
-                            (.setCancelled evt true)
-                            (future-call #(do
-                                            (c/broadcast name ": " 3 " " (.getType (.getItemInHand player)))
-                                            (dosync
-                                              (ref-set countdowning? true))
-                                            (Thread/sleep 1000)
-                                            (c/broadcast 2)
-                                            (Thread/sleep 1000)
-                                            (c/broadcast 1)
-                                            (Thread/sleep 2000)
-                                            (dosync
-                                              (ref-set countdowning? false)))))
+
+      (= "countdown" msg)
+      (do
+        (.setCancelled evt true)
+        (future
+          (c/broadcast name ": " 3 " " (.getType (.getItemInHand player)))
+          (dosync
+            (ref-set countdowning? true))
+          (Thread/sleep 1000)
+          (c/broadcast 2)
+          (Thread/sleep 1000)
+          (c/broadcast 1)
+          (Thread/sleep 2000)
+          (dosync
+            (ref-set countdowning? false))))
+
       (= "where am I?" msg)
       (let [loc (.getLocation player)
             msg (format "%s (%d %d %d)"
@@ -1419,26 +1422,31 @@
       (.setVelocity item (.add (.multiply (.getVelocity item) 2.0) (Vector. 0.0 0.5 0.0))))
     (cond
       (table-equip (.getType itemstack))
-      (future-call #(let [parts (table-equip (.getType itemstack))]
-                      (Thread/sleep 8000)
-                      (when (and
-                              (not (.isDead item))
-                              (#{m/furnace m/burning-furnace}
-                                  (.getType (.getBlock (.add (.getLocation item) 0 -1 0)))))
-                        (doseq [p parts]
-                          (loc/drop-item (.getLocation item) (ItemStack. (if (not= 0 (rand-int 10)) p m/coal) (.getAmount itemstack))))
-                        (when (not-empty (.getEnchantments itemstack))
-                          (let [exp (loc/spawn (.getLocation item) ExperienceOrb)]
-                            (.setExperience exp (rand-nth (range 10 20)))))
-                        (.remove item))))
+      (future
+        (let [parts (table-equip (.getType itemstack))]
+          (Thread/sleep 8000)
+          (later
+            (when (and
+                    (not (.isDead item))
+                    (#{m/furnace m/burning-furnace}
+                        (.getType (.getBlock (.add (.getLocation item) 0 -1 0)))))
+              (doseq [p parts]
+                (loc/drop-item
+                     (.getLocation item)
+                     (ItemStack. (if (not= 0 (rand-int 10)) p m/coal) (.getAmount itemstack))))
+              (when-not (empty? (.getEnchantments itemstack))
+                (let [exp (loc/spawn (.getLocation item) ExperienceOrb)]
+                  (.setExperience exp (rand-nth (range 10 20)))))
+              (.remove item)))))
+
       (and
         (item/pickaxes (.getType itemstack))
         (= 'pickaxe-skill-teleport (pickaxe-skill-of player)))
-      (future-call
-        #(do
-           (Thread/sleep 2000)
-           (when-not (.isDead item)
-             (c/teleport-without-angle player (.getLocation item))))))))
+      (future
+        (Thread/sleep 2000)
+        (later
+          (when-not (.isDead item)
+            (c/teleport-without-angle player (.getLocation item))))))))
 
 (defn player-entity-with-string-event [evt player target]
   (c/consume-item player)
