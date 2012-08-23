@@ -472,7 +472,7 @@
   "args: item entity (maybe dead), success probability 0..100"
   "after delay."
   (future
-    (Thread/sleep (rand-int 2000))
+    (Thread/sleep (rand-int 5000))
     (later (when-not (.isDead item)
       (if (> p (rand-int 100))
         (do
@@ -1047,12 +1047,12 @@
       #_(.sendMessage player "[TIPS] 剣を焼くと分解できる。もしそれがenchantされてると...?")
       #_(.sendMessage player "[TIPS] stone plateを持って他人を右クリックするとスカウター")
       #_(.sendMessage player "[TIPS] TNTの上に置かれたチェストを開くと、即座に...!")
-      (.sendMessage player "[NEWS] Enderman右クリックでもアイテム。たまに怒られるよ")
+      #_(.sendMessage player "[NEWS] Enderman右クリックでもアイテム。たまに怒られるよ")
       (.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
       (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
       (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
-      #_(.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
-      #_(.sendMessage player "[NEWS] 金剣ビームはBlazeに逆効果。普通の雪玉なら効果覿面!")
+      (.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
+      (.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
       #_(.sendMessage player "[NEWS] ")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
@@ -1282,7 +1282,7 @@
 (defn chest-popcorn-probability [block]
   (assert (#{m/chest m/ender-chest} (.getType block)) block)
   (let [world (.getWorld block)
-        base (int (* 30
+        base (int (* 25
                      (if (night? world) 1.4 1)
                      (if (.hasStorm world) 1.4 1)
                      (if (.isThundering world) 1.4 1)))
@@ -1291,7 +1291,7 @@
         total-emeralds (apply + (map #(.getAmount %) emeralds))
         emerald-blocks (filter #(= m/emerald-block (.getType %)) contents)
         total-emerald-blocks (apply + (map #(.getAmount %) emerald-blocks))
-        emerald-effect-num (max 0 (- total-emeralds (* total-emerald-blocks 2)))]
+        emerald-effect-num (max 0 (- total-emeralds (* total-emerald-blocks 10)))]
     (min 90 (+ base (* emerald-effect-num 5)))))
 
 (defn player-right-click-event [evt player]
@@ -1696,7 +1696,7 @@ nil))))
                    #(loc/spawn location Villager)
                    #(loc/spawn location Silverfish)
                    #(loc/drop-item location (ItemStack. m/iron-sword))]))
-        Giant (.setDroppedExp evt 500)
+        Giant (.setDroppedExp evt 300)
         Creeper (.setDroppedExp evt 10)
         Blaze (when (= "world" (.getName (.getWorld entity)))
                 (blaze2-murder-event evt entity killer))
@@ -2024,6 +2024,28 @@ nil))))
       (= m/glass (.getType (.getHelmet (.getInventory target)))))
     (.setCancelled evt true)))
 
+(defn blaze2-get-damaged-by-special-snowball [snowball blaze2 shooter]
+  (assert (instance? Player shooter) shooter)
+  (assert (instance? Blaze blaze2) blaze2)
+  (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
+  (.sendMessage shooter "blaze2 likes your beam! HP max!")
+  (.setHealth blaze2 (.getMaxHealth blaze2))
+  (.setTarget blaze2 shooter)
+  (let [v (.normalize (.toVector (.subtract (.getLocation shooter) (.getLocation blaze2))))]
+    (later (c/add-velocity blaze2 (.getX v) (.getY v) (.getZ v)))))
+
+(defn special-snowball-damage [snowball target shooter]
+  (cond
+    (and
+      (instance? Blaze target)
+      (= "world" (.getName (.getWorld target))))
+    (blaze2-get-damaged-by-special-snowball snowball target shooter)
+
+    :else
+    (do
+      (.setFireTicks target 50)
+      (.damage target 2 shooter))))
+
 (defn entity-damage-intent-event [evt target attacker]
   "attacker can be nil."
   (cond
@@ -2048,9 +2070,7 @@ nil))))
       (if (or
             (@special-snowball-set attacker)
             (instance? Snowman shooter))
-        (do
-          (.setFireTicks target 50)
-          (.damage target 2 (.getShooter attacker)))
+        (special-snowball-damage attacker target shooter)
         (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
               vector (.multiply (.normalize (.toVector direction)) 3)]
           (.setCancelled evt true)
