@@ -44,6 +44,8 @@
         :text (str msg)
         :bot_verifier BOT-VERIFIER}})))
 
+(def world (Bukkit/getWorld "world"))
+
 (defn lingr-mcujm [msg]
   (lingr "mcujm" msg))
 

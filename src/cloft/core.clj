@@ -34,8 +34,6 @@
   (:import [org.bukkit.event.block Action])
   (:require [cloft.zhelpers :as mq]))
 
-(def world (Bukkit/getWorld "world"))
-
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
     (when (= m/feather (.getType (.getItemInHand player)))
@@ -2285,7 +2283,7 @@ nil))))
                       (let [all-players (Bukkit/getOnlinePlayers)
                             bed-players (filter (memfn isSleeping) all-players)]
                         (when (< (count all-players) (inc (* (count bed-players) 2)))
-                          (.setTime world 0)
+                          (.setTime (.getWorld player) 0)
                           (c/broadcast "good morning everyone!"))))))))
 
 (defn player-bucket-empty-event [evt]
@@ -2404,7 +2402,7 @@ nil))))
 (defn good-bye [klass]
   (count (seq (map #(.remove %)
                    (filter #(instance? klass %)
-                           (.getLivingEntities world))))))
+                           (.getLivingEntities c/world))))))
 
 (def good-bye-creeper (partial good-bye Creeper))
 
