@@ -1066,8 +1066,9 @@
       (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
       (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
       (.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
-      #_(.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
-      (.sendMessage player "[NEWS] なんかこの土曜にpvp大会するみたいですよ")
+      (.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
+      (.sendMessage player "[NEWS] なんかこの日曜か月曜にpvp大会するみたいですよ")
+      (.sendMessage player "[NEWS] Zombie Jockeyや匠Jockeyが出没するように")
       #_(.sendMessage player "[NEWS] ")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
@@ -2335,15 +2336,16 @@ nil))))
 (defn player-bed-enter-event [evt]
   (let [player (.getPlayer evt)]
     (c/broadcast (.getDisplayName player) " is sleeping.")
-    (.setHealth player 20)
-    (future-call #(do
-                    (Thread/sleep 3000)
-                    (when (.isSleeping player)
-                      (let [all-players (Bukkit/getOnlinePlayers)
-                            bed-players (filter (memfn isSleeping) all-players)]
-                        (when (< (count all-players) (inc (* (count bed-players) 2)))
-                          (.setTime (.getWorld player) 0)
-                          (c/broadcast "good morning everyone!"))))))))
+    (future
+      (Thread/sleep 3000)
+      (later
+        (when (.isSleeping player)
+          (let [all-players (Bukkit/getOnlinePlayers)
+                bed-players (filter (memfn isSleeping) all-players)]
+            (when (< (count all-players) (inc (* (count bed-players) 2)))
+              (.setHealth player 20)
+              (.setTime (.getWorld player) 0)
+              (c/broadcast "good morning everyone!"))))))))
 
 (defn player-bucket-empty-event [evt]
   (future-call
