@@ -773,11 +773,10 @@
 
 (defn egg-skillchange [player block block-against]
   (when (blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (let [table {m/yellow-flower [egg/skill-teleport "TELEPORT"]
-                 }]
+    (let [table {m/yellow-flower [egg/skill-teleport "TELEPORT"]}]
       (when-let [[skill skill-name] (table (.getType block))]
         (egg/set-skill player skill)
-        (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
+        (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed egg-skill to " skill-name)))))
 
 (defn summon-x
