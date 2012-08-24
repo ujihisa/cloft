@@ -1227,21 +1227,22 @@
         (= (.getHealth player) (.getMaxHealth player)))
       (if (< 33 (.getDurability item))
         (c/consume-item player)
-        (if (empty? (.getEnchantments item))
-          (let [snowball (.launchProjectile player Snowball)]
-            (swap! special-snowball-set conj snowball)
-            (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
-          (let [arrow (.launchProjectile player Arrow)]
-            (.setVelocity arrow (.multiply (.getVelocity arrow)
-                                           (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))
-            (when (= 0 (rand-int 10))
-              (item/modify-durability item inc))
-            (when (= 0 (rand-int 1000))
-              (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
-                (c/lingr-mcujm msg)
-                (c/broadcast msg))
-              (doseq [[enchant level] (.getEnchantments item)]
-                (.removeEnchantment item enchant))))))
+        (do
+          (when (= 0 (rand-int 10))
+            (item/modify-durability item inc))
+          (if (empty? (.getEnchantments item))
+            (let [snowball (.launchProjectile player Snowball)]
+              (swap! special-snowball-set conj snowball)
+              (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
+            (let [arrow (.launchProjectile player Arrow)]
+              (.setVelocity arrow (.multiply (.getVelocity arrow)
+                                             (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))
+              (when (= 0 (rand-int 1000))
+                (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
+                  (c/lingr-mcujm msg)
+                  (c/broadcast msg))
+                (doseq [[enchant level] (.getEnchantments item)]
+                  (.removeEnchantment item enchant)))))))
 
       (and
         (= m/feather (.getType item))
@@ -2013,7 +2014,8 @@ nil))))
             (Thread/sleep 10000)
             (when-not (.isDead chicken)
               (later
-                (prn 'isLoaded chicken (.isLoaded (.getChunk (.getLocation chicken))))
+                (when (not (.isLoaded (.getChunk (.getLocation chicken))))
+                  (prn 'isLoaded-not chicken))
                 (.remove chicken)))))))))
 
 (defn fish-damages-entity-event [evt fish target]
