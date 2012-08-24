@@ -1482,6 +1482,14 @@
         (later (.setPassenger player nil))))
     nil))
 
+(defn player-rightclick-chicken [player target]
+  (when (= 0 (rand-int 10))
+    (.setFoodLevel player (dec (.getFoodLevel player))))
+  (loc/drop-item
+       (.getLocation target)
+       (ItemStack. (rand-nth [m/feather m/feather
+                              m/sand]))))
+
 (defn player-rightclick-cow [player target]
   (let [itemstack (.getItemInHand player)]
     (if (and
@@ -1574,20 +1582,13 @@
           (c/broadcast (.getDisplayName player) ": " msg)
           (.setFoodLevel player 0))
 
-        Player
-        (touch-player player target)
+        Player (touch-player player target)
 
         Sheep
         (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
 
-        Chicken
-        (loc/drop-item
-          (.getLocation target)
-          (ItemStack. (rand-nth [m/feather m/feather
-                                 m/sand])))
-
-        Cow
-        (player-rightclick-cow player target)
+        Chicken (player-rightclick-chicken player target)
+        Cow (player-rightclick-cow player target)
 
         Creeper
         (loc/drop-item (.getLocation target) (ItemStack.  m/sulphur))
@@ -1629,8 +1630,10 @@ nil))))
 
 (defn player-level-change-event [evt]
   (when (< (.getOldLevel evt) (.getNewLevel evt))
-    (c/broadcast "Level up! "(.getDisplayName (.getPlayer evt)) " is Lv" (.getNewLevel evt))))
-
+    (c/broadcast (format
+                   "Level up! %s is Lv%s"
+                   (.getDisplayName (.getPlayer evt))
+                   (.getNewLevel evt)))))
 
 (defn chain-entity [entity shooter]
   (let [block (.getBlock (.getLocation entity))]
@@ -1794,22 +1797,33 @@ nil))))
 
 (defn entity-explode-event [evt]
   (if-let [entity (.getEntity evt)]
-    (let [ename (c/entity2name entity)
-          players-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
-      (cond
-        (instance? Creeper entity)
+    (let [ename (c/entity2name entity)]
+      (condp instance? entity
+        Creeper
         (do
           ((current-creeper-explosion) evt entity)
           (swap! creeper-explosion-idx inc))
 
-        (instance? Fireball entity)
+        Fireball
         (when (instance? Cow (.getShooter entity))
           (.setCancelled evt true))
 
-        (and ename (not-empty players-nearby) (not (instance? EnderDragon entity)))
-        (letfn [(join [xs x]
-                  (apply str (interpose x xs)))]
-          (c/lingr-mcujm (str ename " is exploding near " (join (map #(.getDisplayName %) players-nearby) ", "))))))
+        SmallFireball
+        nil
+
+        Fireball
+        nil
+
+        (let [players-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
+          (when (and
+                  ename
+                  (not-empty players-nearby)
+                  (not (instance? EnderDragon entity)))
+            (c/lingr-mcujm
+               (format
+                 "%s is exploding near %s"
+                 ename
+                 (clojure.string/join ", " (map #(.getDisplayName %) players-nearby))))))))
     (prn 'explosion-without-entity)))
 
 (defn digg-entity [target shooter]
