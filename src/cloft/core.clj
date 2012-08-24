@@ -462,14 +462,24 @@
   (let [creature (.getEntity evt)]
     (condp = (.getSpawnReason evt)
       CreatureSpawnEvent$SpawnReason/NATURAL
-      (when
-        (and
-          (= 0 (rand-int 10))
-          (= "world" (.getName (.getWorld creature)))
-          (some #(instance? % creature) [Zombie Skeleton Spider Creeper Enderman]))
-        (loc/spawn (.getLocation creature) Blaze))
+      (do
+        (when (and
+                (= 0 (rand-int 5))
+                (some #(instance? % creature) [Zombie Skeleton Spider Creeper Enderman]))
+          (let [spider (loc/spawn (.getLocation creature) Spider)]
+            (later (.setPassenger spider creature))))
+        (when (and
+                (= 0 (rand-int 10))
+                (= "world" (.getName (.getWorld creature)))
+                (some #(instance? % creature) [Zombie Skeleton Spider Creeper Enderman]))
+          (loc/spawn (.getLocation creature) Blaze)))
 
-      :else
+      CreatureSpawnEvent$SpawnReason/DEFAULT
+      (prn 'spawn-default creature)
+
+      CreatureSpawnEvent$SpawnReason/JOCKEY
+      (prn 'spawn-jockey creature)
+
       nil)))
 
 (defn popcorn [item p]
@@ -1957,6 +1967,8 @@ nil))))
 (defn player-attacks-spider-event [evt player spider]
   (let [cave-spider (loc/spawn (.getLocation spider) CaveSpider)]
     (.sendMessage player "The spider turned into a cave spider!")
+    (when-let [passenger (.getPassenger spider)]
+      (later (.setPassenger cave-spider passenger)))
     (.addPotionEffect cave-spider (PotionEffect.
                                     PotionEffectType/BLINDNESS
                                     500
