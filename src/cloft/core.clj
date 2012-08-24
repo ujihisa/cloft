@@ -11,6 +11,7 @@
   (:require [cloft.item :as item])
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
+  (:require [cloft.egg :as egg])
   (:require [swank.swank])
   (:import [org.bukkit Bukkit TreeType DyeColor])
   (:import [org.bukkit.material Wool Dye])
@@ -770,6 +771,15 @@
       (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
       (.sendMessage player "ざわ・・・"))))
 
+(defn egg-skillchange [player block block-against]
+  (when (blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
+    (let [table {m/yellow-flower [egg/skill-teleport "TELEPORT"]
+                 }]
+      (when-let [[skill skill-name] (table (.getType block))]
+        (egg/set-skill player skill)
+        (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
+        (c/broadcast (.getDisplayName player) " changed egg-skill to " skill-name)))))
+
 (defn summon-x
   ([pos world creature] (summon-x pos world creature 1))
   ([pos world creature after]
@@ -1030,6 +1040,7 @@
     (arrow-skillchange player block block-against)
     (pickaxe-skillchange player block block-against)
     (reaction-skillchange player block block-against)
+    (egg-skillchange player block block-against)
     (invoke-alchemy player block block-against)
     #_(transport/teleport-machine player block block-against)))
 
@@ -2306,12 +2317,18 @@ nil))))
       (loc/explode (.getLocation snowball) 0 false)
       (.remove snowball))))
 
+(defn egg-hit-event [evt egg]
+  (let [skill (egg/skill-of (.getShooter egg))]
+    (cond
+      (fn? skill) (skill egg))))
+
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
         (condp instance? entity
           #_(Fish (fish-hit-event evt entity))
           Arrow (arrow-hit-event evt entity)
           Snowball (snowball-hit-event evt entity)
+          Egg (egg-hit-event evt entity)
           #_(instance? Snowball entity) #_(.strikeLightning (.getWorld entity) (.getLocation entity))
           nil)))
 
