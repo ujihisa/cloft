@@ -25,7 +25,7 @@
             ThrownPotion TNTPrimed Vehicle Villager Villager$Profession
             WaterMob Weather Wolf Zombie Ocelot])
   (:import [org.bukkit.event.entity EntityDamageByEntityEvent
-            EntityDamageEvent$DamageCause])
+            EntityDamageEvent$DamageCause CreatureSpawnEvent$SpawnReason])
   (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
   (:import [org.bukkit.inventory ItemStack])
   (:import [org.bukkit.util Vector])
@@ -460,13 +460,17 @@
 
 (defn creature-spawn-event [evt]
   (let [creature (.getEntity evt)]
-    (when (and
-            (= org.bukkit.event.entity.CreatureSpawnEvent$SpawnReason/NATURAL (.getSpawnReason evt))
-            (= 0 (rand-int 10))
-            (= "world" (.getName (.getWorld creature)))
-            (some #(instance? % creature) [Zombie Skeleton]))
-      (loc/spawn (.getLocation creature) Blaze)
-      (.setCancelled evt true))))
+    (condp = (.getSpawnReason evt)
+      CreatureSpawnEvent$SpawnReason/NATURAL
+      (when
+        (and
+          (= 0 (rand-int 10))
+          (= "world" (.getName (.getWorld creature)))
+          (some #(instance? % creature) [Zombie Skeleton Spider Creeper Enderman]))
+        (loc/spawn (.getLocation creature) Blaze))
+
+      :else
+      nil)))
 
 (defn popcorn [item p]
   "args: item entity (maybe dead), success probability 0..100"
@@ -1052,7 +1056,8 @@
       (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
       (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
       (.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
-      (.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
+      #_(.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
+      (.sendMessage player "[NEWS] なんかこの土曜にpvp大会するみたいですよ")
       #_(.sendMessage player "[NEWS] ")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
@@ -1452,21 +1457,20 @@
   (c/consume-item player)
   (.setPassenger player target)
   (.setCancelled evt true)
+  (.setFlySpeed player 0.15)
   (condp instance? target
     Pig (.setAllowFlight player true)
     Chicken (.setAllowFlight player true)
     Squid (do
             (c/lingr-mcujm (str (.getDisplayName player) " is flying with squid!"))
             (.setAllowFlight player true)
-            (.setFoodLevel player 20))
+            (.setFlySpeed player 0.30))
     Player
-    (future-call #(do
-                    (Thread/sleep 10000)
-                    (when (= player (.getPassenger player))
-                      (.setPassenger player nil))))
+    (future
+      (Thread/sleep 10000)
+      (when (= player (.getPassenger player))
+        (later (.setPassenger player nil))))
     nil))
-
-
 
 (defn player-rightclick-cow [player target]
   (let [itemstack (.getItemInHand player)]
@@ -1485,9 +1489,9 @@
           r2 (max (+ (* x x) (* z z)) 0.1)
           new-x (* 2 (/ x r2))
           new-z (* 2 (/ z r2))]
-      (future-call #(do
-                      (Thread/sleep 100)
-                      (.setVelocity cart (Vector. new-x (.getY v) new-z)))))))
+      (future
+        (Thread/sleep 100)
+        (later (.setVelocity cart (Vector. new-x (.getY v) new-z)))))))
 
 (defn player-rightclick-villager [player villager]
   (let [default #(loc/drop-item (.getLocation villager) (ItemStack. m/cake))]
@@ -1625,10 +1629,10 @@ nil))))
         (.sendMessage shooter msg)
         (c/lingr-mcujm msg))
       (.setType block m/web)
-      (future-call #(do
-                      (Thread/sleep 10000)
-                      (when (= m/web (.getType block))
-                        (.setType block m/air)))))))
+      (future
+        (Thread/sleep 10000)
+        (when (= m/web (.getType block))
+          (later (.setType block m/air)))))))
 
 (def chicken-attacking (atom 0))
 (defn chicken-touch-player [chicken player]
@@ -1662,9 +1666,9 @@ nil))))
 
 (defn player-respawn-event [evt]
   (let [player (.getPlayer evt)]
-    (future-call #(do
-                    (.setHealth player (/ (.getMaxHealth player) 3))
-                    (.setFoodLevel player 5)))))
+    (future
+      (.setHealth player (/ (.getMaxHealth player) 3))
+      (.setFoodLevel player 5))))
 
 (defn spawn-block-generater [entity]
   (let [loc (.getLocation entity)]
@@ -1679,7 +1683,7 @@ nil))))
         (.setSpawnedType (.getState block) (.getType entity)))
       (doseq [x [-1 0 1] z [-1 0 1]]
         (.setType (.getBlock (.add (.clone loc) x -2 z)) m/mossy-cobblestone))
-      (future-call #(.remove entity))
+      (later (.remove entity))
       #_(.setCancelled evt true))))
 
 (defn pig-murder-event [entity]
@@ -1749,23 +1753,22 @@ nil))))
 
 (defn creeper-explosion-2 [evt entity]
   (.setCancelled evt true)
-  (if false #_(sanctuary/is-in? (.getLocation entity))
-    (prn 'cancelled)
-    (let [loc (.getLocation entity)]
-      (.setType (.getBlock loc) m/pumpkin)
-      (c/broadcast "break the bomb before it explodes!")
-      (future-call #(do
-                      (Thread/sleep 7000)
-                      (when (= (.getType (.getBlock loc)) m/pumpkin)
-                        (c/broadcast "zawa...")
-                        (Thread/sleep 1000)
-                        (when (= (.getType (.getBlock loc)) m/pumpkin)
-                          (.setType (.getBlock loc) m/air)
-                          (let [tnt (loc/spawn loc TNTPrimed)]
-                            (Thread/sleep 1000)
-                            (.remove tnt)
-                            (c/broadcast "big explosion!")
-                            (loc/explode loc 6 true)))))))))
+  (let [loc (.getLocation entity)]
+    (.setType (.getBlock loc) m/pumpkin)
+    (c/broadcast "break the bomb before it explodes!")
+    (future
+      (Thread/sleep 7000)
+      (when (= (.getType (.getBlock loc)) m/pumpkin)
+        (c/broadcast "zawa...")
+        (Thread/sleep 1000)
+        (when (= (.getType (.getBlock loc)) m/pumpkin)
+          (later (.setType (.getBlock loc) m/air))
+          (let [tnt (loc/spawn loc TNTPrimed)]
+            (Thread/sleep 1000)
+            (later
+              (.remove tnt)
+              (c/broadcast "big explosion!")
+              (loc/explode loc 6 true))))))))
 
 (defn creeper-explosion-3 [evt entity]
   (.setCancelled evt true)
