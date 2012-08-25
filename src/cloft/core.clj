@@ -2039,15 +2039,15 @@ nil))))
       (future
         (Thread/sleep 20000)
         (swap! chicken-attacking dec))
-      (doseq [x (range -4 5) z (range -4 5)]
-        (let [chicken (loc/spawn (.add (.clone location) x 3 z) Chicken)]
-          (future
-            (Thread/sleep 10000)
-            (when-not (.isDead chicken)
-              (later
-                (when (not (.isLoaded (.getChunk (.getLocation chicken))))
-                  #_(prn 'isLoaded-not chicken))
-                (.remove chicken)))))))))
+      (doseq [x (range -4 5) z (range -4 5)
+              :let [chicken (loc/spawn (.add (.clone location) x 3 z) Chicken)]]
+        (future
+          (Thread/sleep 10000)
+          (when-not (.isDead chicken)
+            (later
+              (when (not (.isLoaded (.getChunk (.getLocation chicken))))
+                #_(prn 'isLoaded-not chicken))
+              (.remove chicken))))))))
 
 (defn fish-damages-entity-event [evt fish target]
   (if-let [shooter (.getShooter fish)]
