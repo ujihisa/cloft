@@ -2042,7 +2042,7 @@ nil))))
       (doseq [x (range -4 5) z (range -4 5)
               :let [chicken (loc/spawn (.add (.clone location) x 3 z) Chicken)]]
         (future
-          (Thread/sleep 10000)
+          (Thread/sleep (+ 10000 (rand-int 8000)))
           (when-not (.isDead chicken)
             (later
               (when (not (.isLoaded (.getChunk (.getLocation chicken))))
