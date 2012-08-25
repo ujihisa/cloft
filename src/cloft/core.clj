@@ -1,6 +1,7 @@
 (ns cloft.core
   (:require [cloft.cloft :as c])
   (:require [cloft.material :as m])
+  (:require [cloft.sound :as s])
   (:require [cloft.scheduler :as cloft-scheduler])
   (:require [cloft.chimera-cow :as chimera-cow])
   (:require [cloft.arrow :as arrow])
@@ -1105,6 +1106,16 @@
     (cond
       (= 1 (count msg)) nil
 
+      (.startsWith msg "-")
+      (do
+        (.setCancelled evt true)
+        (let [sound
+              (read-string
+                (str "org.bukkit.Sound/"
+                     (clojure.string/upper-case (clojure.string/replace (apply str (rest msg)) #"[ -]" "_"))))]
+          (loc/play-sound (.getLocation player) (eval sound) 1.0 1.0)
+          (c/broadcast (str sound))))
+
       (= "countdown" msg)
       (do
         (.setCancelled evt true)
@@ -1243,6 +1254,7 @@
             (item/modify-durability item inc))
           (if (empty? (.getEnchantments item))
             (let [snowball (.launchProjectile player Snowball)]
+              (loc/play-sound (.getLocation player) s/zombie-metal 0.5 1.0)
               (swap! special-snowball-set conj snowball)
               (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
             (let [arrow (.launchProjectile player Arrow)]
@@ -1641,11 +1653,13 @@
 nil))))
 
 (defn player-level-change-event [evt]
-  (when (< (.getOldLevel evt) (.getNewLevel evt))
-    (c/broadcast (format
-                   "Level up! %s is Lv%s"
-                   (.getDisplayName (.getPlayer evt))
-                   (.getNewLevel evt)))))
+  (let [player (.getPlayer evt)]
+    (when (< (.getOldLevel evt) (.getNewLevel evt))
+      (loc/play-sound (.getLocation player) s/level-up 0.5 1.0)
+      (c/broadcast (format
+                     "Level up! %s is Lv%s"
+                     (.getDisplayName player)
+                     (.getNewLevel evt))))))
 
 (defn chain-entity [entity shooter]
   (let [block (.getBlock (.getLocation entity))]

@@ -16,6 +16,9 @@
 (defn play-effect [loc effect data]
   (.playEffect (.getWorld loc) loc effect data))
 
+(defn play-sound [loc sound volume pitch]
+  (.playSound (.getWorld loc) loc sound volume pitch))
+
 (defn of [pname]
   (.getLocation (Bukkit/getPlayer pname)))
 
