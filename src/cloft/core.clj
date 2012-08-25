@@ -2034,7 +2034,6 @@ nil))))
   (when (not= 0 (rand-int 3))
     (let [location (.getLocation player)
           world (.getWorld location)]
-      (.setFoodLevel player 0)
       (swap! chicken-attacking inc)
       (future
         (Thread/sleep 20000)
