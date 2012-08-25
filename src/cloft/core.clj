@@ -2305,8 +2305,8 @@ nil))))
   (cond
     (instance? Player (.getShooter entity))
     (let [player (.getShooter entity)]
-      (when (let [inhand (.getItemInHand player)]
-              (and inhand (= m/gold-sword (.getType inhand))))
+      (when (when-let [inhand (.getItemInHand player)]
+              (= m/gold-sword (.getType inhand)))
           (.remove entity))
       (let [skill (arrow-skill-of (.getShooter entity))]
         (cond
@@ -2315,7 +2315,7 @@ nil))))
           :else (.sendMessage (.getShooter entity) "You don't have a skill yet."))))
     (instance? Skeleton (.getShooter entity))
     (when (= 0 (rand-int 2))
-      (.createExplosion (.getWorld entity) (.getLocation entity) 1)
+      (loc/explode (.getLocation entity) 1 false)
       (.remove entity))
     (instance? Cow (.getShooter entity))
     (chimera-cow/arrow-hit evt)))
