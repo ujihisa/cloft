@@ -2040,7 +2040,7 @@ nil))))
         (Thread/sleep 20000)
         (swap! chicken-attacking dec))
       (doseq [x (range -4 5) z (range -4 5)]
-        (let [chicken (.spawn world (.add (.clone location) x 3 z) Chicken)]
+        (let [chicken (loc/spawn (.add (.clone location) x 3 z) Chicken)]
           (future
             (Thread/sleep 10000)
             (when-not (.isDead chicken)
