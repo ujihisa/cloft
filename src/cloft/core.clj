@@ -2304,26 +2304,26 @@ nil))))
 (defn arrow-hit-event [evt entity]
   (let [shooter (.getShooter entity)]
     (condp instance? shooter
-    Player
-    (let [player shooter]
-      (when (when-let [inhand (.getItemInHand player)]
-              (= m/gold-sword (.getType inhand)))
+      Player
+      (do
+        (when (when-let [inhand (.getItemInHand shooter)]
+                (= m/gold-sword (.getType inhand)))
           (.remove entity))
-      (let [skill (arrow-skill-of (.getShooter entity))]
-        (cond
-          (fn? skill) (skill entity)
-          (symbol? skill) nil
-          :else (.sendMessage (.getShooter entity) "You don't have a skill yet."))))
+        (let [skill (arrow-skill-of shooter)]
+          (cond
+            (fn? skill) (skill entity)
+            (symbol? skill) nil
+            :else (.sendMessage shooter "You don't have a skill yet."))))
 
-    Skeleton
-    (when (= 0 (rand-int 2))
-      (loc/explode (.getLocation entity) 1 false)
-      (.remove entity))
+      Skeleton
+      (when (= 0 (rand-int 2))
+        (loc/explode (.getLocation entity) 1 false)
+        (.remove entity))
 
-    Cow
-    (chimera-cow/arrow-hit evt)
+      Cow
+      (chimera-cow/arrow-hit evt)
 
-    (prn 'arrow-hit shooter))))
+      (prn 'arrow-hit shooter))))
 
 (defn snowball-hit-event [evt snowball]
   (cond
