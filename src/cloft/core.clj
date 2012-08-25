@@ -2288,12 +2288,18 @@ nil))))
 
 (defn block-grow-event [evt]
   (let [newstate (.getNewState evt)]
-    (when (and
-            (= m/pumpkin (.getType newstate))
-            (= 0 (rand-int 2))
-            #_(not-empty (.getNearbyEntities)))
-      (.spawn (.getWorld newstate) (.getLocation newstate) Squid)
-      (.setCancelled evt true))))
+    (condp = (.getType newstate)
+      m/pumpkin
+      (when (= 0 (rand-int 2))
+        (.spawn (.getWorld newstate) (.getLocation newstate) Squid)
+        (.setCancelled evt true))
+
+      m/melon-block
+      (when (= 0 (rand-int 2))
+        (.spawn (.getWorld newstate) (.getLocation newstate) Squid)
+        (.setCancelled evt true))
+
+      (prn 'block-grow newstate))))
 
 (defn arrow-hit-event [evt entity]
   (cond
