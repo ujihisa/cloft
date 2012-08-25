@@ -44,7 +44,8 @@
             x2 (/ (java.lang.Math/log x) 2)]
         (.setFallDistance player 0.0)
         (c/consume-itemstack (.getInventory player) m/feather)
-        (c/add-velocity player 0 x2 0)))))
+        (c/add-velocity player 0 x2 0)
+        (loc/play-sound (.getLocation player) s/chicken-hurt 1.0 (+ 0.9 (rand)))))))
 
 (defonce plugin* nil)
 (defmacro later [& exps]
@@ -1260,7 +1261,7 @@
             (let [arrow (.launchProjectile player Arrow)]
               (.setVelocity arrow (.multiply (.getVelocity arrow)
                                              (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))
-              (when (= 0 (rand-int 1000))
+              #_(when (= 0 (rand-int 1000))
                 (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
                   (c/lingr-mcujm msg)
                   (c/broadcast msg))
@@ -1276,6 +1277,7 @@
                                (.setY 0)))
         (.setFallDistance player 0.0)
         (when (= 0 (rand-int 3))
+          (loc/play-sound (.getLocation player) s/chicken-idle 0.8 1.5)
           (c/consume-item player)))
 
       (and (.getClickedBlock evt)
@@ -1319,15 +1321,21 @@
               (.setType block (rand-nth [m/sandstone m/air m/clay])))))))))
 
 (defn night? [world]
-  (< 18000 (.getTime world)))
+  (< 13500 (.getTime world)))
 
-(defn chest-popcorn-probability [block]
+(defn burning? [player]
+  (assert (instance? Player player) player)
+  (and (< 0 (.getFireTicks player))
+       (not (.hasPotionEffect player PotionEffectType/FIRE_RESISTANCE))))
+
+(defn chest-popcorn-probability [block player]
   (assert (#{m/chest m/ender-chest} (.getType block)) block)
   (let [world (.getWorld block)
         base (int (* 25
-                     (if (night? world) 1.4 1)
-                     (if (.hasStorm world) 1.4 1)
-                     (if (.isThundering world) 1.4 1)))
+                     (if (night? world) 1.3 1)
+                     (if (.hasStorm world) 1.3 1)
+                     (if (.isThundering world) 1.3 1)
+                     (if (burning? player) 2.0 1)))
         contents (filter identity (.getContents (.getBlockInventory (.getState block))))
         emeralds (filter #(= m/emerald (.getType %)) contents)
         total-emeralds (apply + (map #(.getAmount %) emeralds))
@@ -1379,7 +1387,7 @@
       (= m/blaze-rod (.. player (getItemInHand) (getType)))
       (if (and (blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
                (#{m/chest m/ender-chest} (.getType block)))
-        (let [probability (chest-popcorn-probability block)]
+        (let [probability (chest-popcorn-probability block player)]
           (.setCancelled evt true)
           (.sendMessage player (format "current probability: %.2f" (/ probability 100.0))))
         (do
@@ -2033,14 +2041,14 @@ nil))))
       (future
         (Thread/sleep 20000)
         (swap! chicken-attacking dec))
-      (doseq [x [-2 -1 0 1 2] z [-2 -1 0 1 2]]
+      (doseq [x (range -4 5) z (range -4 5)]
         (let [chicken (.spawn world (.add (.clone location) x 3 z) Chicken)]
           (future
             (Thread/sleep 10000)
             (when-not (.isDead chicken)
               (later
                 (when (not (.isLoaded (.getChunk (.getLocation chicken))))
-                  (prn 'isLoaded-not chicken))
+                  #_(prn 'isLoaded-not chicken))
                 (.remove chicken)))))))))
 
 (defn fish-damages-entity-event [evt fish target]
@@ -2271,7 +2279,7 @@ nil))))
             (when (blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
               #_(.setCancelled evt true)
               (dosync
-                (ref-set popcorning (chest-popcorn-probability block))
+                (ref-set popcorning (chest-popcorn-probability block player))
                 (.breakNaturally block (ItemStack. m/air))
                 (ref-set popcorning nil))
               (let [msg (format "%s popcorned!" (.getDisplayName player))]
@@ -2390,6 +2398,7 @@ nil))))
         (when (blazon? m/stone (.getBlock loc))
           (when (= 0 (rand-int 10))
             (.setType (.getBlock loc) m/air))
+          (loc/play-sound (.getLocation player) s/orb-pickup 0.8 1.5)
           (c/broadcast (.getDisplayName player) ": recovery spa!")
           (.setHealth player 20)
           (.setFoodLevel player 20)
