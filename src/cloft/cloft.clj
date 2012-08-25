@@ -76,7 +76,8 @@
       (.setAmount itemstack (dec amount)))))
 
 (defn get-player [name]
-  (first (filter #(= (.getDisplayName %) name) (Bukkit/getOnlinePlayers))))
+  (first (filter #(= name (.getDisplayName %)) (Bukkit/getOnlinePlayers))))
+
 (defn ujm [] (get-player "ujm"))
 
 (defn jumping? [moveevt]
