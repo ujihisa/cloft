@@ -2075,7 +2075,9 @@ nil))))
               (.damage target 1)
               (.setItemInHand target (ItemStack. m/air))
               (.setItemInHand shooter item)
-              (c/lingr-mcujm (str (.getDisplayName shooter) " fished " (.getDisplayName target)))))
+              (c/lingr-mcujm (format "%s fished %s"
+                                     (.getDisplayName shooter)
+                                     (.getDisplayName target)))))
 
           :else
           (.teleport target shooter))))))
