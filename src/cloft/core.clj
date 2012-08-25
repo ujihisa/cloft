@@ -2017,7 +2017,7 @@ nil))))
     (.sendMessage player "The spider turned into a cave spider!")
     (when-let [passenger (.getPassenger spider)]
       (later (.setPassenger cave-spider passenger)))
-    (.setVelocity spider (.normalize (.subtract (.getLocation spider) (.getLocation player))))
+    (.setVelocity spider (.normalize (.toVector (.subtract (.getLocation spider) (.getLocation player)))))
     (.setTarget cave-spider player))
   (.remove spider))
 
