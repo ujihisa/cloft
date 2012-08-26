@@ -2385,15 +2385,15 @@ nil))))
           (.setFoodLevel player 20)
           (.teleport player loc)
           (c/add-velocity player 0 0.6 0))))
-
     (transport/cauldron-teleport player)
     (when-let [vehicle (.getVehicle player)]
-      (cond
-        (instance? Boat vehicle) (.setVelocity vehicle (Vector. 0 0 0))
-        (instance? Minecart vehicle) nil
-        (instance? Pig vehicle) nil
-        (instance? Player vehicle) (.leaveVehicle player)
-        (instance? Enderman vehicle) (.leaveVehicle player)))))
+      (condp instance? vehicle
+        Boat (.setVelocity vehicle (Vector. 0 0 0))
+        Minecart nil
+        Pig nil
+        Player (.leaveVehicle player)
+        Enderman (.leaveVehicle player)
+        nil))))
 
 (defn just-for-now
   ([] (just-for-now (c/ujm)))
