@@ -2319,15 +2319,15 @@ nil))))
     (condp = (.getType newstate)
       m/pumpkin
       (when (= 0 (rand-int 2))
-        (.spawn (.getWorld newstate) (.getLocation newstate) Squid)
+        (loc/spawn (.getLocation newstate) Squid)
         (.setCancelled evt true))
 
       m/melon-block
       (when (= 0 (rand-int 2))
-        (.spawn (.getWorld newstate) (.getLocation newstate) Squid)
+        (loc/spawn (.getLocation newstate) Squid)
         (.setCancelled evt true))
 
-      (prn 'block-grow newstate))))
+      (prn 'block-grow (.getType newstate)))))
 
 (defn arrow-hit-event [evt entity]
   (let [shooter (.getShooter entity)]
