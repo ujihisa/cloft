@@ -1890,125 +1890,131 @@ nil))))
 
 (defn arrow-damages-entity-event-internal [evt arrow target]
   (when-let [shooter (.getShooter arrow)]
-    (when (instance? Blaze shooter)
-      "arrow from blaze = always it's by blaze2"
-      (blaze2-arrow-hit target))
-    (when (instance? Player shooter)
-      (cond
-        (.contains (.getInventory shooter) m/web)
-        (do
-          (chain-entity target shooter)
-          (c/consume-itemstack (.getInventory shooter) m/web))
+    (condp instance? shooter
+      Blaze
+      (do
+        "arrow from blaze = always it's by blaze2"
+        (blaze2-arrow-hit target))
 
-        (= arrow-skill-explosion (arrow-skill-of shooter))
-        (.damage target 10 shooter)
-
-        (= arrow-skill-ice (arrow-skill-of shooter))
-        (freeze-for-20-sec target)
-
-        (= 'trap (arrow-skill-of shooter))
-        ((rand-nth [chain-entity
-                    (comp freeze-for-20-sec first list)
-                    digg-entity])
-           target shooter)
-
-        (= 'digg (arrow-skill-of shooter))
-        (digg-entity target shooter)
-
-        (= arrow-skill-pumpkin (arrow-skill-of shooter))
-        (condp instance? target
-          Player
-          (let [helmet (.getHelmet (.getInventory target))]
-            (.setHelmet (.getInventory target) (ItemStack. m/pumpkin))
-            (when helmet
-              (.dropItemNaturally (.getWorld target) (.getLocation target) helmet)))
-
-          LivingEntity
-          (let [klass (.getEntityClass (.getType target))
-                health (.getHealth target)
-                loc (.getLocation target)
-                block (.getBlock loc)
-                block-type (.getType block)]
-            (.remove target)
-            (.remove arrow)
-            (.setType block m/pumpkin)
-            (future
-              (Thread/sleep 3000)
-              (let [newmob (loc/spawn loc klass)]
-                (if (= m/pumpkin (.getType block))
-                  (do
-                    (.setHealth newmob health)
-                    (.setType block block-type))
-                  (if-let [player (first (filter #(instance? Player %)
-                                                 (.getNearbyEntities newmob 3 3 3)))]
-                    (.damage newmob (.getMaxHealth newmob) player)
-                    (.damage newmob (.getMaxHealth newmob)))))))
-
-          nil)
-
-        (= arrow-skill-diamond (arrow-skill-of shooter))
+      Player
+      (do
         (cond
-          (some #(instance? % target) [Zombie Skeleton])
+          (.contains (.getInventory shooter) m/web)
           (do
-            (loc/spawn (.getLocation target) Villager)
+            (chain-entity target shooter)
+            (c/consume-itemstack (.getInventory shooter) m/web))
+
+          (= arrow-skill-explosion (arrow-skill-of shooter))
+          (.damage target 10 shooter)
+
+          (= arrow-skill-ice (arrow-skill-of shooter))
+          (freeze-for-20-sec target)
+
+          (= 'trap (arrow-skill-of shooter))
+          ((rand-nth [chain-entity
+                      (comp freeze-for-20-sec first list)
+                      digg-entity])
+             target shooter)
+
+          (= 'digg (arrow-skill-of shooter))
+          (digg-entity target shooter)
+
+          (= arrow-skill-pumpkin (arrow-skill-of shooter))
+          (condp instance? target
+            Player
+            (let [helmet (.getHelmet (.getInventory target))]
+              (.setHelmet (.getInventory target) (ItemStack. m/pumpkin))
+              (when helmet
+                (.dropItemNaturally (.getWorld target) (.getLocation target) helmet)))
+
+            LivingEntity
+            (let [klass (.getEntityClass (.getType target))
+                  health (.getHealth target)
+                  loc (.getLocation target)
+                  block (.getBlock loc)
+                  block-type (.getType block)]
+              (.remove target)
+              (.remove arrow)
+              (.setType block m/pumpkin)
+              (future
+                (Thread/sleep 3000)
+                (let [newmob (loc/spawn loc klass)]
+                  (if (= m/pumpkin (.getType block))
+                    (do
+                      (.setHealth newmob health)
+                      (.setType block block-type))
+                    (if-let [player (first (filter #(instance? Player %)
+                                                   (.getNearbyEntities newmob 3 3 3)))]
+                      (.damage newmob (.getMaxHealth newmob) player)
+                      (.damage newmob (.getMaxHealth newmob)))))))
+
+            nil)
+
+          (= arrow-skill-diamond (arrow-skill-of shooter))
+          (cond
+            (some #(instance? % target) [Zombie Skeleton])
+            (do
+              (loc/spawn (.getLocation target) Villager)
+              (.remove target))
+
+            :else
+            (do
+              (.setHealth target (.getMaxHealth target))
+              (.damage target 1 shooter)
+              (.setHealth target (.getMaxHealth target))
+              (when (instance? Player target)
+                (.setFoodLevel target 20))
+              (.setCancelled evt true)
+              (c/broadcast
+                 "Crazy diamond recovers "
+                 (if (instance? Player target)
+                   (.getDisplayName target)
+                   (c/entity2name target)))))
+
+          (= 'arrow-skill-poison (arrow-skill-of shooter))
+          (reaction-skill-poison nil target)
+
+          (= 'exp (arrow-skill-of shooter))
+          (.damage shooter 2)
+
+          (= 'super-knockback (arrow-skill-of shooter))
+          (let [direction (.subtract (.getLocation shooter)
+                                     (.getLocation target))
+                vector (.multiply (.normalize (.toVector direction)) 3)]
+            (c/add-velocity shooter (.getX vector) (+ (.getY vector) 1.0) (.getY vector))
+            (future-call
+              (let [vector (.multiply vector -1)]
+                (Thread/sleep 1)
+                (c/add-velocity target (.getX vector) (+ (.getY vector) 1.0) (.getY vector)))))
+
+          (= 'mobchange (arrow-skill-of shooter))
+          (do
+            (let [change-to (rand-nth [Blaze Boat CaveSpider Chicken Chicken
+                                       Chicken Cow Cow Cow Creeper Enderman
+                                       Ghast Giant MagmaCube Minecart
+                                       MushroomCow Pig Pig Pig PigZombie
+                                       PoweredMinecart Sheep Sheep Sheep
+                                       Silverfish Skeleton Slime Snowman Spider
+                                       Squid Squid Squid StorageMinecart
+                                       TNTPrimed Villager Wolf Ocelot Zombie])]
+              (loc/spawn (.getLocation target) change-to))
             (.remove target))
 
-          :else
-          (do
-            (.setHealth target (.getMaxHealth target))
-            (.damage target 1 shooter)
-            (.setHealth target (.getMaxHealth target))
-            (when (instance? Player target)
-              (.setFoodLevel target 20))
-            (.setCancelled evt true)
-            (c/broadcast
-               "Crazy diamond recovers "
-               (if (instance? Player target)
-                 (.getDisplayName target)
-                 (c/entity2name target)))))
+          (= arrow-skill-pull (arrow-skill-of shooter))
+          (.teleport target shooter)
 
-        (= 'arrow-skill-poison (arrow-skill-of shooter))
-        (reaction-skill-poison nil target)
+          (= arrow-skill-fire (arrow-skill-of shooter))
+          (.setFireTicks target 400)
 
-        (= 'exp (arrow-skill-of shooter))
-        (.damage shooter 2)
+          (= arrow-skill-teleport (arrow-skill-of shooter))
+          (.setCancelled evt true)
 
-        (= 'super-knockback (arrow-skill-of shooter))
-        (let [direction (.subtract (.getLocation shooter)
-                                   (.getLocation target))
-              vector (.multiply (.normalize (.toVector direction)) 3)]
-          (c/add-velocity shooter (.getX vector) (+ (.getY vector) 1.0) (.getY vector))
-          (future-call
-            (let [vector (.multiply vector -1)]
-              (Thread/sleep 1)
-              (c/add-velocity target (.getX vector) (+ (.getY vector) 1.0) (.getY vector)))))
+          (= 'cart (arrow-skill-of shooter))
+          (let [cart (loc/spawn (.getLocation target) Minecart)]
+            (.setPassenger cart target)))
+      (scouter evt shooter target))
 
-        (= 'mobchange (arrow-skill-of shooter))
-        (do
-          (let [change-to (rand-nth [Blaze Boat CaveSpider Chicken Chicken
-                                     Chicken Cow Cow Cow Creeper Enderman
-                                     Ghast Giant MagmaCube Minecart
-                                     MushroomCow Pig Pig Pig PigZombie
-                                     PoweredMinecart Sheep Sheep Sheep
-                                     Silverfish Skeleton Slime Snowman Spider
-                                     Squid Squid Squid StorageMinecart
-                                     TNTPrimed Villager Wolf Ocelot Zombie])]
-            (loc/spawn (.getLocation target) change-to))
-          (.remove target))
-
-        (= arrow-skill-pull (arrow-skill-of shooter))
-        (.teleport target shooter)
-
-        (= arrow-skill-fire (arrow-skill-of shooter))
-        (.setFireTicks target 400)
-
-        (= arrow-skill-teleport (arrow-skill-of shooter))
-        (.setCancelled evt true)
-
-        (= 'cart (arrow-skill-of shooter))
-        (let [cart (loc/spawn (.getLocation target) Minecart)]
-          (.setPassenger cart target)))
-      (scouter evt shooter target))))
+      nil)))
 
 (defn arrow-damages-entity-event [evt arrow target]
   (if (and
