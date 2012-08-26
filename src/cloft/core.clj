@@ -1261,7 +1261,8 @@
 (defn chest-popcorn-probability [block player]
   (assert (#{m/chest m/ender-chest} (.getType block)) block)
   (let [world (.getWorld block)
-        base (int (* (if (= m/chest (.getType block)) 25 50)
+        base0 (if (= m/chest (.getType block)) 25 50)
+        base (int (* base0
                      (if (night? world) 1.3 1)
                      (if (.hasStorm world) 1.3 1)
                      (if (.isThundering world) 1.3 1)
