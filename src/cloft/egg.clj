@@ -12,7 +12,7 @@
 (def player-skills (atom {}))
 
 (defn spawnable-by-egg? [entity]
-  (some #(instance? %  entity)
+  (some #(instance? % entity)
         [Creeper Skeleton Spider Zombie Slime Ghast PigZombie Enderman
          CaveSpider Silverfish Blaze MagmaCube Pig Sheep Cow Chicken Squid
          Wolf MushroomCow Villager Ocelot]))
@@ -34,10 +34,9 @@
     (let [block (block/of-arrow entity)
           loc (.getLocation block)
           loc-above (.add (.clone loc) 0 1 0)]
-      (when
-        (and
-          (= m/air (.getType (.getBlock loc-above)))
-          (not= m/air (.getType (.getBlock loc))))
+      (when (and
+              (= m/air (.getType (.getBlock loc-above)))
+              (not= m/air (.getType (.getBlock loc))))
         (.setType (.getBlock loc-above) m/snow))))
   (.remove entity))
 
