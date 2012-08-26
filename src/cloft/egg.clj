@@ -18,13 +18,35 @@
     (c/teleport-without-angle shooter location))
   (.remove entity))
 
+(defn skill-ice [entity]
+  (if (.isLiquid (.getBlock (.getLocation entity)))
+    (.setType (.getBlock (.getLocation entity)) m/ice)
+    (let [block (block/of-arrow entity)
+          loc (.getLocation block)
+          loc-above (.add (.clone loc) 0 1 0)]
+      (when
+        (and
+          (= m/air (.getType (.getBlock loc-above)))
+          (not= m/air (.getType (.getBlock loc))))
+        (.setType (.getBlock loc-above) m/snow))))
+  (.remove entity))
+
 (defn set-skill [player skill]
   (swap! user-skills assoc (.getDisplayName player) skill))
 
 (defn change-skill [player block block-against]
   (when (block/blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (let [table {m/yellow-flower [skill-teleport "TELEPORT"]}]
+    (let [table {m/yellow-flower [skill-teleport "TELEPORT"]
+                 m/snow-block [skill-ice "ICE"]
+                 }]
       (when-let [[skill skill-name] (table (.getType block))]
         (set-skill player skill)
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed egg-skill to " skill-name)))))
+
+(defn damages-entity-event [evt egg target]
+  (when-let
+    [shooter (.getShooter egg)]
+    (condp = (skill-of shooter)
+      skill-ice
+      (c/freeze-for-20-sec target))))

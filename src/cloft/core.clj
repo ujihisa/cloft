@@ -1817,6 +1817,9 @@ nil))))
           (= arrow-skill-ice (arrow-skill-of shooter))
           (c/freeze-for-20-sec target)
 
+          (= egg/skill-ice (egg/skill-of shooter))
+          (c/freeze-for-20-sec target)
+
           (= 'trap (arrow-skill-of shooter))
           ((rand-nth [chain-entity
                       (comp c/freeze-for-20-sec first list)
@@ -2093,6 +2096,8 @@ nil))))
             (.setPassenger attacker target)))))
     (when (instance? Arrow attacker)
       (arrow-damages-entity-event evt attacker target))
+    (when (instance? Egg attacker)
+      (egg/damages-entity-event evt attacker target))
     (when (instance? Player attacker)
       (when-not (instance? Player target)
         (spawn-block-generater target))
@@ -2137,7 +2142,7 @@ nil))))
       (chimera-cow/damage-event evt target attacker))))
 
 (defn entity-damage-event [evt]
-  (let [target (.getEntity evt)]
+  (do (prn evt) (prn (.getCause evt)) (let [target (.getEntity evt)]
     (cond
       (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
       (entity-damage-by-drawning-event evt target)
@@ -2176,7 +2181,7 @@ nil))))
                     (.sendMessage target msg)))
                 (.damage target 100))))))
       :else
-      (entity-damage-intent-event evt target))))
+      (entity-damage-intent-event evt target)))))
 
 (defn block-break-event [evt]
   (let [block (.getBlock evt)]
