@@ -2144,90 +2144,89 @@ nil))))
       (.setFireTicks target 50)
       (.damage target 2 shooter))))
 
-(defn entity-damage-intent-event [evt target attacker]
-  "attacker can be nil."
-  (cond
-    (and (instance? Blaze target)
-         (= "world" (.getName (.getWorld target))))
-    (blaze2-get-damaged evt target)
+(defn entity-damage-intent-event [evt target]
+  (let [attacker (when (instance? EntityDamageByEntityEvent evt)
+                   (.getDamager evt))]
+    (cond
+      (and (instance? Blaze target)
+           (= "world" (.getName (.getWorld target))))
+      (blaze2-get-damaged evt target)
 
-    (and (instance? Ghast target)
-         (= "world" (.getName (.getWorld target))))
-    (ghast2-get-damaged evt target attacker)
+      (and (instance? Ghast target)
+           (= "world" (.getName (.getWorld target))))
+      (ghast2-get-damaged evt target attacker)
 
-    :else nil)
-  (when (and
-          (instance? Villager target)
-          (instance? EntityDamageByEntityEvent evt)
-          (instance? Player attacker))
-    (.damage attacker (.getDamage evt)))
-  (when (instance? Fish attacker)
-    (fish-damages-entity-event evt attacker target))
-  (when (instance? Snowball attacker)
-    (if-let [shooter (.getShooter attacker)]
-      (if (or
-            (@special-snowball-set attacker)
-            (instance? Snowman shooter))
-        (special-snowball-damage attacker target shooter)
-        (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
-              vector (.multiply (.normalize (.toVector direction)) 3)]
+      :else nil)
+    (when (and
+            (instance? Villager target)
+            (instance? EntityDamageByEntityEvent evt)
+            (instance? Player attacker))
+      (.damage attacker (.getDamage evt)))
+    (when (instance? Fish attacker)
+      (fish-damages-entity-event evt attacker target))
+    (when (instance? Snowball attacker)
+      (if-let [shooter (.getShooter attacker)]
+        (if (or
+              (@special-snowball-set attacker)
+              (instance? Snowman shooter))
+          (special-snowball-damage attacker target shooter)
+          (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
+                vector (.multiply (.normalize (.toVector direction)) 3)]
+            (.setCancelled evt true)
+            (c/add-velocity target (.getX vector) (+ (.getY vector) 2.0) (.getZ vector))))))
+    (when (instance? Enderman attacker)
+      (when (instance? Player target)
+        (if (= target (.getPassenger attacker))
           (.setCancelled evt true)
-          (c/add-velocity target (.getX vector) (+ (.getY vector) 2.0) (.getZ vector))))))
-  (when (instance? Enderman attacker)
-    (when (instance? Player target)
-      (if (= target (.getPassenger attacker))
-        (.setCancelled evt true)
-        (when (= 0 (rand-int 5))
-          (.sendMessage target "Enderman picked you! (sneaking to get off)")
-          (.setPassenger attacker target)))))
-  (when (instance? Arrow attacker)
-    (arrow-damages-entity-event evt attacker target))
-  (when (instance? Player attacker)
-    (when-not (instance? Player target)
-      (spawn-block-generater target))
-    (when-let [item (.getItemInHand attacker)]
-      (when (item/pickaxes (.getType item))
-        (when (= 'pickaxe-skill-fire (pickaxe-skill-of attacker))
-          (.setFireTicks target 200))))
-    (when (and (instance? Spider target)
-               (not (instance? CaveSpider target)))
-      (player-attacks-spider-event evt attacker target))
-    (when (instance? Pig target)
-      (player-attacks-pig-event evt attacker target))
-    (when (instance? Chicken target)
-      (player-attacks-chicken-event evt attacker target))
-    (scouter evt attacker target))
-  (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
-    (when (instance? Fireball attacker)
-      (when-let [shooter (.getShooter attacker)]
-        (when (chimera-cow/is? shooter)
-          (chimera-cow/fireball-hit-player evt target shooter attacker))))
-    (when-let [skill (reaction-skill-of target)]
-      (let [actual-attacker
-            (if (instance? Projectile attacker)
-              (.getShooter attacker)
-              attacker)]
-        (when (and (not= actual-attacker target)
-                   (not (instance? Wolf actual-attacker))
-                   (not (instance? TNTPrimed actual-attacker))
-                   (not (and
-                          (instance? Player actual-attacker)
-                          (= arrow-skill-diamond (arrow-skill-of actual-attacker)))))
-          (skill target actual-attacker))))
-    (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
-      (if (player/zombie? target)
-        (.setCancelled evt true)
-        (player/zombieze target)))
-    (when (player/zombie? attacker)
-      (player/zombieze target)
-      (.sendMessage attacker "You made a friend")))
-  (when (chimera-cow/is? target)
-    (chimera-cow/damage-event evt target attacker)))
+          (when (= 0 (rand-int 5))
+            (.sendMessage target "Enderman picked you! (sneaking to get off)")
+            (.setPassenger attacker target)))))
+    (when (instance? Arrow attacker)
+      (arrow-damages-entity-event evt attacker target))
+    (when (instance? Player attacker)
+      (when-not (instance? Player target)
+        (spawn-block-generater target))
+      (when-let [item (.getItemInHand attacker)]
+        (when (item/pickaxes (.getType item))
+          (when (= 'pickaxe-skill-fire (pickaxe-skill-of attacker))
+            (.setFireTicks target 200))))
+      (when (and (instance? Spider target)
+                 (not (instance? CaveSpider target)))
+        (player-attacks-spider-event evt attacker target))
+      (when (instance? Pig target)
+        (player-attacks-pig-event evt attacker target))
+      (when (instance? Chicken target)
+        (player-attacks-chicken-event evt attacker target))
+      (scouter evt attacker target))
+    (when (and (instance? Player target) (instance? EntityDamageByEntityEvent evt))
+      (when (instance? Fireball attacker)
+        (when-let [shooter (.getShooter attacker)]
+          (when (chimera-cow/is? shooter)
+            (chimera-cow/fireball-hit-player evt target shooter attacker))))
+      (when-let [skill (reaction-skill-of target)]
+        (let [actual-attacker
+              (if (instance? Projectile attacker)
+                (.getShooter attacker)
+                attacker)]
+          (when (and (not= actual-attacker target)
+                     (not (instance? Wolf actual-attacker))
+                     (not (instance? TNTPrimed actual-attacker))
+                     (not (and
+                            (instance? Player actual-attacker)
+                            (= arrow-skill-diamond (arrow-skill-of actual-attacker)))))
+            (skill target actual-attacker))))
+      (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
+        (if (player/zombie? target)
+          (.setCancelled evt true)
+          (player/zombieze target)))
+      (when (player/zombie? attacker)
+        (player/zombieze target)
+        (.sendMessage attacker "You made a friend")))
+    (when (chimera-cow/is? target)
+      (chimera-cow/damage-event evt target attacker))))
 
 (defn entity-damage-event [evt]
-  (let [target (.getEntity evt)
-        attacker (when (instance? EntityDamageByEntityEvent evt)
-                   (.getDamager evt))]
+  (let [target (.getEntity evt)]
     (cond
       (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
       (entity-damage-by-drawning-event evt target)
@@ -2266,7 +2265,7 @@ nil))))
                     (.sendMessage target msg)))
                 (.damage target 100))))))
       :else
-      (entity-damage-intent-event evt target attacker))))
+      (entity-damage-intent-event evt target))))
 
 (defn block-break-event [evt]
   (let [block (.getBlock evt)]
