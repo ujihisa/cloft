@@ -47,4 +47,6 @@
   (when-let [shooter (.getShooter egg)]
     (condp = (skill-of shooter)
       skill-ice
-      (c/freeze-for-20-sec target))))
+      (c/freeze-for-20-sec target)
+
+      (prn 'egg-damages-entity-event 'must-not-happen shooter (skill-of shooter)))))
