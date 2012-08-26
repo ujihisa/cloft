@@ -2350,6 +2350,9 @@ nil))))
       Cow
       (chimera-cow/arrow-hit evt)
 
+      Blaze
+      nil
+
       (prn 'arrow-hit shooter))))
 
 (defn snowball-hit-event [evt snowball]
