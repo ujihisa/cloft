@@ -1890,6 +1890,9 @@ nil))))
 
 (defn arrow-damages-entity-event-internal [evt arrow target]
   (when-let [shooter (.getShooter arrow)]
+    (when (instance? Blaze shooter)
+      "arrow from blaze = always it's by blaze2"
+      (blaze2-arrow-hit target))
     (when (instance? Player shooter)
       (cond
         (.contains (.getInventory shooter) m/web)
@@ -2005,10 +2008,7 @@ nil))))
         (= 'cart (arrow-skill-of shooter))
         (let [cart (loc/spawn (.getLocation target) Minecart)]
           (.setPassenger cart target)))
-      (scouter evt shooter target))
-    (when (instance? Blaze shooter)
-      "arrow from blaze = always it's by blaze2"
-      (blaze2-arrow-hit target))))
+      (scouter evt shooter target))))
 
 (defn arrow-damages-entity-event [evt arrow target]
   (if (and
