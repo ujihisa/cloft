@@ -2246,7 +2246,9 @@ nil))))
                 (ref-set popcorning (chest-popcorn-probability block player))
                 (cloft.chest/break-and-scatter block player)
                 (ref-set popcorning nil))
-              (let [msg (format "%s popcorned!" (.getDisplayName player))]
+              (let [msg (format "%s popcorned with %s!"
+                                (.getDisplayName player)
+                                (.getType block))]
                 (c/lingr-mcujm msg)
                 (c/broadcast msg)))
             nil)
