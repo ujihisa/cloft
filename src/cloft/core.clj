@@ -849,7 +849,6 @@
         (prn "nothing to connect."))
       (swap! active-fusion-wall assoc (.getDisplayName player) [bottom top]))))
 
-
 (defn fusion-floor [player block]
   (let [world (.getWorld player)
         start-left (coor/local-to-world player block 0.0 0.0 -1.0)
@@ -936,7 +935,6 @@
                   m/red-mushroom earthen-pipe}]
       (when-let [alchemy (table (.getType block))]
         (alchemy player block)))))
-
 
 (defn block-damage-event [evt]
   (let [player (.getPlayer evt)
@@ -1284,7 +1282,6 @@
            (= m/stone-button (.getType (.getClickedBlock evt)))
            (blazon? m/emerald-block (.getBlock (.add (.getLocation player) 0 -1 0))))
       (lift-up (.getLocation player)))))
-
 
 (defn y->pitch [y]
   (* 90 (Math/sin (* y -0.5 Math/PI))))
@@ -2603,4 +2600,3 @@ nil))))
                   (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))))
             (doseq [player players]
               (.sendMessage player (format "%s: %s" (:user contents) (:body contents))))))))))
-
