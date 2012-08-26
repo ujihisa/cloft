@@ -2141,18 +2141,19 @@ nil))))
         (when-let [shooter (.getShooter attacker)]
           (when (chimera-cow/is? shooter)
             (chimera-cow/fireball-hit-player evt target shooter attacker))))
-      (when-let [skill (reaction-skill-of target)]
-        (let [actual-attacker
-              (if (instance? Projectile attacker)
-                (.getShooter attacker)
-                attacker)]
-          (when (and (not= actual-attacker target)
-                     (not (instance? Wolf actual-attacker))
-                     (not (instance? TNTPrimed actual-attacker))
-                     (not (and
-                            (instance? Player actual-attacker)
-                            (= arrow-skill-diamond (arrow-skill-of actual-attacker)))))
-            (skill target actual-attacker))))
+      (when-not (instance? Egg attacker)
+        (when-let [skill (reaction-skill-of target)]
+          (let [actual-attacker
+                (if (instance? Projectile attacker)
+                  (.getShooter attacker)
+                  attacker)]
+            (when (and (not= actual-attacker target)
+                       (not (instance? Wolf actual-attacker))
+                       (not (instance? TNTPrimed actual-attacker))
+                       (not (and
+                              (instance? Player actual-attacker)
+                              (= arrow-skill-diamond (arrow-skill-of actual-attacker)))))
+              (skill target actual-attacker)))))
       (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
         (if (player/zombie? target)
           (.setCancelled evt true)
