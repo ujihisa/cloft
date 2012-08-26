@@ -3,9 +3,19 @@
   (:require [cloft.material :as m])
   (:require [cloft.loc :as loc])
   (:require [cloft.block :as block])
-  (:import [org.bukkit Effect]))
+  (:import [org.bukkit Effect])
+  (:import [org.bukkit.entity Creeper Skeleton Spider Zombie Slime Ghast
+            PigZombie Enderman CaveSpider Silverfish Blaze MagmaCube Pig
+            Sheep Cow Chicken Squid Wolf MushroomCow Villager Ocelot])
+  (:import [org.bukkit.material SpawnEgg]))
 
 (def player-skills (atom {}))
+
+(defn spawnable-by-egg? [entity]
+  (some #(instance? %  entity)
+        [Creeper Skeleton Spider Zombie Slime Ghast PigZombie Enderman
+         CaveSpider Silverfish Blaze MagmaCube Pig Sheep Cow Chicken Squid
+         Wolf MushroomCow Villager Ocelot]))
 
 (defn skill-of [player]
   (get @player-skills (.getDisplayName player)))
@@ -45,6 +55,14 @@
         (.setType (.getBlock loc) m/crops)
         (catch org.bukkit.event.EventException e nil)))))
 
+(defn capture [captor target]
+  (when
+    (spawnable-by-egg? target)
+    (let [spawn-egg (.toItemStack (SpawnEgg. (.getType target)))]
+      (.setAmount spawn-egg 1)
+      (.dropItemNaturally c/world (.getLocation target) spawn-egg)
+      (.remove target))))
+
 (defn set-skill [player skill]
   (swap! player-skills assoc (.getDisplayName player) skill))
 
@@ -52,7 +70,8 @@
   (when (block/blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
     (let [table {m/yellow-flower [skill-teleport "TELEPORT"]
                  m/snow-block [skill-ice "ICE"]
-                 m/crops [skill-plant "PLANT"]}]
+                 m/crops [skill-plant "PLANT"]
+                 m/chest ['skill-capture "CAPTURE"]}]
       (when-let [[skill skill-name] (table (.getType block))]
         (set-skill player skill)
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
@@ -63,6 +82,9 @@
     (condp = (skill-of shooter)
       skill-ice
       (c/freeze-for-20-sec target)
+
+      'skill-capture
+      (capture shooter target)
 
       (prn 'egg-damages-entity-event 'must-not-happen shooter (skill-of shooter)))))
 
