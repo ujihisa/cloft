@@ -198,18 +198,18 @@
   (.remove entity))
 
 (defn arrow-skill-pumpkin [entity]
-  (future-call
-    #(do
-       (Thread/sleep 10)
-       (when-not (.isDead entity)
-         (let [block (.getBlock (.getLocation entity))]
-           (if (and
-                   (= 0 (rand-int 3))
-                   (= m/air (.getType block)))
-             (do
-               (.setType block (rand-nth [m/pumpkin m/jack-o-lantern]))
-               (.remove entity))
-             (.sendMessage (.getShooter entity) "PUMPKIN failed")))))))
+  "This needs to be later to check if the arrow (entity) has hit an entity or
+  not. If the arrow (entity) is dead, it has hit."
+  (later
+    (when-not (.isDead entity)
+      (let [block (.getBlock (.getLocation entity))]
+        (if (and
+              (= 0 (rand-int 3))
+              (= m/air (.getType block)))
+          (do
+            (.setType block (rand-nth [m/pumpkin m/jack-o-lantern]))
+            (.remove entity))
+          (.sendMessage (.getShooter entity) "PUMPKIN failed"))))))
 
 (defn arrow-skill-plant [entity]
   (let [inventory (.getInventory (.getShooter entity))]
