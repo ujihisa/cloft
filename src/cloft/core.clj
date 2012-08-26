@@ -172,19 +172,6 @@
 (defn arrow-skill-shotgun [entity]
   (.remove entity))
 
-(defn arrow-skill-ice [entity]
-  (if (.isLiquid (.getBlock (.getLocation entity)))
-    (.setType (.getBlock (.getLocation entity)) m/ice)
-    (let [block (block/of-arrow entity)
-          loc (.getLocation block)
-          loc-above (.add (.clone loc) 0 1 0)]
-      (when
-        (and
-          (= m/air (.getType (.getBlock loc-above)))
-          (not= m/air (.getType (.getBlock loc))))
-        (.setType (.getBlock loc-above) m/snow))))
-  (.remove entity))
-
 (defn arrow-skill-pumpkin [entity]
   "This needs to be later to check if the arrow (entity) has hit an entity or
   not. If the arrow (entity) is dead, it has hit."
@@ -651,7 +638,6 @@
                  m/rails ['cart "CART"]
                  m/bookshelf ['mobchange "MOBCHANGE"]
                  #_(m/sandstone ['arrow-skill-tntmissile "TNTMissle"])
-                 m/snow-block [arrow-skill-ice "ICE"]
                  m/powered-rail ['exp "EXP"]
                  m/piston-base ['super-knockback "SUPER-KNOCKBACK"]
                  m/jack-o-lantern [arrow-skill-pumpkin "PUMPKIN"]
@@ -1813,9 +1799,6 @@ nil))))
 
           (= arrow-skill-explosion (arrow-skill-of shooter))
           (.damage target 10 shooter)
-
-          (= arrow-skill-ice (arrow-skill-of shooter))
-          (c/freeze-for-20-sec target)
 
           (= egg/skill-ice (egg/skill-of shooter))
           (c/freeze-for-20-sec target)
