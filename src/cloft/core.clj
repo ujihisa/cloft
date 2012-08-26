@@ -541,7 +541,7 @@
                    true)))
             (c/broadcast (.getDisplayName shooter) " has no TNT."))))
       (when (= arrow-skill-shotgun (arrow-skill-of shooter))
-        (doseq [_ (range 1 80)]
+        (dotimes [_ 80]
           (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
                 arrow (.launchProjectile shooter Arrow)]
             (.setVelocity arrow (.getVelocity (.getProjectile evt)))
@@ -1316,7 +1316,7 @@
       (do
         (.setType block m/air)
         (item/modify-durability (.getItemInHand player) inc)
-        (doseq [_ (range 0 3)]
+        (dotimes [_ 3]
           (loc/drop-item (.getLocation block) (ItemStack. m/string 1))))
 
       (= m/blaze-rod (.. player (getItemInHand) (getType)))
