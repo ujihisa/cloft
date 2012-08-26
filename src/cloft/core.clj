@@ -243,24 +243,15 @@
 (defn arrow-skill-quake [entity]
   (let [targets (.getNearbyEntities entity 5 3 5)]
     (future
-      (doseq [_ [1 2 3]]
-        (doseq [target targets :when (instance? LivingEntity target)]
-          (Thread/sleep (rand-int 300))
-          (later
-            (loc/play-effect (.getLocation target) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
-            (c/add-velocity target (- (rand) 0.5) 0.9 (- (rand) 0.5))))
+      (doseq [_ [1 2 3]
+              target targets
+              :when (instance? LivingEntity target)]
+        (Thread/sleep (rand-int 300))
+        (later
+          (loc/play-effect (.getLocation target) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
+          (c/add-velocity target (- (rand) 0.5) 0.9 (- (rand) 0.5)))
         (Thread/sleep 1500))
       (later (.remove entity)))))
-
-(defn arrow-skill-popcorn [entity]
-  (something-like-quake
-    entity
-    Item
-    (fn [item]
-      (when (= 0 (rand-int 5))
-        (.dropItem (.getWorld item) (.getLocation item) (.getItemStack item)))
-      (when (= 0 (rand-int 5))
-        (.remove item)))))
 
 (defn arrow-skill-liquid [material duration entity]
   (let [block (.getBlock (.getLocation entity))]
@@ -727,7 +718,6 @@
                  #_( m/fire [arrow-skill-flame "FLAME"])
                  m/brown-mushroom [arrow-skill-quake "QUAKE"]
                  m/red-mushroom ['arrow-skill-poison "POISON"]
-                 #_(m/fence-gate [arrow-skill-popcorn "POPCORN"])
                  m/water [arrow-skill-water "WATER"]
                  m/lava [arrow-skill-lava "LAVA"]
                  m/log [arrow-skill-woodbreak "WOODBREAK"]}]
