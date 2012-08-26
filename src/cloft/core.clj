@@ -628,21 +628,21 @@
               :let [block (.getBlock (.add (.clone loc) 0 y 0))]
               :when (#{m/air m/snow} (.getType block))]
         (.setType block m/glass))
-      (future-call #(do
-                      (Thread/sleep 1000)
-                      (when-not (.isDead target)
-                        (.teleport target (.add (.clone loc) 0.5 0.0 0.5)))))
-      (future-call #(do
-                      (Thread/sleep 20000)
-                      (doseq [y [0 1]
-                              [x z] [[-1 0] [1 0] [0 -1] [0 1]]
-                              :let [block (.getBlock (.add (.clone loc) x y z))]
-                              :when (= (.getType block) m/glass)]
-                        (.setType block m/air))
-                      (doseq [y [-1 2]
-                              :let [block (.getBlock (.add (.clone loc) 0 y 0))]
-                              :when (= (.getType block) m/glass)]
-                        (.setType block m/air)))))))
+      (future
+        (Thread/sleep 1000)
+        (when-not (.isDead target)
+          (later (.teleport target (.add (.clone loc) 0.5 0.0 0.5)))))
+      (future
+        (Thread/sleep 20000)
+        (doseq [y [0 1]
+                [x z] [[-1 0] [1 0] [0 -1] [0 1]]
+                :let [block (.getBlock (.add (.clone loc) x y z))]
+                :when (= (.getType block) m/glass)]
+          (later (.setType block m/air)))
+        (doseq [y [-1 2]
+                :let [block (.getBlock (.add (.clone loc) 0 y 0))]
+                :when (= (.getType block) m/glass)]
+          (later (.setType block m/air)))))))
 
 (defn reaction-skill-ice [you by]
   (freeze-for-20-sec by)
