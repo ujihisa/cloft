@@ -168,7 +168,7 @@
   (.setPitch location (.getPitch (.getLocation entity)))
   (.teleport entity location))
 
-(defn freeze-for-20-sec [target]
+(defn freeze [target sec]
   (when-not (.isDead target)
     (let [loc (.getLocation (.getBlock (.getLocation target)))]
       (doseq [y [0 1]
@@ -185,7 +185,7 @@
         (when-not (.isDead target)
           (later (.teleport target (.add (.clone loc) 0.5 0.0 0.5)))))
       (future
-        (Thread/sleep 20000)
+        (Thread/sleep (* sec 1000))
         (doseq [y [0 1]
                 [x z] [[-1 0] [1 0] [0 -1] [0 1]]
                 :let [block (.getBlock (.add (.clone loc) x y z))]
@@ -195,6 +195,8 @@
                 :let [block (.getBlock (.add (.clone loc) 0 y 0))]
                 :when (= (.getType block) m/glass)]
           (later (.setType block m/air)))))))
+(defn freeze-for-20-sec [target]
+  (freeze target 20))
 
 (def potion-types [PotionType/FIRE_RESISTANCE PotionType/INSTANT_DAMAGE
                    PotionType/INSTANT_HEAL PotionType/POISON PotionType/REGEN
