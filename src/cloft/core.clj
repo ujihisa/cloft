@@ -2125,7 +2125,7 @@ nil))))
       (chimera-cow/damage-event evt target attacker))))
 
 (defn entity-damage-event [evt]
-  (do (prn evt) (prn (.getCause evt)) (let [target (.getEntity evt)]
+  (let [target (.getEntity evt)]
     (cond
       (= EntityDamageEvent$DamageCause/DROWNING (.getCause evt))
       (entity-damage-by-drawning-event evt target)
@@ -2164,7 +2164,7 @@ nil))))
                     (.sendMessage target msg)))
                 (.damage target 100))))))
       :else
-      (entity-damage-intent-event evt target)))))
+      (entity-damage-intent-event evt target))))
 
 (defn block-break-event [evt]
   (let [block (.getBlock evt)]
