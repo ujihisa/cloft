@@ -695,16 +695,8 @@
 (defn reaction-skill-poison [you by]
   (.addPotionEffect by (PotionEffect. PotionEffectType/POISON 200 2)))
 
-(defn blazon? [block-type block-against]
-  (and (every? #(= % block-type)
-               (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-                    [0 0 -1 1] [-1 1 0 0]))
-       (every? #(not= % block-type)
-               (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
-                    [-1 1 0 0] [-1 1 0 0]))))
-
 (defn reaction-skillchange [player block block-against]
-  (when (blazon? m/log block-against)
+  (when (block/blazon? m/log block-against)
     (let [table {m/red-rose [reaction-skill-fire "FIRE"]
                  m/yellow-flower [reaction-skill-teleport "TELEPORT"]
                  m/cobblestone [reaction-skill-knockback "KNOCKBACK"]
@@ -722,7 +714,7 @@
             (swap! reaction-skill assoc (.getDisplayName player) [(first skill-name) l])))))))
 
 (defn arrow-skillchange [player block block-against]
-  (when (blazon? m/stone (.getBlock (.add (.getLocation block) 0 -1 0)))
+  (when (block/blazon? m/stone (.getBlock (.add (.getLocation block) 0 -1 0)))
     (let [table {m/glowstone ['strong "STRONG"]
                  m/tnt [arrow-skill-explosion "EXPLOSION"]
                  m/torch [arrow-skill-torch "TORCH"]
@@ -758,7 +750,7 @@
         (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
 
 (defn pickaxe-skillchange [player block block-against]
-  (when (blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
+  (when (block/blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
     (let [table {m/yellow-flower ['pickaxe-skill-teleport "TELEPORT"]
                  m/red-rose ['pickaxe-skill-fire "FIRE"]
                  m/workbench ['pickaxe-skill-ore "ORE"]
@@ -774,7 +766,7 @@
       (.sendMessage player "ざわ・・・"))))
 
 (defn egg-skillchange [player block block-against]
-  (when (blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
+  (when (block/blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
     (let [table {m/yellow-flower [egg/skill-teleport "TELEPORT"]}]
       (when-let [[skill skill-name] (table (.getType block))]
         (egg/set-skill player skill)
@@ -922,7 +914,7 @@
           (recur (inc h) inner 9))))))
 
 (defn invoke-alchemy [player block block-against]
-  (when (blazon? m/netherrack block-against)
+  (when (block/blazon? m/netherrack block-against)
     "MEMO: to be changed to STONE BRICK"
     "TODO: consistant naming"
     (let [table {m/cobblestone alchemy-fusion-wall
@@ -1280,7 +1272,7 @@
 
       (and (.getClickedBlock evt)
            (= m/stone-button (.getType (.getClickedBlock evt)))
-           (blazon? m/emerald-block (.getBlock (.add (.getLocation player) 0 -1 0))))
+           (block/blazon? m/emerald-block (.getBlock (.add (.getLocation player) 0 -1 0))))
       (lift-up (.getLocation player)))))
 
 (defn y->pitch [y]
@@ -1373,7 +1365,7 @@
   (if-let [block (.getClickedBlock evt)]
     (cond
       (and (= m/stone-button (.getType block))
-           (blazon? m/emerald-block (.getBlock (.add (.getLocation player) 0 -1 0))))
+           (block/blazon? m/emerald-block (.getBlock (.add (.getLocation player) 0 -1 0))))
       (lift-down (.getLocation player))
 
       (and (= m/shears (.getType (.getItemInHand player)))
@@ -1385,7 +1377,7 @@
           (loc/drop-item (.getLocation block) (ItemStack. m/string 1))))
 
       (= m/blaze-rod (.. player (getItemInHand) (getType)))
-      (if (and (blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
+      (if (and (block/blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
                (#{m/chest m/ender-chest} (.getType block)))
         (let [probability (chest-popcorn-probability block player)]
           (.setCancelled evt true)
@@ -2304,7 +2296,7 @@ nil))))
                   :else nil)))
 
             #{m/chest m/ender-chest}
-            (when (blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
+            (when (block/blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
               #_(.setCancelled evt true)
               (dosync
                 (ref-set popcorning (chest-popcorn-probability block player))
@@ -2438,7 +2430,7 @@ nil))))
     "recovery spa"
     (let [loc (.add (.getLocation player) 0 1 0)]
       (when (= m/stationary-water (.getType (.getBlock loc)))
-        (when (blazon? m/stone (.getBlock loc))
+        (when ( block/blazon? m/stone (.getBlock loc))
           (when (= 0 (rand-int 10))
             (.setType (.getBlock loc) m/air))
           (loc/play-sound (.getLocation player) s/orb-pickup 0.8 1.5)

@@ -128,3 +128,11 @@
           (= m/fence (.getType
                               (.getBlock (.add (.getLocation (.getBlock evt)) 0 -1 0)))))
     (.setBuildable evt true)))
+
+(defn blazon? [block-type block-against]
+  (and (every? #(= % block-type)
+               (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                    [0 0 -1 1] [-1 1 0 0]))
+       (every? #(not= % block-type)
+               (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
+                    [-1 1 0 0] [-1 1 0 0]))))
