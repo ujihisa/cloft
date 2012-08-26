@@ -5,10 +5,10 @@
   (:require [cloft.block :as block])
   (:import [org.bukkit Effect]))
 
-(def user-skills (atom {}))
+(def player-skills (atom {}))
 
 (defn skill-of [player]
-  (get @user-skills (.getDisplayName player)))
+  (get @player-skills (.getDisplayName player)))
 
 (defn skill-teleport [entity]
   (let [location (.getLocation entity)
@@ -32,7 +32,7 @@
   (.remove entity))
 
 (defn set-skill [player skill]
-  (swap! user-skills assoc (.getDisplayName player) skill))
+  (swap! player-skills assoc (.getDisplayName player) skill))
 
 (defn change-skill [player block block-against]
   (when (block/blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
