@@ -1,5 +1,6 @@
 (ns cloft.core
   (:require [cloft.cloft :as c])
+  (:use [cloft.cloft :only [later init-plugin]])
   (:require [cloft.material :as m])
   (:require [cloft.sound :as s])
   (:require [cloft.scheduler :as cloft-scheduler])
@@ -47,14 +48,6 @@
         (c/consume-itemstack (.getInventory player) m/feather)
         (c/add-velocity player 0 x2 0)
         (loc/play-sound (.getLocation player) s/chicken-hurt 1.0 (+ 0.9 (rand)))))))
-
-(defonce plugin* nil)
-(defmacro later [& exps]
-  `(.scheduleSyncDelayedTask
-     (Bukkit/getScheduler)
-     cloft.core/plugin*
-     (fn [] ~@exps)
-     0))
 
 (defn kaiouken [player]
   (if (< 0 (.getFireTicks player))
@@ -2522,8 +2515,7 @@ nil))))
 (defn on-enable [plugin]
   (when-not swank*
     (def swank* (swank.swank/start-repl 4005)))
-  (when-not plugin*
-    (def plugin* plugin))
+  (c/init-plugin plugin)
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)

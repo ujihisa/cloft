@@ -29,6 +29,15 @@
   (:import [org.bukkit.potion PotionType])
   (:require clj-http.client))
 
+(defonce plugin* nil)
+(defmacro later [& exps]
+  `(.scheduleSyncDelayedTask
+     (Bukkit/getScheduler)
+     plugin*
+     (fn [] ~@exps)
+     0))
+(defn init-plugin [plugin] (when-not plugin* (def plugin* plugin)))
+
 (def BOT-VERIFIER
   (apply str (drop-last (try
                           (slurp "bot_verifier.txt")
