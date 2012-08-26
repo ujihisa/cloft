@@ -1,6 +1,7 @@
 (ns cloft.egg
   (:require [cloft.cloft :as c])
   (:require [cloft.material :as m])
+  (:require [cloft.sound :as s])
   (:require [cloft.loc :as loc])
   (:require [cloft.block :as block])
   (:import [org.bukkit Effect])
