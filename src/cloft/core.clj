@@ -1282,7 +1282,8 @@
         emerald-blocks (filter #(= m/emerald-block (.getType %)) contents)
         total-emerald-blocks (apply + (map #(.getAmount %) emerald-blocks))
         emerald-effect-num (- total-emeralds (* total-emerald-blocks 5))]
-    (min 90 (+ base (* emerald-effect-num 5)))))
+    (min (if (= m/chest (.getType block)) 90 95)
+         (+ base (* emerald-effect-num 5)))))
 
 (defn player-right-click-event [evt player]
   (defn else []
