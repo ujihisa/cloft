@@ -2217,7 +2217,8 @@ nil))))
             (.damage player (rand-int 5)))
 
           item/pickaxes
-          (condp get (.getType block)
+          (let [btype (.getType block)]
+            (condp get btype
             #{m/stone}
             (when (= 'pickaxe-skill-ore (pickaxe-skill-of player))
               (letfn [(f [blocktype]
@@ -2248,10 +2249,10 @@ nil))))
                 (ref-set popcorning nil))
               (let [msg (format "%s popcorned with %s!"
                                 (.getDisplayName player)
-                                (.getType block))]
+                                btype)]
                 (c/lingr-mcujm msg)
                 (c/broadcast msg)))
-            nil)
+            nil))
           nil)))))
 
 (defn block-grow-event [evt]
