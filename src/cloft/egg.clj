@@ -83,6 +83,7 @@
 
       'skill-capture
       (when (= 0 (rand-int 4))
+        (loc/play-sound (.getLocation target) s/level-up 0.8 1.5)
         (capture shooter target))
 
       (prn 'egg-damages-entity-event 'must-not-happen shooter (skill-of shooter)))))
