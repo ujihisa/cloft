@@ -1896,17 +1896,22 @@ nil))))
         (do
           (chain-entity target shooter)
           (c/consume-itemstack (.getInventory shooter) m/web))
+
         (= arrow-skill-explosion (arrow-skill-of shooter))
         (.damage target 10 shooter)
+
         (= arrow-skill-ice (arrow-skill-of shooter))
         (freeze-for-20-sec target)
+
         (= 'trap (arrow-skill-of shooter))
         ((rand-nth [chain-entity
                     (comp freeze-for-20-sec first list)
                     digg-entity])
            target shooter)
+
         (= 'digg (arrow-skill-of shooter))
         (digg-entity target shooter)
+
         (= arrow-skill-pumpkin (arrow-skill-of shooter))
         (condp instance? target
           Player
@@ -1914,6 +1919,7 @@ nil))))
             (.setHelmet (.getInventory target) (ItemStack. m/pumpkin))
             (when helmet
               (.dropItemNaturally (.getWorld target) (.getLocation target) helmet)))
+
           LivingEntity
           (let [klass (.getEntityClass (.getType target))
                 health (.getHealth target)
@@ -1934,13 +1940,16 @@ nil))))
                                                  (.getNearbyEntities newmob 3 3 3)))]
                     (.damage newmob (.getMaxHealth newmob) player)
                     (.damage newmob (.getMaxHealth newmob)))))))
+
           nil)
+
         (= arrow-skill-diamond (arrow-skill-of shooter))
         (cond
           (some #(instance? % target) [Zombie Skeleton])
           (do
             (loc/spawn (.getLocation target) Villager)
             (.remove target))
+
           :else
           (do
             (.setHealth target (.getMaxHealth target))
@@ -1954,10 +1963,13 @@ nil))))
                (if (instance? Player target)
                  (.getDisplayName target)
                  (c/entity2name target)))))
+
         (= 'arrow-skill-poison (arrow-skill-of shooter))
         (reaction-skill-poison nil target)
+
         (= 'exp (arrow-skill-of shooter))
         (.damage shooter 2)
+
         (= 'super-knockback (arrow-skill-of shooter))
         (let [direction (.subtract (.getLocation shooter)
                                    (.getLocation target))
@@ -1967,6 +1979,7 @@ nil))))
             (let [vector (.multiply vector -1)]
               (Thread/sleep 1)
               (c/add-velocity target (.getX vector) (+ (.getY vector) 1.0) (.getY vector)))))
+
         (= 'mobchange (arrow-skill-of shooter))
         (do
           (let [change-to (rand-nth [Blaze Boat CaveSpider Chicken Chicken
@@ -1979,12 +1992,16 @@ nil))))
                                      TNTPrimed Villager Wolf Ocelot Zombie])]
             (loc/spawn (.getLocation target) change-to))
           (.remove target))
+
         (= arrow-skill-pull (arrow-skill-of shooter))
         (.teleport target shooter)
+
         (= arrow-skill-fire (arrow-skill-of shooter))
         (.setFireTicks target 400)
+
         (= arrow-skill-teleport (arrow-skill-of shooter))
         (.setCancelled evt true)
+
         (= 'cart (arrow-skill-of shooter))
         (let [cart (loc/spawn (.getLocation target) Minecart)]
           (.setPassenger cart target)))
