@@ -765,14 +765,6 @@
       (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
       (.sendMessage player "ざわ・・・"))))
 
-(defn egg-skillchange [player block block-against]
-  (when (block/blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (let [table {m/yellow-flower [egg/skill-teleport "TELEPORT"]}]
-      (when-let [[skill skill-name] (table (.getType block))]
-        (egg/set-skill player skill)
-        (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
-        (c/broadcast (.getDisplayName player) " changed egg-skill to " skill-name)))))
-
 (defn summon-x
   ([pos world creature] (summon-x pos world creature 1))
   ([pos world creature after]
@@ -1031,7 +1023,7 @@
     (arrow-skillchange player block block-against)
     (pickaxe-skillchange player block block-against)
     (reaction-skillchange player block block-against)
-    (egg-skillchange player block block-against)
+    (egg/change-skill player block block-against)
     (invoke-alchemy player block block-against)
     #_(transport/teleport-machine player block block-against)))
 
