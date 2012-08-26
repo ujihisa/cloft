@@ -36,7 +36,10 @@
      plugin*
      (fn [] ~@exps)
      0))
-(defn init-plugin [plugin] (when-not plugin* (def plugin* plugin)))
+
+(defn init-plugin [plugin]
+  (when-not plugin*
+    (def plugin* plugin)))
 
 (def BOT-VERIFIER
   (apply str (drop-last (try
