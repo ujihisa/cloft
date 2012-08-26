@@ -28,7 +28,7 @@
             PlayerDeathEvent PotionSplashEvent ProjectileHitEvent
             SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
   (:import [org.bukkit.potion PotionType])
-  (:require clj-http.client))
+  (:require [cloft.lingr]))
 
 (defonce plugin* nil)
 (defmacro later [& exps]
@@ -46,16 +46,6 @@
   (apply str (drop-last (try
                           (slurp "bot_verifier.txt")
                           (catch java.io.FileNotFoundException e "")))))
-
-(defn lingr [room msg]
-  (future
-    (clj-http.client/post
-      "http://lingr.com/api/room/say"
-      {:form-params
-       {:room room
-        :bot 'cloft
-        :text (str msg)
-        :bot_verifier BOT-VERIFIER}})))
 
 (def world (Bukkit/getWorld "world"))
 
