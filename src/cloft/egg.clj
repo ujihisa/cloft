@@ -31,13 +31,28 @@
         (.setType (.getBlock loc-above) m/snow))))
   (.remove entity))
 
+(defn skill-plant [entity]
+  (let [inventory (.getInventory (.getShooter entity))]
+    (.remove entity)
+    (doseq [x (range -3 4) z (range -3 4)
+            :let [loc (.add (.getLocation entity) x 0 z)]
+            :when (and (.contains inventory m/seeds)
+                       (= m/air (.getType (.getBlock loc)))
+                       (= m/soil (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))]
+      (try
+        (c/consume-itemstack inventory m/seeds)
+        (c/consume-itemstack inventory m/seeds)
+        (.setType (.getBlock loc) m/crops)
+        (catch org.bukkit.event.EventException e nil)))))
+
 (defn set-skill [player skill]
   (swap! player-skills assoc (.getDisplayName player) skill))
 
 (defn change-skill [player block block-against]
   (when (block/blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
     (let [table {m/yellow-flower [skill-teleport "TELEPORT"]
-                 m/snow-block [skill-ice "ICE"]}]
+                 m/snow-block [skill-ice "ICE"]
+                 m/crops [skill-plant "PLANT"]}]
       (when-let [[skill skill-name] (table (.getType block))]
         (set-skill player skill)
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
