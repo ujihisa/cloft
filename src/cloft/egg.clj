@@ -56,8 +56,7 @@
         (catch org.bukkit.event.EventException e nil)))))
 
 (defn capture [captor target]
-  (when
-    (spawnable-by-egg? target)
+  (when (spawnable-by-egg? target)
     (let [spawn-egg (.toItemStack (SpawnEgg. (.getType target)))]
       (.setAmount spawn-egg 1)
       (.dropItemNaturally c/world (.getLocation target) spawn-egg)
