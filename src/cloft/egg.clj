@@ -37,16 +37,14 @@
 (defn change-skill [player block block-against]
   (when (block/blazon? m/cobblestone (.getBlock (.add (.getLocation block) 0 -1 0)))
     (let [table {m/yellow-flower [skill-teleport "TELEPORT"]
-                 m/snow-block [skill-ice "ICE"]
-                 }]
+                 m/snow-block [skill-ice "ICE"]}]
       (when-let [[skill skill-name] (table (.getType block))]
         (set-skill player skill)
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (.getDisplayName player) " changed egg-skill to " skill-name)))))
 
 (defn damages-entity-event [evt egg target]
-  (when-let
-    [shooter (.getShooter egg)]
+  (when-let [shooter (.getShooter egg)]
     (condp = (skill-of shooter)
       skill-ice
       (c/freeze-for-20-sec target))))
