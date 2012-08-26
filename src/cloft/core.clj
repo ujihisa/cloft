@@ -2050,7 +2050,8 @@ nil))))
 (defn player-attacks-pig-event [evt player pig]
   (when (and (= 0 (rand-int 2))
              (not (.isDead pig)))
-    (let [another-pig (loc/spawn (.getLocation pig) Pig)]
+    (let [another-pig (loc/spawn (.getLocation pig) PigZombie)]
+      (.setTarget another-pig player)
       (future
         (Thread/sleep 3000)
         (when-not (.isDead another-pig)
