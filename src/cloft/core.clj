@@ -36,7 +36,7 @@
   (:import [org.bukkit Location Effect])
   (:import [org.bukkit.block Biome])
   (:import [org.bukkit.event.block Action])
-  (:require [cloft.lingr :as l])
+  (:require [cloft.lingr :as lingr])
   (:require [cloft.zhelpers :as mq]))
 
 (defn player-super-jump [evt player]
@@ -70,7 +70,7 @@
       (let [msg (format "%s got O157! Don't eat a yukhoe or a raw liver!"
                         (.getDisplayName player))]
         (c/broadcast msg)
-        (l/lingr-mcujm msg)
+        (lingr/say-in-mcujm msg)
         (.addPotionEffect player (PotionEffect. PotionEffectType/POISON 100 1))
         (.addPotionEffect player (PotionEffect. PotionEffectType/BLINDNESS 500 1))
         (.addPotionEffect player (PotionEffect. PotionEffectType/CONFUSION 500 1)))))
@@ -378,13 +378,13 @@
     (.setType (.getBlock loc) new-block-type))
   (.setDroppedExp evt 80)
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
-  (l/lingr-mcujm (format "%s beated a blaze2!" (.getDisplayName player))))
+  (lingr/say-in-mcujm (format "%s beated a blaze2!" (.getDisplayName player))))
 
 (defn ghast2-murder-event [evt ghast2 player]
   (assert (= "world" (.getName (.getWorld ghast2))) ghast2)
   (.setDroppedExp evt 80)
   (let [msg (format "%s beated a ghast2!" (.getDisplayName player))]
-    (l/lingr-mcujm msg)))
+    (lingr/say-in-mcujm msg)))
 
 (defn projectile-launch-event [evt]
   (let [projectile (.getEntity evt)
@@ -542,7 +542,7 @@
 
 (defn reaction-skill-ice [you by]
   (c/freeze-for-20-sec by)
-  (l/lingr-mcujm (str "counter attack with ice by " (.getDisplayName you) " to " (c/entity2name by))))
+  (lingr/say-in-mcujm (str "counter attack with ice by " (.getDisplayName you) " to " (c/entity2name by))))
 
 (defn reaction-skill-knockback [you by]
   (let [direction (.multiply (.normalize (.toVector (.subtract (.getLocation by) (.getLocation you)))) 2)]
@@ -959,7 +959,7 @@
       #_(.sendMessage player "[NEWS] ")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
-    (l/lingr-mcujm (format "%s logged in" (.getDisplayName player)))))
+    (lingr/say-in-mcujm (format "%s logged in" (.getDisplayName player)))))
 
 (defn paperlot [player]
   (letfn [(unlucky [player]
@@ -1015,10 +1015,10 @@
                         (int (.getY loc))
                         (int (.getZ loc)))]
         (.setCancelled evt true)
-        (l/lingr "computer_science" msg)
+        (lingr/say "computer_science" msg)
         (c/broadcast msg))
 
-      :else (l/lingr "computer_science" (str (player/name2icon name) msg)))))
+      :else (lingr/say "computer_science" (str (player/name2icon name) msg)))))
 
 (defn touch-player [player target]
   (if (and (.getItemInHand player)
@@ -1138,7 +1138,7 @@
                                              (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))
               #_(when (= 0 (rand-int 1000))
                 (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
-                  (l/lingr-mcujm msg)
+                  (lingr/say-in-mcujm msg)
                   (c/broadcast msg))
                 (doseq [[enchant level] (.getEnchantments item)]
                   (.removeEnchantment item enchant)))))))
@@ -1383,7 +1383,7 @@
     Pig (.setAllowFlight player true)
     Chicken (.setAllowFlight player true)
     Squid (do
-            (l/lingr-mcujm (str (.getDisplayName player) " is flying with squid!"))
+            (lingr/say-in-mcujm (str (.getDisplayName player) " is flying with squid!"))
             (.setAllowFlight player true)
             (.setFlySpeed player 0.30))
     Player
@@ -1489,7 +1489,7 @@
         (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
                                                      65394 65394 65411 65438
                                                      65405]))]
-          (l/lingr-mcujm msg)
+          (lingr/say-in-mcujm msg)
           (c/broadcast (.getDisplayName player) ": " msg)
           (.setFoodLevel player 0))
 
@@ -1553,7 +1553,7 @@ nil))))
     (when-not (.isLiquid block)
       (let [msg (str (.getDisplayName shooter) " chained " (c/entity2name entity))]
         (.sendMessage shooter msg)
-        (l/lingr-mcujm msg))
+        (lingr/say-in-mcujm msg))
       (.setType block m/web)
       (future
         (Thread/sleep 10000)
@@ -1732,7 +1732,7 @@ nil))))
                   ename
                   (not-empty players-nearby)
                   (not (instance? EnderDragon entity)))
-            (l/lingr-mcujm
+            (lingr/say-in-mcujm
                (format
                  "%s is exploding near %s"
                  ename
@@ -1984,7 +1984,7 @@ nil))))
               (.damage target 1)
               (.setItemInHand target (ItemStack. m/air))
               (.setItemInHand shooter item)
-              (l/lingr-mcujm (format "%s fished %s"
+              (lingr/say-in-mcujm (format "%s fished %s"
                                      (.getDisplayName shooter)
                                      (.getDisplayName target)))))
 
@@ -2146,7 +2146,7 @@ nil))))
                                  [[-1 0] [1 0] [0 -1] [0 1]]))
                 (when (instance? Player target)
                   (let [msg (str "Oh trap! " (.getDisplayName target) " was on a needle.")]
-                    (l/lingr-mcujm msg)
+                    (lingr/say-in-mcujm msg)
                     (.sendMessage target msg)))
                 (.damage target 100))))))
       :else
@@ -2196,7 +2196,7 @@ nil))))
                 (let [msg (format "%s popcorned with %s!"
                                   (.getDisplayName player)
                                   btype)]
-                  (l/lingr-mcujm msg)
+                  (lingr/say-in-mcujm msg)
                   (c/broadcast msg)))
               nil))
           nil)))))
@@ -2465,7 +2465,7 @@ nil))))
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
-  (l/lingr-mcujm "cloft plugin running...")
+  (lingr/say-in-mcujm "cloft plugin running...")
   (future
     (let [ctx (mq/context 1)
           subscriber (mq/socket ctx mq/sub)]
@@ -2480,7 +2480,7 @@ nil))))
             (let [msg (if (empty? players)
                         "(no players)"
                         (clojure.string/join "\n" (map #(player/player-inspect % (= (:body contents) "/list -l")) players)))]
-              (l/lingr "computer_science" msg)
+              (lingr/say "computer_science" msg)
               (c/broadcast msg))
             "/chicken"
             (future

@@ -6,7 +6,7 @@
                           (slurp "bot_verifier.txt")
                           (catch java.io.FileNotFoundException e "")))))
 
-(defn lingr [room msg]
+(defn say [room msg]
   (future
     (clj-http.client/post
       "http://lingr.com/api/room/say"
@@ -16,5 +16,5 @@
         :text (str msg)
         :bot_verifier BOT-VERIFIER}})))
 
-(defn lingr-mcujm [msg]
-  (lingr "mcujm" msg))
+(defn say-in-mcujm [msg]
+  (say "mcujm" msg))
