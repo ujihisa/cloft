@@ -328,10 +328,6 @@
 (defn reaction-skill-of-without-consume [player]
   (first (get @reaction-skill (.getDisplayName player))))
 
-(def bowgun-players (atom #{"ujm"}))
-(defn add-bowgun-player [name]
-  (swap! bowgun-players conj name))
-
 (defn arrow-velocity-vertical? [arrow]
   (let [v (.getVelocity arrow)]
     (and (> 0.1 (Math/abs (.getX v)))
@@ -368,12 +364,6 @@
     ; B.
     ; p1, p2, p3, p1, p2, p3,
     ;         t1, t2, t3, t4
-
-(defn fly-with-check [projectile fn]
-  (cloft-scheduler/settimer
-    1
-    #(when (fn projectile)
-       (fly-with-check projectile fn))))
 
 (defn blaze2-launch-fireball [blaze2 projectile]
   (assert (= "world" (.getName (.getWorld blaze2))) blaze2)
@@ -522,24 +512,6 @@
         (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 2)))
       (when (= 'strong (arrow-skill-of shooter))
         (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 2)))
-      (comment (.setCancelled evt true))
-      (comment (.setVelocity shooter (.multiply (.getVelocity (.getProjectile evt)) 2)))
-      (comment (when (and
-              (get @bowgun-players (.getDisplayName shooter))
-              (not= arrow-skill-teleport (arrow-skill-of shooter)))
-        (future-call #(do
-                        (Thread/sleep 100) (.shootArrow (.getEntity evt))
-                        (Thread/sleep 300) (.shootArrow (.getEntity evt))
-                        (Thread/sleep 500) (.shootArrow (.getEntity evt))))))
-      (when (= 'sniping (arrow-skill-of shooter))
-        (let [arrow (.getProjectile evt)
-              direction (.getDirection (.getLocation shooter))]
-         (prn
-          "shooter location " (.getLocation shooter)
-          "shooter direction " direction
-          "arrow loc: "(.getLocation arrow)
-          "arrow v: "(.getVelocity arrow)
-          "arrow v/|v|: " (.multiply (.getVelocity arrow) (/ 1 (.length (.getVelocity arrow)))))))
       (when (arrow-velocity-vertical? (.getProjectile evt))
         (prn last-vertical-shots)
         (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter))
@@ -549,6 +521,12 @@
                         (Thread/sleep 1000)
                         (swap! last-vertical-shots dissoc shooter-name))))
       #_(when (= 'arrow-skill-tntmissile (arrow-skill-of shooter))
+        (defn fly-with-check [projectile fn]
+          (cloft-scheduler/settimer
+            1
+            #(when (fn projectile)
+               (fly-with-check projectile fn))))
+
         (let [inventory (.getInventory shooter)
               arrow (.getProjectile evt)]
           (if (.contains inventory m/tnt)
@@ -707,7 +685,6 @@
                  m/rails ['cart "CART"]
                  m/bookshelf ['mobchange "MOBCHANGE"]
                  #_(m/sandstone ['arrow-skill-tntmissile "TNTMissle"])
-                 #_( m/stone ['sniping "SNIPING"])
                  m/snow-block [arrow-skill-ice "ICE"]
                  m/powered-rail ['exp "EXP"]
                  m/piston-base ['super-knockback "SUPER-KNOCKBACK"]
