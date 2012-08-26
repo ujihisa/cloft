@@ -65,3 +65,8 @@
       (c/freeze-for-20-sec target)
 
       (prn 'egg-damages-entity-event 'must-not-happen shooter (skill-of shooter)))))
+
+(defn hit-event [evt egg]
+  (let [skill (skill-of (.getShooter egg))]
+    (cond
+      (fn? skill) (skill egg))))

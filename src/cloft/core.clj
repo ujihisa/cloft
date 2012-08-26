@@ -2264,18 +2264,13 @@ nil))))
       (loc/explode (.getLocation snowball) 0 false)
       (.remove snowball))))
 
-(defn egg-hit-event [evt egg]
-  (let [skill (egg/skill-of (.getShooter egg))]
-    (cond
-      (fn? skill) (skill egg))))
-
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
         (condp instance? entity
           #_(Fish (fish-hit-event evt entity))
           Arrow (arrow-hit-event evt entity)
           Snowball (snowball-hit-event evt entity)
-          Egg (egg-hit-event evt entity)
+          Egg (egg/hit-event evt entity)
           #_(instance? Snowball entity) #_(.strikeLightning (.getWorld entity) (.getLocation entity))
           nil)))
 
