@@ -8,7 +8,7 @@
   (:require [cloft.recipe])
   (:require [cloft.player :as player])
   (:require [cloft.loc :as loc])
-  (:require [cloft.block])
+  (:require [cloft.block :as block])
   (:require [cloft.item :as item])
   (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
@@ -814,7 +814,7 @@
               (cloft-scheduler/settimer
                 1
                 #(do
-                   (cloft.block/place-in-line-with-offset world (.clone loc) (.clone pos) place-fire 2)
+                   (block/place-in-line-with-offset world (.clone loc) (.clone pos) place-fire 2)
                    (explode-at (.clone pos) world 60)
                    (summon-x pos world Blaze 65)
                    (summon-x loc world PigZombie 65)
@@ -841,11 +841,11 @@
                                        #(when (= m/air (.getType v))
                                           (.setType v m/cobblestone))))]
       (.strikeLightningEffect world (.toLocation bottom world))
-      (cloft.block/place-in-line world bottom top place-cobblestones)
+      (block/place-in-line world bottom top place-cobblestones)
       (if-let [prev (active-fusion-wall-of player)]
         (let [[eb et] prev]
-          (cloft.block/place-in-line world eb bottom place-cobblestones)
-          (cloft.block/place-in-line world et top place-cobblestones))
+          (block/place-in-line world eb bottom place-cobblestones)
+          (block/place-in-line world et top place-cobblestones))
         (prn "nothing to connect."))
       (swap! active-fusion-wall assoc (.getDisplayName player) [bottom top]))))
 
@@ -861,13 +861,13 @@
         block-floor (fn [v i]
                       (cloft-scheduler/settimer
                         i
-                        #(when (boolean ((cloft.block/category :enterable) (.getType v)))
+                        #(when (boolean ((block/category :enterable) (.getType v)))
                            (when (= 0 (rand-int 6))
                              (.strikeLightningEffect world (.getLocation v)))
                            (.setType v m/cobblestone))))]
-    (cloft.block/place-in-line-with-offset world start-left end-left block-floor 2)
-    (cloft.block/place-in-line-with-offset world start-center end-center block-floor 2)
-    (cloft.block/place-in-line-with-offset world start-right end-right block-floor 2)))
+    (block/place-in-line-with-offset world start-left end-left block-floor 2)
+    (block/place-in-line-with-offset world start-center end-center block-floor 2)
+    (block/place-in-line-with-offset world start-right end-right block-floor 2)))
 
 (defn make-redstone-for-livings [player block]
   (let [world (.getWorld player)]
@@ -883,7 +883,7 @@
         crator-location (.toLocation crator-vector world)]
     (.strikeLightningEffect world crator-location)
     (.setType (.getBlockAt world crator-location) m/lava)
-    (cloft.block/place-in-circle
+    (block/place-in-circle
       world 10 14
       crator-location
       (fn [v i]
@@ -894,7 +894,7 @@
         xz (coor/local-to-world player block 0.0 0.0 0.0)
         center-vector (.setY (.clone xz) 255)
         center-location (.toLocation center-vector world)]
-    (doseq [v (cloft.block/blocks-in-radiaus-xz world center-location 20 70)]
+    (doseq [v (block/blocks-in-radiaus-xz world center-location 20 70)]
       (when (= 1 (rand-int 30))
         (cloft-scheduler/settimer
           (rand-int 300)
@@ -909,7 +909,7 @@
         center-location (.toLocation center-vector world)
         uy (Vector. 0 1 0)]
     (loop [h 0 inner 5.0 outer 7.0]
-      (cloft.block/place-in-circle
+      (block/place-in-circle
         world inner outer
         (.toLocation (.add (.clone center-vector) (.multiply (.clone uy) h)) world)
         (fn [v i]
@@ -1026,7 +1026,7 @@
                   :when (< diff 200)]
             (let [b (.getBlock (.add (.clone (.getLocation block1))
                                      (.multiply (.clone unit-vec) diff)))]
-              (when ((cloft.block/category :enterable) (.getType b))
+              (when ((block/category :enterable) (.getType b))
                 (.setType b (.getType another-block))
                 (.setData b (.getData another-block))))))
         (.sendMessage another-player "ok (second)")
@@ -2564,7 +2564,7 @@ nil))))
     (.showPlayer player (c/ujm))))
 
 (defn block-can-build-event [evt]
-  (cloft.block/can-build-event evt))
+  (block/can-build-event evt))
 
 (defn chunk-populate-event [evt]
   #_(let [chk (.getChunk evt)]
