@@ -1284,7 +1284,7 @@
     (cond
       (and
         (player/zombie? player)
-        (= (.. evt (getMaterial)) m/milk-bucket))
+        (= m/milk-bucket (.getMaterial evt)))
       (do
         (player/rebirth-from-zombie player)
         (when (= 0 (rand-int 3))
@@ -1292,7 +1292,7 @@
 
       (and
         (.getAllowFlight player)
-        (= (.. evt (getMaterial)) m/coal))
+        (= m/coal (.getMaterial evt)))
       (do
         (.setVelocity player (.multiply (.getDirection (.getLocation player)) 4))
         (c/consume-item player))
@@ -1302,7 +1302,7 @@
         ((conj item/swords m/bow) (.getType (.getItemInHand player))))
       (autofocus player)
 
-      (= m/feather (.. evt (getMaterial)))
+      (= m/feather (.getMaterial evt))
       (player-super-jump evt player)))
   (if-let [block (.getClickedBlock evt)]
     (cond
