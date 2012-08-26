@@ -2141,8 +2141,8 @@ nil))))
 
     :else
     (do
-      (.setFireTicks target 50)
-      (.damage target 2 shooter))))
+      (.setFireTicks target 200)
+      (.damage target 1 shooter))))
 
 (defn entity-damage-intent-event [evt target]
   (let [attacker (when (instance? EntityDamageByEntityEvent evt)
