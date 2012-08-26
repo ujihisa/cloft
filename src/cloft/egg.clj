@@ -82,7 +82,8 @@
       (c/freeze-for-20-sec target)
 
       'skill-capture
-      (capture shooter target)
+      (when (= 0 (rand-int 4))
+        (capture shooter target))
 
       (prn 'egg-damages-entity-event 'must-not-happen shooter (skill-of shooter)))))
 
