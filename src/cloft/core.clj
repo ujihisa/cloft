@@ -240,24 +240,17 @@
   (let [loc (.getLocation entity)]
     (.dropItem (.getWorld loc) loc (ItemStack. m/arrow))))
 
-(defn something-like-quake [entity klass f]
+(defn arrow-skill-quake [entity]
   (let [targets (.getNearbyEntities entity 5 3 5)]
     (future
       (doseq [_ [1 2 3]]
-        (doseq [target targets :when (instance? klass target)]
+        (doseq [target targets :when (instance? LivingEntity target)]
           (Thread/sleep (rand-int 300))
           (later
             (loc/play-effect (.getLocation target) Effect/ZOMBIE_CHEW_WOODEN_DOOR nil)
-            (c/add-velocity target (- (rand) 0.5) 0.9 (- (rand) 0.5))
-            (f target)))
+            (c/add-velocity target (- (rand) 0.5) 0.9 (- (rand) 0.5))))
         (Thread/sleep 1500))
       (later (.remove entity)))))
-
-(defn arrow-skill-quake [entity]
-  (something-like-quake
-    entity
-    LivingEntity
-    (fn [_] nil)))
 
 (defn arrow-skill-popcorn [entity]
   (something-like-quake
