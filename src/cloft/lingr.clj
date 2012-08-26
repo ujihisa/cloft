@@ -1,6 +1,11 @@
 (ns cloft.lingr
   (:require clj-http.client))
 
+(def BOT-VERIFIER
+  (apply str (drop-last (try
+                          (slurp "bot_verifier.txt")
+                          (catch java.io.FileNotFoundException e "")))))
+
 (defn lingr [room msg]
   (future
     (clj-http.client/post
@@ -11,4 +16,5 @@
         :text (str msg)
         :bot_verifier BOT-VERIFIER}})))
 
-
+(defn lingr-mcujm [msg]
+  (lingr "mcujm" msg))

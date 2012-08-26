@@ -2,6 +2,7 @@
   (:require [cloft.cloft :as c])
   (:require [cloft.material :as m])
   (:require [cloft.arrow :as arrow])
+  (:require [cloft.lingr :as l])
   (:import [org.bukkit.entity Cow Fireball Arrow Minecart Player])
   (:import [org.bukkit Material Location Effect])
   (:import [org.bukkit.inventory ItemStack])
@@ -32,7 +33,7 @@
                                                     (ItemStack. m/apple))))))
   (.setDroppedExp evt 200)
   (c/broadcast (format "%s beated a chimera cow!" (.getDisplayName player)))
-  (c/lingr-mcujm (format "%s beated a chimera cow!" (.getDisplayName player))))
+  (l/lingr-mcujm (format "%s beated a chimera cow!" (.getDisplayName player))))
 
 
 (defn fall-damage-event [evt cow]

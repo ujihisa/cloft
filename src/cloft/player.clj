@@ -1,5 +1,6 @@
 (ns cloft.player
   (:require [cloft.cloft :as c])
+  (:require [cloft.lingr :as l])
   (:import [org.bukkit.entity Player])
   (:import [org.bukkit Bukkit]))
 
@@ -20,7 +21,7 @@
   (.setMaximumAir entity 1)
   (.setRemainingAir entity 1)
   (.sendMessage entity "You turned into a zombie.")
-  (c/lingr-mcujm (str (name2icon (.getDisplayName entity)) "turned into a zombie.")))
+  (l/lingr-mcujm (str (name2icon (.getDisplayName entity)) "turned into a zombie.")))
 
 (defn rebirth-from-zombie [target]
   (.setMaximumAir target 300)
@@ -41,7 +42,7 @@
 
 (defn death-event [evt player]
   (swap! death-locations assoc (.getDisplayName player) (.getLocation player))
-  (c/lingr-mcujm (str (name2icon (.getDisplayName player)) (.getDeathMessage evt))))
+  (l/lingr-mcujm (str (name2icon (.getDisplayName player)) (.getDeathMessage evt))))
 
 (defn death-location-of [player]
   (get @death-locations (.getDisplayName player)))

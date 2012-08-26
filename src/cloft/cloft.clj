@@ -27,8 +27,7 @@
             FoodLevelChangeEvent ItemDespawnEvent ItemSpawnEvent PigZapEvent
             PlayerDeathEvent PotionSplashEvent ProjectileHitEvent
             SheepDyeWoolEvent SheepRegrowWoolEvent SlimeSplitEvent])
-  (:import [org.bukkit.potion PotionType])
-  (:require [cloft.lingr]))
+  (:import [org.bukkit.potion PotionType]))
 
 (defonce plugin* nil)
 (defmacro later [& exps]
@@ -42,15 +41,7 @@
   (when-not plugin*
     (def plugin* plugin)))
 
-(def BOT-VERIFIER
-  (apply str (drop-last (try
-                          (slurp "bot_verifier.txt")
-                          (catch java.io.FileNotFoundException e "")))))
-
 (def world (Bukkit/getWorld "world"))
-
-(defn lingr-mcujm [msg]
-  (lingr "mcujm" msg))
 
 (defn broadcast [& strs]
   (.broadcastMessage (Bukkit/getServer) (apply str strs)))
