@@ -566,36 +566,8 @@
 (defn entity-explosion-prime-event [evt]
   nil)
 
-(defn freeze-for-20-sec [target]
-  (when-not (.isDead target)
-    (let [loc (.getLocation (.getBlock (.getLocation target)))]
-      (doseq [y [0 1]
-              [x z] [[-1 0] [1 0] [0 -1] [0 1]]
-              :let [block (.getBlock (.add (.clone loc) x y z))]
-              :when (#{m/air m/snow} (.getType block))]
-        (.setType block m/glass))
-      (doseq [y [-1 2]
-              :let [block (.getBlock (.add (.clone loc) 0 y 0))]
-              :when (#{m/air m/snow} (.getType block))]
-        (.setType block m/glass))
-      (future
-        (Thread/sleep 1000)
-        (when-not (.isDead target)
-          (later (.teleport target (.add (.clone loc) 0.5 0.0 0.5)))))
-      (future
-        (Thread/sleep 20000)
-        (doseq [y [0 1]
-                [x z] [[-1 0] [1 0] [0 -1] [0 1]]
-                :let [block (.getBlock (.add (.clone loc) x y z))]
-                :when (= (.getType block) m/glass)]
-          (later (.setType block m/air)))
-        (doseq [y [-1 2]
-                :let [block (.getBlock (.add (.clone loc) 0 y 0))]
-                :when (= (.getType block) m/glass)]
-          (later (.setType block m/air)))))))
-
 (defn reaction-skill-ice [you by]
-  (freeze-for-20-sec by)
+  (c/freeze-for-20-sec by)
   (c/lingr-mcujm (str "counter attack with ice by " (.getDisplayName you) " to " (c/entity2name by))))
 
 (defn reaction-skill-knockback [you by]
@@ -1843,11 +1815,11 @@ nil))))
           (.damage target 10 shooter)
 
           (= arrow-skill-ice (arrow-skill-of shooter))
-          (freeze-for-20-sec target)
+          (c/freeze-for-20-sec target)
 
           (= 'trap (arrow-skill-of shooter))
           ((rand-nth [chain-entity
-                      (comp freeze-for-20-sec first list)
+                      (comp c/freeze-for-20-sec first list)
                       digg-entity])
              target shooter)
 

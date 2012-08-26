@@ -2,6 +2,7 @@
   (:require [swank.swank])
   (:require [clojure.string :as s])
   (:require [clojure.set])
+  (:require [cloft.material :as m])
   (:import [org.bukkit Bukkit Material])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
@@ -166,6 +167,34 @@
   (.setYaw location (.getYaw (.getLocation entity)))
   (.setPitch location (.getPitch (.getLocation entity)))
   (.teleport entity location))
+
+(defn freeze-for-20-sec [target]
+  (when-not (.isDead target)
+    (let [loc (.getLocation (.getBlock (.getLocation target)))]
+      (doseq [y [0 1]
+              [x z] [[-1 0] [1 0] [0 -1] [0 1]]
+              :let [block (.getBlock (.add (.clone loc) x y z))]
+              :when (#{m/air m/snow} (.getType block))]
+        (.setType block m/glass))
+      (doseq [y [-1 2]
+              :let [block (.getBlock (.add (.clone loc) 0 y 0))]
+              :when (#{m/air m/snow} (.getType block))]
+        (.setType block m/glass))
+      (future
+        (Thread/sleep 1000)
+        (when-not (.isDead target)
+          (later (.teleport target (.add (.clone loc) 0.5 0.0 0.5)))))
+      (future
+        (Thread/sleep 20000)
+        (doseq [y [0 1]
+                [x z] [[-1 0] [1 0] [0 -1] [0 1]]
+                :let [block (.getBlock (.add (.clone loc) x y z))]
+                :when (= (.getType block) m/glass)]
+          (later (.setType block m/air)))
+        (doseq [y [-1 2]
+                :let [block (.getBlock (.add (.clone loc) 0 y 0))]
+                :when (= (.getType block) m/glass)]
+          (later (.setType block m/air)))))))
 
 (def potion-types [PotionType/FIRE_RESISTANCE PotionType/INSTANT_DAMAGE
                    PotionType/INSTANT_HEAL PotionType/POISON PotionType/REGEN
