@@ -2219,40 +2219,40 @@ nil))))
           item/pickaxes
           (let [btype (.getType block)]
             (condp get btype
-            #{m/stone}
-            (when (= 'pickaxe-skill-ore (pickaxe-skill-of player))
-              (letfn [(f [blocktype]
-                        (.setType block blocktype)
-                        (.setCancelled evt true)
-                        (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil))]
-                (cond
-                  (= 0 (rand-int 10)) (f m/coal-ore)
-                  (= 0 (rand-int 20)) (f m/iron-ore)
-                  (= 0 (rand-int 30)) (f m/redstone-ore)
-                  (= 0 (rand-int 40)) (f m/lapis-ore)
-                  (= 0 (rand-int 50)) (f m/gold-ore)
-                  (= 0 (rand-int 100)) (f m/emerald-ore)
-                  (= 0 (rand-int 1000)) (f m/diamond-ore)
-                  (= 0 (rand-int 300)) (f m/glowstone)
-                  (= 0 (rand-int 1000)) (f m/lapis-block)
-                  (= 0 (rand-int 1500)) (f m/iron-block)
-                  (= 0 (rand-int 2000)) (f m/gold-block)
-                  (= 0 (rand-int 50000)) (f m/diamond-block)
-                  :else nil)))
+              #{m/stone}
+              (when (= 'pickaxe-skill-ore (pickaxe-skill-of player))
+                (letfn [(f [blocktype]
+                          (.setType block blocktype)
+                          (.setCancelled evt true)
+                          (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil))]
+                  (cond
+                    (= 0 (rand-int 10)) (f m/coal-ore)
+                    (= 0 (rand-int 20)) (f m/iron-ore)
+                    (= 0 (rand-int 30)) (f m/redstone-ore)
+                    (= 0 (rand-int 40)) (f m/lapis-ore)
+                    (= 0 (rand-int 50)) (f m/gold-ore)
+                    (= 0 (rand-int 100)) (f m/emerald-ore)
+                    (= 0 (rand-int 1000)) (f m/diamond-ore)
+                    (= 0 (rand-int 300)) (f m/glowstone)
+                    (= 0 (rand-int 1000)) (f m/lapis-block)
+                    (= 0 (rand-int 1500)) (f m/iron-block)
+                    (= 0 (rand-int 2000)) (f m/gold-block)
+                    (= 0 (rand-int 50000)) (f m/diamond-block)
+                    :else nil)))
 
-            #{m/chest m/ender-chest}
-            (when (block/blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
-              #_(.setCancelled evt true)
-              (dosync
-                (ref-set popcorning (chest-popcorn-probability block player))
-                (cloft.chest/break-and-scatter block player)
-                (ref-set popcorning nil))
-              (let [msg (format "%s popcorned with %s!"
-                                (.getDisplayName player)
-                                btype)]
-                (c/lingr-mcujm msg)
-                (c/broadcast msg)))
-            nil))
+              #{m/chest m/ender-chest}
+              (when (block/blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
+                #_(.setCancelled evt true)
+                (dosync
+                  (ref-set popcorning (chest-popcorn-probability block player))
+                  (cloft.chest/break-and-scatter block player)
+                  (ref-set popcorning nil))
+                (let [msg (format "%s popcorned with %s!"
+                                  (.getDisplayName player)
+                                  btype)]
+                  (c/lingr-mcujm msg)
+                  (c/broadcast msg)))
+              nil))
           nil)))))
 
 (defn block-grow-event [evt]
