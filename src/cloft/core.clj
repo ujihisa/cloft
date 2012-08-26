@@ -2416,6 +2416,7 @@ nil))))
             (when (< (count all-players) (inc (* (count bed-players) 2)))
               (.setHealth player 20)
               (.setTime (.getWorld player) 0)
+              (loc/play-sound (.getLocation player) s/cat-hit 0.8 1.0)
               (c/broadcast "good morning everyone!"))))))))
 
 (defn player-bucket-empty-event [evt]
