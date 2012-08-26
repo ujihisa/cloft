@@ -6,6 +6,7 @@
   (:require [cloft.chimera-cow :as chimera-cow])
   (:require [cloft.arrow :as arrow])
   (:require [cloft.recipe])
+  (:require [cloft.chest])
   (:require [cloft.player :as player])
   (:require [cloft.loc :as loc])
   (:require [cloft.block :as block])
@@ -1010,13 +1011,14 @@
       #_(.sendMessage player "[TIPS] stone plateを持って他人を右クリックするとスカウター")
       #_(.sendMessage player "[TIPS] TNTの上に置かれたチェストを開くと、即座に...!")
       #_(.sendMessage player "[NEWS] Enderman右クリックでもアイテム。たまに怒られるよ")
-      (.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
+      #_(.sendMessage player "[NEWS] Zombie Jockeyや匠Jockeyが出没するように")
+      #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
       (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
       (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
       (.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
       (.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
       (.sendMessage player "[NEWS] なんかこの日曜か月曜にpvp大会するみたいですよ")
-      (.sendMessage player "[NEWS] Zombie Jockeyや匠Jockeyが出没するように")
+      (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
       #_(.sendMessage player "[NEWS] ")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
@@ -1266,7 +1268,7 @@
 (defn chest-popcorn-probability [block player]
   (assert (#{m/chest m/ender-chest} (.getType block)) block)
   (let [world (.getWorld block)
-        base (int (* 25
+        base (int (* (if (= m/chest (.getType block)) 25 50)
                      (if (night? world) 1.3 1)
                      (if (.hasStorm world) 1.3 1)
                      (if (.isThundering world) 1.3 1)
@@ -1595,7 +1597,7 @@
                                     m/ender-stone
                                     m/ender-stone
                                     m/ender-stone
-                                    m/eye-of-ender]))))
+                                    m/ender-pearl]))))
 nil))))
 
 (defn player-level-change-event [evt]
@@ -2246,7 +2248,7 @@ nil))))
               #_(.setCancelled evt true)
               (dosync
                 (ref-set popcorning (chest-popcorn-probability block player))
-                (.breakNaturally block (ItemStack. m/air))
+                (cloft.chest/break-and-scatter block player)
                 (ref-set popcorning nil))
               (let [msg (format "%s popcorned!" (.getDisplayName player))]
                 (c/lingr-mcujm msg)
