@@ -186,20 +186,6 @@
             (.remove entity))
           (.sendMessage (.getShooter entity) "PUMPKIN failed"))))))
 
-(defn arrow-skill-plant [entity]
-  (let [inventory (.getInventory (.getShooter entity))]
-    (.remove entity)
-    (doseq [x (range -3 4) z (range -3 4)
-            :let [loc (.add (.getLocation entity) x 0 z)]
-            :when (and (.contains inventory m/seeds)
-                       (= m/air (.getType (.getBlock loc)))
-                       (= m/soil (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))]
-      (try
-        (c/consume-itemstack inventory m/seeds)
-        (c/consume-itemstack inventory m/seeds)
-        (.setType (.getBlock loc) m/crops)
-        (catch org.bukkit.event.EventException e nil)))))
-
 (defn arrow-skill-diamond [entity]
   (let [block (.getBlock (.getLocation entity))]
     (condp = (.getType block)
@@ -642,7 +628,6 @@
                  m/piston-base ['super-knockback "SUPER-KNOCKBACK"]
                  m/jack-o-lantern [arrow-skill-pumpkin "PUMPKIN"]
                  m/pumpkin [arrow-skill-pumpkin "PUMPKIN"]
-                 m/crops [arrow-skill-plant "PLANT"]
                  m/diamond-block [arrow-skill-diamond "CRAZY DIAMOND"]
                  #_( m/fire [arrow-skill-flame "FLAME"])
                  m/brown-mushroom [arrow-skill-quake "QUAKE"]
