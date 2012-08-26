@@ -110,15 +110,9 @@
             (= 0 (rand-int 2)))
       (loc/play-effect (.add (.getLocation player) 0 -1 0) Effect/MOBSPAWNER_FLAMES nil))))
 
-(defn block-of-arrow [entity]
-  (let [location (.getLocation entity)
-        velocity (.getVelocity entity)
-        direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))]
-    (.getBlock (.add (.clone location) direction))))
-
 (defn arrow-skill-explosion [entity]
   (loc/explode (.getLocation entity) 0 false)
-  (let [block (block-of-arrow entity)]
+  (let [block (block/of-arrow entity)]
     (.breakNaturally block (ItemStack. m/diamond-pickaxe)))
   (.remove entity))
 
@@ -127,7 +121,7 @@
     (.setType (.getBlock location) m/torch)))
 
 (defn arrow-skill-pull [entity]
-  (let [block (block-of-arrow entity)]
+  (let [block (block/of-arrow entity)]
     (if (c/removable-block? block)
       (let [shooter-loc (.getLocation (.getShooter entity))]
         (.setType (.getBlock shooter-loc) (.getType block))
@@ -168,7 +162,7 @@
   (.remove entity))
 
 (defn arrow-skill-ore [entity]
-  (let [block (block-of-arrow entity)]
+  (let [block (block/of-arrow entity)]
     (when (= (.getType block) m/stone)
       (let [block-to-choices [m/coal-ore
                               m/coal-ore
@@ -187,7 +181,7 @@
 (defn arrow-skill-ice [entity]
   (if (.isLiquid (.getBlock (.getLocation entity)))
     (.setType (.getBlock (.getLocation entity)) m/ice)
-    (let [block (block-of-arrow entity)
+    (let [block (block/of-arrow entity)
           loc (.getLocation block)
           loc-above (.add (.clone loc) 0 1 0)]
       (when
@@ -231,7 +225,7 @@
       m/crops
       (.setData block 7)
       nil))
-  (let [block (block-of-arrow entity)]
+  (let [block (block/of-arrow entity)]
     (condp = (.getType block)
       m/cobblestone
       (.setType block m/stone)
@@ -296,7 +290,7 @@
   (arrow-skill-liquid m/lava 500 entity))
 
 (defn arrow-skill-woodbreak [entity]
-  (let [block (block-of-arrow entity)
+  (let [block (block/of-arrow entity)
         table {m/wooden-door (repeat 6 (ItemStack. m/wood))
                m/fence (repeat 6 (ItemStack. m/stick))
                m/wall-sign (cons (ItemStack. m/stick)

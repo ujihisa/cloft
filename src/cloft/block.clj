@@ -136,3 +136,9 @@
        (every? #(not= % block-type)
                (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
                     [-1 1 0 0] [-1 1 0 0]))))
+
+(defn of-arrow [entity]
+  (let [location (.getLocation entity)
+        velocity (.getVelocity entity)
+        direction (.multiply (.clone velocity) (double (/ 1 (.length velocity))))]
+    (.getBlock (.add (.clone location) direction))))
