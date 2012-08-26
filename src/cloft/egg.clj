@@ -59,7 +59,7 @@
   (when (spawnable-by-egg? target)
     (let [spawn-egg (.toItemStack (SpawnEgg. (.getType target)))]
       (.setAmount spawn-egg 1)
-      (.dropItemNaturally c/world (.getLocation target) spawn-egg)
+      (loc/drop-item (.getLocation target) spawn-egg)
       (.remove target))))
 
 (defn set-skill [player skill]
