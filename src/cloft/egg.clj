@@ -7,7 +7,7 @@
   (:import [org.bukkit Effect])
   (:import [org.bukkit.entity Creeper Skeleton Spider Zombie Slime Ghast
             PigZombie Enderman CaveSpider Silverfish Blaze MagmaCube Pig
-            Sheep Cow Chicken Squid Wolf MushroomCow Villager Ocelot])
+            Sheep Cow Chicken Squid Wolf MushroomCow Villager Ocelot Player])
   (:import [org.bukkit.material SpawnEgg]))
 
 (def player-skills (atom {}))
@@ -78,6 +78,7 @@
 
 (defn damages-entity-event [evt egg target]
   (when-let [shooter (.getShooter egg)]
+    (assert (instance? Player shooter) shooter)
     (condp = (skill-of shooter)
       skill-ice
       (c/freeze-for-20-sec target)
@@ -86,6 +87,9 @@
       (when (= 0 (rand-int 4))
         (loc/play-sound (.getLocation target) s/level-up 0.8 1.5)
         (capture shooter target))
+
+      nil
+      (.sendMessage shooter "You don't have an egg-skill yet.")
 
       (prn 'egg-damages-entity-event 'must-not-happen shooter (skill-of shooter)))))
 
