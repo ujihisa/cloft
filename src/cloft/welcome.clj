@@ -1,7 +1,6 @@
-(ns cloft.welcome
-  (:import org.bukkit Bukkit))
+(ns cloft.welcome)
 
-(defn message []
+(defn message [player]
   (.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
   #_(.sendMessage player "[TIPS] 3人が同時に真上に矢を撃つと敵がEmeraldに")
   #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")

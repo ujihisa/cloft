@@ -933,7 +933,7 @@
                          (= "127.0.0.1" ip)
                          #_(= "0:0:0:0:0:0:0:1" ip))))
       (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
-      (welcome.message)
+      (welcome/message player)
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (lingr/say-in-mcujm (format "%s logged in" (.getDisplayName player)))))
