@@ -569,24 +569,25 @@
                     (.remove wolf))))
   (.sendMessage you "a wolf helps you!"))
 
+(defn find-place [from range]
+  (let [candidates
+        (for [x range y range z range :when (> y 5)]
+          (.add (.clone from) x y z))
+        good-candidates
+        (filter
+          #(and
+             (not= m/air
+                   (.getType (.getBlock (.add (.clone %) 0 -1 0))))
+             (= m/air (.getType (.getBlock %)))
+             (= m/air
+                (.getType (.getBlock (.add (.clone %) 0 1 0)))))
+          candidates)]
+    (rand-nth good-candidates)))
+
 (defn reaction-skill-teleport [you by]
-  (letfn [(find-place [from range]
-            (let [candidates
-                  (for [x range y range z range :when (> y 5)]
-                    (.add (.clone (.getLocation from)) x y z))
-                  good-candidates
-                  (filter
-                    #(and
-                       (not= m/air
-                             (.getType (.getBlock (.add (.clone %) 0 -1 0))))
-                       (= m/air (.getType (.getBlock %)))
-                       (= m/air
-                          (.getType (.getBlock (.add (.clone %) 0 1 0)))))
-                    candidates)]
-              (rand-nth good-candidates)))]
-    (.sendMessage you
-      (str "You got damage by " (c/entity2name by) " and escaped."))
-    (.teleport you (find-place you (range -10 10)))))
+  (.sendMessage you
+                (str "You got damage by " (c/entity2name by) " and escaped."))
+  (.teleport you (find-place (.getLocation you) (range -10 10))))
 
 (defn reaction-skill-poison [you by]
   (.addPotionEffect by (PotionEffect. PotionEffectType/POISON 200 2)))
@@ -931,7 +932,7 @@
                          (= "127.0.0.1" ip)
                          #_(= "0:0:0:0:0:0:0:1" ip))))
       (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
-      (.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
+      #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
       #_(.sendMessage player "[TIPS] 3人が同時に真上に矢を撃つと敵がEmeraldに")
       #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
       #_(.sendMessage player "[TIPS] HP Maxのときに金の剣で攻撃するとビーム")
@@ -940,7 +941,7 @@
       #_(.sendMessage player "[TIPS] shiftでプレイヤからも降りれます")
       #_(.sendMessage player "[TIPS] exp5以上のなにか殺すとたまにEmeraldもらえます")
       #_(.sendMessage player "[TIPS] arrow-skill-treeで生える木の種類がランダムに")
-      #_(.sendMessage player "[TIPS] しゃがんだまま剣でガードすると近くの敵に自動照準")
+      (.sendMessage player "[TIPS] しゃがんだまま剣でガードすると近くの敵に自動照準")
       #_(.sendMessage player "[TIPS] しゃがんだまま弓を構えると近くの敵に自動照準")
       #_(.sendMessage player "[TIPS] arrow-skill-woodbreakがちょっと便利に")
       #_(.sendMessage player "[TIPS] ラピュタ近くの地上の村、実はその下に地下帝国が...")
@@ -950,13 +951,13 @@
       #_(.sendMessage player "[NEWS] Enderman右クリックでもアイテム。たまに怒られるよ")
       #_(.sendMessage player "[NEWS] Zombie Jockeyや匠Jockeyが出没するように")
       #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
-      (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
+      #_(.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
       (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
       (.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
       (.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
-      (.sendMessage player "[NEWS] なんかこの月曜にpvp大会するみたいですよ")
       (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
       (.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
+      (.sendMessage player "[NEWS] エンダーチェスト壊れるときたまにEnderman出るから注意")
       #_(.sendMessage player "[NEWS] ")
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
@@ -2157,6 +2158,15 @@ nil))))
   (let [block (.getBlock evt)]
     (when-let [player (.getPlayer evt)]
       (when-let [item (.getItemInHand player)]
+        (when (and
+                (= m/ender-chest (.getType item))
+                (= 0 (rand-int 5)))
+          (let [loc (.getLocation block)
+                enderman (loc/spawn loc Enderman)]
+            (.teleport enderman (find-place loc (range -30 30)))
+            (loc/play-sound loc s/enderman-teleport 1.0 1.0)
+            (.setTarget enderman player)
+            (.sendMessage player "Enderman spawned!")))
         (condp get (.getType item)
           #{m/air}
           (do
