@@ -73,6 +73,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onPlayerEggThrow(PlayerEggThrowEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "player-egg-throw-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "player-interact-entity-event");
         if (f.isBound()) f.invoke(event);
