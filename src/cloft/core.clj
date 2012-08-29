@@ -2408,8 +2408,17 @@ nil))))
           (let [block (.getBlock evt)]
             (.teleport vehicle (.add (.getLocation vehicle) 0 1 0))))))))
 
-#_(defn vehicle-damage-event [evt]
-  (prn 'vehicle-damage))
+(defn vehicle-damage-event [evt]
+  (defn near-fire? [loc]
+    (not-empty (filter
+                 #(= m/fire %)
+                 (for [x (range -1 2) z (range -1 2)]
+                   (.getType (.getBlock (.add (.clone loc) x 0 z)))))))
+  (let [vehicle (.getVehicle evt)]
+    (when (and (nil? (.getAttacker evt))
+               (near-fire? (.getLocation vehicle)))
+      (.setCancelled evt true)
+      (.setFireTicks vehicle 100))))
 
 (defn vehicle-destroy-event [evt]
   (let [vehicle (.getVehicle evt)]
