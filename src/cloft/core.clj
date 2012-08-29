@@ -2135,8 +2135,11 @@ nil))))
           (.setDamage evt 0)))
 
       (= EntityDamageEvent$DamageCause/FIRE_TICK (.getCause evt))
-      (when (instance? Creeper target)
-        (.setCancelled evt true))
+      (do
+        #_(when (@fire-damage-exempt target)
+          (.setCancelled evt true))
+        (when (instance? Creeper target)
+          (.setCancelled evt true)))
 
       (= EntityDamageEvent$DamageCause/FALL (.getCause evt))
       (cond
@@ -2408,6 +2411,8 @@ nil))))
           (let [block (.getBlock evt)]
             (.teleport vehicle (.add (.getLocation vehicle) 0 1 0))))))))
 
+#_(def fire-damage-exempt (atom {}))
+
 (defn vehicle-damage-event [evt]
   (defn near-fire? [loc]
     (not-empty (filter
@@ -2415,9 +2420,22 @@ nil))))
                  (for [x (range -1 2) z (range -1 2)]
                    (.getType (.getBlock (.add (.clone loc) x 0 z)))))))
   (let [vehicle (.getVehicle evt)]
-    (when (and (nil? (.getAttacker evt))
-               (near-fire? (.getLocation vehicle)))
-      (.setCancelled evt true))))
+    (when (and
+            (instance? Minecart vehicle)
+            (nil? (.getAttacker evt))
+            (near-fire? (.getLocation vehicle)))
+      (.setCancelled evt true)
+      #_(when-let [passenger (.getPassenger vehicle)]
+        (when-not (@fire-damage-exempt passenger)
+          (swap! fire-damage-exempt assoc passenger true)
+          (future
+            (loop []
+              (Thread/sleep 2000)
+              (prn 'tick passenger)
+              (if (.isInsideVehicle passenger)
+                (recur)
+                (swap! fire-damage-exempt assoc false)))))
+        (later (.setFireTicks passenger 2000))))))
 
 (defn vehicle-destroy-event [evt]
   (let [vehicle (.getVehicle evt)]
