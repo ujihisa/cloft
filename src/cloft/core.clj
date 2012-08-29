@@ -2417,8 +2417,7 @@ nil))))
   (let [vehicle (.getVehicle evt)]
     (when (and (nil? (.getAttacker evt))
                (near-fire? (.getLocation vehicle)))
-      (.setCancelled evt true)
-      (.setFireTicks vehicle 100))))
+      (.setCancelled evt true))))
 
 (defn vehicle-destroy-event [evt]
   (let [vehicle (.getVehicle evt)]
