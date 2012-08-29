@@ -948,6 +948,7 @@
   (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
   (.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
   (.sendMessage player "[NEWS] この鯖のRAMが8GBになり、またHDDが3TB増えました")
+  (.sendMessage player "[NEWS] 蜘蛛右クリックであなたもライダーに")
   #_(.sendMessage player "[NEWS] "))
 
 (defn player-login-event [evt]
@@ -1513,7 +1514,11 @@
         Skeleton (loc/drop-item (.getLocation target) (ItemStack. m/arrow))
 
         Spider
-        (loc/drop-item
+        (do
+          (when (= player (.getTarget target))
+            (.setTarget target nil))
+          (.setPassenger target player))
+        #_(loc/drop-item
           (.getLocation target)
           (ItemStack. (rand-nth [m/spider-eye m/dirt
                                  m/sand m/string])))
