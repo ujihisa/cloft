@@ -37,8 +37,7 @@
   (:import [org.bukkit.block Biome])
   (:import [org.bukkit.event.block Action])
   (:require [cloft.lingr :as lingr])
-  (:require [cloft.zhelpers :as mq])
-  (:require [cloft.welcome :as welcome]))
+  (:require [cloft.zhelpers :as mq]))
 
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
@@ -921,6 +920,36 @@
     (invoke-alchemy player block block-against)
     #_(transport/teleport-machine player block block-against)))
 
+(defn welcome-message [player]
+  (.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
+  #_(.sendMessage player "[TIPS] 3人が同時に真上に矢を撃つと敵がEmeraldに")
+  #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
+  #_(.sendMessage player "[TIPS] HP Maxのときに金の剣で攻撃するとビーム")
+  #_(.sendMessage player "[TIPS] 糸で何か乗せてるときは、糸なくても右クリックで降ろせます")
+  #_(.sendMessage player "[TIPS] 生牛肉は危険です")
+  #_(.sendMessage player "[TIPS] shiftでプレイヤからも降りれます")
+  #_(.sendMessage player "[TIPS] exp5以上のなにか殺すとたまにEmeraldもらえます")
+  #_(.sendMessage player "[TIPS] arrow-skill-treeで生える木の種類がランダムに")
+  #_(.sendMessage player "[TIPS] しゃがんだまま剣でガードすると近くの敵に自動照準")
+  #_(.sendMessage player "[TIPS] しゃがんだまま弓を構えると近くの敵に自動照準")
+  #_(.sendMessage player "[TIPS] arrow-skill-woodbreakがちょっと便利に")
+  #_(.sendMessage player "[TIPS] ラピュタ近くの地上の村、実はその下に地下帝国が...")
+  #_(.sendMessage player "[TIPS] 剣を焼くと分解できる。もしそれがenchantされてると...?")
+  #_(.sendMessage player "[TIPS] stone plateを持って他人を右クリックするとスカウター")
+  #_(.sendMessage player "[TIPS] TNTの上に置かれたチェストを開くと、即座に...!")
+  #_(.sendMessage player "[NEWS] Enderman右クリックでもアイテム。たまに怒られるよ")
+  #_(.sendMessage player "[NEWS] Zombie Jockeyや匠Jockeyが出没するように")
+  #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
+  (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
+  (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
+  (.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
+  (.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
+  (.sendMessage player "[NEWS] なんかこの月曜にpvp大会するみたいですよ")
+  (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
+  (.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
+  (.sendMessage player "[NEWS] この鯖のRAMが8GBになり、またHDDが3TB増えました")
+  #_(.sendMessage player "[NEWS] "))
+
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
     (comment (when (= (.getDisplayName player) "Player")
@@ -933,7 +962,7 @@
                          (= "127.0.0.1" ip)
                          #_(= "0:0:0:0:0:0:0:1" ip))))
       (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
-      (welcome/message player)
+      (welcome-message player)
       #_(when (= "mozukusoba" (.getDisplayName player))
         (.teleport player (.getLocation (c/ujm)))))
     (lingr/say-in-mcujm (format "%s logged in" (.getDisplayName player)))))
