@@ -983,7 +983,7 @@
 
 (defn async-player-chat-event [evt]
   (let [player (.getPlayer evt)
-        name (.getDisplayName player)
+        pname (.getDisplayName player)
         msg (.getMessage evt)]
     (cond
       (= 1 (count msg)) nil
@@ -1002,7 +1002,7 @@
       (do
         (.setCancelled evt true)
         (future
-          (c/broadcast name ": " 3 " " (.getType (.getItemInHand player)))
+          (c/broadcast pname ": " 3 " " (.getType (.getItemInHand player)))
           (dosync
             (ref-set countdowning? true))
           (Thread/sleep 1000)
@@ -1016,7 +1016,7 @@
       (= "where am I?" msg)
       (let [loc (.getLocation player)
             msg (format "%s (%d %d %d)"
-                        name
+                        pname
                         (int (.getX loc))
                         (int (.getY loc))
                         (int (.getZ loc)))]
@@ -1024,7 +1024,7 @@
         (lingr/say "computer_science" msg)
         (c/broadcast msg))
 
-      :else (lingr/say "computer_science" (str (player/name2icon name) msg)))))
+      :else (lingr/say "computer_science" (str (player/name2icon pname) msg)))))
 
 (defn touch-player [player target]
   (if (and (.getItemInHand player)
