@@ -2066,7 +2066,7 @@ nil))))
           (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
                 vector (.multiply (.normalize (.toVector direction)) 3)]
             (.setCancelled evt true)
-            (c/add-velocity target (.getX vector) (+ (.getY vector) 2.0) (.getZ vector))))))
+            (later (c/add-velocity target (.getX vector) (+ (.getY vector) 2.0) (.getZ vector)))))))
     (when (instance? Enderman attacker)
       (when (instance? Player target)
         (if (= target (.getPassenger attacker))
