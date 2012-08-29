@@ -27,4 +27,5 @@
   (.sendMessage player "[NEWS] なんかこの月曜にpvp大会するみたいですよ")
   (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
   (.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
+  (.sendMessage player "[NEWS] この鯖のRAMが8GBになり、またHDDが3TB増えました")
   #_(.sendMessage player "[NEWS] "))
