@@ -2064,9 +2064,9 @@ nil))))
               (instance? Snowman shooter))
           (special-snowball-damage attacker target shooter)
           (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
-                vector (.multiply (.normalize (.toVector direction)) 3)]
+                vector (.normalize (.toVector direction))]
             (.setCancelled evt true)
-            (later (c/add-velocity target (.getX vector) (+ (.getY vector) 2.0) (.getZ vector)))))))
+            (later (c/add-velocity target (.getX vector) (+ (.getY vector) 1.0) (.getZ vector)))))))
     (when (instance? Enderman attacker)
       (when (instance? Player target)
         (if (= target (.getPassenger attacker))
