@@ -999,6 +999,11 @@
           (loc/play-sound (.getLocation player) (eval sound) 1.0 1.0)
           (c/broadcast (str sound))))
 
+      (= "benri" msg)
+      (do
+        (c/broadcast (format "%s: 便利" pname))
+        (.setCancelled evt true))
+
       (= "countdown" msg)
       (do
         (.setCancelled evt true)
