@@ -14,6 +14,7 @@
   (:require [cloft.item :as item])
   (:require [cloft.transport :as transport])
   (:require [cloft.egg :as egg])
+  (:require [cloft.skill :as skill])
   (:require [swank.swank])
   (:import [org.bukkit Bukkit TreeType DyeColor])
   (:import [org.bukkit.material Wool Dye])
@@ -137,14 +138,6 @@
         (.setType block m/air)
         (.teleport (.getShooter entity) (.add shooter-loc 0 1 0)))
       (.sendMessage (.getShooter entity) "PULL failed")))
-  (.remove entity))
-
-(defn arrow-skill-teleport [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)
-        shooter (.getShooter entity)]
-    (.setFallDistance shooter 0.0)
-    (c/teleport-without-angle shooter location))
   (.remove entity))
 
 (defn arrow-skill-fire [entity]
@@ -279,6 +272,9 @@
             (.dropItemNaturally (.getWorld block2) (.getLocation block2) item)))
         (.sendMessage (.getShooter entity) "Woodbreak failed."))))
   (.remove entity))
+
+(def arrow-skill-teleport
+  #(skill/arrow-hit skill/arrow-skill-teleport nil %))
 
 (def arrow-skill (atom {"ujm" arrow-skill-teleport}))
 (defn arrow-skill-of [player]
@@ -607,7 +603,7 @@
 (defn reaction-skillchange [player block block-against]
   (when (block/blazon? m/log block-against)
     (let [table {m/red-rose [reaction-skill-fire "FIRE"]
-                 m/yellow-flower [reaction-skill-teleport "TELEPORT"]
+                 (skill/block skill/arrow-skill-teleport) [reaction-skill-teleport (name skill/arrow-skill-teleport)]
                  m/cobblestone [reaction-skill-knockback "KNOCKBACK"]
                  m/dirt [reaction-skill-wolf "WOLF"]
                  m/iron-block [reaction-skill-golem "GOLEM"]
@@ -628,7 +624,7 @@
                  m/tnt [arrow-skill-explosion "EXPLOSION"]
                  m/torch [arrow-skill-torch "TORCH"]
                  m/piston-sticky-base [arrow-skill-pull "PULL"]
-                 m/yellow-flower [arrow-skill-teleport "TELEPORT"]
+                 m/yellow-flower [arrow-skill-teleport (name skill/arrow-skill-teleport)]
                  m/red-rose [arrow-skill-fire "FIRE"]
                  m/sapling [arrow-skill-tree "TREE"]
                  m/workbench [arrow-skill-ore "ORE"]
@@ -1915,7 +1911,7 @@ nil))))
           (.setFireTicks target 400)
 
           (= arrow-skill-teleport (arrow-skill-of shooter))
-          (.setCancelled evt true)
+          (skill/arrow-damage-entity skill/arrow-skill-teleport evt arrow target)
 
           (= 'cart (arrow-skill-of shooter))
           (let [cart (loc/spawn (.getLocation target) Minecart)]
