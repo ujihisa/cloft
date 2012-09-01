@@ -12,7 +12,6 @@
   (:require [cloft.loc :as loc])
   (:require [cloft.block :as block])
   (:require [cloft.item :as item])
-  (:require [cloft.coordinate :as coor])
   (:require [cloft.transport :as transport])
   (:require [cloft.egg :as egg])
   (:require [swank.swank])
@@ -38,6 +37,19 @@
   (:import [org.bukkit.event.block Action])
   (:require [cloft.lingr :as lingr])
   (:require [cloft.zhelpers :as mq]))
+
+(defn local-to-world [player origin-block dx hx rx]
+  """returns a bukkit Vector"""
+  (defn direction-of [loc]
+    (let [height (Vector. 0.0 1.0 0.0)
+          xz-normalized-vector #(.normalize (Vector. (.getX %) 0.0 (.getZ %)))
+          depth (xz-normalized-vector (.getDirection loc))
+          right-hand (.crossProduct (.clone depth) height)]
+     [depth height right-hand]))
+
+  (let [[d h r] (direction-of (.getLocation player))]
+    (.add (.toVector (.getLocation origin-block))
+          (.add (.add (.multiply d dx) (.multiply h hx)) (.multiply r rx)))))
 
 (defn player-super-jump [evt player]
   (let [name (.getDisplayName player)]
@@ -667,7 +679,7 @@
   (.damage player (/ (.getHealth player) 2))
   (.setFoodLevel player 0)
   (let [world (.getWorld player)
-        spawn-at  (coor/local-to-world player block 10.0 0.0 0.0)]
+        spawn-at  (coor-local-to-world player block 10.0 0.0 0.0)]
     (.strikeLightningEffect world (.toLocation spawn-at world))
     (summon-x spawn-at world Giant)
     (c/broadcast (.getDisplayName player) " has summoned a Giant!")))
@@ -675,9 +687,9 @@
 (defn summon-residents-of-nether [player block]
   (let [world (.getWorld player)
         loc (.toVector (.getLocation player))
-        pos1 (coor/local-to-world player block 15.0 1.0 -5.0)
-        pos2 (coor/local-to-world player block 15.0 1.0 0.0)
-        pos3 (coor/local-to-world player block 15.0 1.0 5.0)
+        pos1 (coor-local-to-world player block 15.0 1.0 -5.0)
+        pos2 (coor-local-to-world player block 15.0 1.0 0.0)
+        pos3 (coor-local-to-world player block 15.0 1.0 5.0)
         place-fire (fn [v i]
                       (cloft-scheduler/settimer
                         i
@@ -701,7 +713,7 @@
             (summon-set-of-evils-at pos1 loc world)
             (summon-set-of-evils-at pos2 loc world)
             (summon-set-of-evils-at pos3 loc world)
-            (summon-x (coor/local-to-world player block -5.0 0.5 0.0) world Creeper 80)
+            (summon-x (coor-local-to-world player block -5.0 0.5 0.0) world Creeper 80)
             (c/broadcast (.getDisplayName player) " has summoned Blazes, PigZombies and Ghasts!"))))
 
 (def active-fusion-wall (atom {}))
@@ -711,8 +723,8 @@
 (defn alchemy-fusion-wall [player block]
   (let [world (.getWorld player)
         loc (.toVector (.getLocation player))
-        bottom (coor/local-to-world player block 15.0 0.0 0.0)
-        top (coor/local-to-world player block 15.0 6.0 0.0)]
+        bottom (coor-local-to-world player block 15.0 0.0 0.0)
+        top (coor-local-to-world player block 15.0 6.0 0.0)]
     (letfn [(place-cobblestones [v i]
               (cloft-scheduler/settimer i
                                        #(when (= m/air (.getType v))
@@ -728,13 +740,13 @@
 
 (defn fusion-floor [player block]
   (let [world (.getWorld player)
-        start-left (coor/local-to-world player block 0.0 0.0 -1.0)
+        start-left (coor-local-to-world player block 0.0 0.0 -1.0)
         start-center (.toVector (.getLocation player))
-        start-right (coor/local-to-world player block 0.0 0.0 1.0)
+        start-right (coor-local-to-world player block 0.0 0.0 1.0)
         distance (min (+ 10.0 (* 2 (.getLevel player))) 60.0)
-        end-left (coor/local-to-world player block distance 0.0 -1.0)
-        end-center (coor/local-to-world player block distance 0.0 0.0)
-        end-right (coor/local-to-world player block distance 0.0 1.0)
+        end-left (coor-local-to-world player block distance 0.0 -1.0)
+        end-center (coor-local-to-world player block distance 0.0 0.0)
+        end-right (coor-local-to-world player block distance 0.0 1.0)
         block-floor (fn [v i]
                       (cloft-scheduler/settimer
                         i
@@ -756,7 +768,7 @@
 
 (defn erupt-volcano [player block]
   (let [world (.getWorld player)
-        crator-vector (coor/local-to-world player block 40.0 20.0 0.0)
+        crator-vector (coor-local-to-world player block 40.0 20.0 0.0)
         crator-location (.toLocation crator-vector world)]
     (.strikeLightningEffect world crator-location)
     (.setType (.getBlockAt world crator-location) m/lava)
@@ -768,7 +780,7 @@
 
 (defn close-air-support [player block]
   (let [world (.getWorld player)
-        xz (coor/local-to-world player block 0.0 0.0 0.0)
+        xz (coor-local-to-world player block 0.0 0.0 0.0)
         center-vector (.setY (.clone xz) 255)
         center-location (.toLocation center-vector world)]
     (doseq [v (block/blocks-in-radiaus-xz world center-location 20 70)]
@@ -782,7 +794,7 @@
 
 (defn earthen-pipe [player block]
   (let [world (.getWorld player)
-        center-vector (coor/local-to-world player block 10.0 0.0 0.0)
+        center-vector (coor-local-to-world player block 10.0 0.0 0.0)
         center-location (.toLocation center-vector world)
         uy (Vector. 0 1 0)]
     (loop [h 0 inner 5.0 outer 7.0]
