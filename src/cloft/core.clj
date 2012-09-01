@@ -2206,7 +2206,9 @@ nil))))
       m/melon-block
       (when (= 0 (rand-int 2))
         (loc/spawn (.getLocation newstate) Squid)
-        (.setCancelled evt true)))))
+        (.setCancelled evt true))
+
+      nil)))
 
 (defn arrow-hit-event [evt entity]
   (let [shooter (.getShooter entity)]
