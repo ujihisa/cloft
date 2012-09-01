@@ -1029,7 +1029,7 @@
 
       :else (lingr/say "computer_science" (str (player/name2icon pname) msg)))))
 
-(defn touch-player [player target]
+(defn player-rightclick-player [player target]
   (if (and (.getItemInHand player)
            (= m/stone-plate (.getType (.getItemInHand player))))
     (do
@@ -1503,7 +1503,7 @@
           (c/broadcast msg2)
           (.setFoodLevel player 0))
 
-        Player (touch-player player target)
+        Player (player-rightclick-player player target)
 
         Sheep
         (loc/drop-item (.getLocation target) (.toItemStack (Wool. (rand-nth (DyeColor/values))) 1))
