@@ -952,8 +952,6 @@
 
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
-    (comment (when (= (.getDisplayName player) "Player")
-      (.setDisplayName player "raa0121")))
     (future (Thread/sleep 1000)
       (let [ip (.. player getAddress getAddress getHostAddress)]
         (.setOp player (or
@@ -961,10 +959,8 @@
                          (= "113.151.154.229" ip)
                          (= "127.0.0.1" ip)
                          #_(= "0:0:0:0:0:0:0:1" ip))))
-      (.playEffect (.getWorld player) (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
+      (loc/play-effect (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
       (welcome-message player)
-      #_(when (= "mozukusoba" (.getDisplayName player))
-        (.teleport player (.getLocation (c/ujm)))))
     (lingr/say-in-mcujm (format "%s logged in" (.getDisplayName player)))))
 
 (defn paperlot [player]
