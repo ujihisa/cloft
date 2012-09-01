@@ -18,7 +18,8 @@
 (defprotocol ArrowSkill
   (arrow-damage-entity [_ evt arrow target])
   (arrow-hit [_ evt arrow])
-  (arrow-shoot [_ evt shooter]))
+  (arrow-shoot [_ evt shooter])
+  (arrow-reflectable? [_]))
 
 (def arrow-skill-teleport
   (reify
@@ -38,7 +39,8 @@
         (c/teleport-without-angle shooter location))
       (.remove arrow))
     (arrow-shoot [_ evt shooter]
-      nil)))
+      nil)
+    (arrow-reflectable? [_] false)))
 
 (def arrow-skill-shotgun
   (reify
@@ -57,4 +59,5 @@
         (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
               arrow (.launchProjectile shooter Arrow)]
           (.setVelocity arrow (.getVelocity (.getProjectile evt)))
-          (c/add-velocity arrow (rand1) (rand1) (rand1)))))))
+          (c/add-velocity arrow (rand1) (rand1) (rand1)))))
+    (arrow-reflectable? [_] true)))

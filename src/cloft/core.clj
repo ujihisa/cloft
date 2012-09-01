@@ -1921,6 +1921,7 @@ nil))))
         (not= 0 (rand-int 10))
         (instance? Player target)
         (or (not (instance? Player (.getShooter arrow)))
+            #_(use skill/arrow-reflectable? instead)
             (not= arrow-skill-teleport
                   (arrow-skill-of (.getShooter arrow))))
         (when-let [chestplate (.getChestplate (.getInventory target))]
