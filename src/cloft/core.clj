@@ -927,8 +927,7 @@
         (.setOp player (or
                          (.startsWith ip "10.0")
                          (= "113.151.154.229" ip)
-                         (= "127.0.0.1" ip)
-                         #_(= "0:0:0:0:0:0:0:1" ip))))
+                         (= "127.0.0.1" ip))))
       (loc/play-effect (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
       (welcome-message player))
     (lingr/say-in-mcujm (format "%s logged in" (.getDisplayName player)))))
@@ -2207,9 +2206,7 @@ nil))))
       m/melon-block
       (when (= 0 (rand-int 2))
         (loc/spawn (.getLocation newstate) Squid)
-        (.setCancelled evt true))
-
-      (prn 'block-grow (.getType newstate)))))
+        (.setCancelled evt true)))))
 
 (defn arrow-hit-event [evt entity]
   (let [shooter (.getShooter entity)]
