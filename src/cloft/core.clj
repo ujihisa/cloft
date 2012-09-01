@@ -523,11 +523,7 @@
                    true)))
             (c/broadcast (.getDisplayName shooter) " has no TNT."))))
       (when (= arrow-skill-shotgun (arrow-skill-of shooter))
-        (dotimes [_ 80]
-          (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
-                arrow (.launchProjectile shooter Arrow)]
-            (.setVelocity arrow (.getVelocity (.getProjectile evt)))
-            (c/add-velocity arrow (rand1) (rand1) (rand1))))))))
+        (skill/arrow-shoot skill/arrow-skill-shotgun evt shooter)))))
 
 (def takumi-watched? (atom false))
 
