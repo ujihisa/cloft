@@ -38,7 +38,7 @@
   (:require [cloft.lingr :as lingr])
   (:require [cloft.zhelpers :as mq]))
 
-(defn local-to-world [player origin-block dx hx rx]
+(defn coor-local-to-world [player origin-block dx hx rx]
   """returns a bukkit Vector"""
   (defn direction-of [loc]
     (let [height (Vector. 0.0 1.0 0.0)
@@ -2526,7 +2526,7 @@ nil))))
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
-  (lingr/say-in-mcujm "cloft plugin running...")
+  #_(lingr/say-in-mcujm "cloft plugin running...")
   (future
     (let [ctx (mq/context 1)
           subscriber (mq/socket ctx mq/sub)]
