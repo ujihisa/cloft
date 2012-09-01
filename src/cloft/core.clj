@@ -175,9 +175,6 @@
                               m/redstone-ore]]
         (.setType block (rand-nth block-to-choices))))))
 
-(defn arrow-skill-shotgun [entity]
-  (.remove entity))
-
 (defn arrow-skill-pumpkin [entity]
   "This needs to be later to check if the arrow (entity) has hit an entity or
   not. If the arrow (entity) is dead, it has hit."
@@ -273,10 +270,7 @@
         (.sendMessage (.getShooter entity) "Woodbreak failed."))))
   (.remove entity))
 
-(def arrow-skill-teleport
-  #(skill/arrow-hit skill/arrow-skill-teleport nil %))
-
-(def arrow-skill (atom {"ujm" arrow-skill-teleport}))
+(def arrow-skill (atom {"ujm" skill/arrow-skill-teleport}))
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
 
@@ -522,8 +516,7 @@
                      false))
                    true)))
             (c/broadcast (.getDisplayName shooter) " has no TNT."))))
-      (when (= arrow-skill-shotgun (arrow-skill-of shooter))
-        (skill/arrow-shoot skill/arrow-skill-shotgun evt shooter)))))
+      (skill/arrow-shoot (arrow-skill-of shooter) evt shooter))))
 
 (def takumi-watched? (atom false))
 
@@ -599,7 +592,7 @@
 (defn reaction-skillchange [player block block-against]
   (when (block/blazon? m/log block-against)
     (let [table {m/red-rose [reaction-skill-fire "FIRE"]
-                 (skill/block skill/arrow-skill-teleport) [reaction-skill-teleport (name skill/arrow-skill-teleport)]
+                 m/yellow-flower [reaction-skill-teleport "TELEPORT"]
                  m/cobblestone [reaction-skill-knockback "KNOCKBACK"]
                  m/dirt [reaction-skill-wolf "WOLF"]
                  m/iron-block [reaction-skill-golem "GOLEM"]
@@ -616,17 +609,15 @@
 
 (defn arrow-skillchange [player block block-against]
   (when (block/blazon? m/stone (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (let [table {m/glowstone ['strong "STRONG"]
+    (let [table-legacy {m/glowstone ['strong "STRONG"]
                  m/tnt [arrow-skill-explosion "EXPLOSION"]
                  m/torch [arrow-skill-torch "TORCH"]
                  m/piston-sticky-base [arrow-skill-pull "PULL"]
-                 (skill/block skill/arrow-skill-teleport) [arrow-skill-teleport (name skill/arrow-skill-teleport)]
                  m/red-rose [arrow-skill-fire "FIRE"]
                  m/sapling [arrow-skill-tree "TREE"]
                  m/workbench [arrow-skill-ore "ORE"]
                  m/trap-door ['digg "DIGG"]
                  m/ladder ['trap "TRAP"]
-                 m/cactus [arrow-skill-shotgun "SHOTGUN"]
                  m/rails ['cart "CART"]
                  m/bookshelf ['mobchange "MOBCHANGE"]
                  #_(m/sandstone ['arrow-skill-tntmissile "TNTMissle"])
@@ -640,11 +631,16 @@
                  m/red-mushroom ['arrow-skill-poison "POISON"]
                  m/water [arrow-skill-water "WATER"]
                  m/lava [arrow-skill-lava "LAVA"]
-                 m/log [arrow-skill-woodbreak "WOODBREAK"]}]
-      (when-let [skill-name (table (.getType block))]
-        (.playEffect (.getWorld block) (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
-        (c/broadcast (.getDisplayName player) " changed arrow-skill to " (last skill-name))
-        (swap! arrow-skill assoc (.getDisplayName player) (first skill-name))))))
+                 m/log [arrow-skill-woodbreak "WOODBREAK"]}
+          table [skill/arrow-skill-teleport
+                 skill/arrow-skill-shotgun]]
+      (when-let [skill (first (filter #(= (.getType block) (skill/block %))
+                                      table))]
+        (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
+        (c/broadcast (format "%s changed arrow-skill to %s"
+                             (.getDisplayName player)
+                             (name skill)))
+        (swap! arrow-skill assoc (.getDisplayName player) skill)))))
 
 (defn pickaxe-skillchange [player block block-against]
   (when (block/blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
@@ -951,6 +947,7 @@
   (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
   (.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
   (.sendMessage player "[NEWS] 蜘蛛右クリックであなたもライダーに")
+  (.sendMessage player "[NOTE] スキルシステム大改造中。arrow-skillはいまは申し訳ないけれどteleportとshotgunしか使えません")
   #_(.sendMessage player "[NEWS] "))
 
 (defn player-login-event [evt]
@@ -1798,12 +1795,13 @@ nil))))
 
       Player
       (do
+        (skill/arrow-damage-entity (arrow-skill-of shooter) evt arrow target)
         (cond
           (.contains (.getInventory shooter) m/web)
           (do
             (chain-entity target shooter)
             (c/consume-itemstack (.getInventory shooter) m/web))
-
+          #_(
           (= arrow-skill-explosion (arrow-skill-of shooter))
           (.damage target 10 shooter)
 
@@ -1906,12 +1904,10 @@ nil))))
           (= arrow-skill-fire (arrow-skill-of shooter))
           (.setFireTicks target 400)
 
-          (= arrow-skill-teleport (arrow-skill-of shooter))
-          (skill/arrow-damage-entity skill/arrow-skill-teleport evt arrow target)
 
           (= 'cart (arrow-skill-of shooter))
           (let [cart (loc/spawn (.getLocation target) Minecart)]
-            (.setPassenger cart target)))
+            (.setPassenger cart target))))
       (scouter evt shooter target))
 
       nil)))
@@ -1922,8 +1918,7 @@ nil))))
         (instance? Player target)
         (or (not (instance? Player (.getShooter arrow)))
             #_(use skill/arrow-reflectable? instead)
-            (not= arrow-skill-teleport
-                  (arrow-skill-of (.getShooter arrow))))
+            (skill/arrow-reflectable? (arrow-skill-of (.getShooter arrow))))
         (when-let [chestplate (.getChestplate (.getInventory target))]
           (and
             (= m/leather-chestplate (.getType chestplate))
@@ -2258,11 +2253,9 @@ nil))))
         (when (when-let [inhand (.getItemInHand shooter)]
                 (= m/gold-sword (.getType inhand)))
           (.remove entity))
-        (let [skill (arrow-skill-of shooter)]
-          (cond
-            (fn? skill) (skill entity)
-            (symbol? skill) nil
-            :else (.sendMessage shooter "You don't have a skill yet."))))
+        (if-let [skill (arrow-skill-of shooter)]
+          (skill/arrow-hit skill evt entity)
+          (.sendMessage shooter "You don't have a skill yet.")))
 
       Skeleton
       (when (= 0 (rand-int 2))
