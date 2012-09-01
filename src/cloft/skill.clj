@@ -18,14 +18,13 @@
 (defprotocol ArrowSkill
   (arrow-damage-entity [_ evt arrow target])
   (arrow-hit [_ evt arrow])
-  (arrow-shoot [_ evt shooter])
+  (arrow-shoot [_ evt arrow shooter])
   (arrow-reflectable? [_]))
 
 (def arrow-skill-teleport
   (reify
     clojure.lang.Named
     (getName [_] "TELEPORT")
-
     Learn
     (block [_] m/yellow-flower)
     ArrowSkill
@@ -38,7 +37,7 @@
         (.setFallDistance shooter 0.0)
         (c/teleport-without-angle shooter location))
       (.remove arrow))
-    (arrow-shoot [_ evt shooter]
+    (arrow-shoot [_ evt arrow shooter]
       nil)
     (arrow-reflectable? [_] false)))
 
@@ -46,7 +45,6 @@
   (reify
     clojure.lang.Named
     (getName [_] "SHOTGUN")
-
     Learn
     (block [_] m/cactus)
     ArrowSkill
@@ -54,10 +52,28 @@
       nil)
     (arrow-hit [_ evt arrow]
       (.remove arrow))
-    (arrow-shoot [_ evt shooter]
+    (arrow-shoot [_ evt arrow shooter]
       (dotimes [_ 80]
         (let [rand1 (fn [] (* 0.8 (- (rand) 0.5)))
-              arrow (.launchProjectile shooter Arrow)]
-          (.setVelocity arrow (.getVelocity (.getProjectile evt)))
-          (c/add-velocity arrow (rand1) (rand1) (rand1)))))
+              new-arrow (.launchProjectile shooter Arrow)]
+          (.setVelocity new-arrow (.getVelocity arrow))
+          (c/add-velocity new-arrow (rand1) (rand1) (rand1)))))
     (arrow-reflectable? [_] true)))
+
+(def arrow-skill-strong
+  (reify
+    clojure.lang.Named
+    (getName [_] "STRONG")
+    Learn
+    (block [_] m/glowstone)
+    ArrowSkill
+    (arrow-damage-entity [_ evt arrow target]
+      nil)
+    (arrow-hit [_ evt arrow]
+      nil)
+    (arrow-shoot [_ evt arrow shooter]
+      (.setVelocity arrow (.multiply (.getVelocity arrow) 2)))
+    (arrow-reflectable? [_] true)))
+
+(def arrow-skills
+  [arrow-skill-teleport arrow-skill-shotgun arrow-skill-strong])

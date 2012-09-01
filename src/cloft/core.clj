@@ -480,8 +480,6 @@
     (when (instance? Player shooter)
       (when (.isSneaking shooter)
         (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 2)))
-      (when (= 'strong (arrow-skill-of shooter))
-        (.setVelocity (.getProjectile evt) (.multiply (.getVelocity (.getProjectile evt)) 2)))
       (when (arrow-velocity-vertical? (.getProjectile evt))
         (prn last-vertical-shots)
         (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter))
@@ -490,33 +488,7 @@
                         (check-and-thunder shooter)
                         (Thread/sleep 1000)
                         (swap! last-vertical-shots dissoc shooter-name))))
-      #_(when (= 'arrow-skill-tntmissile (arrow-skill-of shooter))
-        (defn fly-with-check [projectile fn]
-          (cloft-scheduler/settimer
-            1
-            #(when (fn projectile)
-               (fly-with-check projectile fn))))
-
-        (let [inventory (.getInventory shooter)
-              arrow (.getProjectile evt)]
-          (if (.contains inventory m/tnt)
-            (fly-with-check
-              arrow
-              #(let [velocity (.getVelocity %1)
-                     location (.getLocation %1)]
-                 (if (> (.getY (.toVector location))
-                          (+ 5.0 (.getY (.toVector (.getLocation shooter)))))
-                   (if (.contains inventory m/tnt)
-                     (let [primed-tnt (.spawn world location TNTPrimed) ]
-                       (.setVelocity primed-tnt velocity)
-                       (c/consume-itemstack inventory m/tnt)
-                       (.remove arrow)
-                       false)
-                     ((c/broadcast (.getDisplayName shooter) " has no TNT.")
-                     false))
-                   true)))
-            (c/broadcast (.getDisplayName shooter) " has no TNT."))))
-      (skill/arrow-shoot (arrow-skill-of shooter) evt shooter))))
+      (skill/arrow-shoot (arrow-skill-of shooter) evt (.getProjectile evt) shooter))))
 
 (def takumi-watched? (atom false))
 
@@ -609,7 +581,7 @@
 
 (defn arrow-skillchange [player block block-against]
   (when (block/blazon? m/stone (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (let [table-legacy {m/glowstone ['strong "STRONG"]
+    (let [table-legacy {
                  m/tnt [arrow-skill-explosion "EXPLOSION"]
                  m/torch [arrow-skill-torch "TORCH"]
                  m/piston-sticky-base [arrow-skill-pull "PULL"]
@@ -620,7 +592,6 @@
                  m/ladder ['trap "TRAP"]
                  m/rails ['cart "CART"]
                  m/bookshelf ['mobchange "MOBCHANGE"]
-                 #_(m/sandstone ['arrow-skill-tntmissile "TNTMissle"])
                  m/powered-rail ['exp "EXP"]
                  m/piston-base ['super-knockback "SUPER-KNOCKBACK"]
                  m/jack-o-lantern [arrow-skill-pumpkin "PUMPKIN"]
@@ -631,11 +602,9 @@
                  m/red-mushroom ['arrow-skill-poison "POISON"]
                  m/water [arrow-skill-water "WATER"]
                  m/lava [arrow-skill-lava "LAVA"]
-                 m/log [arrow-skill-woodbreak "WOODBREAK"]}
-          table [skill/arrow-skill-teleport
-                 skill/arrow-skill-shotgun]]
+                 m/log [arrow-skill-woodbreak "WOODBREAK"]}]
       (when-let [skill (first (filter #(= (.getType block) (skill/block %))
-                                      table))]
+                                      skill/arrow-skills))]
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (c/broadcast (format "%s changed arrow-skill to %s"
                              (.getDisplayName player)
@@ -947,7 +916,8 @@
   (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
   (.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
   (.sendMessage player "[NEWS] 蜘蛛右クリックであなたもライダーに")
-  (.sendMessage player "[NOTE] スキルシステム大改造中。arrow-skillはいまは申し訳ないけれどteleportとshotgunしか使えません")
+  (.sendMessage player "[NOTE] スキルシステム大改造中。arrow-skillはいまは申し訳ないけれど一部しか使えません")
+  (later (.sendMessage player (clojure.string/join ", " (map name skill/arrow-skills))))
   #_(.sendMessage player "[NEWS] "))
 
 (defn player-login-event [evt]
@@ -960,7 +930,7 @@
                          (= "127.0.0.1" ip)
                          #_(= "0:0:0:0:0:0:0:1" ip))))
       (loc/play-effect (.getLocation player) Effect/RECORD_PLAY (rand-nth item/records))
-      (welcome-message player)
+      (welcome-message player))
     (lingr/say-in-mcujm (format "%s logged in" (.getDisplayName player)))))
 
 (defn paperlot [player]
@@ -1140,8 +1110,8 @@
               (swap! special-snowball-set conj snowball)
               (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
             (let [arrow (.launchProjectile player Arrow)]
-              (.setVelocity arrow (.multiply (.getVelocity arrow)
-                                             (if (= 'strong (arrow-skill-of player)) 2.5 1.5)))
+              (.setVelocity arrow (.multiply (.getVelocity arrow) 1.3))
+              (skill/arrow-shoot (arrow-skill-of player) nil arrow player)
               #_(when (= 0 (rand-int 1000))
                 (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
                   (lingr/say-in-mcujm msg)
