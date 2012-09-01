@@ -378,7 +378,7 @@
                            m/glowstone m/glowstone
                            m/air m/air])]]
     (.setType (.getBlock loc) new-block-type))
-  (.setDroppedExp evt 80)
+  (.setDroppedExp evt 40)
   (c/broadcast (format "%s beated a blaze2!" (.getDisplayName player)))
   (lingr/say-in-mcujm (format "%s beated a blaze2!" (.getDisplayName player))))
 
@@ -1182,7 +1182,7 @@
   (defn on-spider? [player]
     (instance? Spider (.getVehicle player)))
   (let [world (.getWorld block)
-        base0 25 #_(if (= m/chest (.getType block)) 25 50)
+        base0 (if (= m/chest (.getType block)) 25 40)
         base (int (* base0
                      (if (night? world) 1.3 1)
                      (if (.hasStorm world) 1.3 1)
@@ -1611,13 +1611,13 @@ nil))))
         PigZombie nil
         Zombie ((rand-nth
                   [#(do
-                      (.createExplosion (.getWorld entity) location 0)
+                      (loc/explode location 0 false)
                       (when (= m/air (.getType (.getBlock location)))
-                        (.setType (.getBlock location) m/fire)))
+                        (.setType (.getBlock location) m/gravel)))
                    #(loc/spawn location Villager)
                    #(loc/spawn location Silverfish)
                    #(loc/drop-item location (ItemStack. m/iron-sword))]))
-        Giant (.setDroppedExp evt 300)
+        Giant (.setDroppedExp evt 200)
         Creeper (.setDroppedExp evt 10)
         Blaze (when (= "world" (.getName (.getWorld entity)))
                 (blaze2-murder-event evt entity killer))
