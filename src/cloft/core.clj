@@ -620,7 +620,7 @@
                  m/tnt [arrow-skill-explosion "EXPLOSION"]
                  m/torch [arrow-skill-torch "TORCH"]
                  m/piston-sticky-base [arrow-skill-pull "PULL"]
-                 m/yellow-flower [arrow-skill-teleport (name skill/arrow-skill-teleport)]
+                 (skill/block skill/arrow-skill-teleport) [arrow-skill-teleport (name skill/arrow-skill-teleport)]
                  m/red-rose [arrow-skill-fire "FIRE"]
                  m/sapling [arrow-skill-tree "TREE"]
                  m/workbench [arrow-skill-ore "ORE"]
