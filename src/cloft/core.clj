@@ -921,7 +921,7 @@
     #_(transport/teleport-machine player block block-against)))
 
 (defn welcome-message [player]
-  (.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
+  #_(.sendMessage player "[TIPS] 川で砂金をとろう! クワと皿を忘れずに。")
   #_(.sendMessage player "[TIPS] 3人が同時に真上に矢を撃つと敵がEmeraldに")
   #_(.sendMessage player "[TIPS] りんごを食べて界王拳!")
   #_(.sendMessage player "[TIPS] HP Maxのときに金の剣で攻撃するとビーム")
@@ -940,14 +940,12 @@
   #_(.sendMessage player "[NEWS] Enderman右クリックでもアイテム。たまに怒られるよ")
   #_(.sendMessage player "[NEWS] Zombie Jockeyや匠Jockeyが出没するように")
   #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
-  (.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
+  #_(.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
   (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
   (.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
-  (.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
-  (.sendMessage player "[NEWS] なんかこの月曜にpvp大会するみたいですよ")
+  #_(.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
   (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
   (.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
-  (.sendMessage player "[NEWS] この鯖のRAMが8GBになり、またHDDが3TB増えました")
   (.sendMessage player "[NEWS] 蜘蛛右クリックであなたもライダーに")
   #_(.sendMessage player "[NEWS] "))
 
@@ -996,8 +994,7 @@
               (read-string
                 (str "org.bukkit.Sound/"
                      (clojure.string/upper-case (clojure.string/replace (apply str (rest msg)) #"[ -]" "_"))))]
-          (loc/play-sound (.getLocation player) (eval sound) 1.0 1.0)
-          (c/broadcast (str sound))))
+          (loc/play-sound (.getLocation player) (eval sound) 1.0 1.0)))
 
       (= "benri" msg)
       (do
@@ -1500,9 +1497,10 @@
         Squid
         (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
                                                      65394 65394 65411 65438
-                                                     65405]))]
-          (lingr/say-in-mcujm msg)
-          (c/broadcast (.getDisplayName player) ": " msg)
+                                                     65405]))
+              msg2 (format "%s: %s" (.getDisplayName player) msg)]
+          (lingr/say-in-mcujm msg2)
+          (c/broadcast msg2)
           (.setFoodLevel player 0))
 
         Player (touch-player player target)
