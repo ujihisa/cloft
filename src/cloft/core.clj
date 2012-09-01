@@ -1225,12 +1225,15 @@
 
 (defn chest-popcorn-probability [block player]
   (assert (#{m/chest m/ender-chest} (.getType block)) block)
+  (defn on-spider? [player]
+    (instance? Spider (.getVehicle player)))
   (let [world (.getWorld block)
-        base0 (if (= m/chest (.getType block)) 25 50)
+        base0 25 #_(if (= m/chest (.getType block)) 25 50)
         base (int (* base0
                      (if (night? world) 1.3 1)
                      (if (.hasStorm world) 1.3 1)
                      (if (.isThundering world) 1.3 1)
+                     (if (on-spider? player) 1.3 1)
                      (if (burning? player) 2.0 1)))
         inventory (if (= m/chest (.getType block))
                     (.getBlockInventory (.getState block))
