@@ -102,4 +102,5 @@
   (let [egg (.getEgg evt)
         shooter (.getShooter egg)
         skill (skill-of shooter)]
-    (if skill (.setHatching evt false))))
+    (when skill
+      (.setHatching evt false))))
