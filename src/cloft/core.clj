@@ -579,38 +579,6 @@
             (.sendMessage player (format "You can use the reaction skill for %d times" l))
             (swap! reaction-skill assoc (.getDisplayName player) [(first skill-name) l])))))))
 
-(defn arrow-skillchange [player block block-against]
-  (when (block/blazon? m/stone (.getBlock (.add (.getLocation block) 0 -1 0)))
-    (let [table-legacy {
-                 m/tnt [arrow-skill-explosion "EXPLOSION"]
-                 m/torch [arrow-skill-torch "TORCH"]
-                 m/piston-sticky-base [arrow-skill-pull "PULL"]
-                 m/red-rose [arrow-skill-fire "FIRE"]
-                 m/sapling [arrow-skill-tree "TREE"]
-                 m/workbench [arrow-skill-ore "ORE"]
-                 m/trap-door ['digg "DIGG"]
-                 m/ladder ['trap "TRAP"]
-                 m/rails ['cart "CART"]
-                 m/bookshelf ['mobchange "MOBCHANGE"]
-                 m/piston-base ['super-knockback "SUPER-KNOCKBACK"]
-                 m/jack-o-lantern [arrow-skill-pumpkin "PUMPKIN"]
-                 m/pumpkin [arrow-skill-pumpkin "PUMPKIN"]
-                 m/diamond-block [arrow-skill-diamond "CRAZY DIAMOND"]
-                 #_( m/fire [arrow-skill-flame "FLAME"])
-                 m/brown-mushroom [arrow-skill-quake "QUAKE"]
-                 m/red-mushroom ['arrow-skill-poison "POISON"]
-                 m/water [arrow-skill-water "WATER"]
-                 m/lava [arrow-skill-lava "LAVA"]
-                 m/log [arrow-skill-woodbreak "WOODBREAK"]}]
-      (when-let [skill (first (filter #(= (.getType block) (skill/block %))
-                                      skill/arrow-skills))]
-        (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
-        (loc/play-sound (.getLocation block) s/ambience-cave 0.8 1.2)
-        (c/broadcast (format "%s changed arrow-skill to %s"
-                             (.getDisplayName player)
-                             (name skill)))
-        (swap! skill/arrow-skill assoc (.getDisplayName player) skill)))))
-
 (defn pickaxe-skillchange [player block block-against]
   (when (block/blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
     (let [table {m/yellow-flower ['pickaxe-skill-teleport "TELEPORT"]
@@ -882,7 +850,7 @@
           (Thread/sleep 3000)
           (swap! player-block-placed dissoc block))
         (swap! player-block-placed assoc block player)))
-    (arrow-skillchange player block block-against)
+    (skill/arrow-skillchange player block block-against)
     (pickaxe-skillchange player block block-against)
     (reaction-skillchange player block block-against)
     (egg/change-skill player block block-against)
@@ -2299,9 +2267,8 @@ nil))))
               (c/broadcast "good morning everyone!"))))))))
 
 (defn player-bucket-empty-event [evt]
-  (future-call
-    #(do
-       (arrow-skillchange (.getPlayer evt) (.getBlock (.add (.getLocation (.getBlockClicked evt)) 0 1 0)) nil))))
+  (later
+    (skill/arrow-skillchange (.getPlayer evt) (.getBlock (.add (.getLocation (.getBlockClicked evt)) 0 1 0)) nil)))
 
 (defn player-toggle-sneak-event [evt]
   (let [player (.getPlayer evt)]
