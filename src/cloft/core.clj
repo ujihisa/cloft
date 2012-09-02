@@ -140,12 +140,6 @@
       (.sendMessage (.getShooter entity) "PULL failed")))
   (.remove entity))
 
-(defn arrow-skill-fire [entity]
-  (doseq [target (.getNearbyEntities entity 1 1 1)
-          :when (and (instance? LivingEntity target)
-                     (not= (.getShooter entity) target))]
-    (.setFireTicks target 200)))
-
 (defn arrow-skill-flame [entity]
   (doseq [x [-1 0 1] y [-1 0 1] z [-1 0 1]
           :let [block (.getBlock (.add (.clone (.getLocation entity)) x y z))]
@@ -1831,10 +1825,6 @@ nil))))
 
           (= arrow-skill-pull (arrow-skill-of shooter))
           (.teleport target shooter)
-
-          (= arrow-skill-fire (arrow-skill-of shooter))
-          (.setFireTicks target 400)
-
 
           (= 'cart (arrow-skill-of shooter))
           (let [cart (loc/spawn (.getLocation target) Minecart)]

@@ -95,12 +95,30 @@
       nil)
     (arrow-reflectable? [_] true)))
 
+(def arrow-fire
+  (reify
+    clojure.lang.Named
+    (getName [_] "FIRE")
+    Learn
+    (block [_] m/red-rose)
+    ArrowSkill
+    (arrow-damage-entity [_ evt arrow target]
+      (.setFireTicks target 400))
+    (arrow-hit [_ evt arrow]
+      (doseq [target (.getNearbyEntities arrow 1 1 1)
+              :when (and (instance? LivingEntity target)
+                         (not= (.getShooter arrow) target))]
+        (.setFireTicks target 200)))
+    (arrow-shoot [_ evt arrow shooter]
+      nil)
+    (arrow-reflectable? [_] true)))
+
 (def arrow-skill (atom {"ujm" arrow-teleport
                         "mozukusoba" arrow-teleport
                         "ast924" arrow-shotgun}))
 
 (def arrow-skills
-  [arrow-teleport arrow-shotgun arrow-strong arrow-exp])
+  [arrow-teleport arrow-shotgun arrow-strong arrow-exp arrow-fire])
 
 (defn arrow-skillchange [player block0 block-against]
   (when (block/blazon? m/stone (.getBlock (.add (.getLocation block0) 0 -1 0)))
