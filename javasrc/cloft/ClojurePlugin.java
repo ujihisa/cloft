@@ -17,6 +17,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.vehicle.*;
 import org.bukkit.event.world.*;
+import org.bukkit.event.painting.*;
 
 public class ClojurePlugin extends JavaPlugin implements Listener {
     private String ns;
@@ -279,6 +280,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onChunkPopulate(ChunkPopulateEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "chunk-populate-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
+    public void onPaintingBreakByEntity(PaintingBreakByEntityEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "painting-break-by-entity-event");
         if (f.isBound()) f.invoke(event);
     }
     /* end auto-generated code */

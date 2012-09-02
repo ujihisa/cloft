@@ -2395,6 +2395,11 @@ nil))))
                                 loc))]
           (future (c/teleport-without-angle entity (.add iron-loc 0 5 0))))))))
 
+#_(defn painting-break-by-entity-event [evt]
+  (prn 'pbreak (.getRemover evt) (.getPainting evt))
+  (when (instance? Arrow (.getCause evt))
+    (.setCancelled evt true)))
+
 (comment (defn enderman-pickup-event* [evt]
   (prn 'epe)))
 
