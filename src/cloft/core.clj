@@ -1630,7 +1630,7 @@ nil))))
       (when (chimera-cow/is? entity)
         (chimera-cow/murder-event evt entity killer))
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
-      (when (= skill/arrow-skill-exp (arrow-skill-of killer))
+      (when (= skill/arrow-exp (arrow-skill-of killer))
         (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
       (when (and
               (< 5 (.getDroppedExp evt))

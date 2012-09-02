@@ -21,7 +21,7 @@
   (arrow-shoot [_ evt arrow shooter])
   (arrow-reflectable? [_]))
 
-(def arrow-skill-teleport
+(def arrow-teleport
   (reify
     clojure.lang.Named
     (getName [_] "TELEPORT")
@@ -41,7 +41,7 @@
       nil)
     (arrow-reflectable? [_] false)))
 
-(def arrow-skill-shotgun
+(def arrow-shotgun
   (reify
     clojure.lang.Named
     (getName [_] "SHOTGUN")
@@ -60,7 +60,7 @@
           (c/add-velocity new-arrow (rand1) (rand1) (rand1)))))
     (arrow-reflectable? [_] true)))
 
-(def arrow-skill-strong
+(def arrow-strong
   (reify
     clojure.lang.Named
     (getName [_] "STRONG")
@@ -75,7 +75,7 @@
       (.setVelocity arrow (.multiply (.getVelocity arrow) 2)))
     (arrow-reflectable? [_] true)))
 
-(def arrow-skill-exp
+(def arrow-exp
   "dummy skill. grep the name."
   (reify
     clojure.lang.Named
@@ -91,9 +91,9 @@
       nil)
     (arrow-reflectable? [_] true)))
 
-(def arrow-skill (atom {"ujm" arrow-skill-teleport
-                        "mozukusoba" arrow-skill-teleport
-                        "ast924" arrow-skill-shotgun}))
+(def arrow-skill (atom {"ujm" arrow-teleport
+                        "mozukusoba" arrow-teleport
+                        "ast924" arrow-shotgun}))
 
 (def arrow-skills
-  [arrow-skill-teleport arrow-skill-shotgun arrow-skill-strong arrow-skill-exp])
+  [arrow-teleport arrow-shotgun arrow-strong arrow-exp])
