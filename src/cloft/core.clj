@@ -1477,6 +1477,9 @@
                                     m/ender-pearl]))))
 nil))))
 
+(defn player-egg-throw-event [evt]
+  (egg/throw-event evt))
+
 (defn player-level-change-event [evt]
   (let [player (.getPlayer evt)]
     (when (< (.getOldLevel evt) (.getNewLevel evt))

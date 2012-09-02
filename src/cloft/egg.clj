@@ -97,3 +97,9 @@
   (let [skill (skill-of (.getShooter egg))]
     (cond
       (fn? skill) (skill egg))))
+
+(defn throw-event [evt]
+  (let [egg (.getEgg evt)
+        shooter (.getShooter egg)
+        skill (skill-of shooter)]
+    (if skill (.setHatching evt false))))
