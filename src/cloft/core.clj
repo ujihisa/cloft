@@ -869,6 +869,7 @@
   (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
   (.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
   (.sendMessage player "[NEWS] 蜘蛛右クリックであなたもライダーに")
+  (.sendMessage player "[NEWS] 匠、雪玉爆発")
   (.sendMessage player "[NOTE] スキルシステム大改造中。arrow-skillはいまは申し訳ないけれど一部しか使えません")
   (later (.sendMessage player (clojure.string/join ", " (map name skill/arrow-skills))))
   #_(.sendMessage player "[NEWS] "))
@@ -1637,13 +1638,36 @@ nil))))
   (.setCancelled evt true)
   (.createExplosion (.getWorld entity) (.getLocation entity) 0))
 
+(defn creeper-explosion-4 [evt entity]
+  (defn nearest-player [entity]
+    (apply min-key (cons #(.distance (.getLocation entity) (.getLocation %))
+                         (Bukkit/getOnlinePlayers))))
+  (.setCancelled evt true)
+  (loc/play-sound (.getLocation entity) s/explode-old 1.0 1.3)
+  (prn (nearest-player entity))
+  (let [target (nearest-player entity)
+        rand1 (fn [] (* 0.8 (- (rand) 0.5)))
+        direction (.normalize
+                    (.toVector
+                      (.subtract
+                        (.getLocation target)
+                        (.getLocation entity))))]
+    (dotimes [_ 80]
+      (let [snowball (.launchProjectile entity Snowball)]
+        (.setVelocity
+          snowball
+          (Vector. (+ (rand1) (.getX direction))
+                   (+ (rand1) (.getY direction))
+                   (+ (rand1) (.getZ direction))))))))
+
 (def creeper-explosion-idx (atom 0))
 (defn current-creeper-explosion []
-  (get [(fn [_ _] nil)
+  (get [creeper-explosion-4
+        (constantly nil)
         creeper-explosion-1
         creeper-explosion-2
         creeper-explosion-3
-        ] (rem @creeper-explosion-idx 4)))
+        ] (rem @creeper-explosion-idx 5)))
 
 (defn entity-explode-event [evt]
   (if-let [entity (.getEntity evt)]
@@ -1977,14 +2001,24 @@ nil))))
       (fish-damages-entity-event evt attacker target))
     (when (instance? Snowball attacker)
       (if-let [shooter (.getShooter attacker)]
-        (if (or
-              (@special-snowball-set attacker)
-              (instance? Snowman shooter))
+        (cond
+          (@special-snowball-set attacker)
           (special-snowball-damage attacker target shooter)
+
+          (instance? Snowman shooter)
+          (special-snowball-damage attacker target shooter)
+
+          (instance? Player shooter)
           (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
                 vector (.normalize (.toVector direction))]
             (.setCancelled evt true)
-            (later (c/add-velocity target (.getX vector) (+ (.getY vector) 1.0) (.getZ vector)))))))
+            (later (c/add-velocity target (.getX vector) (+ (.getY vector) 1.0) (.getZ vector))))
+
+          (instance? Creeper shooter)
+          (let [direction (.subtract (.getLocation target) (.getLocation (.getShooter attacker)))
+                vector (.multiply (.normalize (.toVector direction)) 0.3)]
+            (.setCancelled evt true)
+            (later (c/add-velocity target (.getX vector) (+ (.getY vector) 0.3) (.getZ vector)))))))
     (when (instance? Enderman attacker)
       (when (instance? Player target)
         (if (= target (.getPassenger attacker))
@@ -2207,13 +2241,20 @@ nil))))
     (nil? (.getShooter snowball))
     nil
 
-    :else
+    (instance? Player (.getShooter snowball))
     (do
       (let [shooter (.getShooter snowball)]
-        (assert (instance? Player shooter) shooter)
         (.setFoodLevel shooter (dec (.getFoodLevel shooter))))
       (loc/explode (.getLocation snowball) 0 false)
-      (.remove snowball))))
+      (.remove snowball))
+
+    (instance? Creeper (.getShooter snowball))
+    (do
+      #_(loc/explode (.getLocation snowball) 0 false)
+      (.remove snowball))
+
+    :else
+    (prn 'snowball-hit-event 'must-not-happen snowball)))
 
 (defn projectile-hit-event [evt]
   (let [entity (.getEntity evt)]
