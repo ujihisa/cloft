@@ -2103,6 +2103,7 @@ nil))))
       :else
       (entity-damage-intent-event evt target))))
 
+(def unpopcornable (atom {}))
 (defn block-break-event [evt]
   (let [block (.getBlock evt)]
     (when-let [player (.getPlayer evt)]
@@ -2147,17 +2148,27 @@ nil))))
                     :else nil)))
 
               #{m/chest m/ender-chest}
-              (when (block/blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
-                #_(.setCancelled evt true)
-                (dosync
-                  (ref-set popcorning (chest-popcorn-probability block player))
-                  (cloft.chest/break-and-scatter block player)
-                  (ref-set popcorning nil))
-                (let [msg (format "%s popcorned with %s!"
-                                  (.getDisplayName player)
-                                  btype)]
-                  (lingr/say-in-mcujm msg)
-                  (c/broadcast msg)))
+              (when (block/blazon? m/iron-ore (.getBlock (.add (.clone (.getLocation block)) 0 -1 0)))
+                (if (@unpopcornable player)
+                  (do
+                    (.sendMessage player "wait for a min...")
+                    (loc/spawn (.add (.clone (.getLocation block)) 0 1 0)
+                         (rand-nth [Chicken Pig Villager Ocelot]))
+                    (.setCancelled evt true))
+                  (do
+                    (swap! unpopcornable assoc player true)
+                    (future
+                      (Thread/sleep 60000)
+                      (swap! unpopcornable assoc player false))
+                    (dosync
+                      (ref-set popcorning (chest-popcorn-probability block player))
+                      (cloft.chest/break-and-scatter block player)
+                      (ref-set popcorning nil))
+                    (let [msg (format "%s popcorned with %s!"
+                                      (.getDisplayName player)
+                                      btype)]
+                      (lingr/say-in-mcujm msg)
+                      (c/broadcast msg)))))
               nil))
           nil)))))
 
