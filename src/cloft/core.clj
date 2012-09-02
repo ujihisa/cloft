@@ -16,7 +16,7 @@
   (:require [cloft.egg :as egg])
   (:require [cloft.skill :as skill])
   (:require [swank.swank])
-  (:import [org.bukkit Bukkit TreeType DyeColor])
+  (:import [org.bukkit Bukkit DyeColor])
   (:import [org.bukkit.material Wool Dye])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
@@ -145,15 +145,6 @@
           :let [block (.getBlock (.add (.clone (.getLocation entity)) x y z))]
           :when (= m/air (.getType block))]
     (.setType block m/fire)))
-
-(defn arrow-skill-tree [entity]
-  (let [location (.getLocation entity)
-        world (.getWorld location)
-        trees (remove #{TreeType/JUNGLE TreeType/BROWN_MUSHROOM
-                        TreeType/RED_MUSHROOM}
-                      (TreeType/values))]
-    (.generateTree world location (rand-nth trees)))
-  (.remove entity))
 
 (defn arrow-skill-ore [entity]
   (let [block (block/of-arrow entity)]

@@ -4,7 +4,7 @@
   (:require [cloft.loc :as loc])
   (:require [cloft.material :as m])
   (:require [cloft.sound :as s])
-  (:import [org.bukkit Location Effect])
+  (:import [org.bukkit Location Effect TreeType])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
             EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
@@ -113,12 +113,33 @@
       nil)
     (arrow-reflectable? [_] true)))
 
+(def arrow-tree
+  (reify
+    clojure.lang.Named
+    (getName [_] "TREE")
+    Learn
+    (block [_] m/sapling)
+    ArrowSkill
+    (arrow-damage-entity [_ evt arrow target]
+      (.setCancelled evt true))
+    (arrow-hit [_ evt arrow]
+      (let [location (.getLocation arrow)
+            world (.getWorld location)
+            trees (remove #{TreeType/JUNGLE TreeType/BROWN_MUSHROOM
+                            TreeType/RED_MUSHROOM}
+                          (TreeType/values))]
+        (.generateTree world location (rand-nth trees)))
+      (.remove arrow))
+    (arrow-shoot [_ evt arrow shooter]
+      nil)
+    (arrow-reflectable? [_] true)))
+
 (def arrow-skill (atom {"ujm" arrow-teleport
                         "mozukusoba" arrow-teleport
                         "ast924" arrow-shotgun}))
 
 (def arrow-skills
-  [arrow-teleport arrow-shotgun arrow-strong arrow-exp arrow-fire])
+  [arrow-teleport arrow-shotgun arrow-strong arrow-exp arrow-fire arrow-tree])
 
 (defn arrow-skillchange [player block0 block-against]
   (when (block/blazon? m/stone (.getBlock (.add (.getLocation block0) 0 -1 0)))
