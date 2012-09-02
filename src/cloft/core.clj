@@ -606,6 +606,7 @@
       (when-let [skill (first (filter #(= (.getType block) (skill/block %))
                                       skill/arrow-skills))]
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
+        (loc/play-sound (.getLocation block) s/ambience-cave 0.8 1.2)
         (c/broadcast (format "%s changed arrow-skill to %s"
                              (.getDisplayName player)
                              (name skill)))
@@ -2234,7 +2235,7 @@ nil))))
       Blaze
       nil
 
-      (prn 'arrow-hit shooter))))
+      (prn 'arrow-hit 'nil-shooter evt entity))))
 
 (defn snowball-hit-event [evt snowball]
   (cond
