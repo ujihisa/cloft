@@ -592,7 +592,6 @@
                  m/ladder ['trap "TRAP"]
                  m/rails ['cart "CART"]
                  m/bookshelf ['mobchange "MOBCHANGE"]
-                 m/powered-rail ['exp "EXP"]
                  m/piston-base ['super-knockback "SUPER-KNOCKBACK"]
                  m/jack-o-lantern [arrow-skill-pumpkin "PUMPKIN"]
                  m/pumpkin [arrow-skill-pumpkin "PUMPKIN"]
@@ -1631,7 +1630,7 @@ nil))))
       (when (chimera-cow/is? entity)
         (chimera-cow/murder-event evt entity killer))
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
-      (when (= 'exp (arrow-skill-of killer))
+      (when (= skill/arrow-skill-exp (arrow-skill-of killer))
         (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
       (when (and
               (< 5 (.getDroppedExp evt))
@@ -1838,9 +1837,6 @@ nil))))
 
           (= 'arrow-skill-poison (arrow-skill-of shooter))
           (reaction-skill-poison nil target)
-
-          (= 'exp (arrow-skill-of shooter))
-          (.damage shooter 2)
 
           (= 'super-knockback (arrow-skill-of shooter))
           (let [direction (.subtract (.getLocation shooter)

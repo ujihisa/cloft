@@ -75,9 +75,25 @@
       (.setVelocity arrow (.multiply (.getVelocity arrow) 2)))
     (arrow-reflectable? [_] true)))
 
+(def arrow-skill-exp
+  "dummy skill. grep the name."
+  (reify
+    clojure.lang.Named
+    (getName [_] "EXP")
+    Learn
+    (block [_] m/powered-rail)
+    ArrowSkill
+    (arrow-damage-entity [_ evt arrow target]
+      (.damage (.getShooter arrow) 2))
+    (arrow-hit [_ evt arrow]
+      nil)
+    (arrow-shoot [_ evt arrow shooter]
+      nil)
+    (arrow-reflectable? [_] true)))
+
 (def arrow-skill (atom {"ujm" arrow-skill-teleport
                         "mozukusoba" arrow-skill-teleport
                         "ast924" arrow-skill-shotgun}))
 
 (def arrow-skills
-  [arrow-skill-teleport arrow-skill-shotgun arrow-skill-strong])
+  [arrow-skill-teleport arrow-skill-shotgun arrow-skill-strong arrow-skill-exp])
