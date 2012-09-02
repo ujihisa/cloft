@@ -157,7 +157,6 @@
                  m/tnt [arrow-skill-explosion "EXPLOSION"]
                  m/torch [arrow-skill-torch "TORCH"]
                  m/piston-sticky-base [arrow-skill-pull "PULL"]
-                 m/red-rose [arrow-skill-fire "FIRE"]
                  m/sapling [arrow-skill-tree "TREE"]
                  m/workbench [arrow-skill-ore "ORE"]
                  m/trap-door ['digg "DIGG"]
