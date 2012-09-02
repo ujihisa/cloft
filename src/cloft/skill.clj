@@ -75,5 +75,9 @@
       (.setVelocity arrow (.multiply (.getVelocity arrow) 2)))
     (arrow-reflectable? [_] true)))
 
+(def arrow-skill (atom {"ujm" arrow-skill-teleport
+                        "mozukusoba" arrow-skill-teleport
+                        "ast924" arrow-skill-shotgun}))
+
 (def arrow-skills
   [arrow-skill-teleport arrow-skill-shotgun arrow-skill-strong])

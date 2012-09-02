@@ -270,9 +270,8 @@
         (.sendMessage (.getShooter entity) "Woodbreak failed."))))
   (.remove entity))
 
-(def arrow-skill (atom {"ujm" skill/arrow-skill-teleport}))
 (defn arrow-skill-of [player]
-  (get @arrow-skill (.getDisplayName player)))
+  (get @skill/arrow-skill (.getDisplayName player)))
 
 (def pickaxe-skill (atom {}))
 (defn pickaxe-skill-of [player]
@@ -488,7 +487,8 @@
                         (check-and-thunder shooter)
                         (Thread/sleep 1000)
                         (swap! last-vertical-shots dissoc shooter-name))))
-      (skill/arrow-shoot (arrow-skill-of shooter) evt (.getProjectile evt) shooter))))
+      (when-let [skill (arrow-skill-of shooter)]
+        (skill/arrow-shoot skill evt (.getProjectile evt) shooter)))))
 
 (def takumi-watched? (atom false))
 
@@ -609,7 +609,7 @@
         (c/broadcast (format "%s changed arrow-skill to %s"
                              (.getDisplayName player)
                              (name skill)))
-        (swap! arrow-skill assoc (.getDisplayName player) skill)))))
+        (swap! skill/arrow-skill assoc (.getDisplayName player) skill)))))
 
 (defn pickaxe-skillchange [player block block-against]
   (when (block/blazon? m/iron-ore (.getBlock (.add (.getLocation block) 0 -1 0)))
@@ -1110,7 +1110,8 @@
               (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
             (let [arrow (.launchProjectile player Arrow)]
               (.setVelocity arrow (.multiply (.getVelocity arrow) 1.3))
-              (skill/arrow-shoot (arrow-skill-of player) nil arrow player)
+              (when-let [skill (arrow-skill-of player)]
+                (skill/arrow-shoot skill nil arrow player))
               #_(when (= 0 (rand-int 1000))
                 (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
                   (lingr/say-in-mcujm msg)
