@@ -302,9 +302,8 @@
 (defn check-and-thunder [triggered-by]
   "in future"
   (defn thunder-mobs-around [player amount]
-    (doseq [x (filter
-                #(instance? Monster %)
-                (.getNearbyEntities player 20 20 20))]
+    (doseq [x (.getNearbyEntities player 20 20 20)
+            :when (instance? Monster x)]
       (Thread/sleep (rand-int 1000))
       (later
         (.strikeLightningEffect (.getWorld x) (.getLocation x))
