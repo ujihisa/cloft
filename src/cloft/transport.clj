@@ -24,16 +24,16 @@
       (when (teleport-machine? loc)
         (when (instance? Player entity)
           (.sendMessage entity "teleport up!"))
-        (future-call #(let [newloc (.add (.getLocation entity) 0 30 0)]
-                        (Thread/sleep 10)
-                        (condp = (.getType block)
-                          m/stone-plate (.teleport entity newloc)
-                          m/wood-plate (c/add-velocity entity 0 1.5 0)
-                          nil)
-                        (.playEffect (.getWorld entity-loc) (.add entity-loc 0 1 0) Effect/BOW_FIRE nil)
-                        (.playEffect (.getWorld newloc) newloc Effect/BOW_FIRE nil)
-                        (.playEffect (.getWorld entity-loc) entity-loc Effect/ENDER_SIGNAL nil)
-                        (.playEffect (.getWorld newloc) newloc Effect/ENDER_SIGNAL nil)))))))
+        (let [newloc (.add (.getLocation entity) 0 30 0)]
+          (later
+            (condp = (.getType block)
+              m/stone-plate (.teleport entity newloc)
+              m/wood-plate (c/add-velocity entity 0 1.5 0)
+              nil))
+          (loc/play-effect (.add entity-loc 0 1 0) Effect/BOW_FIRE nil)
+          (loc/play-effect newloc Effect/BOW_FIRE nil)
+          (loc/play-effect entity-loc Effect/ENDER_SIGNAL nil)
+          (loc/play-effect newloc Effect/ENDER_SIGNAL nil))))))
 
 (defn teleport-machine [player block block-against]
   (when (= m/water (.getType block))
