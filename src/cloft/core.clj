@@ -445,19 +445,21 @@
                  m/rotten-flesh [nil m/coal]}
           itemstack (.getItemStack item)]
       (when (table (.getType itemstack))
-        (future-call #(let [pair (table (.getType itemstack))]
-                        (Thread/sleep 5000)
-                        (when-not (.isDead item)
-                          (if (#{m/furnace m/burning-furnace}
-                                  (.getType (.getBlock (.add (.getLocation item) 0 -1 0))))
-                            (do
-                              (.dropItem (.getWorld item) (.getLocation item) (ItemStack. (last pair) (.getAmount itemstack)))
-                              (.remove item))
-                            (when-let [type-to (first pair)]
-                              (Thread/sleep 25000)
-                              (when-not (.isDead item)
-                                (.dropItem (.getWorld item) (.getLocation item) (ItemStack. type-to (.getAmount itemstack)))
-                                (.remove item)))))))))))
+        (future
+          (let [pair (table (.getType itemstack))]
+            (Thread/sleep 5000)
+            (when-not (.isDead item)
+              (if (#{m/furnace m/burning-furnace}
+                      (.getType (.getBlock (.add (.getLocation item) 0 -1 0))))
+                (later
+                  (loc/drop-item (.getLocation item) (ItemStack. (last pair) (.getAmount itemstack)))
+                  (.remove item))
+                (when-let [type-to (first pair)]
+                  (Thread/sleep 25000)
+                  (later
+                    (when-not (.isDead item)
+                      (loc/drop-item (.getLocation item) (ItemStack. type-to (.getAmount itemstack)))
+                      (.remove item))))))))))))
 
 (defn entity-shoot-bow-event [evt]
   (let [shooter (.getEntity evt)]
