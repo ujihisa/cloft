@@ -322,11 +322,11 @@
   (.remove projectile)
   (if (= 0 (rand-int 5))
     (let [loc (.getLocation blaze2)]
-      (.playEffect (.getWorld loc) loc Effect/MOBSPAWNER_FLAMES nil)
+      (loc/play-effect loc Effect/MOBSPAWNER_FLAMES nil)
       (loc/spawn
-           (.add loc 0 2 0)
-           (rand-nth [Skeleton Zombie Spider MagmaCube MagmaCube Silverfish
-                         Enderman Villager Creeper])))
+        (.add loc 0 2 0)
+        (rand-nth [Skeleton Zombie Spider MagmaCube MagmaCube Silverfish
+                   Enderman Villager Creeper])))
     (.launchProjectile blaze2 Arrow)))
 
 (defn blaze2-arrow-hit [target]
