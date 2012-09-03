@@ -143,9 +143,12 @@
     (block [_] m/torch)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
-      nil)
+      nil
+      #_(when (nil? (.getPassenger target))
+        (.setPassenger target
+                       (loc/fall-block (.add (.getLocation target) 0 2 0) m/torch (.getData (org.bukkit.material.MaterialData. m/torch))))))
     (arrow-hit [_ evt arrow]
-      (let [location (.getLocation entity)]
+      (let [location (.getLocation arrow)]
         (.setType (.getBlock location) m/torch))
       (.remove arrow))
     (arrow-shoot [_ evt arrow shooter]
