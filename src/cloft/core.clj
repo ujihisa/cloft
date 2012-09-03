@@ -1,6 +1,6 @@
 (ns cloft.core
   (:require [cloft.cloft :as c])
-  (:use [cloft.cloft :only [later init-plugin]])
+  (:use [cloft.cloft :only [later]])
   (:require [cloft.material :as m])
   (:require [cloft.sound :as s])
   (:require [cloft.scheduler :as cloft-scheduler])
