@@ -124,10 +124,6 @@
     (.breakNaturally block (ItemStack. m/diamond-pickaxe)))
   (.remove entity))
 
-(defn arrow-skill-torch [entity]
-  (let [location (.getLocation entity)]
-    (.setType (.getBlock location) m/torch)))
-
 (defn arrow-skill-pull [entity]
   (let [block (block/of-arrow entity)]
     (if (c/removable-block? block)

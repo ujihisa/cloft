@@ -1,4 +1,5 @@
 (ns cloft.skill
+  (:use [cloft.cloft :only [later]])
   (:require [cloft.cloft :as c])
   (:require [cloft.block :as block])
   (:require [cloft.loc :as loc])
@@ -134,12 +135,30 @@
       nil)
     (arrow-reflectable? [_] true)))
 
+(def arrow-torch
+  (reify
+    clojure.lang.Named
+    (getName [_] "TORCH")
+    Learn
+    (block [_] m/torch)
+    ArrowSkill
+    (arrow-damage-entity [_ evt arrow target]
+      nil)
+    (arrow-hit [_ evt arrow]
+      (let [location (.getLocation entity)]
+        (.setType (.getBlock location) m/torch))
+      (.remove arrow))
+    (arrow-shoot [_ evt arrow shooter]
+      nil)
+    (arrow-reflectable? [_] true)))
+
 (def arrow-skill (atom {"ujm" arrow-teleport
                         "mozukusoba" arrow-teleport
                         "ast924" arrow-shotgun}))
 
 (def arrow-skills
-  [arrow-teleport arrow-shotgun arrow-strong arrow-exp arrow-fire arrow-tree])
+  [arrow-teleport arrow-shotgun arrow-strong arrow-exp arrow-fire arrow-tree
+   arrow-torch])
 
 (defn arrow-skillchange [player block0 block-against]
   (when (block/blazon? m/stone (.getBlock (.add (.getLocation block0) 0 -1 0)))
@@ -155,9 +174,7 @@
 
 #_(table-legacy {
                  m/tnt [arrow-skill-explosion "EXPLOSION"]
-                 m/torch [arrow-skill-torch "TORCH"]
                  m/piston-sticky-base [arrow-skill-pull "PULL"]
-                 m/sapling [arrow-skill-tree "TREE"]
                  m/workbench [arrow-skill-ore "ORE"]
                  m/trap-door ['digg "DIGG"]
                  m/ladder ['trap "TRAP"]
