@@ -1,4 +1,5 @@
 (ns cloft.transport
+  (:use [cloft.cloft :only [later]])
   (:require [cloft.cloft :as c])
   (:require [cloft.material :as m])
   (:require [cloft.player :as player])
@@ -26,8 +27,7 @@
         (when (instance? Player entity)
           (.sendMessage entity "teleport up!"))
         (let [newloc (.add (.getLocation entity) 0 30 0)]
-          (future
-            (Thread/sleep 10)
+          (later
             (condp = (.getType block)
               m/stone-plate (.teleport entity newloc)
               m/wood-plate (c/add-velocity entity 0 1.5 0)
