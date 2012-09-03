@@ -403,7 +403,7 @@
       (prn 'spawn-default creature)
 
       CreatureSpawnEvent$SpawnReason/JOCKEY
-      (prn 'spawn-jockey creature)
+      nil
 
       nil)))
 
