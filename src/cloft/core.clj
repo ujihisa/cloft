@@ -289,16 +289,6 @@
 
 (def last-vertical-shots (atom {}))
 
-(defn enough-previous-shots-by-players? [triggered-by threshold]
-  (let [locs (vals @last-vertical-shots)]
-    ;(prn enough-previous-shots-by-players?)
-    ;(prn locs)
-    (<= threshold
-      (count (filter
-               #(> 10.0 ; radius of 10.0
-                   (.distance (.getLocation triggered-by) %))
-               locs)))))
-
 (defn check-and-thunder [triggered-by]
   "in future"
   (defn thunder-mobs-around [player amount]
@@ -308,6 +298,13 @@
       (later
         (.strikeLightningEffect (.getWorld x) (.getLocation x))
         (.damage x amount))))
+
+  (defn enough-previous-shots-by-players? [triggered-by threshold]
+    (let [locs (vals @last-vertical-shots)]
+      (<= threshold
+        (count (filter
+                 #(> 10.0 (.distance (.getLocation triggered-by) %))
+                 locs)))))
 
   (when (enough-previous-shots-by-players? triggered-by 3)
     (thunder-mobs-around triggered-by 20)))
