@@ -819,7 +819,7 @@
                                       (.getLocation block2)
                                       (.getLocation block1))))]
           (doseq [diff (range 1 (- (xyz-getter block2) (xyz-getter block1)))
-                  :when (< diff 200)]
+                  :when (< diff 300)]
             (let [b (.getBlock (.add (.clone (.getLocation block1))
                                      (.multiply (.clone unit-vec) diff)))]
               (when ((block/category :enterable) (.getType b))
@@ -1134,7 +1134,7 @@
   (defn on-spider? [player]
     (instance? Spider (.getVehicle player)))
   (let [world (.getWorld block)
-        base0 (if (= m/chest (.getType block)) 24 39)
+        base0 (if (= m/chest (.getType block)) 25 38)
         base (int (* base0
                      (if (night? world) 1.3 1)
                      (if (.hasStorm world) 1.3 1)
@@ -2408,6 +2408,14 @@ nil))))
   (let [vehicle (.getVehicle evt)]
     (when-let [passenger (.getPassenger vehicle)]
       (.setCancelled evt true))))
+
+#_(defn vehicle-enter-event [evt]
+  (let [vehicle (.getVehicle evt)
+        passenger (.getEntered evt)]
+    (when (and
+            (instance? Minecart vehicle)
+            (instance? Player passenger))
+      (.setMaxSpeed vehicle 0.45))))
 
 #_(defn vehicle-entity-collision-event [evt]
   (prn 'vehicle-entity-collision-event))

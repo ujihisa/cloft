@@ -187,7 +187,7 @@
                  m/jack-o-lantern [arrow-skill-pumpkin "PUMPKIN"]
                  m/pumpkin [arrow-skill-pumpkin "PUMPKIN"]
                  m/diamond-block [arrow-skill-diamond "CRAZY DIAMOND"]
-                 #_( m/fire [arrow-skill-flame "FLAME"])
+                 #_(m/fire [arrow-skill-flame "FLAME"])
                  m/brown-mushroom [arrow-skill-quake "QUAKE"]
                  m/red-mushroom ['arrow-skill-poison "POISON"]
                  m/water [arrow-skill-water "WATER"]
