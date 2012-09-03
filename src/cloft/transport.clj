@@ -2,6 +2,7 @@
   (:require [cloft.cloft :as c])
   (:require [cloft.material :as m])
   (:require [cloft.player :as player])
+  (:require [cloft.loc :as loc])
   (:import [org.bukkit.util Vector])
   (:import [org.bukkit Bukkit])
   (:import [org.bukkit Location Effect])
@@ -25,7 +26,8 @@
         (when (instance? Player entity)
           (.sendMessage entity "teleport up!"))
         (let [newloc (.add (.getLocation entity) 0 30 0)]
-          (later
+          (future
+            (Thread/sleep 10)
             (condp = (.getType block)
               m/stone-plate (.teleport entity newloc)
               m/wood-plate (c/add-velocity entity 0 1.5 0)
@@ -45,11 +47,12 @@
 (defn cauldron-teleport [player]
   (let [center-cauldron (.getBlock (.getLocation player))
         surround-type (.getType (.getBlock (.add (.clone (.getLocation player)) 1 0 1)))
-        cds (for [[x z] [[1 0] [0 1] [-1 0] [0 -1]]]
-                 (let [loc (.add (.getLocation player) x 0 z)
+        cds (for [[x z] [[1 0] [0 1] [-1 0] [0 -1]]
+                  :let [loc (.add (.getLocation player) x 0 z)
                        block (.getBlock loc)]
-                   (when (= m/cauldron (.getType block))
-                     (.multiply (Vector. x 0 z) (* (Math/pow 2 (.getData block)) (Math/pow 2 (.getData center-cauldron)) 10)))))]
+                  :when (= m/cauldron (.getType block))]
+              (.multiply (Vector. x 0 z)
+                         (* (Math/pow 2 (.getData block)) (Math/pow 2 (.getData center-cauldron)) 10)))]
     (when (and
             (= m/cauldron (.getType center-cauldron))
             (every? identity cds))
