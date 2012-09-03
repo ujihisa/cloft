@@ -287,14 +287,6 @@
     (and (> 0.1 (Math/abs (.getX v)))
          (> 0.1 (Math/abs (.getZ v))))))
 
-(defn thunder-mobs-around [player amount]
-  (doseq [x (filter
-              #(instance? Monster %)
-              (.getNearbyEntities player 20 20 20))]
-    (Thread/sleep (rand-int 1000))
-    (.strikeLightningEffect (.getWorld x) (.getLocation x))
-    (.damage x amount)))
-
 (def last-vertical-shots (atom {}))
 
 (defn enough-previous-shots-by-players? [triggered-by threshold]
@@ -308,8 +300,18 @@
                locs)))))
 
 (defn check-and-thunder [triggered-by]
+  "in future"
+  (defn thunder-mobs-around [player amount]
+    (doseq [x (filter
+                #(instance? Monster %)
+                (.getNearbyEntities player 20 20 20))]
+      (Thread/sleep (rand-int 1000))
+      (later
+        (.strikeLightningEffect (.getWorld x) (.getLocation x))
+        (.damage x amount))))
+
   (when (enough-previous-shots-by-players? triggered-by 3)
-    (future-call #(thunder-mobs-around triggered-by 20))))
+    (thunder-mobs-around triggered-by 20)))
     ; possiblly we need to flush last-vertical-shots, not clear.
     ; i.e. 3 shooters p1, p2, p3 shoot arrows into mid air consecutively, how often thuders(tn)?
     ; A.
@@ -470,10 +472,11 @@
         (prn last-vertical-shots)
         (swap! last-vertical-shots assoc (.getDisplayName shooter) (.getLocation shooter))
         (prn last-vertical-shots)
-        (future-call #(let [shooter-name (.getDisplayName shooter)]
-                        (check-and-thunder shooter)
-                        (Thread/sleep 1000)
-                        (swap! last-vertical-shots dissoc shooter-name))))
+        (future
+          (let [shooter-name (.getDisplayName shooter)]
+            (check-and-thunder shooter)
+            (Thread/sleep 1000)
+            (swap! last-vertical-shots dissoc shooter-name))))
       (when-let [skill (arrow-skill-of shooter)]
         (skill/arrow-shoot skill evt (.getProjectile evt) shooter)))))
 
