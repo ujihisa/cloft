@@ -194,7 +194,7 @@
       (swap! arrow-skill assoc (.getDisplayName player) skill))))
 
 (defn arrow-skill-of [player]
-  (get arrow-skill (.getDisplayName player)))
+  (get @arrow-skill (.getDisplayName player)))
 
 #_(table-legacy {
                  m/tnt [arrow-skill-explosion "EXPLOSION"]
