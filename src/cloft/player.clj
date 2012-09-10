@@ -71,13 +71,13 @@ memo: Do we need double dispatch for entity-murder-event handling ?"""
     "%s (%s)"
     (.getDisplayName player)
     (clojure.string/join
-                    ", "
-                    (map (partial clojure.string/join ": ")
-                         (filter second
-                                 (merge (when verbose?
-                                          {'MR (@murder-record (.getDisplayName player))})
-                                        {'HP (.getHealth player)
-                                         'MP (.getFoodLevel player)
-                                         'AS (skill2name (arrow-skill-of player))
-                                         'RS (skill2name (reaction-skill-of-without-consume player))}))))))
+      ", "
+      (map (partial clojure.string/join ": ")
+           (filter second
+                   (merge (when verbose?
+                            {'MR (@murder-record (.getDisplayName player))})
+                          {'HP (.getHealth player)
+                           'MP (.getFoodLevel player)
+                           'AS (skill2name (arrow-skill-of player))
+                           'RS (skill2name (reaction-skill-of-without-consume player))}))))))
 
