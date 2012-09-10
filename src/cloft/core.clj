@@ -251,9 +251,6 @@
         (.sendMessage (.getShooter entity) "Woodbreak failed."))))
   (.remove entity))
 
-(defn arrow-skill-of [player]
-  (get @skill/arrow-skill (.getDisplayName player)))
-
 (def pickaxe-skill (atom {}))
 (defn pickaxe-skill-of [player]
   (get @pickaxe-skill (.getDisplayName player)))
@@ -469,7 +466,7 @@
             (check-and-thunder shooter)
             (Thread/sleep 1000)
             (swap! last-vertical-shots dissoc shooter-name))))
-      (when-let [skill (arrow-skill-of shooter)]
+      (when-let [skill (skill/arrow-skill-of shooter)]
         (skill/arrow-shoot skill evt (.getProjectile evt) shooter)))))
 
 (def takumi-watched? (atom false))
@@ -1062,7 +1059,7 @@
               (.setVelocity snowball (.multiply (.getVelocity snowball) 3)))
             (let [arrow (.launchProjectile player Arrow)]
               (.setVelocity arrow (.multiply (.getVelocity arrow) 1.3))
-              (when-let [skill (arrow-skill-of player)]
+              (when-let [skill (skill/arrow-skill-of player)]
                 (skill/arrow-shoot skill nil arrow player))
               #_(when (= 0 (rand-int 1000))
                 (let [msg (format "%s's gold sword lost enchant" (.getDisplayName player))]
@@ -1580,7 +1577,7 @@
       (when (chimera-cow/is? entity)
         (chimera-cow/murder-event evt entity killer))
       (.setDroppedExp evt (int (* (.getDroppedExp evt) (/ 15 (.getHealth killer)))))
-      (when (= skill/arrow-exp (arrow-skill-of killer))
+      (when (= skill/arrow-exp (skill/arrow-skill-of killer))
         (.setDroppedExp evt (int (* (.getDroppedExp evt) 3))))
       (when (and
               (< 5 (.getDroppedExp evt))
@@ -1734,7 +1731,7 @@
 
       Player
       (do
-        (skill/arrow-damage-entity (arrow-skill-of shooter) evt arrow target)
+        (skill/arrow-damage-entity (skill/arrow-skill-of shooter) evt arrow target)
         (cond
           (.contains (.getInventory shooter) m/web)
           (do
@@ -1850,7 +1847,7 @@
         (instance? Player target)
         (or (not (instance? Player (.getShooter arrow)))
             #_(use skill/arrow-reflectable? instead)
-            (skill/arrow-reflectable? (arrow-skill-of (.getShooter arrow))))
+            (skill/arrow-reflectable? (skill/arrow-skill-of (.getShooter arrow))))
         (when-let [chestplate (.getChestplate (.getInventory target))]
           (and
             (= m/leather-chestplate (.getType chestplate))
@@ -2057,7 +2054,7 @@
                        (not (instance? TNTPrimed actual-attacker))
                        (not (and
                               (instance? Player actual-attacker)
-                              (= arrow-skill-diamond (arrow-skill-of actual-attacker)))))
+                              (= arrow-skill-diamond (skill/arrow-skill-of actual-attacker)))))
               (skill target actual-attacker)))))
       (when (and (instance? Zombie attacker) (not (instance? PigZombie attacker)))
         (if (player/zombie? target)
@@ -2206,7 +2203,7 @@
         (when (when-let [inhand (.getItemInHand shooter)]
                 (= m/gold-sword (.getType inhand)))
           (.remove entity))
-        (if-let [skill (arrow-skill-of shooter)]
+        (if-let [skill (skill/arrow-skill-of shooter)]
           (skill/arrow-hit skill evt entity)
           (.sendMessage shooter "You don't have a skill yet.")))
 

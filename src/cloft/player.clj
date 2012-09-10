@@ -64,9 +64,6 @@ memo: Do we need double dispatch for entity-murder-event handling ?"""
 """dummies"""
 (defn reaction-skill-of-without-consume [player] nil)
 
-(defn arrow-skill-of [player]
-  (get @skill/arrow-skill (.getDisplayName player)))
-
 (defn player-inspect [player verbose?]
   (format
     "%s (%s)"
@@ -79,5 +76,5 @@ memo: Do we need double dispatch for entity-murder-event handling ?"""
                             {'MR (@murder-record (.getDisplayName player))})
                           {'HP (.getHealth player)
                            'MP (.getFoodLevel player)
-                           'AS (skill/id (arrow-skill-of player))
+                           'AS (skill/id (skill/arrow-skill-of player))
                            'RS (comment (reaction-skill-of-without-consume player))}))))))
