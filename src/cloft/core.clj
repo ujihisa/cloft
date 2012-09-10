@@ -849,7 +849,7 @@
   #_(.sendMessage player "[TIPS] shiftでプレイヤからも降りれます")
   #_(.sendMessage player "[TIPS] exp5以上のなにか殺すとたまにEmeraldもらえます")
   #_(.sendMessage player "[TIPS] arrow-skill-treeで生える木の種類がランダムに")
-  #_(.sendMessage player "[TIPS] しゃがんだまま剣でガードすると近くの敵に自動照準")
+  (.sendMessage player "[TIPS] しゃがんだまま剣でガードすると近くの敵に自動照準")
   #_(.sendMessage player "[TIPS] しゃがんだまま弓を構えると近くの敵に自動照準")
   #_(.sendMessage player "[TIPS] arrow-skill-woodbreakがちょっと便利に")
   #_(.sendMessage player "[TIPS] ラピュタ近くの地上の村、実はその下に地下帝国が...")
@@ -860,20 +860,21 @@
   #_(.sendMessage player "[NEWS] Zombie Jockeyや匠Jockeyが出没するように")
   #_(.sendMessage player "[NEWS] pickaxe-skill紋章上チェストをpickaxeで破壊するギャンブル")
   #_(.sendMessage player "[NEWS] 紋章上チェスト確率はblaze rodで確認可能。エメラルドで確変!")
-  (.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
-  (.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
+  #_(.sendMessage player "[NEWS] pickaxe-skill-fallで任意のブロックを落下可能")
+  #_(.sendMessage player "[NEWS] はさみで羊毛ブロックを切って糸にできる")
   #_(.sendMessage player "[NEWS] 金剣ビームはBlaze2に逆効果")
-  (.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
-  (.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
-  (.sendMessage player "[NEWS] 蜘蛛右クリックであなたもライダーに")
-  (.sendMessage player "[NEWS] 匠、雪玉爆発")
+  #_(.sendMessage player "[NEWS] エンダーチェストで高確率popcornが可能に!")
+  #_(.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
+  #_(.sendMessage player "[NEWS] 蜘蛛右クリックであなたもライダーに")
+  #_(.sendMessage player "[NEWS] 匠、雪玉爆発")
   (.sendMessage player "[NOTE] スキルシステム大改造中。arrow-skillはいまは申し訳ないけれど一部しか使えません")
   (later (.sendMessage player (clojure.string/join ", " (map name skill/arrow-skills))))
   #_(.sendMessage player "[NEWS] "))
 
 (defn player-login-event [evt]
   (let [player (.getPlayer evt)]
-    (future (Thread/sleep 1000)
+    (future
+      (Thread/sleep 1000)
       (let [ip (.. player getAddress getAddress getHostAddress)]
         (.setOp player (or
                          (.startsWith ip "10.0")
@@ -915,7 +916,7 @@
 
       (= "benri" msg)
       (do
-        (c/broadcast (format "%s: 便利" pname))
+        (c/broadcast (format "<%s>: 便利" pname))
         (.setCancelled evt true))
 
       (= "countdown" msg)
@@ -1416,13 +1417,15 @@
         Villager (player-rightclick-villager player target)
 
         Squid
-        (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
-                                                     65394 65394 65411 65438
-                                                     65405]))
-              msg2 (format "%s: %s" (.getDisplayName player) msg)]
-          (lingr/say-in-mcujm msg2)
-          (c/broadcast msg2)
-          (.setFoodLevel player 0))
+        (if (< 0 (.getFoodLevel player))
+          (let [msg (clojure.string/join "" (map char [65394 65398 65398 65436
+                                                       65394 65394 65411 65438
+                                                       65405]))
+                msg2 (format "%s: %s" (.getDisplayName player) msg)]
+            (lingr/say-in-mcujm msg2)
+            (c/broadcast msg2)
+            (.setFoodLevel player 0))
+          (.damage player 2 target))
 
         Player (player-rightclick-player player target)
 
@@ -1448,19 +1451,14 @@
                                  m/sand m/string])))
 
         IronGolem
-        (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
-                                                           [m/yellow-flower
-                                                            m/red-rose])))
+        (let [item (ItemStack. (rand-nth [m/yellow-flower m/red-rose]))]
+           (loc/drop-item (.getLocation target) item))
 
         Snowman
-        (loc/drop-item (.getLocation target) (ItemStack. (rand-nth
-                                                           [m/dirt
-                                                            m/snow-ball
-                                                            m/snow-ball
-                                                            m/snow-ball
-                                                            m/snow-ball
-                                                            m/snow-ball
-                                                            m/bucket])))
+        (let [item (ItemStack. (rand-nth
+                                 [m/dirt m/snow-ball m/snow-ball m/snow-ball
+                                  m/snow-ball m/snow-ball m/bucket]))]
+           (loc/drop-item (.getLocation target) item))
 
         Enderman
         (if (= 0 (rand-int 50))
@@ -1472,7 +1470,8 @@
                                     m/ender-stone
                                     m/ender-stone
                                     m/ender-pearl]))))
-nil))))
+
+        nil))))
 
 (defn player-egg-throw-event [evt]
   (egg/throw-event evt))
@@ -1499,15 +1498,12 @@ nil))))
           (later (.setType block m/air)))))))
 
 (def chicken-attacking (atom 0))
-(defn chicken-touch-player [chicken player]
-  (when (not= @chicken-attacking 0)
-    (.teleport chicken (.getLocation player))
-    (.damage player (rand-int 3) chicken)))
-
 (defn periodically-entity-touch-player-event []
-  (doseq [player (Bukkit/getOnlinePlayers)
-          chicken (take 3 (filter #(instance? Chicken %) (.getNearbyEntities player 2 2 2)))]
-      (chicken-touch-player chicken player)))
+  (when (not= @chicken-attacking 0)
+    (doseq [player (Bukkit/getOnlinePlayers)
+            chicken (take 1 (filter #(instance? Chicken %) (.getNearbyEntities player 2 2 2)))]
+      (.teleport chicken (.getLocation player))
+      (.damage player (rand-int 2) chicken))))
 
 (defn periodically-flyers []
   (doseq [player (Bukkit/getOnlinePlayers)
@@ -1530,7 +1526,7 @@ nil))))
 
 (defn player-respawn-event [evt]
   (let [player (.getPlayer evt)]
-    (future
+    (later
       (.setHealth player (/ (.getMaxHealth player) 3))
       (.setFoodLevel player 5))))
 
@@ -2489,7 +2485,7 @@ nil))))
     (def swank* (swank.swank/start-repl 4005)))
   (c/init-plugin plugin)
   (cloft.recipe/on-enable)
-  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 50 50)
+  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 0 25)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
   #_(lingr/say-in-mcujm "cloft plugin running...")
   (future
