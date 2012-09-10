@@ -1,6 +1,7 @@
 (ns cloft.player
   (:require [cloft.cloft :as c])
   (:require [cloft.lingr :as lingr])
+  (:require [cloft.skill :as skill])
   (:import [org.bukkit.entity Player])
   (:import [org.bukkit Bukkit]))
 
@@ -61,10 +62,10 @@ memo: Do we need double dispatch for entity-murder-event handling ?"""
     (c/broadcast name " killed " target-name " (exp: " (.getDroppedExp evt) ")")))
 
 """dummies"""
-(defn arrow-skill-of [player] nil)
 (defn reaction-skill-of-without-consume [player] nil)
 
-(defn skill2name [skill] nil)
+(defn arrow-skill-of [player]
+  (get @skill/arrow-skill (.getDisplayName player)))
 
 (defn player-inspect [player verbose?]
   (format
@@ -78,6 +79,5 @@ memo: Do we need double dispatch for entity-murder-event handling ?"""
                             {'MR (@murder-record (.getDisplayName player))})
                           {'HP (.getHealth player)
                            'MP (.getFoodLevel player)
-                           'AS (skill2name (arrow-skill-of player))
-                           'RS (skill2name (reaction-skill-of-without-consume player))}))))))
-
+                           'AS (skill/id (arrow-skill-of player))
+                           'RS (comment (reaction-skill-of-without-consume player))}))))))

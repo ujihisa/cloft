@@ -20,6 +20,10 @@
 (defprotocol Learn
   (block [_]))
 
+(defprotocol Refer
+  (id [_]))
+
+
 (defprotocol ArrowSkill
   (arrow-damage-entity [_ evt arrow target])
   (arrow-hit [_ evt arrow])
@@ -32,6 +36,8 @@
     (getName [_] "TELEPORT")
     Learn
     (block [_] m/yellow-flower)
+    Refer
+    (id [_] 'arrow-teleport)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       (.setCancelled evt true))
@@ -52,6 +58,8 @@
     (getName [_] "SHOTGUN")
     Learn
     (block [_] m/cactus)
+    Refer
+    (id [_] 'arrow-shotgun)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       nil)
@@ -71,6 +79,8 @@
     (getName [_] "STRONG")
     Learn
     (block [_] m/glowstone)
+    Refer
+    (id [_] 'arrow-strong)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       nil)
@@ -87,6 +97,8 @@
     (getName [_] "EXP")
     Learn
     (block [_] m/powered-rail)
+    Refer
+    (id [_] 'arrow-exp)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       (.damage (.getShooter arrow) 2))
@@ -102,6 +114,8 @@
     (getName [_] "FIRE")
     Learn
     (block [_] m/red-rose)
+    Refer
+    (id [_] 'arrow-fire)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       (.setFireTicks target 400))
@@ -120,6 +134,8 @@
     (getName [_] "TREE")
     Learn
     (block [_] m/sapling)
+    Refer
+    (id [_] 'arrow-tree)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       (.setCancelled evt true))
@@ -141,6 +157,8 @@
     (getName [_] "TORCH")
     Learn
     (block [_] m/torch)
+    Refer
+    (id [_] 'arrow-torch)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       nil
