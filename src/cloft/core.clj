@@ -2486,6 +2486,9 @@
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
   #_(lingr/say-in-mcujm "cloft plugin running...")
   (future
+    (defn send-message-to [contents players]
+      (doseq [player players]
+        (.sendMessage player (format "%s: %s" (:user contents) (:body contents)))))
     (let [ctx (mq/context 1)
           subscriber (mq/socket ctx mq/sub)]
       (mq/bind subscriber "tcp://*:1235")
@@ -2502,9 +2505,9 @@
               (lingr/say "computer_science" msg)
               (c/broadcast msg))
             "/chicken"
-            (future
-              (doseq [p (Bukkit/getOnlinePlayers)]
-                (when-not (.isDead p)
-                  (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))))
-            (doseq [player players]
-              (.sendMessage player (format "%s: %s" (:user contents) (:body contents))))))))))
+            (later
+              (doseq [p (Bukkit/getOnlinePlayers)
+                      :when (not (.isDead p))]
+                (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))
+              (send-message-to contents players))
+            (send-message-to contents players)))))))
