@@ -2476,6 +2476,12 @@
                          m/coal-ore m/air} (.getType block))]
         (.setType block btype)))))
 
+(defn persistent-write []
+  (when (not-empty (Bukkit/getOnlinePlayers))
+    (with-open [w (clojure.java.io/writer "cloft-persistent.clj")]
+      (.write w (str (skill/to-hashmap))))
+    (prn 'persistent-write 'done)))
+
 (defonce swank* nil)
 (defn on-enable [plugin]
   (when-not swank*
@@ -2484,6 +2490,7 @@
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 0 25)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
+  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'persistent-write 0 1200)
   #_(lingr/say-in-mcujm "cloft plugin running...")
   (let [hashmap ((comp eval read-string)
                   (try
