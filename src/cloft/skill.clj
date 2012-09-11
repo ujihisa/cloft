@@ -37,7 +37,7 @@
     Learn
     (block [_] m/yellow-flower)
     Refer
-    (id [_] 'arrow-teleport)
+    (id [_] #'arrow-teleport)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       (.setCancelled evt true))
@@ -59,7 +59,7 @@
     Learn
     (block [_] m/cactus)
     Refer
-    (id [_] 'arrow-shotgun)
+    (id [_] #'arrow-shotgun)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       nil)
@@ -80,7 +80,7 @@
     Learn
     (block [_] m/glowstone)
     Refer
-    (id [_] 'arrow-strong)
+    (id [_] #'arrow-strong)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       nil)
@@ -98,7 +98,7 @@
     Learn
     (block [_] m/powered-rail)
     Refer
-    (id [_] 'arrow-exp)
+    (id [_] #'arrow-exp)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       (.damage (.getShooter arrow) 2))
@@ -115,7 +115,7 @@
     Learn
     (block [_] m/red-rose)
     Refer
-    (id [_] 'arrow-fire)
+    (id [_] #'arrow-fire)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       (.setFireTicks target 400))
@@ -135,7 +135,7 @@
     Learn
     (block [_] m/sapling)
     Refer
-    (id [_] 'arrow-tree)
+    (id [_] #'arrow-tree)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       (.setCancelled evt true))
@@ -158,7 +158,7 @@
     Learn
     (block [_] m/torch)
     Refer
-    (id [_] 'arrow-torch)
+    (id [_] #'arrow-torch)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
       nil

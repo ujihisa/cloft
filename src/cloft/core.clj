@@ -2485,6 +2485,12 @@
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 0 25)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
   #_(lingr/say-in-mcujm "cloft plugin running...")
+  (let [hashmap ((comp eval read-string)
+                  (try
+                    (slurp "cloft-persistent.clj")
+                    (catch java.io.FileNotFoundException e "{}")))]
+    (prn hashmap)
+    (skill/from-hashmap hashmap))
   (future
     (defn send-message-to [contents players]
       (doseq [player players]
