@@ -512,9 +512,12 @@
     (.setTamed wolf true)
     (.setOwner wolf you)
     (.setTarget wolf by)
-    (future-call #(do
-                    (Thread/sleep 10000)
-                    (.remove wolf))))
+    (future
+      (Thread/sleep 10000)
+      (when-not (.isDead wolf)
+        (later
+          (.load (.getChunk (.getLocation wolf)))
+          (.remove wolf)))))
   (.sendMessage you "a wolf helps you!"))
 
 (defn find-place [from range]
@@ -530,12 +533,14 @@
              (= m/air
                 (.getType (.getBlock (.add (.clone %) 0 1 0)))))
           candidates)]
-    (rand-nth good-candidates)))
+    (when-not (empty? good-candidates)
+      (rand-nth good-candidates))))
 
 (defn reaction-skill-teleport [you by]
   (.sendMessage you
                 (str "You got damage by " (c/entity2name by) " and escaped."))
-  (.teleport you (find-place (.getLocation you) (range -10 10))))
+  (when-let [to (find-place (.getLocation you) (range -10 10))]
+    (.teleport you to)))
 
 (defn reaction-skill-poison [you by]
   (.addPotionEffect by (PotionEffect. PotionEffectType/POISON 200 2)))
@@ -2121,7 +2126,8 @@
                 (= 0 (rand-int 5)))
           (let [loc (.getLocation block)
                 enderman (loc/spawn loc Enderman)]
-            (.teleport enderman (find-place loc (range -30 30)))
+            (when-let [to (find-place loc (range -30 30))]
+               (.teleport enderman to))
             (loc/play-sound loc s/enderman-teleport 1.0 1.0)
             (.setTarget enderman player)
             (.sendMessage player "Enderman spawned!")))
