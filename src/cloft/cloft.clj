@@ -3,6 +3,7 @@
   (:require [clojure.string :as s])
   (:require [clojure.set])
   (:require [cloft.material :as m])
+  (:import [org.bukkit.util Vector])
   (:import [org.bukkit Bukkit Material])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
@@ -89,7 +90,8 @@
   (.isInAABB (.toVector loc) (.toVector min) (.toVector max)))
 
 (defn add-velocity [entity x y z]
-  (.setVelocity entity (.add (.getVelocity entity) (org.bukkit.util.Vector. (double x) (double y) (double z)))))
+  (.setVelocity entity
+                (.add (.getVelocity entity) (Vector. (double x) (double y) (double z)))))
 
 (defn entities-nearby-from [location radius]
   "location -> set of entities"
@@ -176,6 +178,7 @@
                 :let [block (.getBlock (.add (.clone loc) 0 y 0))]
                 :when (= (.getType block) m/glass)]
           (later (.setType block m/air)))))))
+
 (defn freeze-for-20-sec [target]
   (freeze target 20))
 

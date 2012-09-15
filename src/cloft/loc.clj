@@ -22,3 +22,4 @@
 (defn of [pname]
   (.getLocation (Bukkit/getPlayer pname)))
 
+(def ujm (partial of "ujm"))
