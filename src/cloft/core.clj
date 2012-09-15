@@ -522,8 +522,10 @@
 
 (defn find-place [from range]
   (let [candidates
-        (for [x range y range z range :when (> y 5)]
-          (.add (.clone from) x y z))
+        (for [x range y range z range
+              :let [loc (.add (.clone from) x y z)]
+              :when (< 5 (.getY loc))]
+          loc)
         good-candidates
         (filter
           #(and
@@ -537,9 +539,8 @@
       (rand-nth good-candidates))))
 
 (defn reaction-skill-teleport [you by]
-  (.sendMessage you
-                (str "You got damage by " (c/entity2name by) " and escaped."))
   (when-let [to (find-place (.getLocation you) (range -10 10))]
+    (.sendMessage you (str "You got damage by " (c/entity2name by) " and escaped."))
     (.teleport you to)))
 
 (defn reaction-skill-poison [you by]
