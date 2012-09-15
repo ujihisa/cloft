@@ -1999,7 +1999,7 @@
     (when (instance? Fish attacker)
       (fish-damages-entity-event evt attacker target))
     (when (instance? Snowball attacker)
-      (if-let [shooter (.getShooter attacker)]
+      (when-let [shooter (.getShooter attacker)]
         (cond
           (@special-snowball-set attacker)
           (special-snowball-damage attacker target shooter)
