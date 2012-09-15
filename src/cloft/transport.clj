@@ -37,7 +37,7 @@
           (loc/play-effect entity-loc Effect/ENDER_SIGNAL nil)
           (loc/play-effect newloc Effect/ENDER_SIGNAL nil))))))
 
-(defn teleport-machine [player block block-against]
+#_(defn teleport-machine [player block block-against]
   (when (= m/water (.getType block))
     (let [wools (for [x [-1 0 1] z [-1 0 1] :when (or (not= x 0) (not= z 0))]
                   (.getType (.getBlock
@@ -49,7 +49,7 @@
         surround-type (.getType (.getBlock (.add (.clone (.getLocation player)) 1 0 1)))
         cds (for [[x z] [[1 0] [0 1] [-1 0] [0 -1]]
                   :let [loc (.add (.getLocation player) x 0 z)
-                       block (.getBlock loc)]
+                        block (.getBlock loc)]
                   :when (= m/cauldron (.getType block))]
               (.multiply (Vector. x 0 z)
                          (* (Math/pow 2 (.getData block)) (Math/pow 2 (.getData center-cauldron)) 10)))]
