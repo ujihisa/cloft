@@ -1737,7 +1737,10 @@
 
       Player
       (do
-        (skill/arrow-damage-entity (skill/arrow-skill-of shooter) evt arrow target)
+        (let [skill (skill/arrow-skill-of shooter)]
+					 (if skill
+						 (skill/arrow-damage-entity skill evt arrow target)
+						 (.sendMessage shooter "You don't have an arrow skill yet!")))
         (cond
           (.contains (.getInventory shooter) m/web)
           (do
