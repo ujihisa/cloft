@@ -1138,13 +1138,13 @@
   (defn on-spider? [player]
     (instance? Spider (.getVehicle player)))
   (let [world (.getWorld block)
-        base0 (if (= m/chest (.getType block)) 25 38)
+        base0 (if (= m/chest (.getType block)) 25 35)
         base (int (* base0
                      (if (night? world) 1.3 1)
                      (if (.hasStorm world) 1.3 1)
                      (if (.isThundering world) 1.3 1)
                      (if (on-spider? player) 1.3 1)
-                     (if (burning? player) 2.0 1)))
+                     (if (burning? player) 1.9 1)))
         inventory (if (= m/chest (.getType block))
                     (.getBlockInventory (.getState block))
                     (.getEnderChest player))
@@ -2173,7 +2173,7 @@
                   (do
                     (swap! unpopcornable assoc player true)
                     (future
-                      (Thread/sleep 180000)
+                      (Thread/sleep 240000)
                       (swap! unpopcornable assoc player false))
                     (dosync
                       (ref-set popcorning (chest-popcorn-probability block player))
