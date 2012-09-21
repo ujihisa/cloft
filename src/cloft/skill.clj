@@ -23,7 +23,6 @@
 (defprotocol Refer
   (id [_]))
 
-
 (defprotocol ArrowSkill
   (arrow-damage-entity [_ evt arrow target])
   (arrow-hit [_ evt arrow])
@@ -161,10 +160,7 @@
     (id [_] #'arrow-torch)
     ArrowSkill
     (arrow-damage-entity [_ evt arrow target]
-      nil
-      #_(when (nil? (.getPassenger target))
-        (.setPassenger target
-                       (loc/fall-block (.add (.getLocation target) 0 2 0) m/torch (.getData (org.bukkit.material.MaterialData. m/torch))))))
+      nil)
     (arrow-hit [_ evt arrow]
       (let [location (.getLocation arrow)]
         (.setType (.getBlock location) m/torch))
@@ -173,9 +169,7 @@
       nil)
     (arrow-reflectable? [_] true)))
 
-(def arrow-skill (atom {"ujm" arrow-teleport
-                        "mozukusoba" arrow-teleport
-                        "ast924" arrow-shotgun}))
+(def arrow-skill (atom {}))
 
 (def arrow-skills
   [arrow-teleport arrow-shotgun arrow-strong arrow-exp arrow-fire arrow-tree
