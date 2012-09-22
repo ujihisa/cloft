@@ -60,6 +60,7 @@
 
 (defn capture [captor target]
   (when (spawnable-by-egg? target)
+    (loc/play-sound (.getLocation target) s/level-up 0.8 1.5)
     (let [spawn-egg (.toItemStack (SpawnEgg. (.getType target)))]
       (.setAmount spawn-egg 1)
       (loc/drop-item (.getLocation target) spawn-egg)
@@ -88,7 +89,6 @@
 
       skill-capture
       (when (= 0 (rand-int 4))
-        (loc/play-sound (.getLocation target) s/level-up 0.8 1.5)
         (capture shooter target))
 
       nil
