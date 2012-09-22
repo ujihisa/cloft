@@ -1138,13 +1138,13 @@
   (defn on-spider? [player]
     (instance? Spider (.getVehicle player)))
   (let [world (.getWorld block)
-        base0 (if (= m/chest (.getType block)) 25 35)
+        base0 (if (= m/chest (.getType block)) 25 34)
         base (int (* base0
                      (if (night? world) 1.3 1)
                      (if (.hasStorm world) 1.3 1)
                      (if (.isThundering world) 1.3 1)
                      (if (on-spider? player) 1.3 1)
-                     (if (burning? player) 1.9 1)))
+                     (if (burning? player) 1.8 1)))
         inventory (if (= m/chest (.getType block))
                     (.getBlockInventory (.getState block))
                     (.getEnderChest player))

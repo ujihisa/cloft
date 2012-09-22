@@ -55,6 +55,9 @@
         (.setType (.getBlock loc) m/crops)
         (catch org.bukkit.event.EventException e nil)))))
 
+(defn skill-capture [entity]
+  (.remove entity))
+
 (defn capture [captor target]
   (when (spawnable-by-egg? target)
     (let [spawn-egg (.toItemStack (SpawnEgg. (.getType target)))]
@@ -70,7 +73,7 @@
     (let [table {m/yellow-flower [skill-teleport "TELEPORT"]
                  m/snow-block [skill-ice "ICE"]
                  m/crops [skill-plant "PLANT"]
-                 m/chest ['skill-capture "CAPTURE"]}]
+                 m/chest [skill-capture "CAPTURE"]}]
       (when-let [[skill skill-name] (table (.getType block))]
         (set-skill player skill)
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
@@ -83,7 +86,7 @@
       skill-ice
       (c/freeze-for-20-sec target)
 
-      'skill-capture
+      skill-capture
       (when (= 0 (rand-int 4))
         (loc/play-sound (.getLocation target) s/level-up 0.8 1.5)
         (capture shooter target))
@@ -94,9 +97,8 @@
       (prn 'egg-damages-entity-event 'must-not-happen shooter (skill-of shooter)))))
 
 (defn hit-event [evt egg]
-  (let [skill (skill-of (.getShooter egg))]
-    (cond
-      (fn? skill) (skill egg))))
+  (when-let [skill (skill-of (.getShooter egg))]
+    (skill egg)))
 
 (defn throw-event [evt]
   (let [egg (.getEgg evt)
