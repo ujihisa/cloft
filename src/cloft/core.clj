@@ -1862,7 +1862,7 @@
             (= m/leather-chestplate (.getType chestplate))
             (not-empty (.getEnchantments chestplate)))))
     (do
-      (c/broadcast (.getDisplayName target) "'s enchanted leather chestplate reflects arrows!")
+      (c/broadcast (format "'s enchanted leather chestplate reflects arrows!" (c/entity2name target)))
       (arrow/reflect evt arrow target))
     (arrow-damages-entity-event-internal evt arrow target)))
 
