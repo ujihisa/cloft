@@ -2486,11 +2486,16 @@
                          m/coal-ore m/air} (.getType block))]
         (.setType block btype)))))
 
+(def persistent-lastdata (ref nil))
 (defn persistent-write []
-  (when (not-empty (Bukkit/getOnlinePlayers))
-    (with-open [w (clojure.java.io/writer "cloft-persistent.clj")]
-      (.write w (str (skill/to-hashmap))))
-    (prn 'persistent-write 'done)))
+  (let [data (str (skill/to-hashmap))]
+    (when (and
+            (not-empty (Bukkit/getOnlinePlayers))
+            (not= @persistent-lastdata data))
+      (with-open [w (clojure.java.io/writer "cloft-persistent.clj")]
+        (.write w data)
+        (dosync (ref-set persistent-lastdata data)))
+      (prn 'persistent-write 'done))))
 
 (defonce swank* nil)
 (defn on-enable [plugin]
