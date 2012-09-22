@@ -12,11 +12,13 @@
 
 (def player-skills (atom {}))
 
-(defn spawnable-by-egg? [entity]
-  (some #(instance? % entity)
-        [Creeper Skeleton Spider Zombie Slime Ghast PigZombie Enderman
-         CaveSpider Silverfish Blaze MagmaCube Pig Sheep Cow Chicken Squid
-         Wolf MushroomCow Villager Ocelot]))
+(defn captureable? [entity]
+  (and
+    (some #(instance? % entity)
+          [Creeper Skeleton Spider Zombie Slime Ghast PigZombie Enderman
+           CaveSpider Silverfish Blaze MagmaCube Pig Sheep Cow Chicken Squid
+           Wolf MushroomCow Villager Ocelot])
+    (> 5 (.getHealth entity))))
 
 (defn skill-of [player]
   (get @player-skills (.getDisplayName player)))
@@ -59,7 +61,7 @@
   (.remove entity))
 
 (defn capture [captor target]
-  (when (spawnable-by-egg? target)
+  (when (captureable? target)
     (loc/play-sound (.getLocation target) s/level-up 0.8 1.5)
     (let [spawn-egg (.toItemStack (SpawnEgg. (.getType target)))]
       (.setAmount spawn-egg 1)
