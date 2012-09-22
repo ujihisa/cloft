@@ -2505,7 +2505,7 @@
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 0 25)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'cloft-scheduler/on-beat 0 20)
-  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'persistent-write 0 1200)
+  (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'persistent-write 0 200)
   #_(lingr/say-in-mcujm "cloft plugin running...")
   (let [hashmap ((comp eval read-string)
                   (try
