@@ -13,12 +13,12 @@
 (def player-skills (atom {}))
 
 (defn captureable? [entity]
-  (and
+  (defn spawnable? [entity]
     (some #(instance? % entity)
           [Creeper Skeleton Spider Zombie Slime Ghast PigZombie Enderman
            CaveSpider Silverfish Blaze MagmaCube Pig Sheep Cow Chicken Squid
-           Wolf MushroomCow Villager Ocelot])
-    (> 5 (.getHealth entity))))
+           Wolf MushroomCow Villager Ocelot]))
+  (and (spawnnable? entity) (> 5 (.getHealth entity))))
 
 (defn skill-of [player]
   (get @player-skills (.getDisplayName player)))
