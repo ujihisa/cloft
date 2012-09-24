@@ -137,6 +137,12 @@
                (map #(.getType (.getBlock (.add (.clone (.getLocation block-against)) %1 0 %2)))
                     [-1 1 0 0] [-1 1 0 0]))))
 
+(defn blazon-change-randomely [block-type block-against]
+  (doseq [[x z] [[0 1] [0 -1] [1 0] [-1 0]]
+          :let [loc (.add (.clone (.getLocation block-against)) x 0 z)]
+          :when (= 0 (rand-int 5))]
+    (.setType (.getBlock loc) block-type)))
+
 (defn of-arrow [entity]
   (let [location (.getLocation entity)
         velocity (.getVelocity entity)

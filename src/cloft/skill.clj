@@ -185,7 +185,8 @@
       (c/broadcast (format "%s changed arrow-skill to %s"
                            (.getDisplayName player)
                            (name skill)))
-      (swap! arrow-skill assoc (.getDisplayName player) skill))))
+      (swap! arrow-skill assoc (.getDisplayName player) skill)
+      (block/blazon-change-randomely m/cobblestone (.getBlock (.add (.getLocation block0) 0 -1 0))))))
 
 (defn arrow-skill-of [player]
   (get @arrow-skill (.getDisplayName player)))
