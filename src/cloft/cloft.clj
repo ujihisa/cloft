@@ -149,7 +149,9 @@
 (defn teleport-without-angle [entity location]
   (.setYaw location (.getYaw (.getLocation entity)))
   (.setPitch location (.getPitch (.getLocation entity)))
-  (.teleport entity location))
+  (.teleport entity location)
+  #_(when-let [vehicle (.getVehicle entity)]
+    (.teleport vehicle location)))
 
 (defn freeze [target sec]
   (when-not (.isDead target)

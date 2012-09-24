@@ -101,7 +101,17 @@
   (.setCancelled evt true))
 
 (defn player-move-event [evt]
+  (defn treadmill-place [loc]
+    (first (for [z [-1 1]
+                 :let [loc-side (.add (.clone loc) 0 0 z)]
+                 :when (= m/emerald-block (.getType (.getBlock loc-side)))
+                 :let [loc-behind-side (.add (.clone loc-side) -5 0 0)]
+                 :when (= m/emerald-block (.getType (.getBlock loc-behind-side)))]
+             (.subtract loc-behind-side 0 0 z))))
   (let [player (.getPlayer evt)]
+    (when (.isSprinting player)
+      (when-let [where-to (treadmill-place (.getLocation player))]
+        (later (c/teleport-without-angle player where-to))))
     #_(when-let [cart (.getVehicle player)]
       (when (instance? Minecart cart)
         (if (#{m/stone} (.getType (.getBlock (.getTo evt))))
