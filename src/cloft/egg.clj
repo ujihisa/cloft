@@ -18,7 +18,7 @@
           [Creeper Skeleton Spider Zombie Slime Ghast PigZombie Enderman
            CaveSpider Silverfish Blaze MagmaCube Pig Sheep Cow Chicken Squid
            Wolf MushroomCow Villager Ocelot]))
-  (and (spawnnable? entity) (>= 5 (.getHealth entity))))
+  (and (spawnable? entity) (>= 5 (.getHealth entity))))
 
 (defn skill-of [player]
   (get @player-skills (.getDisplayName player)))
