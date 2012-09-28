@@ -2187,7 +2187,7 @@
                   (do
                     (swap! unpopcornable assoc player true)
                     (future
-                      (Thread/sleep 240000)
+                      (Thread/sleep 270000)
                       (swap! unpopcornable assoc player false))
                     (dosync
                       (ref-set popcorning (chest-popcorn-probability block player))
