@@ -1,43 +1,43 @@
 (ns cloft.core
-  (:require [cloft.cloft :as c])
   (:use [cloft.cloft :only [later]])
-  (:require [cloft.material :as m])
-  (:require [cloft.sound :as s])
-  (:require [cloft.scheduler :as cloft-scheduler])
-  (:require [cloft.chimera-cow :as chimera-cow])
-  (:require [cloft.arrow :as arrow])
-  (:require [cloft.recipe])
-  (:require [cloft.chest])
-  (:require [cloft.player :as player])
-  (:require [cloft.loc :as loc])
-  (:require [cloft.block :as block])
-  (:require [cloft.item :as item])
-  (:require [cloft.transport :as transport])
-  (:require [cloft.egg :as egg])
-  (:require [cloft.skill :as skill])
-  (:require [swank.swank])
-  (:import [org.bukkit Bukkit DyeColor])
-  (:import [org.bukkit.material Wool Dye])
-  (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
+  (:require [cloft.cloft :as c]
+            [cloft.material :as m]
+            [cloft.sound :as s]
+            [cloft.scheduler :as cloft-scheduler]
+            [cloft.chimera-cow :as chimera-cow]
+            [cloft.arrow :as arrow]
+            [cloft.recipe]
+            [cloft.chest]
+            [cloft.player :as player]
+            [cloft.loc :as loc]
+            [cloft.block :as block]
+            [cloft.item :as item]
+            [cloft.transport :as transport]
+            [cloft.egg :as egg]
+            [cloft.skill :as skill]
+            [swank.swank])
+  (:import [org.bukkit Bukkit DyeColor]
+           [org.bukkit.material Wool Dye]
+           [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
             EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
             EnderSignal ExperienceOrb Explosive FallingSand Fireball Fish
-            Flying Ghast Giant HumanEntity IronGolem Item LightningStrike LivingEntity
-            MagmaCube Minecart Monster MushroomCow NPC Painting Pig PigZombie
-            Player PoweredMinecart Projectile Sheep Silverfish Skeleton Slime
-            SmallFireball Snowball Snowman Spider Squid StorageMinecart
-            ThrownPotion TNTPrimed Vehicle Villager Villager$Profession
-            WaterMob Weather Wolf Zombie Ocelot])
-  (:import [org.bukkit.event.entity EntityDamageByEntityEvent
-            EntityDamageEvent$DamageCause CreatureSpawnEvent$SpawnReason])
-  (:import [org.bukkit.potion Potion PotionEffect PotionEffectType])
-  (:import [org.bukkit.inventory ItemStack])
-  (:import [org.bukkit.util Vector])
-  (:import [org.bukkit Location Effect])
-  (:import [org.bukkit.block Biome])
-  (:import [org.bukkit.event.block Action])
-  (:require [cloft.lingr :as lingr])
-  (:require [cloft.zhelpers :as mq]))
+            Flying Ghast Giant HumanEntity IronGolem Item LightningStrike
+            LivingEntity MagmaCube Minecart Monster MushroomCow NPC Painting
+            Pig PigZombie Player PoweredMinecart Projectile Sheep Silverfish
+            Skeleton Slime SmallFireball Snowball Snowman Spider Squid
+            StorageMinecart ThrownPotion TNTPrimed Vehicle Villager
+            Villager$Profession WaterMob Weather Wolf Zombie Ocelot]
+           [org.bukkit.event.entity EntityDamageByEntityEvent
+            EntityDamageEvent$DamageCause CreatureSpawnEvent$SpawnReason]
+           [org.bukkit.potion Potion PotionEffect PotionEffectType]
+           [org.bukkit.inventory ItemStack]
+           [org.bukkit.util Vector]
+           [org.bukkit Location Effect]
+           [org.bukkit.block Biome]
+           [org.bukkit.event.block Action])
+  (:require [cloft.lingr :as lingr]
+            [cloft.zhelpers :as mq]))
 
 (defn coor-local-to-world [player origin-block dx hx rx]
   """returns a bukkit Vector"""
@@ -68,7 +68,7 @@
     (.sendMessage player "(界王拳失敗)")
     (do
       (.sendMessage player "界王拳3倍!")
-      (.addPotionEffect player (PotionEffect. PotionEffectType/HUNGER 500 10))
+      (.addPotionEffect player (PotionEffect. PotionEffectType/HUNGER 500 1))
       (.addPotionEffect player (PotionEffect. PotionEffectType/FIRE_RESISTANCE 500 3))
       (.addPotionEffect player (PotionEffect. PotionEffectType/INCREASE_DAMAGE 500 1))
       (.addPotionEffect player (PotionEffect. PotionEffectType/DAMAGE_RESISTANCE 500 1))
@@ -1155,7 +1155,7 @@
                      (if (.hasStorm world) 1.3 1)
                      (if (.isThundering world) 1.3 1)
                      (if (on-spider? player) 1.3 1)
-                     (if (burning? player) 1.8 1)))
+                     (if (burning? player) 1.7 1)))
         inventory (if (= m/chest (.getType block))
                     (.getBlockInventory (.getState block))
                     (.getEnderChest player))
