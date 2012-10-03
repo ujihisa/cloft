@@ -930,7 +930,7 @@
 
       (= "benri" msg)
       (do
-        (c/broadcast (format "<%s>: 便利" pname))
+        (c/broadcast (format "<%s> 便利" pname))
         (.setCancelled evt true))
 
       (= "countdown" msg)
