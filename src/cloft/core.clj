@@ -2508,6 +2508,15 @@
         (dosync (ref-set persistent-lastdata data)))
       (prn 'persistent-write 'done))))
 
+(defn last-lingr-command []
+  (let [msg (clojure.string/join
+               "\n"
+               (for [p (Bukkit/getOfflinePlayers)
+                     :let [pname (.getName p)
+                           ltime (.getLastPlayed p)]]
+                 (format "%s: %d" pname ltime)))]
+    (lingr/say "computer_science" (apply str (take 999 msg)))))
+
 (defonce swank* nil)
 (defn on-enable [plugin]
   (when-not swank*
@@ -2537,7 +2546,7 @@
               players (Bukkit/getOnlinePlayers)]
           #_(prn 'received contents)
           (condp re-find (:body contents)
-            #"^/list\s"
+            #"^/list"
             (let [msg (if (empty? players)
                         "(no players)"
                         (clojure.string/join "\n" (map #(player/player-inspect % (= (:body contents) "/list -l")) players)))]
@@ -2550,4 +2559,5 @@
                 (lingr/say "computer_science" (format "%s: ぎゃっ" (.getDisplayName p)))
                 (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))
               (send-message-to contents players))
+            #"^/last$" (last-lingr-command)
             (send-message-to contents players)))))))
