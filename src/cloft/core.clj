@@ -2536,17 +2536,18 @@
         (let [contents (read-string (mq/recv-str subscriber))
               players (Bukkit/getOnlinePlayers)]
           #_(prn 'received contents)
-          (condp #(.startsWith %2 %1) (:body contents)
-            "/list"
+          (condp re-find (:body contents)
+            #"^/list\s"
             (let [msg (if (empty? players)
                         "(no players)"
                         (clojure.string/join "\n" (map #(player/player-inspect % (= (:body contents) "/list -l")) players)))]
               (lingr/say "computer_science" msg)
               (c/broadcast msg))
-            "/chicken"
+            #"^/chicken$"
             (later
               (doseq [p (Bukkit/getOnlinePlayers)
                       :when (not (.isDead p))]
+                (lingr/say "computer_science" (format "%s: ぎゃっ" (.getDisplayName p)))
                 (loc/spawn (.add (.getLocation p) 0 2 0) Chicken))
               (send-message-to contents players))
             (send-message-to contents players)))))))
