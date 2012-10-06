@@ -1536,16 +1536,16 @@
 (defn periodically-sponge []
   (when (= 0 (rand-int 10))
     (let [sponge-locs
-          (set (for [player (Bukkit/getOnlinePlayers)
-                     :let [loc (.getLocation player)]
-                     x (range -9 10)
-                     y (range -2 3)
-                     z (range -9 10)
-                     :let [loc (.add (.clone loc) x y z)]
-                     :when (< 0 (.getY loc) 256)
-                     :when (= m/sponge (.getType (.getBlock loc)))]
-                 loc))]
-      (doseq [sponge-loc sponge-locs
+          (for [player (Bukkit/getOnlinePlayers)
+                :let [loc (.getLocation player)]
+                x (range -9 10)
+                y (range -2 3)
+                z (range -9 10)
+                :let [loc (.add (.clone loc) x y z)]
+                :when (< 0 (.getY loc) 256)
+                :when (= m/sponge (.getType (.getBlock loc)))]
+            loc)]
+      (doseq [sponge-loc (set sponge-locs)
               [x y z] [[-1 0 0] [0 -1 0] [0 0 -1]
                        [1 0 0] [0 1 0] [0 0 1]]
               :let [loc (.add (.clone sponge-loc) x y z)
