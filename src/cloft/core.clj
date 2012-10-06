@@ -436,6 +436,7 @@
       (cond
         (= m/emerald itemtype) (.setCancelled evt true)
         (#{m/chest m/ender-chest} itemtype) nil
+        (= m/sponge itemtype) (lingr/say-in-mcujm "スポンジはpopcornできません m9(^Д^)")
         :else (popcorn item @popcorning)))
     (let [item (.getEntity evt)
           table {m/raw-beef [m/rotten-flesh m/cooked-beef]
@@ -881,7 +882,8 @@
   #_(.sendMessage player "[NEWS] 蜘蛛右クリックであなたもライダーに")
   #_(.sendMessage player "[NEWS] 匠、雪玉爆発")
   (.sendMessage player "[NOTE] スキルシステム大改造中。arrow-skillはいまは申し訳ないけれど一部しか使えません")
-  (.sendMessage player "[NEWS] 矢のスキルを切り替えるとき、確率的に紋章損傷")
+  #_(.sendMessage player "[NEWS] 矢のスキルを切り替えるとき、確率的に紋章損傷")
+  (.sendMessage player "[NEWS] スポンジの吸水効果")
   (later (.sendMessage player (clojure.string/join ", " (map name skill/arrow-skills))))
   #_(.sendMessage player "[NEWS] "))
 
@@ -1531,11 +1533,32 @@
         (.setAllowFlight player false)
         (.setFallDistance player 0.0)))))
 
+(defn periodically-sponge []
+  (when (= 0 (rand-int 10))
+    (let [sponge-locs
+          (set (for [player (Bukkit/getOnlinePlayers)
+                     :let [loc (.getLocation player)]
+                     x (range -9 10)
+                     y (range -2 3)
+                     z (range -9 10)
+                     :let [loc (.add (.clone loc) x y z)]
+                     :when (< 0 (.getY loc) 256)
+                     :when (= m/sponge (.getType (.getBlock loc)))]
+                 loc))]
+      (doseq [sponge-loc sponge-locs
+              [x y z] [[-1 0 0] [0 -1 0] [0 0 -1]
+                       [1 0 0] [0 1 0] [0 0 1]]
+              :let [loc (.add (.clone sponge-loc) x y z)
+                    block (.getBlock loc)]
+              :when (.isLiquid block)]
+        (later (.setType block m/air))))))
+
 (defn periodically []
   (periodically-flyers)
   (periodically-entity-touch-player-event)
   (chimera-cow/periodically)
   (player/periodically-zombie-player)
+  (periodically-sponge)
   nil)
 
 (defn player-respawn-event [evt]
