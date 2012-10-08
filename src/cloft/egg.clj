@@ -60,6 +60,10 @@
 (defn skill-capture [entity]
   (.remove entity))
 
+(defn skill-chargedispensor [entity]
+  (.sendMessage (.getShooter entity) "not implemented yet")
+  (.remove entity))
+
 (defn capture [captor target]
   (when (captureable? target)
     (loc/play-sound (.getLocation target) s/level-up 0.8 1.5)
@@ -76,7 +80,8 @@
     (let [table {m/yellow-flower [skill-teleport "TELEPORT"]
                  m/snow-block [skill-ice "ICE"]
                  m/crops [skill-plant "PLANT"]
-                 m/chest [skill-capture "CAPTURE"]}]
+                 m/chest [skill-capture "CAPTURE"]
+                 m/dispenser [skill-chargedispensor "CHARGE DISPENSOR"]}]
       (when-let [[skill skill-name] (table (.getType block))]
         (set-skill player skill)
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
