@@ -63,17 +63,20 @@
 (defn skill-capture [entity]
   (.remove entity))
 
-(defn skill-chargedispensor [entity]
+(defn skill-chargedispenser [entity]
   (defn first-itemstack-of [player]
     (first (let [inventory (.getInventory player)]
              (for [i (range 9 36)
                    :let [itemstack (.getItem inventory i)]
                    :when itemstack]
                (.getType itemstack)))))
-  (let [shooter (.getShooter entity)]
-    (when-let [itemstack (first-itemstack-of shooter)]
-      (.sendMessage shooter "not implemented yet")
-      (.sendMessage shooter (str itemstack)))
+  (let [shooter (.getShooter entity)
+        block (block/of-arrow entity)]
+    (when (= m/dispenser (.getType block))
+      (when-let [itemstack (first-itemstack-of shooter)]
+        (.sendMessage shooter "not implemented yet")
+        (.sendMessage shooter (str itemstack))
+        (.sendMessage shooter (str (vec (.getContents (.getInventory (.getState block))))))))
     (.remove entity)))
 
 (defn capture [captor target]
@@ -93,7 +96,7 @@
                  m/snow-block [skill-ice "ICE"]
                  m/crops [skill-plant "PLANT"]
                  m/chest [skill-capture "CAPTURE"]
-                 m/dispenser [skill-chargedispensor "CHARGE DISPENSOR"]}]
+                 m/dispenser [skill-chargedispenser "CHARGE DISPENSER"]}]
       (when-let [[skill skill-name] (table (.getType block))]
         (set-skill player skill)
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
