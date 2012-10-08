@@ -1,14 +1,14 @@
 (ns cloft.egg
-  (:require [cloft.cloft :as c])
-  (:require [cloft.material :as m])
-  (:require [cloft.sound :as s])
-  (:require [cloft.loc :as loc])
-  (:require [cloft.block :as block])
-  (:import [org.bukkit Effect])
-  (:import [org.bukkit.entity Creeper Skeleton Spider Zombie Slime Ghast
+  (:require [cloft.cloft :as c]
+            [cloft.material :as m]
+            [cloft.sound :as s]
+            [cloft.loc :as loc]
+            [cloft.block :as block])
+  (:import [org.bukkit Effect]
+           [org.bukkit.entity Creeper Skeleton Spider Zombie Slime Ghast
             PigZombie Enderman CaveSpider Silverfish Blaze MagmaCube Pig
-            Sheep Cow Chicken Squid Wolf MushroomCow Villager Ocelot Player])
-  (:import [org.bukkit.material SpawnEgg]))
+            Sheep Cow Chicken Squid Wolf MushroomCow Villager Ocelot Player]
+           [org.bukkit.material SpawnEgg]))
 
 (def player-skills (atom {}))
 
