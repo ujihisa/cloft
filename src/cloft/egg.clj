@@ -61,8 +61,17 @@
   (.remove entity))
 
 (defn skill-chargedispensor [entity]
-  (.sendMessage (.getShooter entity) "not implemented yet")
-  (.remove entity))
+  (defn first-itemstack-of [player]
+    (first (let [inventory (.getInventory player)]
+             (for [i (range 9 36)
+                   :let [itemstack (.getItem inventory i)]
+                   :when itemstack]
+               (.getType itemstack)))))
+  (let [shooter (.getShooter entity)]
+    (when-let [itemstack (first-itemstack-of shooter)]
+      (.sendMessage shooter "not implemented yet")
+      (.sendMessage shooter (str itemstack)))
+    (.remove entity)))
 
 (defn capture [captor target]
   (when (captureable? target)
