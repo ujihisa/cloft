@@ -8,7 +8,8 @@
            [org.bukkit.entity Creeper Skeleton Spider Zombie Slime Ghast
             PigZombie Enderman CaveSpider Silverfish Blaze MagmaCube Pig
             Sheep Cow Chicken Squid Wolf MushroomCow Villager Ocelot Player]
-           [org.bukkit.material SpawnEgg]))
+           [org.bukkit.material SpawnEgg]
+           [org.bukkit.event EventException]))
 
 (def player-skills (atom {}))
 
@@ -46,16 +47,18 @@
 (defn skill-plant [entity]
   (let [inventory (.getInventory (.getShooter entity))]
     (.remove entity)
-    (doseq [x (range -3 4) z (range -3 4)
+    (doseq [x (range -3 4)
+            z (range -3 4)
             :let [loc (.add (.getLocation entity) x 0 z)]
-            :when (and (.contains inventory m/seeds)
-                       (= m/air (.getType (.getBlock loc)))
-                       (= m/soil (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))]
+            :when (and
+                    (.contains inventory m/seeds)
+                    (= m/air (.getType (.getBlock loc)))
+                    (= m/soil (.getType (.getBlock (.add (.clone loc) 0 -1 0)))))]
       (try
         (c/consume-itemstack inventory m/seeds)
         (c/consume-itemstack inventory m/seeds)
         (.setType (.getBlock loc) m/crops)
-        (catch org.bukkit.event.EventException e nil)))))
+        (catch EventException e nil)))))
 
 (defn skill-capture [entity]
   (.remove entity))
