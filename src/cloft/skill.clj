@@ -90,7 +90,7 @@
     (arrow-reflectable? [_] true)))
 
 (def arrow-exp
-  "dummy skill. grep the name."
+  #_("dummy skill. grep the name.")
   (reify
     clojure.lang.Named
     (getName [_] "EXP")
