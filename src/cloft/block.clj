@@ -3,7 +3,6 @@
   (:import [org.bukkit.util BlockIterator Vector]))
 
 (defn category
-  [& ks]
   """available options:
     :gettable  may have material from that block with proper tool
     :enterable   can step in.
@@ -15,9 +14,9 @@
 
     http://jd.bukkit.org/apidocs/org/bukkit/Material.html
     """
+  [& ks]
   (let [c (set ks)
-        data {
-              m/air #{:enterable}
+        data {m/air #{:enterable}
               m/water #{:enterable}
               m/lava #{:enterable}
               m/fire #{:enterable}
@@ -117,8 +116,8 @@
       (.getBlockAt world (.toLocation v world)))))
 
 (defn place-in-circle
-  [world inner outer center place-fn]
   """with fill. naive way."""
+  [world inner outer center place-fn]
   (doseq [v (blocks-in-radiaus-xz world center inner outer)]
     (place-fn v 0)))
 
