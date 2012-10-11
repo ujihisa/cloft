@@ -3,17 +3,17 @@
   (:import [org.bukkit.util BlockIterator Vector]))
 
 (defn category
-  """available options:
-    :gettable  may have material from that block with proper tool
-    :enterable   can step in.
-    :combustible  can be set fire.
-    :crafted  something crafted by player
-    usage:
-    (category :gettable :enterable) => #{} of gettable and enterable
-    (category :gettable ) => #{} of enterable
+  "available options:
+  :gettable  may have material from that block with proper tool
+  :enterable   can step in.
+  :combustible  can be set fire.
+  :crafted  something crafted by player
+  usage:
+  (category :gettable :enterable) => #{} of gettable and enterable
+  (category :gettable ) => #{} of enterable
 
-    http://jd.bukkit.org/apidocs/org/bukkit/Material.html
-    """
+  http://jd.bukkit.org/apidocs/org/bukkit/Material.html
+  "
   [& ks]
   (let [c (set ks)
         data {m/air #{:enterable}
@@ -116,7 +116,7 @@
       (.getBlockAt world (.toLocation v world)))))
 
 (defn place-in-circle
-  """with fill. naive way."""
+  "with fill. naive way."
   [world inner outer center place-fn]
   (doseq [v (blocks-in-radiaus-xz world center inner outer)]
     (place-fn v 0)))
