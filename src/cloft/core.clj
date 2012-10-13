@@ -2359,10 +2359,14 @@
                       (.toVector (.subtract (.getLocation fish) (.getLocation player)))
                       (- 0.5 (* 0.1 i)))]
               (later
-                (c/add-velocity player (.getX v) (.getY v) (.getZ v))
+                (c/add-velocity player (.getX v) (* 0.8 (.getY v)) (.getZ v))
                 (.setFallDistance player 0.0))
               (Thread/sleep 200)
-              (when (< i 4)
+              (when (and
+                      player
+                      (< i 4)
+                      (.getItemInHand player)
+                      (= m/fishing-rod (.getType (.getItemInHand player))))
                 (recur (inc i))))))))))
 
 (defn player-toggle-sneak-event [evt]
