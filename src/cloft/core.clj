@@ -2341,6 +2341,26 @@
   (later
     (skill/arrow-skillchange (.getPlayer evt) (.getBlock (.add (.getLocation (.getBlockClicked evt)) 0 1 0)) nil)))
 
+(defn umikawaharase-pull-yourself [evt player]
+  (assert (instance? Player player) player)
+  (when (and
+          (.isSneaking evt)
+          (.getItemInHand player)
+          (= m/fishing-rod (.getType (.getItemInHand player))))
+    (when-let [fish (first (filter #(and
+                                 (instance? Fish %)
+                                 (= player (.getShooter %)))
+                              (.getNearbyEntities player 20 20 20)))]
+      (when (not= m/air (.getType (.getBlock (.add (.getLocation fish) 0.0 -0.5 0.0))))
+        (loc/play-sound (.getLocation player) s/arrow-shake 0.8 1.5)
+        (future
+          (dotimes [i 4]
+            (let [v (.multiply
+                      (.toVector (.subtract (.getLocation fish) (.getLocation player)))
+                      (- 0.5 (* 0.1 i)))]
+              (later (c/add-velocity player (.getX v) (.getY v) (.getZ v)))
+              (Thread/sleep 200))))))))
+
 (defn player-toggle-sneak-event [evt]
   (let [player (.getPlayer evt)]
     "recovery spa"
@@ -2356,6 +2376,7 @@
           (.teleport player loc)
           (c/add-velocity player 0 0.6 0))))
     (transport/cauldron-teleport player)
+    (umikawaharase-pull-yourself evt player)
     (when-let [vehicle (.getVehicle player)]
       (condp instance? vehicle
         Boat (.setVelocity vehicle (Vector. 0 0 0))
