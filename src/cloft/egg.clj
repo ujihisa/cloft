@@ -9,7 +9,8 @@
             PigZombie Enderman CaveSpider Silverfish Blaze MagmaCube Pig
             Sheep Cow Chicken Squid Wolf MushroomCow Villager Ocelot Player]
            [org.bukkit.material SpawnEgg]
-           [org.bukkit.event EventException]))
+           [org.bukkit.event EventException]
+           [org.bukkit.inventory ItemStack]))
 
 (def player-skills (atom {}))
 
@@ -65,18 +66,30 @@
 
 (defn skill-chargedispenser [entity]
   (defn first-itemstack-of [player]
+    "returns itemstack and its index"
     (first (let [inventory (.getInventory player)]
              (for [i (range 9 36)
                    :let [itemstack (.getItem inventory i)]
                    :when itemstack]
-               (.getType itemstack)))))
+               [itemstack i]))))
   (let [shooter (.getShooter entity)
         block (block/of-arrow entity)]
     (when (= m/dispenser (.getType block))
-      (when-let [itemstack (first-itemstack-of shooter)]
-        (.sendMessage shooter "not implemented yet")
-        (.sendMessage shooter (str itemstack))
-        (.sendMessage shooter (str (vec (.getContents (.getInventory (.getState block))))))))
+      (when-let [[itemstack p-idx] (first-itemstack-of shooter)]
+        (let [d-inventory (.getInventory (.getState block))
+              d-idx (.firstEmpty d-inventory)]
+          (if (= -1 d-idx)
+            (do
+              (.sendMessage shooter "The dispenser has no empty slots.")
+              (loc/drop-item (.getLocation block) (ItemStack. m/egg 1)))
+            (do
+              (c/broadcast (format "%s inserted %s to a dispenser."
+                                   (.getDisplayName shooter)
+                                   (.getType itemstack)))
+              (.setItem d-inventory d-idx itemstack)
+              (.clear (.getInventory shooter) p-idx)
+              (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
+              (loc/play-sound (.getLocation block) s/level-up 0.8 1.5))))))
     (.remove entity)))
 
 (defn capture [captor target]

@@ -867,7 +867,7 @@
   #_(.sendMessage player "[TIPS] しゃがんだまま弓を構えると近くの敵に自動照準")
   #_(.sendMessage player "[TIPS] arrow-skill-woodbreakがちょっと便利に")
   #_(.sendMessage player "[TIPS] ラピュタ近くの地上の村、実はその下に地下帝国が...")
-  (.sendMessage player "[TIPS] 剣を焼くと分解できる。もしそれがenchantされてると...?")
+  #_(.sendMessage player "[TIPS] 剣を焼くと分解できる。もしそれがenchantされてると...?")
   #_(.sendMessage player "[TIPS] stone plateを持って他人を右クリックするとスカウター")
   #_(.sendMessage player "[TIPS] TNTの上に置かれたチェストを開くと、即座に...!")
   #_(.sendMessage player "[NEWS] Enderman右クリックでもアイテム。たまに怒られるよ")
@@ -883,7 +883,8 @@
   #_(.sendMessage player "[NEWS] 匠、雪玉爆発")
   (.sendMessage player "[NOTE] スキルシステム大改造中。arrow-skillはいまは申し訳ないけれど一部しか使えません")
   #_(.sendMessage player "[NEWS] 矢のスキルを切り替えるとき、確率的に紋章損傷")
-  (.sendMessage player "[NEWS] スポンジの吸水効果")
+  #_(.sendMessage player "[NEWS] スポンジの吸水効果")
+  (.sendMessage player "[NEWS] 新しいegg-skill。さっそくdispenserを!")
   (later (.sendMessage player (clojure.string/join ", " (map name skill/arrow-skills))))
   #_(.sendMessage player "[NEWS] "))
 
