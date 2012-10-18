@@ -2573,7 +2573,7 @@
 (defonce swank* nil)
 (defn on-enable [plugin]
   (when-not swank*
-    (def swank* (swank.swank/start-repl 4005)))
+    (def swank* (swank.swank/start-repl :port 4005)))
   (c/init-plugin plugin)
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 0 25)
