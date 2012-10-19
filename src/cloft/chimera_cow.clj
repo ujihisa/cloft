@@ -62,11 +62,10 @@
 
 (defn periodically []
   (doseq [c @chimera-cows]
+    (.playEffect (.getWorld c) (.getLocation c) Effect/MOBSPAWNER_FLAMES nil)
     (if (or (.isDead c) (= 0 (rand-int 1000)))
       (swap! chimera-cows disj c)
-      (do
-        (.playEffect (.getWorld c) (.getLocation c) Effect/MOBSPAWNER_FLAMES nil)
-        (when (not= 0 (rand-int 10))
+      (when (not= 0 (rand-int 10))
           (future
             (Thread/sleep (rand-int 2500))
             (let [players (filter #(instance? Player %) (.getNearbyEntities c 50 50 50))]
@@ -104,4 +103,4 @@
                             (.setShooter ar c)
                             (.setVelocity
                               ar
-                              (Vector. (rand1) 1.0 (rand1)))))))))))))))))
+                              (Vector. (rand1) 1.0 (rand1))))))))))))))))
