@@ -95,7 +95,7 @@
                               (.setVelocity fb (.add vect (Vector. (- (rand) 0.5) 0.0 (- (rand) 0.5))))))))
                       (letfn [(rand1 []
                                 (* 0.8 (- (rand) 0.5)))]
-                        (doseq [_ (range 0 50)]
+                        (dotimes [_ 50]
                           (let [ar (.launchProjectile c Arrow)]
                             (.setShooter ar c)
                             (.setVelocity
