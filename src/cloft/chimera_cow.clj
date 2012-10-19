@@ -1,12 +1,12 @@
 (ns cloft.chimera-cow
-  (:require [cloft.cloft :as c])
-  (:require [cloft.material :as m])
-  (:require [cloft.arrow :as arrow])
-  (:require [cloft.lingr :as lingr])
-  (:import [org.bukkit.entity Cow Fireball Arrow Minecart Player])
-  (:import [org.bukkit Material Location Effect])
-  (:import [org.bukkit.inventory ItemStack])
-  (:import [org.bukkit.util Vector]))
+  (:require [cloft.cloft :as c]
+            [cloft.material :as m]
+            [cloft.arrow :as arrow]
+            [cloft.lingr :as lingr])
+  (:import [org.bukkit.entity Cow Fireball Arrow Minecart Player]
+           [org.bukkit Material Location Effect]
+           [org.bukkit.inventory ItemStack]
+           [org.bukkit.util Vector]))
 
 (def chimera-cows (atom #{}))
 
