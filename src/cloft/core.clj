@@ -35,7 +35,8 @@
            [org.bukkit.util Vector]
            [org.bukkit Location Effect]
            [org.bukkit.block Biome]
-           [org.bukkit.event.block Action])
+           [org.bukkit.event.block Action]
+           [Enchantment])
   (:require [cloft.lingr :as lingr]
             [cloft.zhelpers :as mq]))
 
@@ -2412,13 +2413,13 @@
 
 (defn just-for-now3 []
   (let [gs (ItemStack. m/gold-sword)]
-    (.addEnchantment gs org.bukkit.enchantments.Enchantment/DAMAGE_ALL 5)
+    (.addEnchantment gs Enchantment/DAMAGE_ALL 5)
     (.setItemInHand (c/ujm) gs)))
 
 (defn just-for-now4 []
   (let [gp (ItemStack. m/gold-pickaxe)]
-    (.addEnchantment gp org.bukkit.enchantments.Enchantment/DIG_SPEED 4)
-    (.addEnchantment gp org.bukkit.enchantments.Enchantment/DURABILITY 3)
+    (.addEnchantment gp Enchantment/DIG_SPEED 4)
+    (.addEnchantment gp Enchantment/DURABILITY 3)
     (.setItemInHand (c/ujm) gp)))
 
 (def just-for-now5-state (ref true))
