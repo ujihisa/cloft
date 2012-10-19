@@ -66,41 +66,41 @@
     (if (or (.isDead c) (= 0 (rand-int 1000)))
       (swap! chimera-cows disj c)
       (when (not= 0 (rand-int 10))
-          (future
-            (Thread/sleep (rand-int 2500))
-            (let [players (filter #(instance? Player %) (.getNearbyEntities c 50 50 50))]
-              (when-let [player (when-not (empty? players)
-                                  (rand-nth players))]
-                (let [dire (.subtract (.clone (.getLocation player))
-                                      (.clone (.getLocation c)))
-                      vect (.normalize (.toVector dire))]
-                  (if (not= 0 (rand-int 5))
+        (future
+          (Thread/sleep (rand-int 2500))
+          (let [players (filter #(instance? Player %) (.getNearbyEntities c 50 50 50))]
+            (when-let [player (when-not (empty? players)
+                                (rand-nth players))]
+              (let [dire (.subtract (.clone (.getLocation player))
+                                    (.clone (.getLocation c)))
+                    vect (.normalize (.toVector dire))]
+                (if (not= 0 (rand-int 5))
+                  (later
+                    (.setVelocity c (Vector. (* (.getX vect) 0.1)
+                                             (rand-nth [0.3 0.5 0.7])
+                                             (* (.getZ vect) 0.1))))
+                  (Thread/sleep 800)
+                  (later
+                    (.setVelocity c (Vector. 0.0 0.5 0.0)))
+                  (let [dire (.subtract (.clone (.getLocation player))
+                                        (.clone (.getLocation c)))
+                        vect (.normalize (.toVector dire))]
+                    (doseq [_ [0 1 2]]
+                      (let [fb (.launchProjectile c Fireball)]
+                        (later
+                          (.setShooter fb c)
+                          (.setYield fb 0.0)
+                          (.teleport fb (.add (.clone (.getLocation c)) vect)))
+                        (Thread/sleep 300)
+                        (later
+                          (.setDirection fb vect)
+                          (.setVelocity fb (.add vect (Vector. (- (rand) 0.5) 0.0 (- (rand) 0.5))))))))
+                  (letfn [(rand1 []
+                            (* 0.8 (- (rand) 0.5)))]
                     (later
-                      (.setVelocity c (Vector. (* (.getX vect) 0.1)
-                                               (rand-nth [0.3 0.5 0.7])
-                                               (* (.getZ vect) 0.1))))
-                    (Thread/sleep 800)
-                    (later
-                      (.setVelocity c (Vector. 0.0 0.5 0.0)))
-                    (let [dire (.subtract (.clone (.getLocation player))
-                                          (.clone (.getLocation c)))
-                          vect (.normalize (.toVector dire))]
-                      (doseq [_ [0 1 2]]
-                        (let [fb (.launchProjectile c Fireball)]
-                          (later
-                            (.setShooter fb c)
-                            (.setYield fb 0.0)
-                            (.teleport fb (.add (.clone (.getLocation c)) vect)))
-                          (Thread/sleep 300)
-                          (later
-                            (.setDirection fb vect)
-                            (.setVelocity fb (.add vect (Vector. (- (rand) 0.5) 0.0 (- (rand) 0.5))))))))
-                    (letfn [(rand1 []
-                              (* 0.8 (- (rand) 0.5)))]
-                      (later
-                        (dotimes [_ 50]
-                          (let [ar (.launchProjectile c Arrow)]
-                            (.setShooter ar c)
-                            (.setVelocity
-                              ar
-                              (Vector. (rand1) 1.0 (rand1))))))))))))))))
+                      (dotimes [_ 50]
+                        (let [ar (.launchProjectile c Arrow)]
+                          (.setShooter ar c)
+                          (.setVelocity
+                            ar
+                            (Vector. (rand1) 1.0 (rand1))))))))))))))))
