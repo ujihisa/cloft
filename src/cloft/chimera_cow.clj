@@ -25,13 +25,14 @@
                   (.setThundering world false))))
 
 (defn murder-event [evt cow player]
-  (future-call #(let [world (.getWorld cow)
-                      loc (.getLocation cow)]
-                  (doseq [_ (range 0 20)]
-                    (Thread/sleep 1000)
-                    (.dropItemNaturally world loc (if (= 0 (rand-int 10))
-                                                    (ItemStack. m/golden-apple)
-                                                    (ItemStack. m/apple))))))
+  (future (let [world (.getWorld cow)
+                loc (.getLocation cow)]
+            (dotimes [_ 20]
+              (Thread/sleep 1000)
+              (later
+                (.dropItemNaturally world loc (if (= 0 (rand-int 10))
+                                                (ItemStack. m/golden-apple)
+                                                (ItemStack. m/apple)))))))
   (.setDroppedExp evt 200)
   (c/broadcast (format "%s beated a chimera cow!" (.getDisplayName player)))
   (lingr/say-in-mcujm (format "%s beated a chimera cow!" (.getDisplayName player))))
