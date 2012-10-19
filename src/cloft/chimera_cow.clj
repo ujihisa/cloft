@@ -42,7 +42,9 @@
   (.setCancelled evt true))
 
 (defn damage-event [evt cow attacker]
-  (.setDamage evt (min (.getDamage evt) 2))
+  (if (= 0 (rand-int 3))
+    (.setDamage evt 0)
+    (.setDamage evt (min (.getDamage evt) 2)))
   (condp instance? attacker
     Fireball (.setCancelled evt true)
     Arrow (arrow/reflect evt attacker cow)
