@@ -36,7 +36,7 @@
            [org.bukkit Location Effect]
            [org.bukkit.block Biome]
            [org.bukkit.event.block Action]
-           [Enchantment])
+           [org.bukkit.enchantments Enchantment])
   (:require [cloft.lingr :as lingr]
             [cloft.zhelpers :as mq]))
 
