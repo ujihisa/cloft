@@ -88,12 +88,14 @@
                                 vect (.normalize (.toVector dire))]
                             (doseq [_ [0 1 2]]
                               (let [fb (.launchProjectile c Fireball)]
-                                (.setShooter fb c)
-                                (.setYield fb 0.0)
-                                (.teleport fb (.add (.clone (.getLocation c)) vect))
+                                (later
+                                  (.setShooter fb c)
+                                  (.setYield fb 0.0)
+                                  (.teleport fb (.add (.clone (.getLocation c)) vect)))
                                 (Thread/sleep 300)
-                                (.setDirection fb vect)
-                                (.setVelocity fb (.add vect (Vector. (- (rand) 0.5) 0.0 (- (rand) 0.5))))))))))
+                                (later
+                                  (.setDirection fb vect)
+                                  (.setVelocity fb (.add vect (Vector. (- (rand) 0.5) 0.0 (- (rand) 0.5)))))))))))
                     (letfn [(rand1 []
                               (* 0.8 (- (rand) 0.5)))]
                       (dotimes [_ 50]
