@@ -59,8 +59,7 @@
     0 (let [cart (.spawn (.getWorld player) (.getLocation player) Minecart)]
         (.setPassenger cart player))
     1 (.setFireTicks player 200)
-    2 nil
-    3 nil))
+    2 nil))
 
 (defn periodically []
   (doseq [c @chimera-cows
