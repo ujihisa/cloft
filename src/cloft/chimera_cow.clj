@@ -77,7 +77,7 @@
               (let [dire (.subtract (.clone (.getLocation player))
                                     (.clone (.getLocation c)))
                     vect (.normalize (.toVector dire))]
-                (if (not= 0 (rand-int 5))
+                (when (not= 0 (rand-int 5))
                   (later
                     (.setVelocity c (Vector. (* (.getX vect) 0.1)
                                              (rand-nth [0.3 0.5 0.7])
