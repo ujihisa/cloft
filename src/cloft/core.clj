@@ -436,7 +436,9 @@
       (cond
         (= m/emerald itemtype) (.setCancelled evt true)
         (#{m/chest m/ender-chest} itemtype) nil
-        (= m/sponge itemtype) (lingr/say-in-mcujm "スポンジはpopcornできません m9(^Д^)")
+        (= m/sponge itemtype) (let [msg "スポンジはpopcornできません m9(^Д^)"]
+                                (c/broadcast msg)
+                                (lingr/say-in-mcujm msg))
         :else (popcorn item @popcorning)))
     (let [item (.getEntity evt)
           table {m/raw-beef [m/rotten-flesh m/cooked-beef]
