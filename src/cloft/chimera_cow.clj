@@ -75,10 +75,11 @@
                                       (.clone (.getLocation c)))
                       vect (.normalize (.toVector dire))]
                   (if (not= 0 (rand-int 5))
-                    (do
+                    (later
                       (.setVelocity c (Vector. (* (.getX vect) 0.1)
                                                (rand-nth [0.3 0.5 0.7])
                                                (* (.getZ vect) 0.1)))
+                      (future
                       (Thread/sleep 800)
                       (.setVelocity c (Vector. 0.0 0.5 0.0))
                       (let [dire (.subtract (.clone (.getLocation player))
@@ -91,7 +92,7 @@
                             (.teleport fb (.add (.clone (.getLocation c)) vect))
                             (Thread/sleep 300)
                             (.setDirection fb vect)
-                            (.setVelocity fb (.add vect (Vector. (- (rand) 0.5) 0.0 (- (rand) 0.5))))))))
+                            (.setVelocity fb (.add vect (Vector. (- (rand) 0.5) 0.0 (- (rand) 0.5)))))))))
                     (letfn [(rand1 []
                               (* 0.8 (- (rand) 0.5)))]
                       (dotimes [_ 50]
