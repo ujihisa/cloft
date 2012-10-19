@@ -63,7 +63,8 @@
     3 nil))
 
 (defn periodically []
-  (doseq [c @chimera-cows]
+  (doseq [c @chimera-cows
+          :when c]
     (.playEffect (.getWorld c) (.getLocation c) Effect/MOBSPAWNER_FLAMES nil)
     (if (or (.isDead c) (= 0 (rand-int 1000)))
       (swap! chimera-cows disj c)
