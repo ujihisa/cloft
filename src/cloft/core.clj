@@ -884,10 +884,13 @@
   #_(.sendMessage player "[NEWS] chestのegg-skillでポケモンできる!")
   #_(.sendMessage player "[NEWS] 蜘蛛右クリックであなたもライダーに")
   #_(.sendMessage player "[NEWS] 匠、雪玉爆発")
-  (.sendMessage player "[NOTE] スキルシステム大改造中。arrow-skillはいまは申し訳ないけれど一部しか使えません")
+  #_(.sendMessage player "[NOTE] スキルシステム大改造中。arrow-skillはいまは申し訳ないけれど一部しか使えません")
+
   #_(.sendMessage player "[NEWS] 矢のスキルを切り替えるとき、確率的に紋章損傷")
   #_(.sendMessage player "[NEWS] スポンジの吸水効果")
-  (.sendMessage player "[NEWS] 新しいegg-skill。さっそくdispenserを!")
+  #_(.sendMessage player "[NEWS] 新しいegg-skill。さっそくdispenserを!")
+  (.sendMessage player "[NEWS] 釣竿ジャンプの楽しさは異常")
+  (.sendMessage player "[NEWS] ujmさんが10月28日〜11月21日来日 (東京滞在11月1~4日)")
   (later (.sendMessage player (clojure.string/join ", " (map name skill/arrow-skills))))
   #_(.sendMessage player "[NEWS] "))
 
