@@ -1709,6 +1709,18 @@
         creeper-explosion-3
         ] (rem @creeper-explosion-idx 5)))
 
+(defn- notify-explosion [entity ename]
+  (let [players-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
+    (when (and
+            ename
+            (not-empty players-nearby)
+            (not (instance? EnderDragon entity)))
+      (lingr/say-in-mcujm
+        (format
+          "%s is exploding near %s"
+          ename
+          (clojure.string/join ", " (map #(.getDisplayName %) players-nearby)))))))
+
 (defn entity-explode-event [evt]
   (if-let [entity (.getEntity evt)]
     (let [ename (c/entity2name entity)]
@@ -1728,16 +1740,7 @@
         Fireball
         nil
 
-        (let [players-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
-          (when (and
-                  ename
-                  (not-empty players-nearby)
-                  (not (instance? EnderDragon entity)))
-            (lingr/say-in-mcujm
-               (format
-                 "%s is exploding near %s"
-                 ename
-                 (clojure.string/join ", " (map #(.getDisplayName %) players-nearby))))))))
+        (notify-explosion entity ename)))
     (prn 'explosion-without-entity)))
 
 (defn digg-entity [target shooter]
