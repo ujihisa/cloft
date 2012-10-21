@@ -1709,12 +1709,18 @@
         creeper-explosion-3
         ] (rem @creeper-explosion-idx 5)))
 
+(def notify-explosion-enable (ref true))
 (defn- notify-explosion [entity ename]
   (let [players-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
     (when (and
             ename
+            @notify-explosion-disable
             (not-empty players-nearby)
             (not (instance? EnderDragon entity)))
+      (dosync (ref-set notify-explosion-enable false))
+      (future
+        (Thread/sleep 1000)
+        (dosync (ref-set notify-explosion-enable true)))
       (lingr/say-in-mcujm
         (format
           "%s is exploding near %s"
