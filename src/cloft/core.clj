@@ -1893,14 +1893,14 @@
         (not= 0 (rand-int 10))
         (instance? Player target)
         (or (not (instance? Player (.getShooter arrow)))
-            #_(use skill/arrow-reflectable? instead)
             (skill/arrow-reflectable? (skill/arrow-skill-of (.getShooter arrow))))
         (when-let [chestplate (.getChestplate (.getInventory target))]
           (and
             (= m/leather-chestplate (.getType chestplate))
             (not-empty (.getEnchantments chestplate)))))
     (do
-      (c/broadcast (format "'s enchanted leather chestplate reflects arrows!" (c/entity2name target)))
+      (c/broadcast (format "%s's enchanted leather chestplate reflects arrows!"
+                           (c/entity2name target)))
       (arrow/reflect evt arrow target))
     (arrow-damages-entity-event-internal evt arrow target)))
 
