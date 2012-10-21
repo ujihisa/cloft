@@ -1709,23 +1709,26 @@
         creeper-explosion-3
         ] (rem @creeper-explosion-idx 5)))
 
-(def notify-explosion-enable (ref true))
+(def notify-explosion-mailbox (ref nil))
 (defn- notify-explosion [entity ename]
-  (when @notify-explosion-enable
+  (when (nil? @notify-explosion-mailbox)
     (let [players-nearby (filter #(instance? Player %) (.getNearbyEntities entity 5 5 5))]
       (when (and
               ename
               (not-empty players-nearby)
               (not (instance? EnderDragon entity)))
-        (dosync (ref-set notify-explosion-enable false))
+        (dosync
+          (ref-set
+            notify-explosion-mailbox
+            (format
+              "%s is exploding near %s"
+              ename
+              (clojure.string/join ", " (map #(.getDisplayName %) players-nearby)))))
         (future
-          (Thread/sleep 1000)
-          (dosync (ref-set notify-explosion-enable true)))
-        (lingr/say-in-mcujm
-          (format
-            "%s is exploding near %s"
-            ename
-            (clojure.string/join ", " (map #(.getDisplayName %) players-nearby))))))))
+          (Thread/sleep 500)
+          (lingr/say-in-mcujm @notify-explosion-mailbox)
+          (dosync
+            (ref-set notify-explosion-mailbox nil)))))))
 
 (defn entity-explode-event [evt]
   (if-let [entity (.getEntity evt)]
