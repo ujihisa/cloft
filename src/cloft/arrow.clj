@@ -7,7 +7,7 @@
     (.setCancelled evt true)
     (.remove arrow)
     (let [a (.launchProjectile target Arrow)]
-      (future-call #(do
-                      (Thread/sleep 100)
-                      (.setShooter a shooter)))
+      (future
+        (Thread/sleep 100)
+        (.setShooter a shooter))
       (.setVelocity a (.multiply (.getVelocity arrow) -1)))))
