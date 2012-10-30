@@ -1,5 +1,6 @@
 (ns cloft.arrow
-  (:import [org.bukkit.entity Arrow]))
+  (:import [org.bukkit.entity Arrow])
+  (:use [cloft.cloft :only [later]]))
 
 (defn reflect
   "assumes `arrow` is an arrow"
