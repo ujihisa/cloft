@@ -889,8 +889,8 @@
   #_(.sendMessage player "[NEWS] 矢のスキルを切り替えるとき、確率的に紋章損傷")
   #_(.sendMessage player "[NEWS] スポンジの吸水効果")
   #_(.sendMessage player "[NEWS] 新しいegg-skill。さっそくdispenserを!")
-  (.sendMessage player "[NEWS] 釣竿ジャンプの楽しさは異常")
-  (.sendMessage player "[NEWS] ujmさんが10月28日〜11月21日来日 (東京滞在11月1~4日)")
+  #_(.sendMessage player "[NEWS] 釣竿ジャンプの楽しさは異常")
+  (.sendMessage player "[NEWS] ujmさんが10月28日〜11月21日来日")
   (later (.sendMessage player (clojure.string/join ", " (map name skill/arrow-skills))))
   #_(.sendMessage player "[NEWS] "))
 
@@ -899,7 +899,7 @@
     (future
       (Thread/sleep 1000)
       (let [ip (.. player getAddress getAddress getHostAddress)]
-        (.setOp player (or
+        (.setOp player (= "ujm" (.getDisplayName player))#_(or
                          (.startsWith ip "10.0")
                          (= "113.151.154.229" ip)
                          (= "127.0.0.1" ip))))
