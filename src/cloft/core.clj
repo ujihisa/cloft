@@ -938,9 +938,10 @@
       (do
         (.setCancelled evt true)
         (let [sound
-              (read-string
+              (try (read-string
                 (str "org.bukkit.Sound/"
-                     (clojure.string/upper-case (clojure.string/replace (apply str (rest msg)) #"[ -]" "_"))))]
+                     (clojure.string/upper-case (clojure.string/replace (apply str (rest msg)) #"[ -]" "_"))))
+                (catch Exception e (prn 'sound e)))]
           (loc/play-sound (.getLocation player) (eval sound) 1.0 1.0)))
 
       (chat-kanji-conversion msg)
