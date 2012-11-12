@@ -921,6 +921,12 @@
                        (.spawn (.getWorld loc) loc Creeper)))))))]
     ((rand-nth [unlucky]) player)))
 
+(def chat-kanji-conversion
+  {"benri" "便利"
+   "fuben" "不便"
+   "kawaisou" "可哀想"
+   "hi" "你好"})
+
 (defn async-player-chat-event [evt]
   (let [player (.getPlayer evt)
         pname (.getDisplayName player)
@@ -937,9 +943,9 @@
                      (clojure.string/upper-case (clojure.string/replace (apply str (rest msg)) #"[ -]" "_"))))]
           (loc/play-sound (.getLocation player) (eval sound) 1.0 1.0)))
 
-      (= "benri" msg)
+      (chat-kanji-conversion msg)
       (do
-        (c/broadcast (format "<%s> 便利" pname))
+        (c/broadcast (format "<%s> %s" pname (chat-kanji-conversion msg)))
         (.setCancelled evt true))
 
       (= "countdown" msg)
