@@ -8,4 +8,4 @@
   :repositories {"org.bukkit"
                  "http://repo.bukkit.org/service/local/repositories/snapshots/content/"}
   :javac-options {:destdir "classes/"}
-  :java-source-path "javasrc")
+  :java-source-paths ["javasrc"])
