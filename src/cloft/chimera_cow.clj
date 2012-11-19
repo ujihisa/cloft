@@ -3,7 +3,8 @@
   (:require [cloft.cloft :as c]
             [cloft.material :as m]
             [cloft.arrow :as arrow]
-            [cloft.lingr :as lingr])
+            [cloft.lingr :as lingr]
+            [cloft.loc :as loc])
   (:import [org.bukkit.entity Cow Fireball Arrow Minecart Player]
            [org.bukkit Material Location Effect]
            [org.bukkit.inventory ItemStack]
@@ -65,7 +66,7 @@
 (defn periodically []
   (doseq [c @chimera-cows
           :when c]
-    (.playEffect (.getWorld c) (.getLocation c) Effect/MOBSPAWNER_FLAMES nil)
+    (loc/play-effect (.getLocation c) Effect/MOBSPAWNER_FLAMES nil)
     (if (or (.isDead c) (= 0 (rand-int 1000)))
       (swap! chimera-cows disj c)
       (when (not= 0 (rand-int 10))
