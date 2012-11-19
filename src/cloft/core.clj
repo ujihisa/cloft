@@ -27,7 +27,8 @@
             Pig PigZombie Player PoweredMinecart Projectile Sheep Silverfish
             Skeleton Slime SmallFireball Snowball Snowman Spider Squid
             StorageMinecart ThrownPotion TNTPrimed Vehicle Villager
-            Villager$Profession WaterMob Weather Wolf Zombie Ocelot]
+            Villager$Profession WaterMob Weather Wolf Zombie Ocelot
+            Bat]
            [org.bukkit.event.entity EntityDamageByEntityEvent
             EntityDamageEvent$DamageCause CreatureSpawnEvent$SpawnReason]
            [org.bukkit.potion Potion PotionEffect PotionEffectType]
@@ -927,6 +928,14 @@
    "kawaisou" "可哀想"
    "hi" "你好"})
 
+(defn kill-minecart [player]
+  (doseq [m (filter #(instance? Minecart %)
+                    (.getNearbyEntities player 10 10 10))
+          :let [b (.getBlock (.getLocation m))]
+          :when (.isLiquid b)]
+    (.strikeLightningEffect (.getWorld m) (.getLocation m))
+    (.remove m)))
+
 (defn async-player-chat-event [evt]
   (let [player (.getPlayer evt)
         pname (.getDisplayName player)
@@ -949,6 +958,18 @@
         (c/broadcast (format "<%s> %s" pname (chat-kanji-conversion msg)))
         (.setCancelled evt true))
 
+      (= "kill-minecart" msg)
+      (do
+        (.setCancelled evt true)
+        (kill-minecart player))
+
+      (= "kill-bat" msg)
+      (doseq [b (.getNearbyEntities player 20 10 20)
+              :when (instance? Bat b)
+              :let [l (.getLocation b)]]
+        (.strikeLightningEffect (.getWorld l) l)
+        (.setFireTicks b 2000))
+
       (= "countdown" msg)
       (do
         (.setCancelled evt true)
@@ -960,7 +981,7 @@
           (c/broadcast 2)
           (Thread/sleep 1000)
           (c/broadcast 1)
-          (Thread/sleep 2000)
+          (Thread/sleep 1000)
           (dosync
             (ref-set countdowning? false))))
 
@@ -1265,6 +1286,13 @@
              (.isLiquid (.getBlock (.add (.getLocation block) 0 1 0)))))
       (pan-gold-wait player block)
 
+      (and
+        (= m/air (.getType (.getItemInHand player)))
+        (= m/grass (.getType block)))
+      (do
+        (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
+        (.setType block m/dirt))
+
       :else
       (else))
     (else)))
@@ -1345,6 +1373,10 @@
     Chicken (.setAllowFlight player true)
     Squid (do
             (lingr/say-in-mcujm (str (.getDisplayName player) " is flying with squid!"))
+            (.setAllowFlight player true)
+            (.setFlySpeed player 0.30))
+    Bat (do
+            (lingr/say-in-mcujm (str (.getDisplayName player) " is flying with bat"))
             (.setAllowFlight player true)
             (.setFlySpeed player 0.30))
     Player
@@ -1640,8 +1672,10 @@
       (player/record-and-report killer entity evt)))))
 
 (defn entity-orthothanasia-event [evt entity]
-  (when (instance? Player entity)
-    (player/death-event evt entity)))
+  (condp instance? entity
+    Player (player/death-event evt entity)
+    Bat (loc/drop-item (.getLocation entity) (ItemStack. m/coal))
+    nil))
 
 (defn entity-death-event [evt]
   (let [entity (.getEntity evt)]
@@ -2201,8 +2235,8 @@
             (.sendMessage player "Your hand hurts!")
             (.damage player (rand-int 5)))
 
-          item/pickaxes
-          (let [btype (.getType block)]
+          #_(item/pickaxes)
+          #_(let [btype (.getType block)]
             (condp get btype
               #{m/stone}
               (when (= 'pickaxe-skill-ore (pickaxe-skill-of player))
@@ -2410,6 +2444,10 @@
           (c/add-velocity player 0 0.6 0))))
     (transport/cauldron-teleport player)
     (umikawaharase-pull-yourself evt player)
+    (when (and
+            (.isSneaking evt)
+            (> -89.9 (.getPitch (.getLocation player))))
+      (loc/spawn (.add (.getLocation player) 0 2 0) Bat))
     (when-let [vehicle (.getVehicle player)]
       (condp instance? vehicle
         Boat (.setVelocity vehicle (Vector. 0 0 0))
