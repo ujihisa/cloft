@@ -1288,7 +1288,7 @@
 
       (and
         (= m/air (.getType (.getItemInHand player)))
-        (= m/grass (.getType block)))
+        (#{m/grass m/mycel} (.getType block)))
       (do
         (loc/play-effect (.getLocation block) Effect/MOBSPAWNER_FLAMES nil)
         (.setType block m/dirt))
