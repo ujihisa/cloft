@@ -52,8 +52,8 @@
     Arrow (arrow/reflect evt attacker cow)
     nil))
 
-(defn arrow-hit [entity]
-  (.remove entity))
+(defn arrow-hit [evt]
+  (.remove (.getEntity evt)))
 
 (defn fireball-hit-player [evt player cow fireball]
   #_(.sendMessage player "Chimeracow's fireball hit!")
