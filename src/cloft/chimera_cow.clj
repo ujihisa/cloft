@@ -8,7 +8,8 @@
   (:import [org.bukkit.entity Cow Fireball Arrow Minecart Player]
            [org.bukkit Material Location Effect]
            [org.bukkit.inventory ItemStack]
-           [org.bukkit.util Vector]))
+           [org.bukkit.util Vector]
+           [org.bukkit Bukkit DyeColor]))
 
 (def chimera-cows (atom #{}))
 
@@ -73,9 +74,9 @@
       (when (not= 0 (rand-int 10))
         (future
           (Thread/sleep (rand-int 2500))
-          (let [players (filter #(instance? Player %) (.getNearbyEntities c 50 50 50))]
+          (let [players (Bukkit/getOnlinePlayers)]
             (when-let [player (when-not (empty? players)
-                                (rand-nth players))]
+                                (first (sort-by #(.distance (.getLocation c) (.getLocation %)) players)))]
               (let [dire (.subtract (.clone (.getLocation player))
                                     (.clone (.getLocation c)))
                     vect (.normalize (.toVector dire))]
