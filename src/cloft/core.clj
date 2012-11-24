@@ -1653,6 +1653,8 @@
                    #(loc/drop-item location (ItemStack. m/iron-sword))]))
         Giant (.setDroppedExp evt 200)
         Creeper (.setDroppedExp evt 10)
+        Skeleton (when (= 20 (.getMaxHealth entity))
+                   (.setDroppedExp evt 10))
         Blaze (when (= "world" (.getName (.getWorld entity)))
                 (blaze2-murder-event evt entity killer))
         Ghast (when (= "world" (.getName (.getWorld entity)))
@@ -1724,7 +1726,7 @@
     (apply min-key (cons #(.distance (.getLocation entity) (.getLocation %))
                          (Bukkit/getOnlinePlayers))))
   (.setCancelled evt true)
-  (loc/play-sound (.getLocation entity) s/explode-old 1.0 1.3)
+  (loc/play-sound (.getLocation entity) s/explode 1.0 1.3)
   (prn (nearest-player entity))
   (let [target (nearest-player entity)
         rand1 (fn [] (* 0.8 (- (rand) 0.5)))
@@ -2411,7 +2413,7 @@
                                  (= player (.getShooter %)))
                               (.getNearbyEntities player 20 20 20)))]
       (when (not= m/air (.getType (.getBlock (.add (.getLocation fish) 0.0 -0.5 0.0))))
-        (loc/play-sound (.getLocation player) s/arrow-shake 0.8 1.5)
+        (loc/play-sound (.getLocation player) s/arrow-hit 0.8 1.5)
         (future
           (loop [i 0]
             (let [v (.multiply
