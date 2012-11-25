@@ -891,7 +891,9 @@
   #_(.sendMessage player "[NEWS] スポンジの吸水効果")
   #_(.sendMessage player "[NEWS] 新しいegg-skill。さっそくdispenserを!")
   #_(.sendMessage player "[NEWS] 釣竿ジャンプの楽しさは異常")
-  (.sendMessage player "[NEWS] ujmさんが10月28日〜11月21日来日")
+  #_(.sendMessage player "[NEWS] ujmさんが10月28日〜11月21日来日")
+  (.sendMessage player "[NEWS] 真上を向いてしゃがむと蝙蝠発生。糸で飛べるよ!")
+  (.sendMessage player "[NEWS] kill-batと発言すると近くの蝙蝠全滅")
   (later (.sendMessage player (clojure.string/join ", " (map name skill/arrow-skills))))
   #_(.sendMessage player "[NEWS] "))
 
