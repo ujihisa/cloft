@@ -1,9 +1,11 @@
 (ns cloft.player
-  (:require [cloft.cloft :as c])
-  (:require [cloft.lingr :as lingr])
-  (:require [cloft.skill :as skill])
-  (:import [org.bukkit.entity Player])
-  (:import [org.bukkit Bukkit]))
+  (:require [cloft.cloft :as c]
+            [cloft.lingr :as lingr]
+            [cloft.skill :as skill]
+            [cloft.loc :as loc])
+  (:import [org.bukkit.entity Player]
+           [org.bukkit Bukkit Material]
+           [org.bukkit.inventory ItemStack]))
 
 (defn name2icon [name]
   (str name ": "))
@@ -22,14 +24,27 @@
   (.setMaximumAir entity 1)
   (.setRemainingAir entity 1)
   (.sendMessage entity "You turned into a zombie.")
-  (lingr/say-in-mcujm (str (name2icon (.getDisplayName entity)) "turned into a zombie.")))
+  (lingr/say-in-mcujm (str (name2icon (.getDisplayName entity)) "turned into a zombie."))
+  (when-let [helmet (.getHelmet (.getInventory entity))]
+    (loc/drop-item (.getLocation entity) helmet))
+  (.setHelmet (.getInventory entity)
+              (let [is (ItemStack. Material/SKULL_ITEM)
+                    d (.getData is)]
+                (.setData d 2)
+                (.setData is d)
+                (.toItemStack d 1))))
 
 (defn rebirth-from-zombie [target]
   (.setMaximumAir target 300)
   (.setRemainingAir target 300)
   (.setHealth target (.getMaxHealth target))
   (swap! zombie-players disj target)
-  (c/broadcast (.getDisplayName target) " rebirthed as a human."))
+  (c/broadcast (.getDisplayName target) " rebirthed as a human.")
+  (when-let [helmet (.getHelmet (.getInventory target))]
+    (when (and
+            (= Material/SKULL_ITEM (.getType helmet))
+            (= 2 (.getData (.getData helmet))))
+      (.setHelmet (.getInventory target) nil))))
 
 (defn periodically-zombie-player []
   (doseq [zplayer (filter zombie? (Bukkit/getOnlinePlayers))]
