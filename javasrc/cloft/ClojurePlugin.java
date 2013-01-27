@@ -12,12 +12,13 @@ import java.net.URL;
 import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Event;
-import org.bukkit.event.player.*;
-import org.bukkit.event.entity.*;
-import org.bukkit.event.block.*;
-import org.bukkit.event.vehicle.*;
-import org.bukkit.event.world.*;
-import org.bukkit.event.painting.*;
+//import org.bukkit.event.player.*;
+//import org.bukkit.event.entity.*;
+//import org.bukkit.event.block.*;
+//import org.bukkit.event.vehicle.*;
+//import org.bukkit.event.world.*;
+//import org.bukkit.event.painting.*;
+//import org.bukkit.event.server.*;
 
 public class ClojurePlugin extends JavaPlugin implements Listener {
     private String ns;
@@ -169,11 +170,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
-    public void onEntity(org.bukkit.event.entity.EntityEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
     public void onCreatureSpawn(org.bukkit.event.entity.CreatureSpawnEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "creature-spawn-event");
         if (f.isBound()) f.invoke(event);
@@ -239,11 +235,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
-    public void onEntityPortalEnter(org.bukkit.event.entity.EntityPortalEnterEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-portal-enter-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
     public void onEntityRegainHealth(org.bukkit.event.entity.EntityRegainHealthEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-regain-health-event");
         if (f.isBound()) f.invoke(event);
@@ -271,16 +262,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onEntityTeleport(org.bukkit.event.entity.EntityTeleportEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-teleport-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
-    public void onEntityPortal(org.bukkit.event.entity.EntityPortalEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-portal-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
-    public void onEntityPortalExit(org.bukkit.event.entity.EntityPortalExitEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-portal-exit-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
@@ -341,11 +322,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onSlimeSplit(org.bukkit.event.entity.SlimeSplitEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "slime-split-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
-    public void onHanging(org.bukkit.event.hanging.HangingEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "hanging-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
@@ -509,11 +485,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
-    public void onPlayerInventory(org.bukkit.event.player.PlayerInventoryEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "player-inventory-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
     public void onPlayerItemBreak(org.bukkit.event.player.PlayerItemBreakEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "player-item-break-event");
         if (f.isBound()) f.invoke(event);
@@ -609,11 +580,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
-    public void onPlugin(org.bukkit.event.server.PluginEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "plugin-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
     public void onPluginDisable(org.bukkit.event.server.PluginDisableEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "plugin-disable-event");
         if (f.isBound()) f.invoke(event);
@@ -639,11 +605,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
-    public void onService(org.bukkit.event.server.ServiceEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "service-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
     public void onServiceRegister(org.bukkit.event.server.ServiceRegisterEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "service-register-event");
         if (f.isBound()) f.invoke(event);
@@ -651,11 +612,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onServiceUnregister(org.bukkit.event.server.ServiceUnregisterEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "service-unregister-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
-    public void onVehicleCollision(org.bukkit.event.vehicle.VehicleCollisionEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-collision-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
@@ -716,11 +672,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onWeatherChange(org.bukkit.event.weather.WeatherChangeEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "weather-change-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
-    public void onChunk(org.bukkit.event.world.ChunkEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "chunk-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
