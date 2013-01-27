@@ -105,7 +105,7 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     }
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "player-respawn-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "player-respawn-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
@@ -120,22 +120,22 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     }
     @EventHandler
     public void onProjectileLaunchEvent(ProjectileLaunchEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "projectile-launch-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "projectile-launch-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "creature-spawn-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "creature-spawn-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "food-level-change-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "food-level-change-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onEntityCombust(EntityCombustEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "entity-combust-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-combust-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
@@ -232,59 +232,59 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
     }
     @EventHandler
     public void onVehicleBlockCollision(VehicleBlockCollisionEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-block-collision-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-block-collision-event");
         if (f.isBound()) f.invoke(event);
     }
     /*
     @EventHandler
     public void onVehicleCreate(VehicleCreateEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-create-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-create-event");
         if (f.isBound()) f.invoke(event);
     }
     */
     @EventHandler
     public void onVehicleDamage(VehicleDamageEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-damage-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-damage-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onVehicleDestroy(VehicleDestroyEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-destroy-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-destroy-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onVehicleEnter(VehicleEnterEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-enter-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-enter-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onVehicleEntityCollision(VehicleEntityCollisionEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-entity-collision-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-entity-collision-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onVehicleExit(VehicleExitEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-exit-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-exit-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onVehicleMove(VehicleMoveEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-move-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-move-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onVehicleUpdate(VehicleUpdateEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "vehicle-update-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "vehicle-update-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onChunkPopulate(ChunkPopulateEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "chunk-populate-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "chunk-populate-event");
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
     public void onPaintingBreakByEntity(PaintingBreakByEntityEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var("cloft.core", "painting-break-by-entity-event");
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "painting-break-by-entity-event");
         if (f.isBound()) f.invoke(event);
     }
     /* end auto-generated code */
