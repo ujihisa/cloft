@@ -49,7 +49,7 @@
 
 (defn location-in-lisp [location]
   (list
-    'Location.
+    `Location.
     (.getName (.getWorld location))
     (.getX location)
     (.getY location)
