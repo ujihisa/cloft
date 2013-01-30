@@ -4,7 +4,7 @@
   (:require [clojure.set])
   (:require [cloft.material :as m])
   (:import [org.bukkit.util Vector])
-  (:import [org.bukkit Bukkit Material])
+  (:import [org.bukkit Bukkit Material Location])
   (:import [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
             ComplexEntityPart ComplexLivingEntity Cow Creature Creeper Egg
             EnderCrystal EnderDragon EnderDragonPart Enderman EnderPearl
@@ -49,7 +49,7 @@
 
 (defn location-in-lisp [location]
   (list
-    'org.bukkit.Location.
+    'Location.
     (.getName (.getWorld location))
     (.getX location)
     (.getY location)
