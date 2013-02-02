@@ -42,7 +42,8 @@
   (when-not plugin*
     (def plugin* plugin)))
 
-(def world (Bukkit/getWorld "world"))
+(defn world []
+  (Bukkit/getWorld "world"))
 
 (defn broadcast [& strs]
   (.broadcastMessage (Bukkit/getServer) (apply str strs)))
@@ -61,7 +62,7 @@
   (let [location (.getLocation target)
         world (.getWorld target)]
     (.remove target)
-    (.spawn world location klass)))
+    (.spawn (world) location klass)))
 
 (defn consume-item [player]
   (let [itemstack (.getItemInHand player)
