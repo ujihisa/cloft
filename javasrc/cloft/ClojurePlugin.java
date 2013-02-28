@@ -190,6 +190,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
+    public void onEntityCombust(org.bukkit.event.entity.EntityCombustEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-combust-event");
+        if (f.isBound()) f.invoke(event);
+    }
+    @EventHandler
     public void onEntityCombustByBlock(org.bukkit.event.entity.EntityCombustByBlockEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "entity-combust-by-block-event");
         if (f.isBound()) f.invoke(event);

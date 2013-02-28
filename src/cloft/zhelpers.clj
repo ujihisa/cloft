@@ -3,7 +3,7 @@
 ;;
 (ns cloft.zhelpers
   (:refer-clojure :exclude [send])
-  (:import [org.zeromq ZMQ ZMQ$Context ZMQ$Socket ZMQQueue])
+  (:import [org.jeromq ZMQ ZMQ$Context ZMQ$Socket ZMQQueue])
   (:import (java.util Random)
            (java.nio ByteBuffer)))
 
