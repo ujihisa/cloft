@@ -1,6 +1,6 @@
 (defproject cloft "1.0.0-SNAPSHOT"
   :description "FIXME: write description"
-  :dependencies [[clj-http "0.5.6"]
+  :dependencies [[clj-http "0.6.4"]
                  [swank-clojure/swank-clojure "1.5.0-SNAPSHOT"]
                  [org.clojure/clojure "1.4.0"]
                  [org.bukkit/bukkit "1.4.7-R1.1-SNAPSHOT"]]
