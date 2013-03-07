@@ -3,7 +3,8 @@
   :dependencies [[clj-http "0.6.4"]
                  [swank-clojure/swank-clojure "1.5.0-SNAPSHOT"]
                  [org.clojure/clojure "1.4.0"]
-                 [org.bukkit/bukkit "1.4.7-R1.1-SNAPSHOT"]]
+                 [org.bukkit/bukkit "1.4.7-R1.1-SNAPSHOT"]
+                 [org.dynmap/dynmap-api "1.5"]]
   :dev-dependencies [[org.bukkit/bukkit "1.4.7-R1.1-SNAPSHOT"]
                      [org.zeromq/jeromq "0.2.0"]]
   :repositories {"org.bukkit"

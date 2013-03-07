@@ -734,6 +734,11 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "world-unload-event");
         if (f.isBound()) f.invoke(event);
     }
+    @EventHandler
+    public void onDynmapWebChat(org.dynmap.DynmapWebChatEvent event) {
+        clojure.lang.Var f = clojure.lang.RT.var(ns, "dynmap-web-chat-event");
+        if (f.isBound()) f.invoke(event);
+    }
 
     /* end auto-generated code */
 
