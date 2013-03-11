@@ -1,0 +1,6 @@
+name: tough-explosive
+main: cloft.ClojurePlugin
+version: 2.0.0
+website: http://ujihisa.blogspot.com
+author: Tatsuhiro Ujihisa
+description: cool beans
