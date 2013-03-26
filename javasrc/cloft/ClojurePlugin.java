@@ -385,16 +385,6 @@ public class ClojurePlugin extends JavaPlugin implements Listener {
         if (f.isBound()) f.invoke(event);
     }
     @EventHandler
-    public void onHangingBreakByEntity(org.bukkit.event.hanging.HangingBreakByEntityEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "hanging-break-by-entity-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
-    public void onPaintingPlace(org.bukkit.event.painting.PaintingPlaceEvent event) {
-        clojure.lang.Var f = clojure.lang.RT.var(ns, "painting-place-event");
-        if (f.isBound()) f.invoke(event);
-    }
-    @EventHandler
     public void onAsyncPlayerChat(org.bukkit.event.player.AsyncPlayerChatEvent event) {
         clojure.lang.Var f = clojure.lang.RT.var(ns, "async-player-chat-event");
         if (f.isBound()) f.invoke(event);
