@@ -9,6 +9,9 @@
   :dev-dependencies [[org.bukkit/bukkit "1.6.2-R0.1-SNAPSHOT"]
                      [org.zeromq/jeromq "0.2.0"]]
   :repositories {"org.bukkit"
-                 "http://repo.bukkit.org/service/local/repositories/snapshots/content/"}
+                 "http://repo.bukkit.org/service/local/repositories/snapshots/content/"
+                 "for dynmap"
+                 {:url "http://repo.mikeprimm.com/"
+                  :checksum :warn}}
   :javac-options {:destdir "classes/"}
   :java-source-paths ["javasrc"])
