@@ -1,5 +1,4 @@
 (ns cloft.cloft
-  (:require [swank.swank])
   (:require [clojure.string :as s])
   (:require [clojure.set])
   (:require [cloft.material :as m])
