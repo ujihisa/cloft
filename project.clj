@@ -1,7 +1,7 @@
 (defproject cloft "1.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :license {:name "GPL-3 or later"}
-  :dependencies [[clj-http "0.6.4"]
+  :dependencies [[clj-http "0.7.5"]
                  [swank-clojure/swank-clojure "1.5.0-SNAPSHOT"]
                  [org.clojure/clojure "1.5.1"]
                  [org.bukkit/bukkit "1.5-R0.1-SNAPSHOT"]
