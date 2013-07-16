@@ -14,8 +14,7 @@
             [cloft.item :as item]
             [cloft.transport :as transport]
             [cloft.egg :as egg]
-            [cloft.skill :as skill]
-            [swank.swank])
+            [cloft.skill :as skill])
   (:import [org.bukkit Bukkit DyeColor]
            [org.bukkit.material Wool Dye]
            [org.bukkit.entity Animals Arrow Blaze Boat CaveSpider Chicken
@@ -1061,7 +1060,7 @@
 (defn lift-down [center-loc]
   (lift center-loc -1))
 
-(comment (defn elevator [player door]
+#_(defn elevator [player door]
   (let [loc (.getLocation (.getBlock (.getLocation player)))]
     (when (and
             (every?
@@ -1082,7 +1081,7 @@
       (doseq [x [-1 0 1] z [-1 0 1]]
         (.setType (.getBlock (.add (.clone loc) x 12 z)) m/cobblestone))
       (.setType (.getBlock (.getLocation door)) m/air)
-      (.setType (.getBlock (.add (.getLocation door) 0 10 0)) m/iron-door)))))
+      (.setType (.getBlock (.add (.getLocation door) 0 10 0)) m/iron-door))))
 
 (def plowed-sands (atom #{}))
 
@@ -1697,8 +1696,8 @@
       (when (instance? Player e)
         (.sendMessage e "Air Explosion"))
       (.setVelocity e (Vector. x 1.5 z))))
-  (comment (let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
-             (.setVelocity another (Vector. 0 1 0)))))
+  #_(let [another (.spawn (.getWorld entity) (.getLocation entity) Creeper)]
+             (.setVelocity another (Vector. 0 1 0))))
 
 (defn creeper-explosion-2 [evt entity]
   (.setCancelled evt true)
@@ -1964,11 +1963,11 @@
       (arrow/reflect evt arrow target))
     (arrow-damages-entity-event-internal evt arrow target)))
 
-(comment (let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
+#_(let [cart (.spawn (.getWorld target) (.getLocation target) Minecart)]
            (future-call #(let [b (.getBlock (.getLocation target))]
                            (.setType b m/rails)))
            (.setPassenger cart target)
-           (c/add-velocity cart 0 5 0)))
+           (c/add-velocity cart 0 5 0))
 
 (defn player-attacks-spider-event [evt player spider]
   (let [cave-spider (loc/spawn (.getLocation spider) CaveSpider)]
@@ -2333,9 +2332,9 @@
     (@special-snowball-set snowball)
     (do
       (swap! special-snowball-set disj snowball)
-      (comment (let [block (.getBlock (.getLocation snowball))]
+      #_(let [block (.getBlock (.getLocation snowball))]
                  (when (= m/air (.getType block))
-                   (.setType block m/snow)))))
+                   (.setType block m/snow))))
     (instance? Snowman (.getShooter snowball))
     nil
 
@@ -2575,12 +2574,12 @@
   (when (instance? Arrow (.getCause evt))
     (.setCancelled evt true)))
 
-(comment (defn enderman-pickup-event* [evt]
-  (prn 'epe)))
+#_(defn enderman-pickup-event* [evt]
+  (prn 'epe))
 
-(comment (defn enderman-pickup-event []
+#_(defn enderman-pickup-event []
   (c/auto-proxy [Listener] []
-                (onEndermanPickup [evt] (enderman-pickup-event* evt)))))
+                (onEndermanPickup [evt] (enderman-pickup-event* evt))))
 
 (defn good-bye [klass]
   (count (seq (map #(.remove %)
@@ -2637,10 +2636,7 @@
                  (format "%s: %d" pname ltime)))]
     (lingr/say "computer_science" (apply str (take 999 msg)))))
 
-(defonce swank* nil)
 (defn on-enable [plugin]
-  (when-not swank*
-    (def swank* (swank.swank/start-repl 4005)))
   (c/init-plugin plugin)
   (cloft.recipe/on-enable)
   (.scheduleSyncRepeatingTask (Bukkit/getScheduler) plugin #'periodically 0 25)
